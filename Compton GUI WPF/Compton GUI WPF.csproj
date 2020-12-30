@@ -41,7 +41,7 @@
 
   <ItemGroup>
     <Reference Include="CyUSB">
-      <HintPath>..\..\..\..\..\Desktop\20201208_GUI\CyUSB.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\net5.0-windows\CyUSB.dll</HintPath>
     </Reference>
   </ItemGroup>
 

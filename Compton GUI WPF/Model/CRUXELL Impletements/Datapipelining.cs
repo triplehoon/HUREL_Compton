@@ -13,26 +13,30 @@ namespace HUREL.Compton
 {
     public partial class CRUXELLLACC
     {
-        //private void ParsingThread()
-        //{
-        //    Console.WriteLine("HY : ParsingThread start");
-        //   while (thread_run)
-        //   {
-        //       byte[] Item;
-        //    while (test_buffer.TryTake(out Item, 1))
-        //      {
-        //           using (BinaryWriter writer = new BinaryWriter(File.Open(file_main_path, FileMode.Append)))
-        //           {
-        //               writer.Write(Item);
-        //            }
-        //            Thread.Sleep(0);
-        //           int test_buffercount = test_buffer.Count;
-        //            if (test_buffercount > 1000 && test_buffercount % 1000 == 0)
-        //               Console.WriteLine("test buffer count is " + test_buffercount);
-        //       }
-        //   }
-        //}
         private void ParsingCyusbBuffer()
+        {
+            Console.WriteLine("HY : ParsingThread start");
+            BinaryWriter writer = new BinaryWriter(File.Open(FileMainPath, FileMode.Append));
+            while (IsParsing)
+            {
+                byte[] Item;
+
+                while (DataInQueue.TryDequeue(out Item))
+                { 
+                       writer.Write(Item);
+
+                    Thread.Sleep(0);
+                    int test_buffercount = DataInQueue.Count;
+                    if (test_buffercount > 1000 && test_buffercount % 1000 == 0)
+                        Console.WriteLine("test buffer count is " + test_buffercount);
+                }
+            }
+            writer.Close();
+            writer.Dispose();
+
+
+        }
+        private void ParsingCyusbBufferNot()
         {
 
             short flag = 0; //0 is nothing, 1 is find FE, 2 find second FE
@@ -49,7 +53,7 @@ namespace HUREL.Compton
             {
 
                 byte[] item;
-                while (DataInQueue.TryReceive(out item))
+                while (DataInQueue.TryDequeue(out item))
                 {
 
                     chk1 = item;

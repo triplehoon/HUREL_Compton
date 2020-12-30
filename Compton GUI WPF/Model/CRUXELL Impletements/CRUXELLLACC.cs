@@ -11,14 +11,15 @@ using System.IO;
 using System.Threading.Tasks.Dataflow;
 using System.Threading;
 using System.ComponentModel;
+using System.Collections.Concurrent;
 
 namespace HUREL.Compton
 {
     public partial class CRUXELLLACC  //only cruxell function to make class for Compton GUI
     {
 
-        public BufferBlock<byte[]> ParsedQueue = new BufferBlock<byte[]>();
-        public BufferBlock<byte[]> DataInQueue = new BufferBlock<byte[]>();
+        public ConcurrentQueue<byte[]> ParsedQueue = new ConcurrentQueue<byte[]>();
+        public ConcurrentQueue<byte[]> DataInQueue = new ConcurrentQueue<byte[]>();
 
 
         private byte[] DATA_BUFFER; // FEFE제외하고 데이터만 담은 294 data buffer
@@ -40,6 +41,7 @@ namespace HUREL.Compton
 
 
         private Task ListenUBSAsync;
+        private Thread ListenUSBThread;
         private Task ParsingUSBAsync;
 
         public bool IsStart;
@@ -294,9 +296,9 @@ namespace HUREL.Compton
             // 1. 입력칸 비활성화 및 설정
             Trace.WriteLine("HY : [Try] input_disable ");
 
-            IList<byte[]> Item;
+            byte[] Item;
 
-            while (DataInQueue.TryReceiveAll(out Item))
+            while (DataInQueue.TryDequeue(out Item))
             {
             }
 
@@ -344,7 +346,9 @@ namespace HUREL.Compton
             IsListening = true;
             FlagFinalCall = 0;
             Debug.WriteLine("HY : [Try] Start XferThread");
-            ListenUBSAsync = Task.Run(() => XferThread());
+            ListenUSBThread = new Thread(new ThreadStart( XferThread));
+            ListenUSBThread.Start();
+            //ListenUBSAsync = Task.Run(() => XferThread());
 
             IsParsing = true;
             Debug.WriteLine("HY : [Try] Start ParsingThread");
@@ -365,9 +369,10 @@ namespace HUREL.Compton
             IsStart = false;
 
             IsListening = false;
-            ListenUBSAsync.Wait();
-            ListenUBSAsync = null;
-
+            //ListenUBSAsync.Wait();
+            //ListenUBSAsync = null;
+            ListenUSBThread.Join();
+            ListenUSBThread = null;
             IsParsing = false;
             Debug.WriteLine("wait for tParsing");
             ParsingUSBAsync.Wait();
@@ -1114,7 +1119,7 @@ namespace HUREL.Compton
                                 //Buffer.BlockCopy(xBufs[k], 0, temp_buffer, 0, 16384);
 
                                 //while (DataInQueue.Post(temp_buffer) == false)
-                                DataInQueue.SendAsync(temp_buffer);
+                                DataInQueue.Enqueue(temp_buffer);
                                 // 넣을때
 
                                 for (int ii = 0; ii < 16384; ++ii)
@@ -1136,7 +1141,7 @@ namespace HUREL.Compton
                                 byte[] temp_buffer = new byte[len];
                                 Buffer.BlockCopy(xBufs[k], 0, temp_buffer, 0, len);
                                 //while (DataInQueue.Post(temp_buffer) == false) ;
-                                DataInQueue.SendAsync(temp_buffer);
+                                DataInQueue.Enqueue(temp_buffer);
                                 // 넣을때
 
                                 XferBytes += len;
