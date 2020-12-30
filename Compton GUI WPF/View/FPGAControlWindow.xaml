@@ -1,0 +1,385 @@
+﻿<Window x:Class="Compton_GUI_WPF.View.FPGAControlWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions" 
+        xmlns:local="clr-namespace:Compton_GUI_WPF.View"
+        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+        xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
+        xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
+        xmlns:VM="clr-namespace:Compton_GUI_WPF.ViewModel"
+         syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"
+        mc:Ignorable="d"
+        Title="CRUXELL FPGA" Height="745" Width="646" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow" ResizeMode="NoResize">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <mvvm:EventToCommand Command="{Binding OffCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Window.DataContext>
+        <VM:FPGAConrolPannelViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="10">
+        <StackPanel>
+            <Label Content="Measurement Mode" FontSize="20" FontWeight="ExtraBold"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.2*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="0.2*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <RadioButton VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0"  Grid.Row="0"
+                             GroupName="Mesurement Mode" IsChecked="{Binding MeasurementMode[0], Mode=TwoWay}" 
+                              RenderTransformOrigin="0.5,0.5">
+                    <RadioButton.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="2" ScaleY="2"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </RadioButton.RenderTransform>
+                </RadioButton>
+                <Label FontSize="22" FontWeight="Medium" Content= "Coincidence" VerticalAlignment="Center" Grid.Column="1" Grid.Row="0"/>
+                <RadioButton VerticalAlignment="Center"  HorizontalAlignment="Center"  Grid.Column="2" Grid.Row="0"
+                             GroupName="Mesurement Mode" IsChecked="{Binding MeasurementMode[1], Mode=TwoWay}" RenderTransformOrigin="0.5,0.5">
+                    <RadioButton.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="2" ScaleY="2"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </RadioButton.RenderTransform>
+                </RadioButton>
+                <Label FontSize="22" FontWeight="Medium" Content= "Single" VerticalAlignment="Center" Grid.Column="3" Grid.Row="0"/>
+                <RadioButton VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="0" Grid.Row="1"
+                             GroupName="Mesurement Mode" IsChecked="{Binding MeasurementMode[2], Mode=TwoWay}" RenderTransformOrigin="0.5,0.5">
+                    <RadioButton.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="2" ScaleY="2"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </RadioButton.RenderTransform>
+                </RadioButton>
+                <Label FontSize="22" FontWeight="Medium" Content= "Single + Coin1" VerticalAlignment="Center" Grid.Column="1" Grid.Row="1"/>
+                <RadioButton VerticalAlignment="Center"  HorizontalAlignment="Center"  Grid.Column="2" Grid.Row="1"
+                             GroupName="Mesurement Mode" IsChecked="{Binding MeasurementMode[3], Mode=TwoWay}" RenderTransformOrigin="0.5,0.5">
+                    <RadioButton.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="2" ScaleY="2"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </RadioButton.RenderTransform>
+                </RadioButton>
+                <Label FontSize="22" FontWeight="Medium" Content= "Single + Coin2" VerticalAlignment="Center" Grid.Column="3" Grid.Row="1"/>
+
+            </Grid>
+
+            <syncfusion:TabControlExt
+                                     CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None" >
+                <syncfusion:TabItemExt FontSize="15"    Header="Smoothing &amp; Trigger Setting">
+                    <StackPanel>
+                        <syncfusion:SfTextInputLayout Hint="Smooth Winodw" HelperText="2^N(0/1/2/3) Samples" ContainerType="Filled" VerticalAlignment="Bottom" Margin="0,10,10,10">
+                            <TextBox FontSize="15" Text="{Binding SmoothWindowSamples, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+
+                        <syncfusion:SfTextInputLayout Hint="Trigger Slope Point" HelperText="0-100 Samples" ContainerType="Filled" VerticalAlignment="Bottom" Margin="0,10,10,10">
+                            <TextBox FontSize="15" Text="{Binding TrgSlopePoint, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+
+                        <syncfusion:SfTextInputLayout Hint="Trigger Window for Global Trigger" HelperText="0-255 Samples" ContainerType="Filled" VerticalAlignment="Bottom" Margin="0,10,10,10">
+                            <TextBox FontSize="15" Text="{Binding TWForGlobalTrg, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+
+                        <syncfusion:SfTextInputLayout Hint="[UNUSE] Trigger Window for Detector Trigger" HelperText="0-255 Samples" ContainerType="Filled" VerticalAlignment="Bottom" Margin="0,10,10,10">
+                            <TextBox FontSize="15" Text="{Binding TWForDetTrg, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+
+                        <syncfusion:SfTextInputLayout Hint="[UNUSE] Number for Trigger for Detector Trigger" HelperText="0-9 Samples" ContainerType="Filled" VerticalAlignment="Bottom" Margin="0,10,10,10">
+                            <TextBox FontSize="15" Text="{Binding NoTrgforDetTrg, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+
+
+                    </StackPanel>
+                </syncfusion:TabItemExt>
+
+                <syncfusion:TabItemExt FontSize="15"    Header="Peak Sensing">
+                    <StackPanel>
+                        <syncfusion:SfTextInputLayout Hint="Baseline Measurement Interval" HelperText="2^N(0/1/2/3/4) Samples" ContainerType="Filled" VerticalAlignment="Bottom" Margin="0,10,10,10">
+                            <TextBox FontSize="15" Text="{Binding BlMeasInterval, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+                        <syncfusion:SfTextInputLayout Hint="Baseline Offset" HelperText="0 - 100 Samples" ContainerType="Filled" VerticalAlignment="Bottom" Margin="0,10,10,10">
+                            <TextBox FontSize="15" Text="{Binding BlOffset, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+                        <syncfusion:SfTextInputLayout Hint="Max Offset" HelperText="0 - 256 Samples" ContainerType="Filled" VerticalAlignment="Bottom" Margin="0,10,10,10">
+                            <TextBox FontSize="15" Text="{Binding MaxOffset, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+                        <syncfusion:SfTextInputLayout Hint="Max Measurement Interval" HelperText="0 - 256 Samples" ContainerType="Filled" VerticalAlignment="Bottom" Margin="0,10,10,10">
+                            <TextBox FontSize="15" Text="{Binding MaxMeasInterval, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+                    </StackPanel>
+                </syncfusion:TabItemExt>
+
+                <syncfusion:TabItemExt FontSize="15" Header="Trigger thershold by channel">
+                    <StackPanel>
+                        <TextBlock FontSize="15" FontWeight="Bold" Margin="5,10,10,10">
+                           Theshold Level  = [Value] × 4.392 mV (1 - 4095 Samples)
+                        </TextBlock>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <syncfusion:SfTextInputLayout Hint="Channel 0" Grid.Column="0" Grid.Row="0"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_0, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 1" Grid.Column="1" Grid.Row="0"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_1, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 2" Grid.Column="2" Grid.Row="0"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_2, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 3" Grid.Column="3" Grid.Row="0"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_3, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+
+
+
+                            <syncfusion:SfTextInputLayout Hint="Channel 4" Grid.Column="0" Grid.Row="1"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_4, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 5" Grid.Column="1" Grid.Row="1"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_5, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 6" Grid.Column="2" Grid.Row="1"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_6, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 7" Grid.Column="3" Grid.Row="1"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_7, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+
+
+                            <syncfusion:SfTextInputLayout Hint="Channel 8" Grid.Column="0" Grid.Row="2"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_8, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 9" Grid.Column="1" Grid.Row="2"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_9, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 10" Grid.Column="2" Grid.Row="2"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_10, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 11" Grid.Column="3" Grid.Row="2"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_11, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+
+                            <syncfusion:SfTextInputLayout Hint="Channel 12" Grid.Column="0" Grid.Row="3"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_12, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 13" Grid.Column="1" Grid.Row="3"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_13, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 14" Grid.Column="2" Grid.Row="3"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_14, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                            <syncfusion:SfTextInputLayout Hint="Channel 15" Grid.Column="3" Grid.Row="3"
+                                                          ContainerType="Filled" VerticalAlignment="Bottom" Margin="5,5,5,5" HelperTextVisibility="Hidden" >
+                                <TextBox FontSize="15" Text="{Binding BaselineTrigger_15, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="PreviewTextInput">
+                                            <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </syncfusion:SfTextInputLayout>
+                        </Grid>
+
+                    </StackPanel>
+
+                </syncfusion:TabItemExt>
+            </syncfusion:TabControlExt>
+
+
+
+        </StackPanel>
+    </Grid>
+</Window>

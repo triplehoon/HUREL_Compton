@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <RootNamespace>Compton_GUI_WPF</RootNamespace>
+    <UseWPF>true</UseWPF>
+	<UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MvvmLight" Version="5.4.1.1" />
+    <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
+    <PackageReference Include="Syncfusion.SfBusyIndicator.WPF" Version="18.4.0.32" />
+    <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="18.4.0.31" />
+    <PackageReference Include="Syncfusion.SfTextInputLayout.WPF" Version="18.4.0.31" />
+    <PackageReference Include="Syncfusion.Themes.Blend.WPF" Version="18.4.0.31" />
+    <PackageReference Include="Syncfusion.Themes.MaterialLight.WPF" Version="18.4.0.31" />
+    <PackageReference Include="Syncfusion.Themes.Metro.WPF" Version="18.4.0.31" />
+    <PackageReference Include="Syncfusion.Themes.Saffron.WPF" Version="18.4.0.31" />
+    <PackageReference Include="Syncfusion.Tools.WPF" Version="18.4.0.31" />
+    <PackageReference Include="System.Windows.Interactivity.WPF" Version="2.0.20525" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CyUSB">
+      <HintPath>..\..\..\CRUXELL\HY_PMT_DAQ_100MSPS\HY_PMT_DAQ_100MSPS\bin\Debug\CyUSB.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
