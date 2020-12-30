@@ -6,13 +6,22 @@
     <RootNamespace>Compton_GUI_WPF</RootNamespace>
     <UseWPF>true</UseWPF>
 	<UseWindowsForms>true</UseWindowsForms>
+	<Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -32,7 +41,7 @@
 
   <ItemGroup>
     <Reference Include="CyUSB">
-      <HintPath>..\..\..\CRUXELL\HY_PMT_DAQ_100MSPS\HY_PMT_DAQ_100MSPS\bin\Debug\CyUSB.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\20201208_GUI\CyUSB.dll</HintPath>
     </Reference>
   </ItemGroup>
 

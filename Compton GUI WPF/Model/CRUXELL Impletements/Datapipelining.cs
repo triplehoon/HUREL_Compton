@@ -41,6 +41,8 @@ namespace HUREL.Compton
             byte[] dataBuffer = new byte[296];
             byte[] chk1 = new byte[296];
             byte[] chk2 = new byte[296];
+
+            Int64 dataInCount = 0;
             Debug.WriteLine("HY : ParsingThread start");
             BinaryWriter writer = new BinaryWriter(File.Open(FileMainPath, FileMode.Append));
             while (IsParsing)
@@ -57,7 +59,10 @@ namespace HUREL.Compton
                     } 
                     chk2 = item;
                     if(flag==2)
-                    { writer.Write(item); }
+                    { 
+                        writer.Write(item);
+                        Debug.WriteLine(DataInQueue.Count);
+                    }
 
                     foreach (byte b in item)
                     {
@@ -67,7 +72,12 @@ namespace HUREL.Compton
                             countflag++;
                             if (countflag == 296 && dataBuffer[294] == 0xFE && dataBuffer[295] == 0xFE)
                             {
-                                while (ParsedQueue.Post(dataBuffer) == false) { }
+                                //while (ParsedQueue.Post(dataBuffer) == false) { }
+                                dataInCount++;
+                                if(dataInCount %10000 ==0)
+                                {
+                                    Debug.WriteLine("Data in count is " + dataInCount);
+                                }
                                 dataBuffer = new byte[296];
                                 countflag = 0;
                             }
@@ -99,6 +109,8 @@ namespace HUREL.Compton
                 }              
             }
             writer.Flush();
+            writer.Close();
+            writer.Dispose();
         }
 
         

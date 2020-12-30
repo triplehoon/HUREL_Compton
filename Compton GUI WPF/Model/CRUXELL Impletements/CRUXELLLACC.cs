@@ -1113,7 +1113,8 @@ namespace HUREL.Compton
                                 }
                                 //Buffer.BlockCopy(xBufs[k], 0, temp_buffer, 0, 16384);
 
-                                while (DataInQueue.Post(temp_buffer) == false) ;
+                                //while (DataInQueue.Post(temp_buffer) == false)
+                                DataInQueue.SendAsync(temp_buffer);
                                 // 넣을때
 
                                 for (int ii = 0; ii < 16384; ++ii)
@@ -1134,7 +1135,8 @@ namespace HUREL.Compton
                             {
                                 byte[] temp_buffer = new byte[len];
                                 Buffer.BlockCopy(xBufs[k], 0, temp_buffer, 0, len);
-                                while (DataInQueue.Post(temp_buffer) == false) ;
+                                //while (DataInQueue.Post(temp_buffer) == false) ;
+                                DataInQueue.SendAsync(temp_buffer);
                                 // 넣을때
 
                                 XferBytes += len;

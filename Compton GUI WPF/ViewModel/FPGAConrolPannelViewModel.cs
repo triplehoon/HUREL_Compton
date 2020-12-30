@@ -587,7 +587,7 @@ namespace Compton_GUI_WPF.ViewModel
                 MainViewModel.FPGAVariable.CurrentMeasurementMode0x11 = (CRUXELLLACC.MeasurementMode)Array.IndexOf(measurementMode, true);
                 Debug.WriteLine(MainViewModel.FPGAVariable.CurrentMeasurementMode0x11.ToString());
                 return this.measurementMode;               
-            }            
+            }           
         }
 
 
