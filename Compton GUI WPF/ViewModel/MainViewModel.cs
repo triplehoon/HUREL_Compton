@@ -178,7 +178,7 @@ namespace Compton_GUI_WPF.ViewModel
                     return;
                 }
                 else
-                {
+                { 
                     VMStatus = "FPGA setting Start";
                     
                     string status;
