@@ -192,8 +192,10 @@ namespace Compton_GUI_WPF.ViewModel
             }
             else
             {
+                
                 VMStatus = FPGAControl.Stop_usb();
                 IsSessionStart = false;
+                timer.Stop();
             }
 
 
@@ -279,6 +281,7 @@ namespace Compton_GUI_WPF.ViewModel
             
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += new EventHandler(TimerTick);
+            timer.Start();
         }
 
         private void TimerTick (object sender, EventArgs e)

@@ -46,16 +46,14 @@ namespace HUREL.Compton
             while (IsParsing)
             {
 
-                byte[] item = { };
-
-
+                byte[] item;
                 while (DataInQueue.TryReceive(out item))
                 {
 
                     chk1 = item;
                     if (chk1 == chk2)
                     {
-                        Console.WriteLine(DataInQueue.Count);
+                        Debug.WriteLine(DataInQueue.Count);
                     } 
                     chk2 = item;
                     if(flag==2)
@@ -83,23 +81,24 @@ namespace HUREL.Compton
                         {
                             if (b == 0xFE && flag == 0)
                             {
-                                Console.WriteLine("flag is 1");
+                                Debug.WriteLine("flag is 1");
                                 flag = 1;
                             }
                             else if (b == 0xFE && flag == 1)
                             {
-                                Console.WriteLine("flag is 2");
+                                Debug.WriteLine("flag is 2");
                                 flag = 2;
                             }
                             else
                             {
                                 flag = 0;
-                                Console.WriteLine("flag is 0");
+                                Debug.WriteLine("flag is 0");
                             }
                         }
                     }             
                 }              
             }
+            writer.Flush();
         }
 
         
