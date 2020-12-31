@@ -710,7 +710,7 @@ namespace HUREL.Compton
             if (flag == 1)
             {
                 // 최초 셋팅값 전송
-                tryparse_send(ref outData, ref outData_BufSz, 0x0a, 0x0a); // Sec
+                tryparse_send(ref outData, ref outData_BufSz, tb_0x0a, 0x0a); // Sec
                 tryparse_send(ref outData, ref outData_BufSz, tb_0x0b, 0x0b); // Count
                 tryparse_send(ref outData, ref outData_BufSz, tb_0x11, 0x11); // Single / Coincidence Mode
                 tryparse_send(ref outData, ref outData_BufSz, tb_0x12, 0x12); // T.W for Global Trig
