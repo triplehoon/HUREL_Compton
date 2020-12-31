@@ -25,7 +25,7 @@ namespace HUREL.Compton
                 { 
                        writer.Write(Item);
 
-                    Thread.Sleep(0);
+                    Thread.Sleep(0); 
                     int test_buffercount = DataInQueue.Count;
                     if (test_buffercount > 1000 && test_buffercount % 1000 == 0)
                         Console.WriteLine("test buffer count is " + test_buffercount);
