@@ -18,8 +18,8 @@ namespace HUREL.Compton
     public partial class CRUXELLLACC  //only cruxell function to make class for Compton GUI
     {
 
-        public ConcurrentQueue<byte[]> ParsedQueue = new ConcurrentQueue<byte[]>();
-        public ConcurrentQueue<byte[]> DataInQueue = new ConcurrentQueue<byte[]>();
+        public BlockingCollection<byte[]> ParsedQueue = new BlockingCollection<byte[]>();
+        public BlockingCollection<byte[]> DataInQueue = new BlockingCollection<byte[]>();
 
 
         private byte[] DATA_BUFFER; // FEFE제외하고 데이터만 담은 294 data buffer
@@ -257,7 +257,7 @@ namespace HUREL.Compton
                 status = "Variable is not set";
                 return false;
             }
-            IsStart = true;
+            
 
             // 사장님 - Start 눌렀을때
             if (SelectedDevice.DeviceName == "")
@@ -298,7 +298,7 @@ namespace HUREL.Compton
 
             byte[] Item;
 
-            while (DataInQueue.TryDequeue(out Item))
+            while (DataInQueue.TryTake(out Item))
             {
             }
 
@@ -352,12 +352,13 @@ namespace HUREL.Compton
 
             IsParsing = true;
             Debug.WriteLine("HY : [Try] Start ParsingThread");
-            ParsingUSBAsync = Task.Run(() => ParsingCyusbBuffer());
+            ParsingUSBAsync = Task.Run(() => ParsingCyusbBufferAsync());
 
             /*
             need more?
             */
             status = "Data Aquisition Start";
+            IsStart = true;
             return true;
         }
         public string Stop_usb()
@@ -1119,7 +1120,7 @@ namespace HUREL.Compton
                                 //Buffer.BlockCopy(xBufs[k], 0, temp_buffer, 0, 16384);
 
                                 //while (DataInQueue.Post(temp_buffer) == false)
-                                DataInQueue.Enqueue(temp_buffer);
+                                DataInQueue.Add(temp_buffer);
                                 // 넣을때
 
                                 for (int ii = 0; ii < 16384; ++ii)
@@ -1141,7 +1142,7 @@ namespace HUREL.Compton
                                 byte[] temp_buffer = new byte[len];
                                 Buffer.BlockCopy(xBufs[k], 0, temp_buffer, 0, len);
                                 //while (DataInQueue.Post(temp_buffer) == false) ;
-                                DataInQueue.Enqueue(temp_buffer);
+                                DataInQueue.Add(temp_buffer);
                                 // 넣을때
 
                                 XferBytes += len;

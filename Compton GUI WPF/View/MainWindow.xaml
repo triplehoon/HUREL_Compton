@@ -11,7 +11,7 @@
         xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
         mc:Ignorable="d"
         Title="MainWindow" Height="900" Width="1600"
-        syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"
+        syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"        
         >
 
     <i:Interaction.Triggers>
@@ -34,11 +34,17 @@
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Foreground" Value="DarkSlateGray"/>
         </Style>
-        <Style TargetType="Button" x:Key="ButtonDesignHYU" >
+
+        <Style TargetType="{x:Type Button}" x:Key="defaultButtonStyle">
+           
+        </Style>
+
+        <Style TargetType="{x:Type Button}" x:Key="ButtonDesignHYU" BasedOn="{StaticResource defaultButtonStyle}">
             <Setter Property="Background" Value="#FF00457E"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Padding" Value="5"/>
             <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Style.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="5"/>

@@ -13,7 +13,10 @@ namespace HUREL.Compton
 {
     public partial class CRUXELLLACC
     {
-        private void ParsingCyusbBuffer()
+
+        public BlockingCollection<int[]> ListModeData = new BlockingCollection<int[]>();
+
+        private void ParsingCyusbBufferOrign()
         {
             Console.WriteLine("HY : ParsingThread start");
             BinaryWriter writer = new BinaryWriter(File.Open(FileMainPath, FileMode.Append));
@@ -21,7 +24,7 @@ namespace HUREL.Compton
             {
                 byte[] Item;
 
-                while (DataInQueue.TryDequeue(out Item))
+                while (DataInQueue.TryTake(out Item))
                 { 
                        writer.Write(Item);
 
@@ -36,7 +39,7 @@ namespace HUREL.Compton
 
 
         }
-        private void ParsingCyusbBufferNot()
+        private void ParsingCyusbBufferAsync()
         {
 
             short flag = 0; //0 is nothing, 1 is find FE, 2 find second FE
@@ -53,7 +56,7 @@ namespace HUREL.Compton
             {
 
                 byte[] item;
-                while (DataInQueue.TryDequeue(out item))
+                while (DataInQueue.TryTake(out item))
                 {
 
                     chk1 = item;
@@ -76,7 +79,7 @@ namespace HUREL.Compton
                             countflag++;
                             if (countflag == 296 && dataBuffer[294] == 0xFE && dataBuffer[295] == 0xFE)
                             {
-                                //while (ParsedQueue.Post(dataBuffer) == false) { }
+                                ParsedQueue.Add(dataBuffer);
                                 dataInCount++;
                                 if(dataInCount %10000 ==0)
                                 {
@@ -115,6 +118,11 @@ namespace HUREL.Compton
             writer.Flush();
             writer.Close();
             writer.Dispose();
+        }
+
+        private void MLPEAsync()
+        {
+
         }
 
         

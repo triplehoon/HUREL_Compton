@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Windows.Data;
 using System.Windows.Input;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -590,6 +591,19 @@ namespace Compton_GUI_WPF.ViewModel
             }           
         }
 
+        private CRUXELLLACC.MeasurementMode currentMode;
+        public CRUXELLLACC.MeasurementMode CurrentMode
+        {
+            get {
+                currentMode = MainViewModel.FPGAVariable.CurrentMeasurementMode0x11;
+                return currentMode; 
+            }
+            set 
+            {
+                MainViewModel.FPGAVariable.CurrentMeasurementMode0x11 = value;
+            }
+        }
+
 
 
         private string debugText;
@@ -628,6 +642,19 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+    }
+
+    public class MeasurementModeComparisonConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return value?.Equals((CRUXELLLACC.MeasurementMode)System.Convert.ToInt32(parameter));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return value?.Equals(true) == true ? parameter : Binding.DoNothing;
         }
     }
 

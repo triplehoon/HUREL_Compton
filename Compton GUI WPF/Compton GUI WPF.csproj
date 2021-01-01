@@ -41,7 +41,7 @@
 
   <ItemGroup>
     <Reference Include="CyUSB">
-      <HintPath>..\..\..\..\..\Desktop\net5.0-windows\CyUSB.dll</HintPath>
+      <HintPath>..\..\..\CRUXELL\HY_PMT_DAQ_100MSPS\HY_PMT_DAQ_100MSPS\bin\Debug\CyUSB.dll</HintPath>
     </Reference>
   </ItemGroup>
 

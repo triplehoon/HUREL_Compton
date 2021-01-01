@@ -133,6 +133,14 @@ namespace Compton_GUI_WPF.ViewModel
         {
             DeviceInfos = new ObservableCollection<CRUXELLLACC.DeviceInfo>(FPGAControl.DeviceList);
             SelectDevice = FPGAControl.SelectedDevice;
+            if (DeviceInfos.Count > 0)
+            {
+                IsSessionAvailable = true;
+            }
+            else
+            {
+                IsSessionAvailable = false;
+            }
         }
 
     
