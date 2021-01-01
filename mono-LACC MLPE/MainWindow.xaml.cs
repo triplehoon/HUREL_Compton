@@ -10,9 +10,10 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using HUREL.Compton;
+using HUREL.Compton.LACC;
 
 namespace mono_LACC_MLPE
 {
@@ -21,39 +22,35 @@ namespace mono_LACC_MLPE
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static LACC_Control LACC_Control;
         public MainWindow()
         {
             InitializeComponent();
 
+            LACC_Module monoScatter = new LACC_Module(  ModuleInfo.Mono,
+                                                        new LACC_Module.ModuleOffet { x = 0, y = 0, z = 0 },
+                                                        new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                                        new double[36] {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                                                                        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+                                                        new LACC_Module.ModulePMTOrderInfo(),
+                                                        "");
 
-            short[] adcData = ADCData(LACCMLPE.MLPEMode.Quad)
 
+            LACC_Module monoAbsorber = new LACC_Module(ModuleInfo.Mono,
+                                                        new LACC_Module.ModuleOffet { x = 0, y = 0, z = -150 },
+                                                        new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                                        new double[36] {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                                                                        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+                                                        new LACC_Module.ModulePMTOrderInfo(),
+                                                        "");
+
+            LACC_Control = new LACC_Control(monoScatter, monoAbsorber);
+
+            LACC_Control.AddListModeData(new short[144], Matrix3D.Identity);
+
+            var spect = LACC_Control.SpectrumEnergys;
         }
 
 
-
-        private short[] ADCData(LACCMLPE.MLPEMode mode)
-        {
-            short[] shortArray;
-            Random random = new Random();
-            if (mode == LACCMLPE.MLPEMode.Mono)
-            {
-                shortArray = new short[36];
-                for(int i =0; i <36; i++)
-                {
-                    shortArray[i] = (short) random.Next(0,1000);
-                }
-            }
-            else                
-            {//Mode Quad
-                shortArray = new short[9];
-                for (int i = 0; i < 9; i++)
-                {
-                    shortArray[i] = (short)random.Next(0, 1000);
-                }
-            }
-
-            return shortArray;
-        }
     }
 }
