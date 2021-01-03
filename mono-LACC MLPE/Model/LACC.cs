@@ -69,8 +69,8 @@ namespace HUREL.Compton.LACC
             LMData lmData;
             if (Module == ModuleInfo.Mono)
             {
-                short[] scatter = fullADCArrayValue[0..35];
-                short[] absorber = fullADCArrayValue[72..107];
+                short[] scatter = fullADCArrayValue[0..36];
+                short[] absorber = fullADCArrayValue[72..108];
 
                 int scatterProd = 1;
                 foreach(short s in scatter)
@@ -100,7 +100,7 @@ namespace HUREL.Compton.LACC
                     {
                         var scatterMLPEdata = LACC_Scatter_Modules[0].FastPosAndEEstimate(scatter);
                         var absorberMLPEdata = LACC_Scatter_Modules[0].FastPosAndEEstimate(absorber);
-                        lmData = new LMData(scatterMLPEdata.Item1, absorberMLPEdata.Item1, scatterMLPEdata.Item2, absorberMLPEdata.Item2, deviceTransformation);
+                        lmData = new LMData(scatterMLPEdata.Item1, absorberMLPEdata.Item1, scatterMLPEdata.Item2, absorberMLPEdata.Item2, deviceTransformation);                       
                         ListedLMData.Add(lmData);
                     }                    
                 }
@@ -534,26 +534,25 @@ namespace HUREL.Compton.LACC
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            for (int x = 0; x < sizeX; x++)
-            {
-                XYLogMue[x] = new double[sizeY][];
-                XYSumMu[x] = new double[sizeY];
-                Parallel.For(0, sizeY, y =>
-                  {
-                      var selLUT = from lut in LUT
-                                   where lut.Xpos == minX + x && lut.Ypos == minY + y
-                                   select lut;
-                      if (selLUT.Any())
-                      {
-                          XYLogMue[x][y] = selLUT.First().LogMu.ToArray();
-                          XYSumMu[x][y] = selLUT.First().SumMu;
-                      }
+            Parallel.For(0, sizeX, x =>
+             {
+                 XYLogMue[x] = new double[sizeY][];
+                 XYSumMu[x] = new double[sizeY];
+                 for (int y = 0; y < sizeY; y++)
+                 {
+                     var selLUT = from lut in LUT
+                                  where lut.Xpos == minX + x && lut.Ypos == minY + y
+                                  select lut;
+                     if (selLUT.Any())
+                     {
+                         XYLogMue[x][y] = selLUT.First().LogMu.ToArray();
+                         XYSumMu[x][y] = selLUT.First().SumMu;
+                     }
 
-                  });
-            }
+                 }
+             });
             sw.Stop();
-            Trace.WriteLine(sw.ElapsedMilliseconds);
-            Debug.WriteLine("XY Logmu Table is done.");
+            Trace.WriteLine("XY Logmu Table is done. Takes: " + sw.ElapsedMilliseconds + " ms");
         }
 
         /// <summary>
@@ -628,12 +627,12 @@ namespace HUREL.Compton.LACC
 
             int[] Max2 = new int[2];
             int GridSize2 = sizeX / 25;
-            for (int x2 = Max1[0] - GridSize1; x2 < Max1[0] + GridSize1; x2 += GridSize2)
+            for (int x2 = Max1[0] - GridSize1; x2 < Math.Min(Max1[0] + GridSize1,sizeX); x2 += GridSize2)
             {
                 if (x2 > -1)
                 {
 
-                    for (int y2 = Max1[1] - GridSize1; y2 < Max1[1] + GridSize1; y2 += GridSize2)
+                    for (int y2 = Max1[1] - GridSize1; y2 < Math.Min( Max1[1] + GridSize1,sizeY); y2 += GridSize2)
                     {
                         if (y2 > -1)
                         {
@@ -662,11 +661,11 @@ namespace HUREL.Compton.LACC
 
             int[] Max3 = new int[2];
             int GridSize3 = 1;
-            for (int x2 = Max2[0] - GridSize2; x2 < Max2[0] + GridSize2; x2 += GridSize3)
+            for (int x2 = Max2[0] - GridSize2; x2 <Math.Min( Max2[0] + GridSize2,sizeX); x2 += GridSize3)
             {
                 if (x2 > -1)
                 {
-                    for (int y2 = Max2[1] - GridSize2; y2 < Max2[1] + GridSize2; y2 += GridSize3)
+                    for (int y2 = Max2[1] - GridSize2; y2 <Math.Min( Max2[1] + GridSize2,sizeY); y2 += GridSize3)
                     {
                         if (y2 > -1)
                         {

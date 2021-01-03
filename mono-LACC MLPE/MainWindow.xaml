@@ -4,9 +4,32 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:mono_LACC_MLPE"
+        xmlns:syncfusion="clr-namespace:Syncfusion.UI.Xaml.Charts;assembly=Syncfusion.SfChart.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+        
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Margin="10">
+            <Button Content="Start" Click="Button_Click"/>
+            <Button Content="End" Margin="0,20,0,0" Click="Button_Click_1"/>
+            <TextBlock x:Name="CountTextBlock" Margin="0,20,0,0"/>
+            <TextBlock Text="Status :" Margin="0,20,0,0"/>
+            <TextBlock x:Name="SatusMessage" Margin="0,0,0,0"/>
+        </StackPanel>
+        <syncfusion:SfChart Grid.Column="1" Margin="20">
+            <syncfusion:SfChart.PrimaryAxis>
+                <syncfusion:NumericalAxis Header="Energy"/>
+            </syncfusion:SfChart.PrimaryAxis>
+            <syncfusion:SfChart.SecondaryAxis>
+                <syncfusion:NumericalAxis Header="Counts"/>
+            </syncfusion:SfChart.SecondaryAxis>
+            <syncfusion:ColumnSeries x:Name="sfColumn">
+            </syncfusion:ColumnSeries>
+        </syncfusion:SfChart>
 
     </Grid>
 </Window>
