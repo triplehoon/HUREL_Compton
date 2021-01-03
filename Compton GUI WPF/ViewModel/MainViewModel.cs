@@ -17,6 +17,7 @@ using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using HUREL.Compton;
 
+
 namespace Compton_GUI_WPF.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
@@ -26,8 +27,7 @@ namespace Compton_GUI_WPF.ViewModel
 
         public static CRUXELLLACC.VariableInfo FPGAVariable;
 
-
-        FPGAConrolPannelViewModel pannelViewModel = new FPGAConrolPannelViewModel();
+       
         public MainViewModel()
         {
             FPGAControl = new CRUXELLLACC();
@@ -37,10 +37,40 @@ namespace Compton_GUI_WPF.ViewModel
 
             FPGAControl.USBChangeHandler += UpdateDeviceList;
             FPGAControl.USBChange();
-            Messenger.Default.Register<WindowStateMessage>(this,
-                (action) => ReceiveIsEnableOpenFPGAWindow(action)
-                );
+            //Messenger.Default.Register<WindowStateMessage>(this,
+            //    (action) => ReceiveIsEnableOpenFPGAWindow(action)
+            //    );
+
+            ecalInfos = new ObservableCollection<EcalInfo>();
+            this.GenerateEcalInfos();
         }
+
+        #region Test DataGrid
+
+        private ObservableCollection<EcalInfo> ecalInfos;
+        public ObservableCollection<EcalInfo> EcalInfos
+        {
+            get { return ecalInfos; }
+            set 
+            { 
+                ecalInfos = value; 
+                OnPropertyChanged(nameof(EcalInfo)); 
+            }
+        }
+
+
+        private void GenerateEcalInfos()
+        {
+            EcalInfos.Add(new EcalInfo(662, 0, "Cs-137"));
+            EcalInfos.Add(new EcalInfo(60, 0, "Am-241"));
+            EcalInfos.Add(new EcalInfo(511, 0, "Na-22"));
+            EcalInfos.Add(new EcalInfo(1275, 0, "Na-22"));
+            EcalInfos.Add(new EcalInfo(1173, 0, "Co-60"));
+            EcalInfos.Add(new EcalInfo(1332, 0, "Co-60"));
+        }
+
+        #endregion
+
 
         private RelayCommand mianWindowCloseCommand;
         public ICommand MianWindowCloseCommand
@@ -49,11 +79,7 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private void CloseMainWindow()
         {
-            if(WService.Window != null)
-            {
-                if(WService.Window.IsLoaded)
-                    WService.Window.Close();
-            }            
+   
             FPGAControl.SetVaribles(FPGAVariable);
             FPGAControl.Dispose();
         }
@@ -79,19 +105,7 @@ namespace Compton_GUI_WPF.ViewModel
             get { return isEnableOpenFPGAWindow; }
             set { isEnableOpenFPGAWindow = value; OnPropertyChanged(nameof(IsEnableOpenFPGAWindow)); }
         }
-        private RelayCommand openFPGAWindowCommand;
-        public ICommand OpenFPGAWindowCommand
-        {
-            get { return (this.openFPGAWindowCommand) ?? (this.openFPGAWindowCommand = new RelayCommand(this.OpenFPGAWindow, this.CanOpenFPGAWindow)); }
-        }
-
-        private void OpenFPGAWindow()
-        {
-
-            WService.ShowFPGAWindow(pannelViewModel);
-            //IsEnableOpenFPGAWindow = false;
-        }
-        private WindowService WService = new WindowService();
+ 
         public bool CanOpenFPGAWindow()
         {
             return IsEnableOpenFPGAWindow;
@@ -230,7 +244,13 @@ namespace Compton_GUI_WPF.ViewModel
         public bool IsSessionStart
         {
             get { return isSessionStart; }
-            set { isSessionStart = value; OnPropertyChanged(nameof(IsSessionStart)); }
+            set { isSessionStart = value; IsSesstionStop = !value; OnPropertyChanged(nameof(IsSessionStart)); }
+        }
+        private bool isSessionStop = true;
+        public bool IsSesstionStop
+        {
+            get { return isSessionStop; }
+            set { isSessionStop = value; OnPropertyChanged(nameof(IsSesstionStop)); }
         }
         private string measurementTime;
         public string MeasurementTime
@@ -341,49 +361,53 @@ namespace Compton_GUI_WPF.ViewModel
 
     }
 
-    class WindowService
+    public class EcalInfo
     {
-        public FPGAControlWindow Window;
-        public void ShowFPGAWindow(object viewModel)
+
+        double trueEnergy;
+        double mesuredEnergy;
+        string sourceName;
+
+
+
+        public double TrueEnergy
         {
-            Window = new FPGAControlWindow();
-            Window.DataContext = viewModel;
-            Window.Show();
+            get { return trueEnergy; }
+            set
+            {
+                trueEnergy = value;
+
+            }
         }
+
+
+        public double MeasuredEnergy
+        {
+            get { return mesuredEnergy; }
+            set
+            {
+                mesuredEnergy = value;
+
+            }
+        }
+
+        public string SourceName
+        {
+            get { return sourceName; }
+            set { sourceName = value; }
+        }
+
+
+
+
+        public EcalInfo(double trueEnergy, double measuredEnergy = 0, string sourceName = "Unkown")
+        {
+            this.TrueEnergy = trueEnergy;
+            this.MeasuredEnergy = measuredEnergy;
+            this.SourceName = sourceName;
+        }
+
     }
 
-    public class TimespaneToStringConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            var timeSpan =(TimeSpan)value;
-            return timeSpan.ToString();
-        }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class BoolToStringConverter : BoolToValueConverter<String> { }
-    public class BoolToVisibilityConverter : BoolToValueConverter<Visibility> { }
-    public class BoolToValueConverter<T> : IValueConverter
-    {
-        public T FalseValue { get; set; }
-        public T TrueValue { get; set; }
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            if (value == null)
-                return FalseValue;
-            else
-                return (bool)value ? TrueValue : FalseValue;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return value != null ? value.Equals(TrueValue) : false;
-        }
-    }
 }

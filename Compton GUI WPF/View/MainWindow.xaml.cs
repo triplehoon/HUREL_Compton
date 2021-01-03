@@ -27,3 +27,5 @@ namespace Compton_GUI_WPF
         }
     }
 }
+
+

@@ -3,12 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Compton_GUI_WPF"
-        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:VM="clr-namespace:Compton_GUI_WPF.ViewModel"
+        xmlns:localView="clr-namespace:Compton_GUI_WPF.View"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
         xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
+        
         mc:Ignorable="d"
         Title="MainWindow" Height="900" Width="1600"
         syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"        
@@ -24,19 +25,27 @@
         <VM:MainViewModel/>
     </Window.DataContext>
     <Window.Resources>
-        <VM:BoolToStringConverter x:Key="ConvStartOrStop" FalseValue="Start Session" TrueValue="Stop Session"/>
-        <VM:TimespaneToStringConverter x:Key="ConvTimeSpanToStr"/>
+        <localView:BoolToStringConverter x:Key="ConvStartOrStop" FalseValue="Start Session" TrueValue="Stop Session"/>
+        <localView:TimespaneToStringConverter x:Key="ConvTimeSpanToStr"/>
         <Style TargetType="TextBlock" x:Key="TextBlockTitle">
             <Setter Property="FontSize" Value="20"/>
             <Setter Property="FontWeight" Value="Bold"/>
         </Style>
         <Style TargetType="TextBlock" x:Key="TextBlockTitle2">
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Foreground" Value="DarkSlateGray"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="Black"/>
         </Style>
 
+        <Style TargetType="TextBlock" x:Key="TextBlockContentBold">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style TargetType="TextBlock" x:Key="TextBlockContent">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+        </Style>
         <Style TargetType="{x:Type Button}" x:Key="defaultButtonStyle">
-           
+
         </Style>
 
         <Style TargetType="{x:Type Button}" x:Key="ButtonDesignHYU" BasedOn="{StaticResource defaultButtonStyle}">
@@ -57,13 +66,190 @@
     <Grid Background="#FFEAEAEA">
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1.5*"/>
-            <ColumnDefinition Width="1.5*"/>
+            <ColumnDefinition Width="3*"/>
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
+        <syncfusion:TabControlExt FontWeight="Bold" 
+                                  Background="White" 
+                                  Margin="10" 
+                                  BorderBrush="#FFEAEAEA"
+                                  CloseButtonType="Hide" 
+                                  TabStripPlacement="Top" 
+                                  
+                                  TabListContextMenuOptions="None"                                  
+                                  TabItemSelectedBackground="#FF00457E" 
+                                  TabItemHoverBorderBrush="#FF00457E" 
+                                  TabItemLayout="SingleLineStar" 
+                                  IsCustomTabItemContextMenuEnabled="False" 
+                                  EnableLabelEdit="False">
+            <syncfusion:TabItemExt Header="Main" Background="White" BorderBrush="#FFEAEAEA">
+                <Grid >
+                    <StackPanel>
+                        <TextBlock Text="Hello" />
+                    </StackPanel>
+                </Grid>
+            </syncfusion:TabItemExt>
+            <syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition MaxWidth="500" Width="*"/>
+                        <ColumnDefinition MaxWidth="500" Width="0.02*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="2">
-            <Border Margin="20,20,20,0" Background="White" CornerRadius="10,10,10,10" >
+                        <Frame VerticalAlignment="Top" Source="/View/Pages/FPGAControlPage.xaml" Grid.Column="0"/>
+
+                    <Line Grid.Column="1" Margin="0,20,0,20"
+                          X1="8" Y1="0"
+                          X2="8" Y2="5000"
+                          StrokeThickness="1"
+                          Stroke="Black"
+                          />
+                    <Grid Grid.Column="2" Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Style="{StaticResource TextBlockTitle}" Text="LACC Configuration" Grid.Row="0"/>
+                        <syncfusion:TabControlExt Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="10" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
+                            <syncfusion:TabItemExt Header="LACC">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <StackPanel>
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="LACC Configuration" Style="{StaticResource TextBlockTitle}"/>
+                                            <Button Style="{StaticResource ButtonDesignHYU}" Grid.Column="1" Content="Apply Changes"/>
+                                        </Grid>
+                                        <TextBlock Text="PMT Order Setting [Fixed]" Style="{StaticResource TextBlockTitle2}" Margin="5"/>
+                                        <Border Margin="5" BorderThickness="2" BorderBrush="#FFEAEAEA" Padding="0,2.5,0,2.5">
+                                            <TextBlock Margin="5" TextWrapping="WrapWithOverflow" Style="{StaticResource TextBlockContent}" Text="  0, 18,  1, 19,  2, 20, 11, 29, 12, 28,  9, 27,  3, 21,  4, 22,  5, 23, &#x0a;14, 32, 13, 31, 12, 30,  6, 24,  7, 25,  8, 26, 17, 35, 16, 34, 15, 33"/>
+                                        </Border>
+                                        <TextBlock Margin="5,20,5,5" Text="PMT Gain" Style="{StaticResource TextBlockTitle2}"/>
+                                        <Grid Margin="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="auto"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="auto"/>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Scatter: " Style="{StaticResource TextBlockContentBold}" Grid.Column="0" VerticalAlignment="Center" />
+                                            <ComboBox Text="Channel #" Grid.Column="1"/>
+                                            <TextBox d:Text="2.55" Grid.Column="2" Margin="10,0,10,0"/>
+                                            <TextBlock Text="Absorber: " Style="{StaticResource TextBlockContentBold}" Grid.Column="3" VerticalAlignment="Center" />
+                                            <ComboBox Text="Channel #" Grid.Column="4"/>
+                                            <TextBox d:Text="2.55" Grid.Column="5" Margin="10,0,10,0"/>
+                                        </Grid>
+                                        <TextBlock Text="Look-up Table Setting" Margin="5,20,5,5" Style="{StaticResource TextBlockTitle2}"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Scatter LUT Path: " Grid.Column="0" Style="{StaticResource TextBlockContentBold}" Margin="5"/>
+                                            <Button Content="Set LUT Path [*.csv]" Grid.Column="1" Style="{StaticResource ButtonDesignHYU}" Margin="0,0,5,0"/>
+                                        </Grid>
+                                        <Border Margin="5" BorderThickness="2" BorderBrush="#FFEAEAEA" Padding="0,2.5,0,2.5">
+                                            <TextBlock d:Text="E:\OneDrive\01.Hurel\01.현재작업\01.연구정리\LUT.csv" Style="{StaticResource TextBlockContent}"/>
+                                        </Border>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Absorber LUT Path: " Grid.Column="0" Style="{StaticResource TextBlockContentBold}" Margin="5"/>
+                                            <Button Content="Set LUT Path [*.csv]" Grid.Column="1" Style="{StaticResource ButtonDesignHYU}" Margin="0,0,5,0"/>
+                                        </Grid>
+                                        <Border Margin="5" BorderThickness="2" BorderBrush="#FFEAEAEA" Padding="0,2.5,0,2.5">
+                                            <TextBlock d:Text="E:\OneDrive\01.Hurel\01.현재작업\01.연구정리\LUT.csv" Style="{StaticResource TextBlockContent}"/>
+                                        </Border>
+                                        <TextBlock Text="Scatter Energy Calibration" Margin="5,20,5,5" Style="{StaticResource TextBlockTitle2}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="5">
+                                            <TextBlock Text="Calibration Equation: " Grid.Column="0" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="a" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text=" · " Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text="x" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text="2" Style="{StaticResource TextBlockContent}" FontSize="8" VerticalAlignment="Top"/>
+                                            <TextBlock Text=" + " Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="b" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text=" · " Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text="x" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text=" + " Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="c" Style="{StaticResource TextBlockContent}"/>
+                                        </StackPanel>
+                                      
+                                            <syncfusion:SfDataGrid Margin="5" ColumnSizer="Star"  ItemsSource="{Binding Path =EcalInfos, Mode=TwoWay,UpdateSourceTrigger = LostFocus}" AutoGenerateColumns="False" EditTrigger="OnDoubleTap" AllowRowHoverHighlighting="False">
+                                                <syncfusion:SfDataGrid.Columns>
+                                                    <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Source"/>
+                                                    <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="True Energy"/>
+                                                    <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="MeasuredEnergy" AllowEditing="True" />
+                                                </syncfusion:SfDataGrid.Columns>
+                                            </syncfusion:SfDataGrid>
+                                        <syncfusion:SfChart Margin="5" Header=" Scatter Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
+                                        </syncfusion:SfChart>
+
+                                        <TextBlock Text="Absorber Energy Calibration" Margin="5,20,5,5" Style="{StaticResource TextBlockTitle2}"/>
+                                        <StackPanel Orientation="Horizontal" Margin="5">
+                                            <TextBlock Text="Calibration Equation: " Grid.Column="0" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="a" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text=" · " Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text="x" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text="2" Style="{StaticResource TextBlockContent}" FontSize="8" VerticalAlignment="Top"/>
+                                            <TextBlock Text=" + " Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="b" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text=" · " Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text="x" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock Text=" + " Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="c" Style="{StaticResource TextBlockContent}"/>
+                                        </StackPanel>
+
+                                        <syncfusion:SfDataGrid Margin="5" ColumnSizer="Star"  ItemsSource="{Binding Path =EcalInfos, Mode=TwoWay,UpdateSourceTrigger = LostFocus}" AutoGenerateColumns="False" EditTrigger="OnDoubleTap" AllowRowHoverHighlighting="False">
+                                            <syncfusion:SfDataGrid.Columns>
+                                                <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Source"/>
+                                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="True Energy"/>
+                                                <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="MeasuredEnergy" AllowEditing="True" />
+                                            </syncfusion:SfDataGrid.Columns>
+                                        </syncfusion:SfDataGrid>
+                                        <syncfusion:SfChart Margin="5" Header=" Scatter Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
+                                        </syncfusion:SfChart>
+
+
+
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </syncfusion:TabItemExt>
+                            
+                            <syncfusion:TabItemExt Header="LAGIS [Single Head]">
+                                
+                            </syncfusion:TabItemExt>
+                            <syncfusion:TabItemExt Header="LAGIS [Dual Head]">
+                                <StackPanel>
+                                    <TextBlock Text="NOT IMPLEMENTED YET" FontSize="80" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                
+                            </syncfusion:TabItemExt>
+                        </syncfusion:TabControlExt>
+
+                    </Grid>
+                </Grid>
+
+            </syncfusion:TabItemExt>
+            <syncfusion:TabItemExt Header="Menu1" Background="White" BorderBrush="#FFEAEAEA"/>
+            <syncfusion:TabItemExt Header="Menu2" Background="White" BorderBrush="#FFEAEAEA"/>
+            <syncfusion:TabItemExt Header="Menu3" Background="White" BorderBrush="#FFEAEAEA"/>
+        </syncfusion:TabControlExt>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Margin="20,20,20,0" Background="White" CornerRadius="10,10,10,10" >
                 <StackPanel Margin="15,10,10,10">
                     <TextBlock Text="Connect" Style="{StaticResource TextBlockTitle}"/>
                     <TextBlock Text="USB Devices" Style="{StaticResource TextBlockTitle2}"/>
@@ -106,11 +292,11 @@
 
                 </StackPanel>
             </Border>
-            <Border Margin="20,20,20,0" Background="White" CornerRadius="10,10,10,10" >
+            <Border Grid.Row="1" Margin="20,20,20,0" Background="White" CornerRadius="10,10,10,10" >
                 <StackPanel Margin="15,10,10,10">
                     <TextBlock Text="Setting" Style="{StaticResource TextBlockTitle}"/>
                     <syncfusion:SfTextInputLayout Margin="0,10,0,0"
-                        Hint="Mesurement Time" HelperText="In Seconds" ContainerType="Filled" IsEnabled="{Binding !IsSessionStart}">
+                        Hint="Mesurement Time" HelperText="In Seconds" ContainerType="Filled" IsEnabled="{Binding IsSesstionStop}">
                         <TextBox FontSize="15" Text="{Binding MeasurementTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="PreviewTextInput">
@@ -123,14 +309,29 @@
                                                           ContainerType="Filled" HelperText="*.bin" Margin="0,10,0,10" >
                         <TextBox FontSize="15" Text="{Binding FileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </syncfusion:SfTextInputLayout>
-                    <Button Content="FPGA Configuration" Style="{StaticResource ButtonDesignHYU}"
-                            Command="{Binding OpenFPGAWindowCommand}" IsEnabled="{Binding IsEnableOpenFPGAWindow}"/>
+
 
 
                 </StackPanel>
             </Border>
-
-        </StackPanel>
+            <Border Grid.Row="2" Margin="20,20,20,10" Background="White" CornerRadius="10,10,10,10" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5" Grid.Row="0"/>
+                    <syncfusion:TabControlExt Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="5" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
+                        <syncfusion:TabItemExt Header="Scatter">
+                            <syncfusion:SfChart>
+                                
+                            </syncfusion:SfChart>
+                        </syncfusion:TabItemExt>
+                        <syncfusion:TabItemExt Header="Absorber"></syncfusion:TabItemExt>
+                    </syncfusion:TabControlExt>
+                </Grid>
+            </Border>
+        </Grid>
 
 
     </Grid>

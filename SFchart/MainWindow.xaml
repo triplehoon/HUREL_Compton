@@ -21,6 +21,9 @@
             <TextBlock Text="{Binding Counts}" Margin="20"/>
         </StackPanel>
         <syncfusion:SfChart Grid.Column="1" Margin="5">
+            <syncfusion:SfChart.SecondaryAxis>
+                <syncfusion:LogarithmicAxis/>
+            </syncfusion:SfChart.SecondaryAxis>
             <syncfusion:ColumnSeries Interior="Black" ListenPropertyChange="True" Label="Energy" ItemsSource="{Binding SpectrumHistoModels}" XBindingPath="LowerBound" YBindingPath="Count" ShowTooltip="True" syncfusion:ChartSeriesBase.Spacing="0" />
 
         </syncfusion:SfChart>
