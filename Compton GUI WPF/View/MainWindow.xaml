@@ -320,15 +320,20 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5" Grid.Row="0"/>
-                    <syncfusion:TabControlExt Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="5" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
-                        <syncfusion:TabItemExt Header="Scatter">
-                            <syncfusion:SfChart>
-                                
-                            </syncfusion:SfChart>
-                        </syncfusion:TabItemExt>
-                        <syncfusion:TabItemExt Header="Absorber"></syncfusion:TabItemExt>
-                    </syncfusion:TabControlExt>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="15,5,5,5" Grid.Column="0"/>
+                        <ComboBox d:Text="Ch1" Grid.Column="1" Margin="5" Width="100"/>
+                    </Grid>
+                    <syncfusion:SfChart Margin="5" Grid.Row="1">
+                        
+                    </syncfusion:SfChart>
+                    
+
+
                 </Grid>
             </Border>
         </Grid>
