@@ -182,11 +182,24 @@
                                             <TextBlock d:Text="c" Style="{StaticResource TextBlockContent}"/>
                                         </StackPanel>
                                       
-                                            <syncfusion:SfDataGrid Margin="5" ColumnSizer="Star"  ItemsSource="{Binding Path =EcalInfos, Mode=TwoWay,UpdateSourceTrigger = LostFocus}" AutoGenerateColumns="False" EditTrigger="OnDoubleTap" AllowRowHoverHighlighting="False">
+                                            <syncfusion:SfDataGrid Margin="5" 
+                                                                   ColumnSizer="Star"                                                                    
+                                                                   AutoGenerateColumns="False" 
+                                                                   ItemsSource="{Binding EcalInfosbyChannel[0], Mode=TwoWay}"
+                                                                   EditTrigger="OnDoubleTap" 
+                                                                   AddNewRowPosition="FixedTop"
+                                                                   AllowRowHoverHighlighting="False" 
+                                                                   
+                                                                   >
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName= "CurrentCellValueChanged">
+                                                    <mvvm:EventToCommand Command="{Binding ItemChangedCommand}" PassEventArgsToCommand="True"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
                                                 <syncfusion:SfDataGrid.Columns>
                                                     <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Source"/>
-                                                    <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="True Energy"/>
-                                                    <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="MeasuredEnergy" AllowEditing="True" />
+                                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="True Energy [keV]" NumberDecimalDigits="0" />
+                                                    <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="Measured Energy [keV]" AllowEditing="True" NumberDecimalDigits="0"/>
                                                 </syncfusion:SfDataGrid.Columns>
                                             </syncfusion:SfDataGrid>
                                         <syncfusion:SfChart Margin="5" Header=" Scatter Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
@@ -207,11 +220,23 @@
                                             <TextBlock d:Text="c" Style="{StaticResource TextBlockContent}"/>
                                         </StackPanel>
 
-                                        <syncfusion:SfDataGrid Margin="5" ColumnSizer="Star"  ItemsSource="{Binding Path =EcalInfos, Mode=TwoWay,UpdateSourceTrigger = LostFocus}" AutoGenerateColumns="False" EditTrigger="OnDoubleTap" AllowRowHoverHighlighting="False">
+                                        <syncfusion:SfDataGrid Margin="5" 
+                                                               ColumnSizer="Star"  
+                                                               ItemsSource="{Binding Path =EcalInfosbyChannel[8], Mode=TwoWay,UpdateSourceTrigger = LostFocus}"
+                                                               AutoGenerateColumns="False" 
+                                                               EditTrigger="OnDoubleTap" 
+                                                               AllowRowHoverHighlighting="False"                                                              
+                                                               >
+
                                             <syncfusion:SfDataGrid.Columns>
                                                 <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Source"/>
-                                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="True Energy"/>
-                                                <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="MeasuredEnergy" AllowEditing="True" />
+                                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="True Energy  [keV]"/>
+                                                <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" 
+                                                                              HeaderText="MeasuredEnergy  [keV]" 
+                                                                              AllowEditing="True"
+                                                                              
+                                                                              >
+                                                </syncfusion:GridNumericColumn>
                                             </syncfusion:SfDataGrid.Columns>
                                         </syncfusion:SfDataGrid>
                                         <syncfusion:SfChart Margin="5" Header=" Scatter Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
@@ -325,13 +350,11 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="15,5,5,5" Grid.Column="0"/>
-                        <ComboBox d:Text="Ch1" Grid.Column="1" Margin="5" Width="100"/>
+                        <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5" Grid.Column="0"/>
+                        <ComboBox Grid.Column="1" Margin="5" Width="100"/>
                     </Grid>
-                    <syncfusion:SfChart Margin="5" Grid.Row="1">
-                        
-                    </syncfusion:SfChart>
-                    
+                    <syncfusion:SfChart Margin="5" Grid.Row="0">
+</syncfusion:SfChart>
 
 
                 </Grid>

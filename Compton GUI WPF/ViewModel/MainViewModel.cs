@@ -16,7 +16,7 @@ using Compton_GUI_WPF.View;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using HUREL.Compton;
-
+using MathNet.Numerics;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -27,7 +27,7 @@ namespace Compton_GUI_WPF.ViewModel
 
         public static CRUXELLLACC.VariableInfo FPGAVariable;
 
-       
+
         public MainViewModel()
         {
             FPGAControl = new CRUXELLLACC();
@@ -41,35 +41,10 @@ namespace Compton_GUI_WPF.ViewModel
             //    (action) => ReceiveIsEnableOpenFPGAWindow(action)
             //    );
 
-            ecalInfos = new ObservableCollection<EcalInfo>();
             this.GenerateEcalInfos();
         }
 
-        #region Test DataGrid
 
-        private ObservableCollection<EcalInfo> ecalInfos;
-        public ObservableCollection<EcalInfo> EcalInfos
-        {
-            get { return ecalInfos; }
-            set 
-            { 
-                ecalInfos = value; 
-                OnPropertyChanged(nameof(EcalInfo)); 
-            }
-        }
-
-
-        private void GenerateEcalInfos()
-        {
-            EcalInfos.Add(new EcalInfo(662, 0, "Cs-137"));
-            EcalInfos.Add(new EcalInfo(60, 0, "Am-241"));
-            EcalInfos.Add(new EcalInfo(511, 0, "Na-22"));
-            EcalInfos.Add(new EcalInfo(1275, 0, "Na-22"));
-            EcalInfos.Add(new EcalInfo(1173, 0, "Co-60"));
-            EcalInfos.Add(new EcalInfo(1332, 0, "Co-60"));
-        }
-
-        #endregion
 
 
         private RelayCommand mianWindowCloseCommand;
@@ -79,7 +54,7 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private void CloseMainWindow()
         {
-   
+
             FPGAControl.SetVaribles(FPGAVariable);
             FPGAControl.Dispose();
         }
@@ -105,7 +80,7 @@ namespace Compton_GUI_WPF.ViewModel
             get { return isEnableOpenFPGAWindow; }
             set { isEnableOpenFPGAWindow = value; OnPropertyChanged(nameof(IsEnableOpenFPGAWindow)); }
         }
- 
+
         public bool CanOpenFPGAWindow()
         {
             return IsEnableOpenFPGAWindow;
@@ -157,7 +132,7 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
-    
+
 
         private string fileName;
         public string FileName
@@ -200,9 +175,9 @@ namespace Compton_GUI_WPF.ViewModel
                     return;
                 }
                 else
-                { 
+                {
                     VMStatus = "FPGA setting Start";
-                    
+
                     string status;
                     if (FPGAControl.Start_usb(out status))
                     {
@@ -214,7 +189,7 @@ namespace Compton_GUI_WPF.ViewModel
             }
             else
             {
-                
+
                 VMStatus = FPGAControl.Stop_usb();
                 IsSessionStart = false;
                 timer.Stop();
@@ -237,7 +212,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 isSessionAvailable = value;
                 OnPropertyChanged(nameof(IsSessionAvailable));
-            }           
+            }
         }
 
         private bool isSessionStart = false;
@@ -256,7 +231,7 @@ namespace Compton_GUI_WPF.ViewModel
         public string MeasurementTime
         {
             get
-            {                
+            {
                 return measurementTime;
             }
             set
@@ -288,7 +263,7 @@ namespace Compton_GUI_WPF.ViewModel
             get { return recordTimeSpan; }
             set
             {
-               
+
                 recordTimeSpan = value;
                 if (IsSessionStart && MeasurementTimeSpan == value)
                 {
@@ -313,13 +288,57 @@ namespace Compton_GUI_WPF.ViewModel
             timer.Start();
         }
 
-        private void TimerTick (object sender, EventArgs e)
+        private void TimerTick(object sender, EventArgs e)
         {
             RecordTimeSpan = RecordTimeSpan.Add(TimeSpan.FromSeconds(1));
         }
 
 
         #endregion
+
+        #region Ecal DataGrid
+
+        public ObservableCollection<EcalInfo> EcalInfos = new ObservableCollection<EcalInfo>();
+
+
+        private void GenerateEcalInfos()
+        {
+            
+                EcalInfos.Add(new EcalInfo(60, 60, "Am-241"));
+                EcalInfos.Add(new EcalInfo(662, 662, "Cs-137"));
+                EcalInfos.Add(new EcalInfo(511, 511, "Na-22"));
+                EcalInfos.Add(new EcalInfo(1275, 1275, "Na-22"));
+                EcalInfos.Add(new EcalInfo(1173, 1173, "Co-60"));
+                EcalInfos.Add(new EcalInfo(1332, 1332, "Co-60"));
+            
+            
+
+        }
+
+        private RelayCommand<object> ecalInfoChangedCommand;
+        public ICommand EcalInfoChangedCommand
+        {
+            get { return (this.ecalInfoChangedCommand) ?? (this.ecalInfoChangedCommand = new RelayCommand(EcalInfoChanged)); }
+        }
+        private void EcalInfoChanged()
+        {
+
+        }
+
+        private double[] ecalFunctions;
+        public double[] EcalFuctions
+        {
+            get { return ecalFunctions; }
+            set { }
+        }
+
+        private void UpdateEcalFucntions()
+        {
+
+        }
+
+        #endregion
+
 
         private string vmStatus;
         public string VMStatus 
@@ -361,6 +380,23 @@ namespace Compton_GUI_WPF.ViewModel
 
     }
 
+    
+
+
+    public class ECalViewModel
+    {
+        public ObservableCollection<EcalInfo> EcalInfos = new ObservableCollection<EcalInfo>();
+
+
+        public double[] Calibration = new double[] { 0, 1, 0 };
+
+        public void CalE()
+        {
+
+        }
+    }
+
+
     public class EcalInfo
     {
 
@@ -372,7 +408,10 @@ namespace Compton_GUI_WPF.ViewModel
 
         public double TrueEnergy
         {
-            get { return trueEnergy; }
+            get 
+            { 
+                return trueEnergy; 
+            }
             set
             {
                 trueEnergy = value;
@@ -404,9 +443,8 @@ namespace Compton_GUI_WPF.ViewModel
         {
             this.TrueEnergy = trueEnergy;
             this.MeasuredEnergy = measuredEnergy;
-            this.SourceName = sourceName;
+            this.SourceName = sourceName;            
         }
-
     }
 
 
