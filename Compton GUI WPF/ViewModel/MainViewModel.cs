@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -16,6 +17,7 @@ using Compton_GUI_WPF.View;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using HUREL.Compton;
+using HUREL.Compton.LACC;
 using MathNet.Numerics;
 
 namespace Compton_GUI_WPF.ViewModel
@@ -27,13 +29,24 @@ namespace Compton_GUI_WPF.ViewModel
 
         public static CRUXELLLACC.VariableInfo FPGAVariable;
 
+        public static LACC_Control LACC_Control_Static;
 
+        private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
+        public ModuleInfo SelecteModuleInfo 
+        { get { return selectedModuleInfo; } 
+            set { 
+                selectedModuleInfo = value; 
+            } 
+        }
+
+        private string CurrentPath = Directory.GetCurrentDirectory();
+        
         public MainViewModel()
         {
             FPGAControl = new CRUXELLLACC();
             FPGAVariable = FPGAControl.Variables;
             IsEnableOpenFPGAWindow = true;
-            IsSessionAvailable = true;
+            IsSessionAvailable = false;
 
             FPGAControl.USBChangeHandler += UpdateDeviceList;
             FPGAControl.USBChange();
@@ -41,7 +54,7 @@ namespace Compton_GUI_WPF.ViewModel
             //    (action) => ReceiveIsEnableOpenFPGAWindow(action)
             //    );
 
-            this.GenerateEcalInfos();
+            InitiateLACC();
         }
 
 
@@ -206,11 +219,12 @@ namespace Compton_GUI_WPF.ViewModel
         {
             get
             {
+                isSessionAvailable = IsLACCModuleInitiate && isSessionAvailable;
                 return isSessionAvailable;
             }
             set
             {
-                isSessionAvailable = value;
+                isSessionAvailable = IsLACCModuleInitiate && value;
                 OnPropertyChanged(nameof(IsSessionAvailable));
             }
         }
@@ -296,49 +310,210 @@ namespace Compton_GUI_WPF.ViewModel
 
         #endregion
 
-        #region Ecal DataGrid
+        #region Ecal Data
 
-        public ObservableCollection<EcalInfo> EcalInfos = new ObservableCollection<EcalInfo>();
-
-
-        private void GenerateEcalInfos()
+        private bool isLACCModuleInitiate = false;
+        public bool IsLACCModuleInitiate
         {
-            
-                EcalInfos.Add(new EcalInfo(60, 60, "Am-241"));
-                EcalInfos.Add(new EcalInfo(662, 662, "Cs-137"));
-                EcalInfos.Add(new EcalInfo(511, 511, "Na-22"));
-                EcalInfos.Add(new EcalInfo(1275, 1275, "Na-22"));
-                EcalInfos.Add(new EcalInfo(1173, 1173, "Co-60"));
-                EcalInfos.Add(new EcalInfo(1332, 1332, "Co-60"));
-            
-            
-
+            get { return isLACCModuleInitiate; }
+            set
+            {
+                isLACCModuleInitiate = value;                
+                OnPropertyChanged(nameof(IsLACCModuleInitiate));
+                OnPropertyChanged(nameof(IsSessionAvailable));
+            }
         }
 
-        private RelayCommand<object> ecalInfoChangedCommand;
+        private string LUTFolderDirectory = Path.Combine(Directory.GetCurrentDirectory(),"LUT Files");
+        public void InitiateMonoType()
+        {
+            Task.Run(() =>
+            {
+                var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = true, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 12, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
+
+                var scatterGain = new double[37]  { 0.229400822535143,
+                                                0.194663785680398,
+                                                0.184236289538727,
+                                                0.328845970032704,
+                                                0.388535540257414,
+                                                0.182997191802852,
+                                                0.256568926962897,
+                                                0.261898167575063,
+                                                0.200476805251476,
+                                                0.107149915166777,
+                                                0.258711656044783,
+                                                0.317571489375082,
+                                                0.153968089385871,
+                                                0.175575768904058,
+                                                0.175069094879092,
+                                                0.111338944874489,
+                                                0.126300762020813,
+                                                0.310296386792488,
+                                                0.271149150631817,
+                                                0.110569664442744,
+                                                0.109709278149893,
+                                                0.312856624047890,
+                                                0.135521237098968,
+                                                0.193823476297495,
+                                                0.147240054519398,
+                                                0.199701252506580,
+                                                0.222085079797251,
+                                                0.186253277487988,
+                                                0.163246220676073,
+                                                0.363372707108992,
+                                                0.451220095983549,
+                                                0.294538914503081,
+                                                0.234470528667482,
+                                                0.330946205527829,
+                                                0.201129108512092,
+                                                0.399876618388626,
+                                                -19.1899788970696 };
+
+                var absorberGain = new double[37] { 0.609106629714565,
+                                                0.408225309758093,
+                                                0.461847452592639,
+                                                0.420864773543207,
+                                                0.406298442910974,
+                                                0.556871972880209,
+                                                0.427062526383404,
+                                                0.529611054266539,
+                                                0.385468424382990,
+                                                0.248421318082802,
+                                                0.399864947053825,
+                                                0.425536517980407,
+                                                0.339859200857057,
+                                                0.398740664113444,
+                                                0.464483368090175,
+                                                0.403390895135249,
+                                                0.298422129818660,
+                                                0.553180476402401,
+                                                0.642667635434905,
+                                                0.358890089937244,
+                                                0.464030776465580,
+                                                0.445993103539891,
+                                                0.273774321638299,
+                                                0.214176752360862,
+                                                0.621807100373737,
+                                                0.356965167293123,
+                                                0.376619470434398,
+                                                0.289744640131841,
+                                                0.369076302531657,
+                                                0.674687609116932,
+                                                0.639591093149570,
+                                                0.556966464257456,
+                                                0.651793451901132,
+                                                0.363504215341530,
+                                                0.662096134248347,
+                                                0.599963606291628,
+                                                -20.6402542760799 };
+
+                Debug.WriteLine("Making Scatter Module");
+                TEST = "Making Scatter Module";
+                ModuleInfoViewModels[0] = new ModuleInfoViewModel(ModuleInfo.Mono,
+                                                            new LACC_Module.ModuleOffet { x = 0, y = 0, z = 0 },
+                                                            new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                                            scatterGain,
+                                                            pmtOrderInfo,
+                                                            Path.Combine(LUTFolderDirectory, "MonoScatterLUT.csv"));
+
+                Debug.WriteLine("Making Abosrober Module");
+                TEST = "Making Absorber Module";
+                ModuleInfoViewModels[8] = new ModuleInfoViewModel(ModuleInfo.Mono,
+                                                            new LACC_Module.ModuleOffet { x = 0, y = 0, z = -150 },
+                                                            new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                                            absorberGain,
+                                                            pmtOrderInfo,
+                                                            Path.Combine(LUTFolderDirectory, "MonoAbsorberLUT.csv"));
+
+                LACC_Control_Static = new LACC_Control(ModuleInfoViewModels[0].Module, ModuleInfoViewModels[8].Module);
+                IsLACCModuleInitiate = true;
+                initiating = false;
+            });
+            
+        }
+
+        public void InitiateSingleHeadQuadType()
+        {
+            IsLACCModuleInitiate = true;
+        }
+
+        public void InitiateDualHeadQuadType()
+        {
+            IsLACCModuleInitiate = true;
+        }
+
+        public ObservableCollection<ModuleInfoViewModel> ModuleInfoViewModels { get; set; } //16 Channels
+
+
+        private RelayCommand initiateLACCommand;
+        public ICommand InitiateLACCommand
+        {
+            get { return (this.initiateLACCommand) ?? (this.initiateLACCommand = new RelayCommand(InitiateLACC)); }
+        }
+        private bool initiating;
+        private void InitiateLACC()
+        {
+            if (initiating == true)
+                return;
+
+            ModuleInfoViewModels = new ObservableCollection<ModuleInfoViewModel>();
+
+            for (int i = 0; i < 16; i++)
+            {
+                ModuleInfoViewModels.Add(new ModuleInfoViewModel());
+            }
+
+            initiating = true;
+            IsLACCModuleInitiate = false;
+            InitiateLACC();
+            switch (this.selectedModuleInfo)
+            {
+                case ModuleInfo.Mono:
+                    InitiateMonoType();
+                    break;
+                case ModuleInfo.QuadSingleHead:
+                    InitiateSingleHeadQuadType();
+                    break;
+                case ModuleInfo.QuadDualHead:
+                    InitiateDualHeadQuadType();
+                    break;
+            }
+        }
+
+
+        private RelayCommand<string> ecalInfoChangedCommand;
         public ICommand EcalInfoChangedCommand
         {
-            get { return (this.ecalInfoChangedCommand) ?? (this.ecalInfoChangedCommand = new RelayCommand(EcalInfoChanged)); }
+            get { return (this.ecalInfoChangedCommand) ?? (this.ecalInfoChangedCommand = new RelayCommand<string>(EcalInfoChanged)); }
         }
-        private void EcalInfoChanged()
+        private void EcalInfoChanged(string a)
         {
-
-        }
-
-        private double[] ecalFunctions;
-        public double[] EcalFuctions
-        {
-            get { return ecalFunctions; }
-            set { }
-        }
-
-        private void UpdateEcalFucntions()
-        {
+            Debug.WriteLine("Channel num is " + a);
+            try
+            {
+                int channelNum=Convert.ToInt32(a);
+                ModuleInfoViewModels[channelNum].Fitting();                
+            }
+            catch
+            {
+                Debug.WriteLine("EcalInfoChanged parameter is wrong");
+            }
 
         }
 
         #endregion
 
+
+        private RelayCommand<object> testCommand;
+        public ICommand TestCommand
+        {
+            get { return (this.testCommand) ?? (this.testCommand = new RelayCommand<object>(TestFunction)); }
+        }
+        private void TestFunction(object obj)
+        {
+            var a = obj;
+            Debug.WriteLine("TestFuction");
+        }
 
         private string vmStatus;
         public string VMStatus 
@@ -367,7 +542,7 @@ namespace Compton_GUI_WPF.ViewModel
 
 
 
-
+        
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
@@ -383,69 +558,7 @@ namespace Compton_GUI_WPF.ViewModel
     
 
 
-    public class ECalViewModel
-    {
-        public ObservableCollection<EcalInfo> EcalInfos = new ObservableCollection<EcalInfo>();
-
-
-        public double[] Calibration = new double[] { 0, 1, 0 };
-
-        public void CalE()
-        {
-
-        }
-    }
-
-
-    public class EcalInfo
-    {
-
-        double trueEnergy;
-        double mesuredEnergy;
-        string sourceName;
-
-
-
-        public double TrueEnergy
-        {
-            get 
-            { 
-                return trueEnergy; 
-            }
-            set
-            {
-                trueEnergy = value;
-
-            }
-        }
-
-
-        public double MeasuredEnergy
-        {
-            get { return mesuredEnergy; }
-            set
-            {
-                mesuredEnergy = value;
-
-            }
-        }
-
-        public string SourceName
-        {
-            get { return sourceName; }
-            set { sourceName = value; }
-        }
-
-
-
-
-        public EcalInfo(double trueEnergy, double measuredEnergy = 0, string sourceName = "Unkown")
-        {
-            this.TrueEnergy = trueEnergy;
-            this.MeasuredEnergy = measuredEnergy;
-            this.SourceName = sourceName;            
-        }
-    }
+    
 
 
 }

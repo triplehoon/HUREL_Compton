@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,12 +24,20 @@ namespace Compton_GUI_WPF
         public MainWindow()
         {
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mzc0OTQ4QDMxMzgyZTM0MmUzMFRlU2dMemQrMXRGZW1iQk96NklnOVBWNnhScjVDckxTT2p1M0crRHpXcjA9");
-            InitializeComponent();          
+            InitializeComponent();
         }
 
-        private void SfDataGrid_AddNewRowInitiating(object sender, Syncfusion.UI.Xaml.Grid.AddNewRowInitiatingEventArgs e)
-        {
 
+
+        private void SfDataGrid_PreviewMouseWheel_ScrollViewer1(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer1.ScrollToVerticalOffset(ScrollViewer1.VerticalOffset - e.Delta);
+        }
+
+        private void ComboBox_TargetUpdated(object sender, DataTransferEventArgs e)
+        {
+            ((ComboBox)sender).SelectedIndex = 0;
+            Debug.WriteLine("Combox changed");
         }
     }
 }

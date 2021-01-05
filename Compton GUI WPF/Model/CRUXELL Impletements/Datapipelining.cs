@@ -14,7 +14,7 @@ namespace HUREL.Compton
     public partial class CRUXELLLACC
     {
 
-        public BlockingCollection<int[]> ListModeData = new BlockingCollection<int[]>();
+        public BlockingCollection<short[]> ShortArrayQueue = new BlockingCollection<short[]>();
 
         private void ParsingCyusbBufferOrign()
         {
@@ -81,7 +81,7 @@ namespace HUREL.Compton
                             {
                                 ParsedQueue.Add(dataBuffer);
                                 dataInCount++;
-                                if(dataInCount %10000 ==0)
+                                if(dataInCount %100000 ==0)
                                 {
                                     Debug.WriteLine("Data in count is " + dataInCount);
                                 }
@@ -120,9 +120,19 @@ namespace HUREL.Compton
             writer.Dispose();
         }
 
-        private void MLPEAsync()
+        private bool IsGenerateShortArrayBuff;
+        private void GenerateShortArrayBuffAsync()
         {
-
+            while (IsGenerateShortArrayBuff)
+            {
+                byte[] item;
+                short[] shortArray = new short[144];
+                while (DataInQueue.TryTake(out item))
+                {
+                    Buffer.BlockCopy(item, 0, shortArray, 0, 288);
+                    ShortArrayQueue.Add(shortArray);
+                }
+            }
         }
 
         

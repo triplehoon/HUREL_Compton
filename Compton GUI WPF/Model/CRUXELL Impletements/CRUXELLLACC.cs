@@ -43,6 +43,7 @@ namespace HUREL.Compton
         private Task ListenUBSAsync;
         private Thread ListenUSBThread;
         private Task ParsingUSBAsync;
+        private Task GenerateShortBufferAsyn;
 
         public bool IsStart;
 
@@ -354,11 +355,13 @@ namespace HUREL.Compton
             Debug.WriteLine("HY : [Try] Start ParsingThread");
             ParsingUSBAsync = Task.Run(() => ParsingCyusbBufferAsync());
 
-            /*
-            need more?
-            */
+            IsGenerateShortArrayBuff = true;
+            GenerateShortBufferAsyn = Task.Run(() => GenerateShortArrayBuffAsync());
             status = "Data Aquisition Start";
             IsStart = true;
+
+            
+
             return true;
         }
         public string Stop_usb()
@@ -379,6 +382,8 @@ namespace HUREL.Compton
             ParsingUSBAsync.Wait();
             ParsingUSBAsync = null;
 
+            IsGenerateShortArrayBuff = false;
+            GenerateShortBufferAsyn.Wait();
 
             usb_setting(3); // 모든처리 끝났을때 stop
 

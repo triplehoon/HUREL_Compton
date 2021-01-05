@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Compton_GUI_WPF.ViewModel;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -21,6 +23,56 @@ namespace Compton_GUI_WPF.View
         {
             throw new NotImplementedException();
         }
+    }
+
+    public class ObservalbeDoubleToChannelNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if(value == null)
+            {
+                List<string> non = new List<string>();
+                non.Add("PMT CorrMat");
+                return non;
+            }
+            var channelGain = (ObservableCollection<double>)value;
+            ObservableCollection<string> CorrMatNameAndGain = new ObservableCollection<string>();
+            int i = 0;
+            CorrMatNameAndGain.Add("PMT CorrMat");
+            foreach (double d in channelGain)
+            {
+                CorrMatNameAndGain.Add("CorrMat["+ i + "]: " + d.ToString("F2"));
+                i++;
+            }
+            return CorrMatNameAndGain;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    [ValueConversion(typeof(bool), typeof(bool))]
+    public class InverseBooleanConverter : IValueConverter
+    {
+        #region IValueConverter Members
+
+        public object Convert(object value, Type targetType, object parameter,
+            System.Globalization.CultureInfo culture)
+        {
+            if (targetType != typeof(bool))
+                throw new InvalidOperationException("The target must be a boolean");
+
+            return !(bool)value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter,
+            System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+
+        #endregion
     }
 
     public class BoolToStringConverter : BoolToValueConverter<String> { }

@@ -37,6 +37,7 @@ namespace SFchart
 
         public void Loading()
         {
+            #region Random Spect
             Random rand = new Random();
             List<double> randDobuleList = new List<double>();
             
@@ -49,10 +50,7 @@ namespace SFchart
             SpectrumHisto spectrum = new SpectrumHisto(randDobuleList, 200, 0, 1000);
 
             SpectrumHistoModels = spectrum.SpectrumData;
-
-
-
-
+            #endregion
             var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = true, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 12, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
 
             var scatterGain = new double[37]  { 0.229400822535143,

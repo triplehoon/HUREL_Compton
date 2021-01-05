@@ -27,6 +27,8 @@
     <Window.Resources>
         <localView:BoolToStringConverter x:Key="ConvStartOrStop" FalseValue="Start Session" TrueValue="Stop Session"/>
         <localView:TimespaneToStringConverter x:Key="ConvTimeSpanToStr"/>
+        <localView:ObservalbeDoubleToChannelNameConverter x:Key="ConvObservalbeDoubleToChannelName"/>
+        <localView:InverseBooleanConverter x:Key="ConvInverseBoolean"/>
         <Style TargetType="TextBlock" x:Key="TextBlockTitle">
             <Setter Property="FontSize" Value="20"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -74,8 +76,7 @@
                                   Margin="10" 
                                   BorderBrush="#FFEAEAEA"
                                   CloseButtonType="Hide" 
-                                  TabStripPlacement="Top" 
-                                  
+                                  TabStripPlacement="Top"                                   
                                   TabListContextMenuOptions="None"                                  
                                   TabItemSelectedBackground="#FF00457E" 
                                   TabItemHoverBorderBrush="#FF00457E" 
@@ -111,9 +112,9 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Style="{StaticResource TextBlockTitle}" Text="LACC Configuration" Grid.Row="0"/>
-                        <syncfusion:TabControlExt Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="10" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
-                            <syncfusion:TabItemExt Header="LACC">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <syncfusion:TabControlExt SelectedIndex="{Binding SelecteModuleInfo }" Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="10" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
+                            <syncfusion:TabItemExt TabIndex="0" Header="LACC" >
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ScrollViewer1">
                                     <StackPanel>
                                         <Grid Margin="5">
                                             <Grid.ColumnDefinitions>
@@ -121,7 +122,9 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="LACC Configuration" Style="{StaticResource TextBlockTitle}"/>
-                                            <Button Style="{StaticResource ButtonDesignHYU}" Grid.Column="1" Content="Apply Changes"/>
+                                            <Button Style="{StaticResource ButtonDesignHYU}" IsEnabled="{Binding IsLACCModuleInitiate}" 
+                                                    Command="{Binding InitiateLACCommand}"
+                                                    Grid.Column="1" Content="Apply Changes"/>
                                         </Grid>
                                         <TextBlock Text="PMT Order Setting [Fixed]" Style="{StaticResource TextBlockTitle2}" Margin="5"/>
                                         <Border Margin="5" BorderThickness="2" BorderBrush="#FFEAEAEA" Padding="0,2.5,0,2.5">
@@ -138,11 +141,29 @@
                                                 <ColumnDefinition Width="2*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="Scatter: " Style="{StaticResource TextBlockContentBold}" Grid.Column="0" VerticalAlignment="Center" />
-                                            <ComboBox Text="Channel #" Grid.Column="1"/>
-                                            <TextBox d:Text="2.55" Grid.Column="2" Margin="10,0,10,0"/>
+                                            <ComboBox                                                 
+                                                      Grid.Column="1"
+                                                      SelectedIndex="0"
+                                                      Binding.TargetUpdated="ComboBox_TargetUpdated"
+                                                      ItemsSource="{Binding ModuleInfoViewModels[0].ModuleGain, Converter={StaticResource ConvObservalbeDoubleToChannelName},NotifyOnTargetUpdated=True}"/>
+                                            <Button  Content="Load Gain (*.txt)" 
+                                                     HorizontalContentAlignment="Center"
+                                                     FontSize="10"
+                                                     Grid.Column="2" 
+                                                     Margin="10,0,10,0"
+                                                     Style="{StaticResource ButtonDesignHYU}"/>
                                             <TextBlock Text="Absorber: " Style="{StaticResource TextBlockContentBold}" Grid.Column="3" VerticalAlignment="Center" />
-                                            <ComboBox Text="Channel #" Grid.Column="4"/>
-                                            <TextBox d:Text="2.55" Grid.Column="5" Margin="10,0,10,0"/>
+                                            <ComboBox                                                 
+                                                      Grid.Column="4"
+                                                      SelectedIndex="0"
+                                                      Binding.TargetUpdated="ComboBox_TargetUpdated"
+                                                      ItemsSource="{Binding ModuleInfoViewModels[8].ModuleGain, Converter={StaticResource ConvObservalbeDoubleToChannelName}, NotifyOnTargetUpdated=True}"/>
+                                            <Button  Content="Load Gain (*.txt)" 
+                                                     HorizontalContentAlignment="Center"
+                                                     FontSize="10"
+                                                     Grid.Column="5" 
+                                                     Margin="10,0,10,0"
+                                                     Style="{StaticResource ButtonDesignHYU}"/>
                                         </Grid>
                                         <TextBlock Text="Look-up Table Setting" Margin="5,20,5,5" Style="{StaticResource TextBlockTitle2}"/>
                                         <Grid>
@@ -154,7 +175,9 @@
                                             <Button Content="Set LUT Path [*.csv]" Grid.Column="1" Style="{StaticResource ButtonDesignHYU}" Margin="0,0,5,0"/>
                                         </Grid>
                                         <Border Margin="5" BorderThickness="2" BorderBrush="#FFEAEAEA" Padding="0,2.5,0,2.5">
-                                            <TextBlock d:Text="E:\OneDrive\01.Hurel\01.현재작업\01.연구정리\LUT.csv" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="E:\OneDrive\01.Hurel\01.현재작업\01.연구정리\LUT.csv"
+                                                       Text="{Binding ModuleInfoViewModels[0].LUTCSVFileLink}"
+                                                       Style="{StaticResource TextBlockContent}"/>
                                         </Border>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -165,35 +188,37 @@
                                             <Button Content="Set LUT Path [*.csv]" Grid.Column="1" Style="{StaticResource ButtonDesignHYU}" Margin="0,0,5,0"/>
                                         </Grid>
                                         <Border Margin="5" BorderThickness="2" BorderBrush="#FFEAEAEA" Padding="0,2.5,0,2.5">
-                                            <TextBlock d:Text="E:\OneDrive\01.Hurel\01.현재작업\01.연구정리\LUT.csv" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="E:\OneDrive\01.Hurel\01.현재작업\01.연구정리\LUT.csv" 
+                                                       Text="{Binding ModuleInfoViewModels[8].LUTCSVFileLink}"
+                                                       Style="{StaticResource TextBlockContent}"/>
                                         </Border>
                                         <TextBlock Text="Scatter Energy Calibration" Margin="5,20,5,5" Style="{StaticResource TextBlockTitle2}"/>
                                         <StackPanel Orientation="Horizontal" Margin="5">
                                             <TextBlock Text="Calibration Equation: " Grid.Column="0" Style="{StaticResource TextBlockContent}"/>
-                                            <TextBlock d:Text="a" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="a" Text="{Binding ModuleInfoViewModels[0].EcalEquationInfoA, StringFormat=F2}" Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text=" · " Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text="x" Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text="2" Style="{StaticResource TextBlockContent}" FontSize="8" VerticalAlignment="Top"/>
                                             <TextBlock Text=" + " Style="{StaticResource TextBlockContent}"/>
-                                            <TextBlock d:Text="b" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="b" Text="{Binding ModuleInfoViewModels[0].EcalEquationInfoB, StringFormat=F2}" Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text=" · " Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text="x" Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text=" + " Style="{StaticResource TextBlockContent}"/>
-                                            <TextBlock d:Text="c" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="c" Text="{Binding ModuleInfoViewModels[0].EcalEquationInfoC, StringFormat=F2}" Style="{StaticResource TextBlockContent}"/>
                                         </StackPanel>
-                                      
-                                            <syncfusion:SfDataGrid Margin="5" 
-                                                                   ColumnSizer="Star"                                                                    
-                                                                   AutoGenerateColumns="False" 
-                                                                   ItemsSource="{Binding EcalInfosbyChannel[0], Mode=TwoWay}"
-                                                                   EditTrigger="OnDoubleTap" 
-                                                                   AddNewRowPosition="FixedTop"
-                                                                   AllowRowHoverHighlighting="False" 
-                                                                   
-                                                                   >
+                                        <syncfusion:SfDataGrid Margin="5" 
+                                                               PreviewMouseWheel="SfDataGrid_PreviewMouseWheel_ScrollViewer1"
+                                                               CanMaintainScrollPosition="True"
+                                                               ColumnSizer="Star"                                                                    
+                                                               AutoGenerateColumns="False" 
+                                                               ItemsSource="{Binding ModuleInfoViewModels[0].EcalInfos}"                                                                   
+                                                               EditTrigger="OnDoubleTap"                                                         
+                                                               AddNewRowPosition="None"
+                                                               AllowRowHoverHighlighting="False"
+                                                               >
                                             <i:Interaction.Triggers>
-                                                <i:EventTrigger EventName= "CurrentCellValueChanged">
-                                                    <mvvm:EventToCommand Command="{Binding ItemChangedCommand}" PassEventArgsToCommand="True"/>
+                                                <i:EventTrigger EventName="CurrentCellValueChanged">
+                                                    <mvvm:EventToCommand Command="{Binding EcalInfoChangedCommand}" CommandParameter="0"/>
                                                 </i:EventTrigger>
                                             </i:Interaction.Triggers>
                                                 <syncfusion:SfDataGrid.Columns>
@@ -202,44 +227,45 @@
                                                     <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="Measured Energy [keV]" AllowEditing="True" NumberDecimalDigits="0"/>
                                                 </syncfusion:SfDataGrid.Columns>
                                             </syncfusion:SfDataGrid>
+                                        
                                         <syncfusion:SfChart Margin="5" Header=" Scatter Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
                                         </syncfusion:SfChart>
 
                                         <TextBlock Text="Absorber Energy Calibration" Margin="5,20,5,5" Style="{StaticResource TextBlockTitle2}"/>
                                         <StackPanel Orientation="Horizontal" Margin="5">
                                             <TextBlock Text="Calibration Equation: " Grid.Column="0" Style="{StaticResource TextBlockContent}"/>
-                                            <TextBlock d:Text="a" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="a" Text="{Binding ModuleInfoViewModels[8].EcalEquationInfoA, StringFormat=F2}" Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text=" · " Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text="x" Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text="2" Style="{StaticResource TextBlockContent}" FontSize="8" VerticalAlignment="Top"/>
                                             <TextBlock Text=" + " Style="{StaticResource TextBlockContent}"/>
-                                            <TextBlock d:Text="b" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="b" Text="{Binding ModuleInfoViewModels[8].EcalEquationInfoB, StringFormat=F2}" Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text=" · " Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text="x" Style="{StaticResource TextBlockContent}"/>
                                             <TextBlock Text=" + " Style="{StaticResource TextBlockContent}"/>
-                                            <TextBlock d:Text="c" Style="{StaticResource TextBlockContent}"/>
+                                            <TextBlock d:Text="c" Text="{Binding ModuleInfoViewModels[8].EcalEquationInfoC, StringFormat=F2}" Style="{StaticResource TextBlockContent}"/>
                                         </StackPanel>
-
                                         <syncfusion:SfDataGrid Margin="5" 
-                                                               ColumnSizer="Star"  
-                                                               ItemsSource="{Binding Path =EcalInfosbyChannel[8], Mode=TwoWay,UpdateSourceTrigger = LostFocus}"
+                                                               PreviewMouseWheel="SfDataGrid_PreviewMouseWheel_ScrollViewer1"
+                                                               ScrollMode="None"
+                                                               ColumnSizer="Star"                                                                    
                                                                AutoGenerateColumns="False" 
-                                                               EditTrigger="OnDoubleTap" 
-                                                               AllowRowHoverHighlighting="False"                                                              
-                                                               >
-
+                                                               ItemsSource="{Binding ModuleInfoViewModels[8].EcalInfos}"                                                                   
+                                                               EditTrigger="OnDoubleTap"                                                         
+                                                               AddNewRowPosition="None"
+                                                               AllowRowHoverHighlighting="False">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="CurrentCellValueChanged">
+                                                    <mvvm:EventToCommand Command="{Binding EcalInfoChangedCommand}" CommandParameter="8"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
                                             <syncfusion:SfDataGrid.Columns>
                                                 <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Source"/>
-                                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="True Energy  [keV]"/>
-                                                <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" 
-                                                                              HeaderText="MeasuredEnergy  [keV]" 
-                                                                              AllowEditing="True"
-                                                                              
-                                                                              >
-                                                </syncfusion:GridNumericColumn>
+                                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="True Energy [keV]" NumberDecimalDigits="0" />
+                                                <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="Measured Energy [keV]" AllowEditing="True" NumberDecimalDigits="0"/>
                                             </syncfusion:SfDataGrid.Columns>
                                         </syncfusion:SfDataGrid>
-                                        <syncfusion:SfChart Margin="5" Header=" Scatter Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
+                                        <syncfusion:SfChart Margin="5" Header=" Absorber Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
                                         </syncfusion:SfChart>
 
 
@@ -248,15 +274,16 @@
                                 </ScrollViewer>
                             </syncfusion:TabItemExt>
                             
-                            <syncfusion:TabItemExt Header="LAGIS [Single Head]">
+                            <syncfusion:TabItemExt TabIndex="1" Header="LAHGIS [Single Head]">
                                 
                             </syncfusion:TabItemExt>
-                            <syncfusion:TabItemExt Header="LAGIS [Dual Head]">
+                            <syncfusion:TabItemExt TabIndex="2" Header="LAHGIS [Dual Head]">
                                 <StackPanel>
-                                    <TextBlock Text="NOT IMPLEMENTED YET" FontSize="80" TextWrapping="Wrap"/>
+                                    <TextBlock Text="NOT IMPLEMENTED" FontSize="80" TextWrapping="Wrap"/>
                                 </StackPanel>
                                 
                             </syncfusion:TabItemExt>
+
                         </syncfusion:TabControlExt>
 
                     </Grid>
@@ -353,8 +380,8 @@
                         <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5" Grid.Column="0"/>
                         <ComboBox Grid.Column="1" Margin="5" Width="100"/>
                     </Grid>
-                    <syncfusion:SfChart Margin="5" Grid.Row="0">
-</syncfusion:SfChart>
+                    <syncfusion:SfChart Margin="5" Grid.Row="1">
+                    </syncfusion:SfChart>
 
 
                 </Grid>

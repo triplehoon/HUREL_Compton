@@ -15,23 +15,29 @@ namespace HUREL.Compton.LACC
     /// </summary>
     public enum ModuleInfo
     {
+        Mono,
         QuadSingleHead,
-        QuadDualHead,
-        Mono
+        QuadDualHead
     }
 
     public class LACC_Control
     {
         public ModuleInfo Module;
-        public LACC_Module[] LACC_Scatter_Modules;
-        public LACC_Module[] LACC_Absorber_Modules;
+        /// <summary>
+        /// FPGA Channel 0 to 7. For mono index 0 is Channel 0 to 3
+        /// </summary>
+        public LACC_Module[/*Channel Numer*/] LACC_Scatter_Modules;
+        /// <summary>
+        /// FPGA Channel 8 to 15. For mono index 0 is Channel 8 to 11
+        /// </summary>
+        public LACC_Module[/*Channel Numer*/] LACC_Absorber_Modules; 
         public List<LMData> ListedLMData = new List<LMData>();
         public List<double> ScatterEnergys = new List<double>();
         public List<double> AbsorberEnergys = new List<double>();
 
 
         /// <summary>
-        /// 
+        /// Quad type setting
         /// </summary>
         /// <param name="scatters"></param>
         /// <param name="absorbers"></param>
@@ -305,6 +311,7 @@ namespace HUREL.Compton.LACC
             public double b;
             public double c;
         }
+        
         public EcalVar ModuleEcalData { get; set; }
         /// <summary>
         /// x, y, z offset in [mm]
@@ -323,10 +330,6 @@ namespace HUREL.Compton.LACC
 
 
         public double[] ModuleGain { get; set; }
-        private double EcalVarA;
-        private double EcalVarB;
-        private double EcalVarC;
-
         public ModulePMTOrderInfo ModulePMTOrder { get; init; }
         public class ModulePMTOrderInfo
         {
@@ -376,9 +379,7 @@ namespace HUREL.Compton.LACC
             ModuleOffsetY = ModuleOffetData.y;
             ModuleOffsetZ = ModuleOffetData.z;
             ModuleEcalData = ecalData;
-            EcalVarA = ModuleEcalData.a;
-            EcalVarB = ModuleEcalData.b;
-            EcalVarC = ModuleEcalData.c;
+
             ModuleGain = gain;
             ModulePMTOrder = pmtOrder;
 
@@ -557,9 +558,9 @@ namespace HUREL.Compton.LACC
                  XYSumMu[x] = new double[sizeY];
                  for (int y = 0; y < sizeY; y++)
                  {
-                     var selLUT = from lut in LUT
+                     var selLUT = (from lut in LUT
                                   where lut.Xpos == minX + x && lut.Ypos == minY + y
-                                  select lut;
+                                  select lut).ToArray();
                      if (selLUT.Any())
                      {
                          XYLogMue[x][y] = selLUT.First().LogMu.ToArray();
@@ -603,18 +604,19 @@ namespace HUREL.Compton.LACC
                 }
             }
 
+
             if (ModulePMTOrder.IsOrderChange)
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    normalizePMTValue[i] = (pmtADCValue[ModulePMTOrder.Order[i]] / max);
+                    normalizePMTValue[i] = ((pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i]) / max);
                 }
             }
             else
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    normalizePMTValue[i] = (pmtADCValue[i] / max);
+                    normalizePMTValue[i] = ( (pmtADCValue[i] * ModuleGain[i]) / max);
                 }
             }
 
@@ -715,7 +717,6 @@ namespace HUREL.Compton.LACC
             return (point, eCalEnergy);
         }
 
-
         public double GetEcal(short[] pmtADCValue)
         {
             double eCalEnergy = 0;
@@ -735,7 +736,7 @@ namespace HUREL.Compton.LACC
                 eCalEnergy += arrangedPMTValue[i] * ModuleGain[i];
             }
             eCalEnergy += ModuleGain[^1];
-            eCalEnergy = EcalVarA * eCalEnergy * eCalEnergy + EcalVarB * eCalEnergy + EcalVarC;
+            eCalEnergy = ModuleEcalData.a * eCalEnergy * eCalEnergy + ModuleEcalData.b * eCalEnergy + ModuleEcalData.c;
 
             return eCalEnergy;
         }
