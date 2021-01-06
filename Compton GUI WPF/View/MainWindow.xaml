@@ -227,8 +227,21 @@
                                                     <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="Measured Energy [keV]" AllowEditing="True" NumberDecimalDigits="0"/>
                                                 </syncfusion:SfDataGrid.Columns>
                                             </syncfusion:SfDataGrid>
-                                        
+
                                         <syncfusion:SfChart Margin="5" Header=" Scatter Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
+                                            <syncfusion:SfChart.PrimaryAxis>
+                                                <syncfusion:NumericalAxis Minimum="0" Maximum="2000"/>
+                                            </syncfusion:SfChart.PrimaryAxis>
+                                            <syncfusion:SfChart.SecondaryAxis>
+                                                <syncfusion:LogarithmicAxis/>
+                                            </syncfusion:SfChart.SecondaryAxis>
+                                            <syncfusion:ColumnSeries Interior="Black"
+                                                                     ListenPropertyChange="True"
+                                                                     Label="Energy"
+                                                                     ItemsSource="{Binding SpectrumHistoModels[0]}" 
+                                                                     XBindingPath="LowerBound" 
+                                                                     YBindingPath="Count"
+                                                                     syncfusion:ChartSeriesBase.Spacing="0" />
                                         </syncfusion:SfChart>
 
                                         <TextBlock Text="Absorber Energy Calibration" Margin="5,20,5,5" Style="{StaticResource TextBlockTitle2}"/>

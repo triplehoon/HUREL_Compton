@@ -20,6 +20,7 @@ namespace HUREL.Compton.LACC
         QuadDualHead
     }
 
+    public record ChannelEnergy(int Channel, double Energy);
     public class LACC_Control
     {
         public ModuleInfo Module;
@@ -32,9 +33,8 @@ namespace HUREL.Compton.LACC
         /// </summary>
         public LACC_Module[/*Channel Numer*/] LACC_Absorber_Modules; 
         public List<LMData> ListedLMData = new List<LMData>();
-        public List<double> ScatterEnergys = new List<double>();
-        public List<double> AbsorberEnergys = new List<double>();
-
+        public List<ChannelEnergy> EnergySpect = new List<ChannelEnergy>();
+        
 
         /// <summary>
         /// Quad type setting
@@ -102,9 +102,9 @@ namespace HUREL.Compton.LACC
                     double absorberEcal = LACC_Absorber_Modules[0].GetEcal(absorber);
 
                     double combinedEcal = scatterEcal + absorberEcal;                    
-                    ScatterEnergys.Add(scatterEcal);
-                    AbsorberEnergys.Add(absorberEcal);
-                    
+                    EnergySpect.Add(new ChannelEnergy(0,scatterEcal));
+                    EnergySpect.Add(new ChannelEnergy(8, absorberEcal));
+
                     if (combinedEcal > minE && combinedEcal < maxE && isMLPEOn)
                     {
                         var scatterMLPEdata = LACC_Scatter_Modules[0].FastPosAndEEstimate(scatter);
@@ -117,7 +117,7 @@ namespace HUREL.Compton.LACC
                 else if(scatterProd != 0 && absorberProd ==0)
                 {
                     double scatterEcal = LACC_Scatter_Modules[0].GetEcal(scatter);
-                    ScatterEnergys.Add(scatterEcal);
+                    EnergySpect.Add(new ChannelEnergy(0, scatterEcal));
 
                     if (scatterEcal > minE && scatterEcal < maxE && isMLPEOn)
                     {
@@ -129,8 +129,8 @@ namespace HUREL.Compton.LACC
                 
                 else if(scatterProd == 0 && absorberProd != 0)
                 {
-                    double abosorberEcal = LACC_Absorber_Modules[0].GetEcal(absorber);
-                    AbsorberEnergys.Add(abosorberEcal);                    
+                    double absorberEcal = LACC_Absorber_Modules[0].GetEcal(absorber);
+                    EnergySpect.Add(new ChannelEnergy(8, absorberEcal));
                 }
                 else
                 {
@@ -139,142 +139,7 @@ namespace HUREL.Compton.LACC
             }
             else if (Module == ModuleInfo.QuadSingleHead)
             {
-                #region Get Prodcut
-                short[] scatter0 = fullADCArrayValue[0..9];
-                short[] scatter1 = fullADCArrayValue[9..18];
-                short[] scatter2 = fullADCArrayValue[18..27];
-                short[] scatter3 = fullADCArrayValue[27..36];
-
-                short[] absorber0 = fullADCArrayValue[72..81];
-                short[] absorber1 = fullADCArrayValue[81..90];
-                short[] absorber2 = fullADCArrayValue[90..99];
-                short[] absorber3 = fullADCArrayValue[99..108];
-                
-                int scatter0Prod = 1;
-                foreach (short s in scatter0)
-                {
-                    scatter0Prod *= s;
-                    if (scatter0Prod == 0)
-                        break;
-                }
-
-                int scatter1Prod = 1;
-                foreach (short s in scatter1)
-                {
-                    scatter1Prod *= s;
-                    if (scatter1Prod == 0)
-                        break;
-                }
-
-                int scatter2Prod = 1;
-                foreach (short s in scatter2)
-                {
-                    scatter2Prod *= s;
-                    if (scatter2Prod == 0)
-                        break;
-                }
-
-                int scatter3Prod = 1;
-                foreach (short s in scatter3)
-                {
-                    scatter3Prod *= s;
-                    if (scatter0Prod == 0)
-                        break;
-                }
-
-                int absorber0Prod = 1;
-                foreach (short s in absorber0)
-                {
-                    absorber0Prod *= s;
-                    if (absorber0Prod == 0)
-                        break;
-                }
-
-                int absorber1Prod = 1;
-                foreach (short s in absorber1)
-                {
-                    absorber1Prod *= s;
-                    if (absorber1Prod == 0)
-                        break;
-                }
-
-                int absorber2Prod = 1;
-                foreach (short s in absorber2)
-                {
-                    absorber2Prod *= s;
-                    if (absorber2Prod == 0)
-                        break;
-                }
-
-                int absorber3Prod = 1;
-                foreach (short s in absorber3)
-                {
-                    absorber3Prod *= s;
-                    if (absorber0Prod == 0)
-                        break;
-                }
-
-                #endregion
-                
-                List<(Point3D, double)> scatterMLPEdata = new List<(Point3D, double)>();
-                List<(Point3D, double)> absorberMLPEdata = new List<(Point3D, double)>();
-                
-                if (scatter0Prod != 0)
-                {
-                    double ecal = LACC_Scatter_Modules[0].GetEcal(scatter0);
-                    ScatterEnergys.Add(ecal);
-                    if(ecal >minE && ecal<maxE && isMLPEOn)
-                    scatterMLPEdata.Add(LACC_Scatter_Modules[0].FastPosAndEEstimate(scatter0));
-                }
-                if (scatter1Prod != 0)
-                {
-                    double ecal = LACC_Scatter_Modules[1].GetEcal(scatter1);
-                    ScatterEnergys.Add(ecal);
-                    if (ecal > minE && ecal < maxE && isMLPEOn)
-                        scatterMLPEdata.Add(LACC_Scatter_Modules[1].FastPosAndEEstimate(scatter1));
-                }
-                if (scatter2Prod != 0)
-                {
-                    double ecal = LACC_Scatter_Modules[2].GetEcal(scatter2);
-                    ScatterEnergys.Add(ecal);
-                    if (ecal > minE && ecal < maxE && isMLPEOn)
-                        scatterMLPEdata.Add(LACC_Scatter_Modules[2].FastPosAndEEstimate(scatter2));
-                }
-                if (scatter3Prod != 0)
-                {
-                    double ecal = LACC_Scatter_Modules[3].GetEcal(scatter3);
-                    ScatterEnergys.Add(ecal);
-                    if (ecal > minE && ecal < maxE && isMLPEOn)
-                        scatterMLPEdata.Add(LACC_Scatter_Modules[3].FastPosAndEEstimate(scatter3));
-                }
-
-                if (absorber0Prod != 0)
-                {
-                    double ecal = LACC_Absorber_Modules[0].GetEcal(absorber0);
-                    if (ecal > minE && ecal < maxE && isMLPEOn)
-                        absorberMLPEdata.Add(LACC_Absorber_Modules[0].FastPosAndEEstimate(absorber0));
-                }
-                if (absorber1Prod != 0)
-                {
-                    double ecal = LACC_Absorber_Modules[1].GetEcal(absorber1);
-                    if (ecal > minE && ecal < maxE && isMLPEOn)
-                        absorberMLPEdata.Add(LACC_Absorber_Modules[1].FastPosAndEEstimate(absorber1));
-                }
-                if (absorber2Prod != 0)
-                {
-                    double ecal = LACC_Absorber_Modules[2].GetEcal(absorber2);
-                    if (ecal > minE && ecal < maxE && isMLPEOn)
-                        absorberMLPEdata.Add(LACC_Absorber_Modules[2].FastPosAndEEstimate(absorber2));
-                }
-                if (absorber3Prod != 0)
-                {
-                    double ecal = LACC_Absorber_Modules[3].GetEcal(absorber3);
-                    if (ecal > minE && ecal < maxE && isMLPEOn)
-                        absorberMLPEdata.Add(LACC_Absorber_Modules[3].FastPosAndEEstimate(absorber3));
-                }
-
-                lmData = new LMData(scatterMLPEdata, absorberMLPEdata, deviceTransformation);
-                ListedLMData.Add(lmData);
+                throw new NotImplementedException();
             }
             else //(Module == ModuleInfo.QuadDualHead)
             {
@@ -285,8 +150,7 @@ namespace HUREL.Compton.LACC
         public void ResetLMData()
         {
             ListedLMData = new List<LMData>();
-            ScatterEnergys = new List<double>();
-            AbsorberEnergys = new List<double>();
+            EnergySpect = new List<ChannelEnergy>();
             LMData.Reset();
         }
 

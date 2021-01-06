@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using Compton_GUI_WPF.View;
 using GalaSoft.MvvmLight.Command;
@@ -19,6 +21,7 @@ using GalaSoft.MvvmLight.Messaging;
 using HUREL.Compton;
 using HUREL.Compton.LACC;
 using MathNet.Numerics;
+using MathNet.Numerics.Statistics;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -50,10 +53,11 @@ namespace Compton_GUI_WPF.ViewModel
 
             FPGAControl.USBChangeHandler += UpdateDeviceList;
             FPGAControl.USBChange();
+            SpectrumHistoModels = new ObservableCollection<SpectrumHisto.SpectrumHistoModel>[16];
             //Messenger.Default.Register<WindowStateMessage>(this,
             //    (action) => ReceiveIsEnableOpenFPGAWindow(action)
             //    );
-
+            
             InitiateLACC();
         }
 
@@ -173,7 +177,6 @@ namespace Compton_GUI_WPF.ViewModel
         {
             get { return (this.startorStopSessionCommand) ?? (this.startorStopSessionCommand = new RelayCommand(StartorStopSession, IsSessionAvailable)); }
         }
-
         private void StartorStopSession()
         {
             if (MeasurementTime == "")
@@ -195,6 +198,9 @@ namespace Compton_GUI_WPF.ViewModel
                     if (FPGAControl.Start_usb(out status))
                     {
                         StartTimer();
+                        IsAddingListModeData = true;
+                        AddListModeDataTask = new Task(() => AddListModeData());
+                        AddListModeDataTask.Start();
                         IsSessionStart = true;
                     }
                     VMStatus = status;
@@ -202,16 +208,71 @@ namespace Compton_GUI_WPF.ViewModel
             }
             else
             {
-
                 VMStatus = FPGAControl.Stop_usb();
                 IsSessionStart = false;
+                IsAddingListModeData = false;
+                AddListModeDataTask.Wait();
                 timer.Stop();
+                DataUpdateTimer.Stop();
                 RecordTimeSpan = TimeSpan.Zero;
             }
 
 
 
             IsSessionAvailable = true;
+        }
+
+        private Task AddListModeDataTask;
+        private bool IsAddingListModeData;
+        private void AddListModeData()
+        {
+            while (IsAddingListModeData)
+            {
+                short[] item;
+                while(FPGAControl.ShortArrayQueue.TryTake(out item))
+                {
+                    LACC_Control_Static.AddListModeData(item, Matrix3D.Identity);
+                }
+            }
+        }
+
+        public void DrawSpectrum()
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                var SelectedESpect = (from selESpect in LACC_Control_Static.EnergySpect
+                                      where selESpect.Channel == i
+                                      select selESpect.Energy).ToList();
+                SpectrumHisto histo = new SpectrumHisto(SelectedESpect, 500, 0, 3000);
+                SpectrumHistoModels[i] = histo.SpectrumData;
+            }
+        }
+
+        private ObservableCollection<SpectrumHisto.SpectrumHistoModel>[] spectrumHistoModels;
+        public ObservableCollection<SpectrumHisto.SpectrumHistoModel>[] SpectrumHistoModels
+        {
+            get { return spectrumHistoModels; }
+            set { spectrumHistoModels = value; OnPropertyChanged(nameof(SpectrumHistoModels)); }
+        }
+
+        public class SpectrumHisto
+        {
+            public ObservableCollection<SpectrumHistoModel> SpectrumData = new ObservableCollection<SpectrumHistoModel>();
+            public SpectrumHisto(IEnumerable<double> data, int nbuckets, double lower, double upper)
+            {
+                Histogram hist = new Histogram(data, nbuckets, lower, upper);
+                for (int i = 0; i < hist.BucketCount; i++)
+                {
+                    SpectrumData.Add(new SpectrumHistoModel { LowerBound = hist[i].LowerBound, Count = hist[i].Count });
+                }
+
+            }
+
+            public class SpectrumHistoModel
+            {
+                public double LowerBound { get; set; }
+                public double Count { get; set; }
+            }
         }
 
         private bool isSessionAvailable;
@@ -294,12 +355,17 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
         private DispatcherTimer timer = new DispatcherTimer();
+        private DispatcherTimer DataUpdateTimer = new DispatcherTimer();
         private void StartTimer()
         {
             timer = new DispatcherTimer();
+            DataUpdateTimer = new DispatcherTimer();
+            DataUpdateTimer.Interval = TimeSpan.FromMilliseconds(50);
+            DataUpdateTimer.Tick += new EventHandler(DataUpdate);
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += new EventHandler(TimerTick);
             timer.Start();
+            DataUpdateTimer.Start();
         }
 
         private void TimerTick(object sender, EventArgs e)
@@ -307,6 +373,10 @@ namespace Compton_GUI_WPF.ViewModel
             RecordTimeSpan = RecordTimeSpan.Add(TimeSpan.FromSeconds(1));
         }
 
+        private void DataUpdate(object sender, EventArgs e)
+        {
+            DrawSpectrum();
+        }
 
         #endregion
 

@@ -199,11 +199,7 @@ namespace SFchart
 
         }
 
-        public void DrawSpectrum()
-        {
-            SpectrumHisto histo = new SpectrumHisto(LACC_Control.ScatterEnergys, 500, 0, 3000);
-            SpectrumHistoModels = histo.SpectrumData;
-        }
+
 
         public Action ResumeSeriesAction { get; set; }
 
