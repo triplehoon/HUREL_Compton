@@ -16,29 +16,29 @@ namespace HUREL.Compton
 
         public BlockingCollection<short[]> ShortArrayQueue = new BlockingCollection<short[]>();
 
-        private void ParsingCyusbBufferOrign()
-        {
-            Console.WriteLine("HY : ParsingThread start");
-            BinaryWriter writer = new BinaryWriter(File.Open(FileMainPath, FileMode.Append));
-            while (IsParsing)
-            {
-                byte[] Item;
+        //private void ParsingCyusbBufferOrign()
+        //{
+        //    Console.WriteLine("HY : ParsingThread start");
+        //    BinaryWriter writer = new BinaryWriter(File.Open(FileMainPath, FileMode.Append));
+        //    while (IsParsing)
+        //    {
+        //        byte[] Item;
 
-                while (DataInQueue.TryTake(out Item))
-                { 
-                       writer.Write(Item);
+        //        while (DataInQueue.TryTake(out Item))
+        //        { 
+        //               writer.Write(Item);
 
-                    Thread.Sleep(0); 
-                    int test_buffercount = DataInQueue.Count;
-                    if (test_buffercount > 1000 && test_buffercount % 1000 == 0)
-                        Console.WriteLine("test buffer count is " + test_buffercount);
-                }
-            }
-            writer.Close();
-            writer.Dispose();
+        //            Thread.Sleep(0); 
+        //            int test_buffercount = DataInQueue.Count;
+        //            if (test_buffercount > 1000 && test_buffercount % 1000 == 0)
+        //                Console.WriteLine("test buffer count is " + test_buffercount);
+        //        }
+        //    }
+        //    writer.Close();
+        //    writer.Dispose();
 
 
-        }
+        //}
         private void ParsingCyusbBufferAsync()
         {
 
@@ -54,21 +54,16 @@ namespace HUREL.Compton
             BinaryWriter writer = new BinaryWriter(File.Open(FileMainPath, FileMode.Append));
             while (IsParsing)
             {
-
+              
                 byte[] item;
                 while (DataInQueue.TryTake(out item))
                 {
 
-                    chk1 = item;
-                    if (chk1 == chk2)
-                    {
-                        Debug.WriteLine(DataInQueue.Count);
-                    } 
-                    chk2 = item;
+
                     if(flag==2)
                     { 
                         writer.Write(item);
-                        Debug.WriteLine(DataInQueue.Count);
+                        Trace.WriteLine("DataInQueCount is " + DataInQueue.Count);
                     }
 
                     foreach (byte b in item)
@@ -79,9 +74,15 @@ namespace HUREL.Compton
                             countflag++;
                             if (countflag == 296 && dataBuffer[294] == 0xFE && dataBuffer[295] == 0xFE)
                             {
+                                chk1 = dataBuffer;
+                                if (chk1 == chk2)
+                                {
+                                    Debug.WriteLine("item is not changed");
+                                }
+                                chk2 = dataBuffer;
                                 ParsedQueue.Add(dataBuffer);
                                 dataInCount++;
-                                if(dataInCount %100000 ==0)
+                                if(dataInCount %10000 ==0)
                                 {
                                     Debug.WriteLine("Data in count is " + dataInCount);
                                 }
@@ -126,9 +127,10 @@ namespace HUREL.Compton
             while (IsGenerateShortArrayBuff)
             {
                 byte[] item;
-                short[] shortArray = new short[144];
-                while (DataInQueue.TryTake(out item))
+                
+                while (ParsedQueue.TryTake(out item))
                 {
+                    short[] shortArray = new short[144];
                     Buffer.BlockCopy(item, 0, shortArray, 0, 288);
                     ShortArrayQueue.Add(shortArray);
                 }

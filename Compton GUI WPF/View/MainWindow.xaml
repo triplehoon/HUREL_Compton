@@ -176,6 +176,7 @@
                                         </Grid>
                                         <Border Margin="5" BorderThickness="2" BorderBrush="#FFEAEAEA" Padding="0,2.5,0,2.5">
                                             <TextBlock d:Text="E:\OneDrive\01.Hurel\01.현재작업\01.연구정리\LUT.csv"
+                                                       TextWrapping="Wrap"
                                                        Text="{Binding ModuleInfoViewModels[0].LUTCSVFileLink}"
                                                        Style="{StaticResource TextBlockContent}"/>
                                         </Border>
@@ -184,7 +185,7 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="Absorber LUT Path: " Grid.Column="0" Style="{StaticResource TextBlockContentBold}" Margin="5"/>
+                                            <TextBlock Text="Absorber LUT Path: " TextWrapping="Wrap" Grid.Column="0" Style="{StaticResource TextBlockContentBold}" Margin="5"/>
                                             <Button Content="Set LUT Path [*.csv]" Grid.Column="1" Style="{StaticResource ButtonDesignHYU}" Margin="0,0,5,0"/>
                                         </Grid>
                                         <Border Margin="5" BorderThickness="2" BorderBrush="#FFEAEAEA" Padding="0,2.5,0,2.5">
@@ -233,9 +234,9 @@
                                                 <syncfusion:NumericalAxis Minimum="0" Maximum="2000"/>
                                             </syncfusion:SfChart.PrimaryAxis>
                                             <syncfusion:SfChart.SecondaryAxis>
-                                                <syncfusion:LogarithmicAxis/>
+                                                <syncfusion:NumericalAxis/>
                                             </syncfusion:SfChart.SecondaryAxis>
-                                            <syncfusion:ColumnSeries Interior="Black"
+                                            <syncfusion:FastColumnBitmapSeries Interior="Black"
                                                                      ListenPropertyChange="True"
                                                                      Label="Energy"
                                                                      ItemsSource="{Binding SpectrumHistoModels[0]}" 
@@ -279,6 +280,19 @@
                                             </syncfusion:SfDataGrid.Columns>
                                         </syncfusion:SfDataGrid>
                                         <syncfusion:SfChart Margin="5" Header=" Absorber Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
+                                            <syncfusion:SfChart.PrimaryAxis>
+                                                <syncfusion:NumericalAxis Minimum="0" Maximum="2000"/>
+                                            </syncfusion:SfChart.PrimaryAxis>
+                                            <syncfusion:SfChart.SecondaryAxis>
+                                                <syncfusion:NumericalAxis/>
+                                            </syncfusion:SfChart.SecondaryAxis>
+                                            <syncfusion:FastColumnBitmapSeries Interior="Black"
+                                                                     ListenPropertyChange="True"
+                                                                     Label="Energy"
+                                                                     ItemsSource="{Binding SpectrumHistoModels[8]}" 
+                                                                     XBindingPath="LowerBound" 
+                                                                     YBindingPath="Count"
+                                                                     syncfusion:ChartSeriesBase.Spacing="0" />
                                         </syncfusion:SfChart>
 
 

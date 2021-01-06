@@ -347,9 +347,9 @@ namespace HUREL.Compton
             IsListening = true;
             FlagFinalCall = 0;
             Debug.WriteLine("HY : [Try] Start XferThread");
-            ListenUSBThread = new Thread(new ThreadStart( XferThread));
-            ListenUSBThread.Start();
-            //ListenUBSAsync = Task.Run(() => XferThread());
+            //ListenUSBThread = new Thread(new ThreadStart( XferThread));
+            //ListenUSBThread.Start();
+            ListenUBSAsync = Task.Run(() => XferThread());
 
             IsParsing = true;
             Debug.WriteLine("HY : [Try] Start ParsingThread");
@@ -371,12 +371,12 @@ namespace HUREL.Compton
                 return "Have to start usb";
             }
             IsStart = false;
-
+            Debug.WriteLine("wait for ListenUBSAsync");
             IsListening = false;
-            //ListenUBSAsync.Wait();
-            //ListenUBSAsync = null;
-            ListenUSBThread.Join();
-            ListenUSBThread = null;
+            ListenUBSAsync.Wait();
+            ListenUBSAsync = null;
+            //ListenUSBThread.Join();
+            //ListenUSBThread = null;
             IsParsing = false;
             Debug.WriteLine("wait for tParsing");
             ParsingUSBAsync.Wait();
@@ -1099,10 +1099,10 @@ namespace HUREL.Compton
                         if (!EndPoint.WaitForXfer(ovData.hEvent, 1000))
                         {
                             EndPoint.Abort();
-                            PInvoke.WaitForSingleObject(ovData.hEvent, 100);
+                            PInvoke.WaitForSingleObject(ovData.hEvent, 1000);
 
                             EndPoint.FinishDataXfer(ref cBufs[k], ref xBufs[k], ref len, ref oLaps[k]);
-
+                            
                             for (int i = 0; i < 16; ++i) // 16384 * 16
                             {
                                 int check_write = 0;
@@ -1116,23 +1116,19 @@ namespace HUREL.Compton
                                 }
                                 if (check_write == 0)
                                     break;
-
                                 byte[] temp_buffer = new byte[16384];
                                 for (int ii = 0; ii < 16384; ++ii)
                                 {
                                     temp_buffer[ii] = xBufs[k][i * 16384 + ii];
                                 }
                                 //Buffer.BlockCopy(xBufs[k], 0, temp_buffer, 0, 16384);
-
                                 //while (DataInQueue.Post(temp_buffer) == false)
                                 DataInQueue.Add(temp_buffer);
                                 // 넣을때
-
                                 for (int ii = 0; ii < 16384; ++ii)
                                 {
                                     xBufs[k][i * 16384 + ii] = DefaultBufInitValue;
                                 }
-
                                 XferBytes += 16384;
                                 test_data += 16384;
                                 //test_data2 = test_buffer.Count();

@@ -53,7 +53,11 @@ namespace Compton_GUI_WPF.ViewModel
 
             FPGAControl.USBChangeHandler += UpdateDeviceList;
             FPGAControl.USBChange();
-            SpectrumHistoModels = new ObservableCollection<SpectrumHisto.SpectrumHistoModel>[16];
+            spectrumHistoModels = new ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>>();
+            for(int i = 0; i <16; i++)
+            {
+                spectrumHistoModels.Add(new List<SpectrumHisto.SpectrumHistoModel>());
+            }
             //Messenger.Default.Register<WindowStateMessage>(this,
             //    (action) => ReceiveIsEnableOpenFPGAWindow(action)
             //    );
@@ -197,11 +201,12 @@ namespace Compton_GUI_WPF.ViewModel
                     string status;
                     if (FPGAControl.Start_usb(out status))
                     {
+                        IsSessionStart = true;
                         StartTimer();
                         IsAddingListModeData = true;
                         AddListModeDataTask = new Task(() => AddListModeData());
                         AddListModeDataTask.Start();
-                        IsSessionStart = true;
+                        
                     }
                     VMStatus = status;
                 }
@@ -213,7 +218,6 @@ namespace Compton_GUI_WPF.ViewModel
                 IsAddingListModeData = false;
                 AddListModeDataTask.Wait();
                 timer.Stop();
-                DataUpdateTimer.Stop();
                 RecordTimeSpan = TimeSpan.Zero;
             }
 
@@ -226,11 +230,19 @@ namespace Compton_GUI_WPF.ViewModel
         private bool IsAddingListModeData;
         private void AddListModeData()
         {
+            short[] check1;
+            short[] check2 = new short[256];
             while (IsAddingListModeData)
             {
                 short[] item;
                 while(FPGAControl.ShortArrayQueue.TryTake(out item))
                 {
+                    check1 = item;
+                    if(check1==check2)
+                    {
+                        Debug.WriteLine("CEHK");
+                    }
+                    check2 = item;
                     LACC_Control_Static.AddListModeData(item, Matrix3D.Identity);
                 }
             }
@@ -238,26 +250,29 @@ namespace Compton_GUI_WPF.ViewModel
 
         public void DrawSpectrum()
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             for (int i = 0; i < 16; i++)
             {
                 var SelectedESpect = (from selESpect in LACC_Control_Static.EnergySpect
                                       where selESpect.Channel == i
                                       select selESpect.Energy).ToList();
-                SpectrumHisto histo = new SpectrumHisto(SelectedESpect, 500, 0, 3000);
+                SpectrumHisto histo = new SpectrumHisto(SelectedESpect, 405, 0, 2100);
                 SpectrumHistoModels[i] = histo.SpectrumData;
             }
+            sw.Stop();
+            Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
         }
 
-        private ObservableCollection<SpectrumHisto.SpectrumHistoModel>[] spectrumHistoModels;
-        public ObservableCollection<SpectrumHisto.SpectrumHistoModel>[] SpectrumHistoModels
+        private ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> spectrumHistoModels;
+        public ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> SpectrumHistoModels
         {
             get { return spectrumHistoModels; }
-            set { spectrumHistoModels = value; OnPropertyChanged(nameof(SpectrumHistoModels)); }
         }
 
         public class SpectrumHisto
         {
-            public ObservableCollection<SpectrumHistoModel> SpectrumData = new ObservableCollection<SpectrumHistoModel>();
+            public List<SpectrumHistoModel> SpectrumData = new List<SpectrumHistoModel>();
             public SpectrumHisto(IEnumerable<double> data, int nbuckets, double lower, double upper)
             {
                 Histogram hist = new Histogram(data, nbuckets, lower, upper);
@@ -280,12 +295,12 @@ namespace Compton_GUI_WPF.ViewModel
         {
             get
             {
-                isSessionAvailable = IsLACCModuleInitiate && isSessionAvailable;
-                return isSessionAvailable;
+                bool allSessionAvailable = IsLACCModuleInitiate && isSessionAvailable;
+                return allSessionAvailable;
             }
             set
             {
-                isSessionAvailable = IsLACCModuleInitiate && value;
+                isSessionAvailable = value;
                 OnPropertyChanged(nameof(IsSessionAvailable));
             }
         }
@@ -355,17 +370,14 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
         private DispatcherTimer timer = new DispatcherTimer();
-        private DispatcherTimer DataUpdateTimer = new DispatcherTimer();
+        
         private void StartTimer()
         {
             timer = new DispatcherTimer();
-            DataUpdateTimer = new DispatcherTimer();
-            DataUpdateTimer.Interval = TimeSpan.FromMilliseconds(50);
-            DataUpdateTimer.Tick += new EventHandler(DataUpdate);
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += new EventHandler(TimerTick);
             timer.Start();
-            DataUpdateTimer.Start();
+            Task.Run(()=>DataUpdate());
         }
 
         private void TimerTick(object sender, EventArgs e)
@@ -373,14 +385,19 @@ namespace Compton_GUI_WPF.ViewModel
             RecordTimeSpan = RecordTimeSpan.Add(TimeSpan.FromSeconds(1));
         }
 
-        private void DataUpdate(object sender, EventArgs e)
+        private void DataUpdate()
         {
-            DrawSpectrum();
+            while (IsSessionStart)
+            {
+                DrawSpectrum();
+                Thread.Sleep(1000);
+            }
+            Debug.WriteLine("DataUpdate End");
         }
 
         #endregion
 
-        #region Ecal Data
+        #region LACC Module Setting
 
         private bool isLACCModuleInitiate = false;
         public bool IsLACCModuleInitiate

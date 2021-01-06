@@ -86,6 +86,7 @@ namespace HUREL.Compton.LACC
                     scatterProd *= s;
                     if (scatterProd == 0)
                         break;
+                    scatterProd = 1;
                 }
 
                 int absorberProd = 1;
@@ -94,6 +95,7 @@ namespace HUREL.Compton.LACC
                     absorberProd *= s;
                     if (absorberProd == 0)
                         break;
+                    absorberProd = 1;
                 }
 
                 if(scatterProd != 0 && absorberProd != 0)
@@ -108,7 +110,7 @@ namespace HUREL.Compton.LACC
                     if (combinedEcal > minE && combinedEcal < maxE && isMLPEOn)
                     {
                         var scatterMLPEdata = LACC_Scatter_Modules[0].FastPosAndEEstimate(scatter);
-                        var absorberMLPEdata = LACC_Scatter_Modules[0].FastPosAndEEstimate(absorber);
+                        var absorberMLPEdata = LACC_Absorber_Modules[0].FastPosAndEEstimate(absorber);
                         lmData = new LMData(scatterMLPEdata.Item1, absorberMLPEdata.Item1, scatterMLPEdata.Item2, absorberMLPEdata.Item2, deviceTransformation);
                         ListedLMData.Add(lmData);
                     }                    
@@ -416,23 +418,47 @@ namespace HUREL.Compton.LACC
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            Parallel.For(0, sizeX, x =>
+            var yascending = (from lut in LUT
+                              orderby lut.Ypos ascending
+                              select lut).ToArray();
+            var xyascending = (from lut in yascending
+                              orderby lut.Xpos ascending
+                              select lut).ToArray();
+
+            int i = 0;
+             for(int x = 0; x<sizeX;x++)
              {
                  XYLogMue[x] = new double[sizeY][];
                  XYSumMu[x] = new double[sizeY];
                  for (int y = 0; y < sizeY; y++)
                  {
-                     var selLUT = (from lut in LUT
-                                  where lut.Xpos == minX + x && lut.Ypos == minY + y
-                                  select lut).ToArray();
-                     if (selLUT.Any())
-                     {
-                         XYLogMue[x][y] = selLUT.First().LogMu.ToArray();
-                         XYSumMu[x][y] = selLUT.First().SumMu;
-                     }
-
+                    try
+                    {
+                        XYLogMue[x][y] = xyascending[i].LogMu.ToArray();
+                        XYSumMu[x][y] = xyascending[i].SumMu;
+                    }
+                    catch{ }
+                    finally { i++; }
                  }
-             });
+             }
+
+            //Parallel.For(0, sizeX, x =>
+            // {
+            //     XYLogMue[x] = new double[sizeY][];
+            //     XYSumMu[x] = new double[sizeY];
+            //     for (int y = 0; y < sizeY; y++)
+            //     {
+            //         var selLUT = (from lut in LUT
+            //                      where lut.Xpos == minX + x && lut.Ypos == minY + y
+            //                      select lut).ToArray();
+            //         if (selLUT.Any())
+            //         {
+            //             XYLogMue[x][y] = selLUT.First().LogMu.ToArray();
+            //             XYSumMu[x][y] = selLUT.First().SumMu;
+            //         }
+
+            //     }
+            // });
             sw.Stop();
             Trace.WriteLine("XY Logmu Table is done. Takes: " + sw.ElapsedMilliseconds + " ms");
         }
