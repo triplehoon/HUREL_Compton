@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Syncfusion.Windows.Shared;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Compton_GUI_WPF
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mzc0OTQ4QDMxMzgyZTM0MmUzMFRlU2dMemQrMXRGZW1iQk96NklnOVBWNnhScjVDckxTT2p1M0crRHpXcjA9");
             InitializeComponent();
         }
-
+      
 
 
         private void SfDataGrid_PreviewMouseWheel_ScrollViewer1(object sender, MouseWheelEventArgs e)
@@ -38,6 +39,34 @@ namespace Compton_GUI_WPF
         {
             ((ComboBox)sender).SelectedIndex = 0;
             Debug.WriteLine("Combox changed");
+        }
+
+        bool SfChart_MouseDown_Check = true;
+        private void SfChart_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            
+            Point position = new Point
+            {
+                X = e.GetPosition(SpectrumMain).X - SpectrumMain.SeriesClipRect.Left,
+                Y = e.GetPosition(SpectrumMain).Y - SpectrumMain.SeriesClipRect.Top
+            };
+            //PointToValue converts window coordinates to chart X,Y coordinates
+            double xValueDouble = SpectrumMain.PointToValue(this.SpectrumMain.PrimaryAxis, position);
+            double yValue = SpectrumMain.PointToValue(this.SpectrumMain.SecondaryAxis, position);
+            int xValue = Convert.ToInt32(xValueDouble);
+            
+            if (SfChart_MouseDown_Check)
+            {
+                TBMinE.Value = xValue;
+                SfChart_MouseDown_Check = false;
+            }
+            else
+            {
+                TBMaxE.Value = xValue;
+                SfChart_MouseDown_Check = true;
+            }
+
+            Debug.WriteLine("SfChart_MouseDown");
         }
     }
 }

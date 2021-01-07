@@ -13,11 +13,7 @@ namespace HUREL.Compton
         /// </summary>
         public DateTime MeasurementTime { get; }
 
-        public class LMDataInfo
-        {
-            public Point3D TransformedInteractionPoint3D;
-            public double InteractionEnergy;
-        }
+        public record LMDataInfo(Point3D TransformedInteractionPoint3D, double InteractionEnergy);       
 
         public enum InteractionType
         {
@@ -46,7 +42,17 @@ namespace HUREL.Compton
             }
         }
 
-        public Matrix3D DeviceTransformMatrix { get; init; }
+        private Matrix3D deviceTransformMatrix;
+        public Matrix3D DeviceTransformMatrix
+        {
+            get { return deviceTransformMatrix; }
+            set 
+            {
+                deviceTransformMatrix = value;
+                scatterLMDataInfos = null;
+                absorberLMDataInfos = null;
+            }
+        }
 
         #region Scatter
 
@@ -63,7 +69,7 @@ namespace HUREL.Compton
 
                     for (int i = 0; i < ScatterInteractionCount; i++)
                     {
-                        var tempLMDataInfo = new LMDataInfo { TransformedInteractionPoint3D = DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), InteractionEnergy = ScatterInteractionEnergys[i] };
+                        var tempLMDataInfo = new LMDataInfo(DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]) ;
                         scatterLMDataInfos.Add(tempLMDataInfo);
                     }
                     return scatterLMDataInfos;
@@ -74,27 +80,27 @@ namespace HUREL.Compton
         /// <summary>
         /// Scatter Interaction Count
         /// </summary>
-        public int ScatterInteractionCount { get { return ScatterInteractionPoint3Ds.Count; } }
+        private int ScatterInteractionCount { get { return ScatterInteractionPoint3Ds.Count; } }
 
         /// <summary>
         /// Scatter Interaction Point in Liset
         /// </summary>
-        public List<Point3D> ScatterInteractionPoint3Ds { get; init; }
+        private List<Point3D> ScatterInteractionPoint3Ds { get; init; }
 
         /// <summary>
         /// Scatter Energy in keV
         /// </summary>
-        public List<double> ScatterInteractionEnergys { get; init; }
+        private List<double> ScatterInteractionEnergys { get; init; }
 
         /// <summary>
         /// Total Scatter Interaction Count
         /// </summary>
-        public static int TotalScatterInteractionCount = 0;
+        private static int TotalScatterInteractionCount = 0;
 
         /// <summary>
         /// Total Scater Energy List
         /// </summary>
-        public static List<double> TotalScatterInteractionEnergys = new List<double>();
+        private static List<double> TotalScatterInteractionEnergys = new List<double>();
         #endregion
 
         #region Abosrber
@@ -113,7 +119,7 @@ namespace HUREL.Compton
 
                     for (int i = 0; i < AbsorberInteractionCount; i++)
                     {
-                        var tempLMDataInfo = new LMDataInfo { TransformedInteractionPoint3D = DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]), InteractionEnergy = AbsorberInteractionEnergys[i] };
+                        var tempLMDataInfo = new LMDataInfo (DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]),AbsorberInteractionEnergys[i] );
                         absorberLMDataInfos.Add(tempLMDataInfo);
                     }
                     return absorberLMDataInfos;
@@ -124,23 +130,23 @@ namespace HUREL.Compton
         /// <summary>
         /// Abosober Interaction Count
         /// </summary>
-        public int AbsorberInteractionCount { get { return AbsorberInteractionPoint3Ds.Count; } }
+        private int AbsorberInteractionCount { get { return AbsorberInteractionPoint3Ds.Count; } }
 
         /// <summary>
         /// Abosober Interaction Point in List
         /// </summary>
-        public List<Point3D> AbsorberInteractionPoint3Ds { get; init; }
+        private List<Point3D> AbsorberInteractionPoint3Ds { get; init; }
 
         /// <summary>
         /// Abosober Energy in keV
         /// </summary>
-        public List<double> AbsorberInteractionEnergys { get; init; }
+        private List<double> AbsorberInteractionEnergys { get; init; }
 
         /// <summary>
         /// Total Abosober Interaction Count
         /// </summary>
-        public static int TotalAbsorberInteractionCount = 0;
-        public static List<double> TotalAbsorberInteractionEnergys = new List<double>();
+        private static int TotalAbsorberInteractionCount = 0;
+        private static List<double> TotalAbsorberInteractionEnergys = new List<double>();
 
         #endregion
 

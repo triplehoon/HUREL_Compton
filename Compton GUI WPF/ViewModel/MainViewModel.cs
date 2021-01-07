@@ -226,6 +226,29 @@ namespace Compton_GUI_WPF.ViewModel
             IsSessionAvailable = true;
         }
 
+        private bool isMLPEOn = false;
+        public bool IsMLPEOn
+        {
+            get { return isMLPEOn; }
+            set { isMLPEOn = value; OnPropertyChanged(nameof(IsMLPEOn)); }
+        }
+
+        private int minMLPE_Energy = 0;
+        public int MinMLPE_Energy
+        {
+            get { return minMLPE_Energy; }
+            set { minMLPE_Energy = value; OnPropertyChanged(nameof(MinMLPE_Energy)); }
+        }
+        private int maxMLPE_Energy = 100;
+        public int MaxMLPE_Energy
+        {
+            get { return maxMLPE_Energy; }
+            set { 
+                maxMLPE_Energy = value; 
+                OnPropertyChanged(nameof(MaxMLPE_Energy)); }
+        }
+
+
         private Task AddListModeDataTask;
         private bool IsAddingListModeData;
         private void AddListModeData()
@@ -243,7 +266,7 @@ namespace Compton_GUI_WPF.ViewModel
                         Debug.WriteLine("CEHK");
                     }
                     check2 = item;
-                    LACC_Control_Static.AddListModeData(item, Matrix3D.Identity);
+                    LACC_Control_Static.AddListModeData(item, Matrix3D.Identity,isMLPEOn,minMLPE_Energy,maxMLPE_Energy);
                 }
             }
         }
@@ -263,6 +286,49 @@ namespace Compton_GUI_WPF.ViewModel
             sw.Stop();
             Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
         }
+
+        public void DrawMLPEPositions()
+        {
+            var absorberLMData = (from LMData in LACC_Control_Static.ListedLMData
+                                  select LMData.AbsorberLMDataInfos).ToList();
+            var scatterLMData = (from LMData in LACC_Control_Static.ListedLMData
+                                  select LMData.ScatterLMDataInfos).ToList();
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            AbsorberPositionData.Clear();
+            foreach (var lmdata in absorberLMData)
+            {
+                foreach (var lmdatum in lmdata)
+                {
+                    AbsorberPositionData.Add(new MlpePositionInfo(lmdatum.TransformedInteractionPoint3D.X, lmdatum.TransformedInteractionPoint3D.Y));
+                }
+            }
+            ScatterPositionData.Clear();
+            foreach (var lmdata in scatterLMData)
+            {
+                foreach (var lmdatum in lmdata)
+                {
+                    ScatterPositionData.Add(new MlpePositionInfo(lmdatum.TransformedInteractionPoint3D.X, lmdatum.TransformedInteractionPoint3D.Y));
+                }
+            }
+            sw.Stop();
+            Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
+
+
+
+
+        }
+        public record MlpePositionInfo(double X, double Y);
+
+        private ObservableCollection<MlpePositionInfo> absorberPositionData;
+        public ObservableCollection<MlpePositionInfo> AbsorberPositionData { get { return absorberPositionData; } }
+
+
+        private ObservableCollection<MlpePositionInfo> scatterPositionData;
+        public ObservableCollection<MlpePositionInfo> ScatterPositionData { get { return scatterPositionData; } }
+
+
 
         private ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> spectrumHistoModels;
         public ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> SpectrumHistoModels
@@ -391,6 +457,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 DrawSpectrum();
                 Thread.Sleep(1000);
+                DrawMLPEPositions();
             }
             Debug.WriteLine("DataUpdate End");
         }

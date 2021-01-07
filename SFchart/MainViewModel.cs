@@ -178,22 +178,13 @@ namespace SFchart
             short[] item = { };
             int checkAdding = 0;
 
-           
+            LACC_Control.ResetLMData();
+
             while (IsAquiring)
             {
                 while (ShortBuffer.TryTake(out item))
                 {
                     LACC_Control.AddListModeData(item, Matrix3D.Identity);
-                    checkAdding++;
-                    if (checkAdding == 5000)
-                    {
-                        checkAdding = 0;
-                        Counts = LACC_Control.ListedLMData.Count.ToString();
-
-                        DrawSpectrum();
-
-
-                    }
                 }
             }
 

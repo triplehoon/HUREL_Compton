@@ -6,6 +6,7 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:VM="clr-namespace:Compton_GUI_WPF.ViewModel"
         xmlns:localView="clr-namespace:Compton_GUI_WPF.View"
+        
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
         xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
@@ -98,7 +99,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                        <Frame VerticalAlignment="Top" Source="/View/Pages/FPGAControlPage.xaml" Grid.Column="0"/>
+                    <Frame VerticalAlignment="Top" Source="/View/Pages/FPGAControlPage.xaml" Grid.Column="0"/>
 
                     <Line Grid.Column="1" Margin="0,20,0,20"
                           X1="8" Y1="0"
@@ -112,7 +113,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Style="{StaticResource TextBlockTitle}" Text="LACC Configuration" Grid.Row="0"/>
-                        <syncfusion:TabControlExt SelectedIndex="{Binding SelecteModuleInfo }" Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="10" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
+                        <syncfusion:TabControlExt Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="10" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
                             <syncfusion:TabItemExt TabIndex="0" Header="LACC" >
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ScrollViewer1">
                                     <StackPanel>
@@ -191,7 +192,8 @@
                                         <Border Margin="5" BorderThickness="2" BorderBrush="#FFEAEAEA" Padding="0,2.5,0,2.5">
                                             <TextBlock d:Text="E:\OneDrive\01.Hurel\01.현재작업\01.연구정리\LUT.csv" 
                                                        Text="{Binding ModuleInfoViewModels[8].LUTCSVFileLink}"
-                                                       Style="{StaticResource TextBlockContent}"/>
+                                                       Style="{StaticResource TextBlockContent}"
+                                                       TextWrapping="Wrap"/>
                                         </Border>
                                         <TextBlock Text="Scatter Energy Calibration" Margin="5,20,5,5" Style="{StaticResource TextBlockTitle2}"/>
                                         <StackPanel Orientation="Horizontal" Margin="5">
@@ -222,12 +224,12 @@
                                                     <mvvm:EventToCommand Command="{Binding EcalInfoChangedCommand}" CommandParameter="0"/>
                                                 </i:EventTrigger>
                                             </i:Interaction.Triggers>
-                                                <syncfusion:SfDataGrid.Columns>
-                                                    <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Source"/>
+                                            <syncfusion:SfDataGrid.Columns>
+                                                <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Source"/>
                                                 <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="True Energy [keV]" NumberDecimalDigits="0" />
-                                                    <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="Measured Energy [keV]" AllowEditing="True" NumberDecimalDigits="0"/>
-                                                </syncfusion:SfDataGrid.Columns>
-                                            </syncfusion:SfDataGrid>
+                                                <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="Measured Energy [keV]" AllowEditing="True" NumberDecimalDigits="0"/>
+                                            </syncfusion:SfDataGrid.Columns>
+                                        </syncfusion:SfDataGrid>
 
                                         <syncfusion:SfChart Margin="5" Header=" Scatter Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
                                             <syncfusion:SfChart.PrimaryAxis>
@@ -279,6 +281,7 @@
                                                 <syncfusion:GridNumericColumn MappingName="MeasuredEnergy" HeaderText="Measured Energy [keV]" AllowEditing="True" NumberDecimalDigits="0"/>
                                             </syncfusion:SfDataGrid.Columns>
                                         </syncfusion:SfDataGrid>
+
                                         <syncfusion:SfChart Margin="5" Header=" Absorber Spectrum (Only Gain Correction)" VerticalAlignment="Top" HorizontalAlignment="Center">
                                             <syncfusion:SfChart.PrimaryAxis>
                                                 <syncfusion:NumericalAxis Minimum="0" Maximum="2000"/>
@@ -300,15 +303,15 @@
                                     </StackPanel>
                                 </ScrollViewer>
                             </syncfusion:TabItemExt>
-                            
+
                             <syncfusion:TabItemExt TabIndex="1" Header="LAHGIS [Single Head]">
-                                
+
                             </syncfusion:TabItemExt>
                             <syncfusion:TabItemExt TabIndex="2" Header="LAHGIS [Dual Head]">
                                 <StackPanel>
                                     <TextBlock Text="NOT IMPLEMENTED" FontSize="80" TextWrapping="Wrap"/>
                                 </StackPanel>
-                                
+
                             </syncfusion:TabItemExt>
 
                         </syncfusion:TabControlExt>
@@ -317,7 +320,41 @@
                 </Grid>
 
             </syncfusion:TabItemExt>
-            <syncfusion:TabItemExt Header="Menu1" Background="White" BorderBrush="#FFEAEAEA"/>
+            <syncfusion:TabItemExt Header="MLPE Data" Background="White" BorderBrush="#FFEAEAEA">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <syncfusion:SfChart Grid.Column="0" Grid.Row="0" Header="Scatter 0" Margin="10">
+                        <syncfusion:SfChart.PrimaryAxis>
+                            <syncfusion:NumericalAxis Minimum="-80" Maximum="+80" ShowGridLines="False"/>
+                        </syncfusion:SfChart.PrimaryAxis>
+                        <syncfusion:SfChart.SecondaryAxis>
+                            <syncfusion:NumericalAxis Minimum="-80" Maximum="+80" ShowGridLines="False"/>
+                        </syncfusion:SfChart.SecondaryAxis>
+                        <syncfusion:FastScatterBitmapSeries Interior="Orange" ItemsSource="{Binding ScatterPositionData}" XBindingPath="X" YBindingPath="Y" ScatterHeight="0.5" ScatterWidth="0.5"/>
+                    </syncfusion:SfChart>
+                    <syncfusion:SfChart Grid.Column="1" Grid.Row="0" Header="Scatter 1" Margin="10">
+                    </syncfusion:SfChart>
+                    <syncfusion:SfChart Grid.Column="0" Grid.Row="1" Header="Absorber 0" Margin="10">
+                        <syncfusion:SfChart.PrimaryAxis>
+                            <syncfusion:NumericalAxis Minimum="-80" Maximum="+80" ShowGridLines="False"/>
+                        </syncfusion:SfChart.PrimaryAxis>
+                        <syncfusion:SfChart.SecondaryAxis>
+                            <syncfusion:NumericalAxis Minimum="-80" Maximum="+80" ShowGridLines="False"/>
+                        </syncfusion:SfChart.SecondaryAxis>
+                        <syncfusion:FastScatterBitmapSeries Interior="Orange" ItemsSource="{Binding AbsorberPositionData}" XBindingPath="X" YBindingPath="Y" ScatterHeight="0.5" ScatterWidth="0.5"/>
+                    </syncfusion:SfChart>
+                    <syncfusion:SfChart Grid.Column="1" Grid.Row="1" Header="Absorber 1" Margin="10">
+                    </syncfusion:SfChart>
+                </Grid>
+
+            </syncfusion:TabItemExt>
             <syncfusion:TabItemExt Header="Menu2" Background="White" BorderBrush="#FFEAEAEA"/>
             <syncfusion:TabItemExt Header="Menu3" Background="White" BorderBrush="#FFEAEAEA"/>
         </syncfusion:TabControlExt>
@@ -397,6 +434,7 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
@@ -405,9 +443,54 @@
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5" Grid.Column="0"/>
-                        <ComboBox Grid.Column="1" Margin="5" Width="100"/>
+                        <CheckBox Content="MLEP On" IsChecked="{Binding IsMLPEOn}" Grid.Column="1" VerticalAlignment="Center" Margin="5"/>
+
                     </Grid>
-                    <syncfusion:SfChart Margin="5" Grid.Row="1">
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <syncfusion:SfTextInputLayout Margin="10" Grid.Column="0" Hint="Low Bound Energy" HelperTextVisibility="Collapsed">
+                            <syncfusion:IntegerTextBox x:Name="TBMinE" IsScrollingOnCircle="True" Margin="5" Width="100" HorizontalAlignment="Left" Value="{Binding MinMLPE_Energy,UpdateSourceTrigger=PropertyChanged}" />
+                        </syncfusion:SfTextInputLayout>
+
+                        <syncfusion:SfTextInputLayout Margin="10" Grid.Column="1" Hint="High Bound Energy" HelperTextVisibility="Collapsed">
+                            <syncfusion:IntegerTextBox x:Name="TBMaxE" IsCaretAnimationEnabled="True" IsScrollingOnCircle="True"  Value="{Binding MaxMLPE_Energy,UpdateSourceTrigger=PropertyChanged}"  Margin="14,0,0,0" Width="100" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                            </syncfusion:IntegerTextBox>
+                        </syncfusion:SfTextInputLayout>
+
+                    </Grid>
+
+                    <syncfusion:SfChart  x:Name="SpectrumMain" Margin="5" Grid.Row="2" MouseDown="SfChart_MouseDown">
+                        <syncfusion:SfChart.Resources>
+
+                            <Style TargetType="Line" x:Key="lineStyle">
+
+                                <Setter Property="StrokeDashArray" Value="10,5"/>
+
+                                <Setter Property="Stroke" Value="Red"/>
+
+                                <Setter Property="StrokeThickness" Value="1"/>
+
+                            </Style>
+                        </syncfusion:SfChart.Resources>
+                        <syncfusion:SfChart.Behaviors>
+                            <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
+                        </syncfusion:SfChart.Behaviors>
+                        <syncfusion:SfChart.PrimaryAxis>
+                            <syncfusion:NumericalAxis Minimum="0" Maximum="2000" ShowTrackBallInfo="True"/>
+                        </syncfusion:SfChart.PrimaryAxis>
+                        <syncfusion:SfChart.SecondaryAxis>
+                            <syncfusion:NumericalAxis/>
+                        </syncfusion:SfChart.SecondaryAxis>
+                        <syncfusion:FastColumnBitmapSeries Interior="Black"
+                                                                     ListenPropertyChange="True"
+                                                                     Label="Energy"
+                                                                     ItemsSource="{Binding SpectrumHistoModels[0]}" 
+                                                                     XBindingPath="LowerBound" 
+                                                                     YBindingPath="Count"
+                                                                     syncfusion:ChartSeriesBase.Spacing="0" />
                     </syncfusion:SfChart>
 
 
