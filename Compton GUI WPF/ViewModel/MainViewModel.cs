@@ -219,6 +219,7 @@ namespace Compton_GUI_WPF.ViewModel
                 AddListModeDataTask.Wait();
                 timer.Stop();
                 RecordTimeSpan = TimeSpan.Zero;
+                DrawMLPEPositions();
             }
 
 
@@ -255,6 +256,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
             short[] check1;
             short[] check2 = new short[256];
+            LACC_Control_Static.ResetLMData();
             while (IsAddingListModeData)
             {
                 short[] item;
@@ -296,22 +298,27 @@ namespace Compton_GUI_WPF.ViewModel
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            AbsorberPositionData.Clear();
+            //AbsorberPositionData.Clear();
+            var temp1 = new List<MlpePositionInfo>();
             foreach (var lmdata in absorberLMData)
             {
                 foreach (var lmdatum in lmdata)
                 {
-                    AbsorberPositionData.Add(new MlpePositionInfo(lmdatum.TransformedInteractionPoint3D.X, lmdatum.TransformedInteractionPoint3D.Y));
+                    temp1.Add(new MlpePositionInfo(lmdatum.TransformedInteractionPoint3D.X, lmdatum.TransformedInteractionPoint3D.Y));
                 }
             }
-            ScatterPositionData.Clear();
+            AbsorberPositionData = temp1;
+            //ScatterPositionData.Clear();
+            var temp2 = new List<MlpePositionInfo>();
+           
             foreach (var lmdata in scatterLMData)
             {
                 foreach (var lmdatum in lmdata)
                 {
-                    ScatterPositionData.Add(new MlpePositionInfo(lmdatum.TransformedInteractionPoint3D.X, lmdatum.TransformedInteractionPoint3D.Y));
+                    temp2.Add(new MlpePositionInfo(lmdatum.TransformedInteractionPoint3D.X, lmdatum.TransformedInteractionPoint3D.Y));
                 }
             }
+            ScatterPositionData = temp2;
             sw.Stop();
             Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
 
@@ -321,12 +328,18 @@ namespace Compton_GUI_WPF.ViewModel
         }
         public record MlpePositionInfo(double X, double Y);
 
-        private ObservableCollection<MlpePositionInfo> absorberPositionData;
-        public ObservableCollection<MlpePositionInfo> AbsorberPositionData { get { return absorberPositionData; } }
+        private List<MlpePositionInfo> absorberPositionData = new List<MlpePositionInfo>();
+        public List<MlpePositionInfo> AbsorberPositionData
+        {
+            get { return absorberPositionData; }
+            set { absorberPositionData = value; OnPropertyChanged(nameof(AbsorberPositionData)); }
+        }
 
-
-        private ObservableCollection<MlpePositionInfo> scatterPositionData;
-        public ObservableCollection<MlpePositionInfo> ScatterPositionData { get { return scatterPositionData; } }
+        private List<MlpePositionInfo> scatterPositionData = new List<MlpePositionInfo>();
+        public List<MlpePositionInfo> ScatterPositionData 
+        { get { return scatterPositionData; } 
+           set { scatterPositionData = value; OnPropertyChanged(nameof(ScatterPositionData)); }
+        }
 
 
 
@@ -457,7 +470,6 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 DrawSpectrum();
                 Thread.Sleep(1000);
-                DrawMLPEPositions();
             }
             Debug.WriteLine("DataUpdate End");
         }
@@ -485,81 +497,81 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = true, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 12, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
 
-                var scatterGain = new double[37]  { 0.229400822535143,
-                                                0.194663785680398,
-                                                0.184236289538727,
-                                                0.328845970032704,
-                                                0.388535540257414,
-                                                0.182997191802852,
-                                                0.256568926962897,
-                                                0.261898167575063,
-                                                0.200476805251476,
-                                                0.107149915166777,
-                                                0.258711656044783,
-                                                0.317571489375082,
-                                                0.153968089385871,
-                                                0.175575768904058,
-                                                0.175069094879092,
-                                                0.111338944874489,
-                                                0.126300762020813,
-                                                0.310296386792488,
-                                                0.271149150631817,
-                                                0.110569664442744,
-                                                0.109709278149893,
-                                                0.312856624047890,
-                                                0.135521237098968,
-                                                0.193823476297495,
-                                                0.147240054519398,
-                                                0.199701252506580,
-                                                0.222085079797251,
-                                                0.186253277487988,
-                                                0.163246220676073,
-                                                0.363372707108992,
-                                                0.451220095983549,
-                                                0.294538914503081,
-                                                0.234470528667482,
-                                                0.330946205527829,
-                                                0.201129108512092,
-                                                0.399876618388626,
-                                                -19.1899788970696 };
-
-                var absorberGain = new double[37] { 0.609106629714565,
-                                                0.408225309758093,
-                                                0.461847452592639,
-                                                0.420864773543207,
-                                                0.406298442910974,
-                                                0.556871972880209,
-                                                0.427062526383404,
-                                                0.529611054266539,
-                                                0.385468424382990,
-                                                0.248421318082802,
-                                                0.399864947053825,
-                                                0.425536517980407,
-                                                0.339859200857057,
-                                                0.398740664113444,
-                                                0.464483368090175,
-                                                0.403390895135249,
-                                                0.298422129818660,
-                                                0.553180476402401,
-                                                0.642667635434905,
-                                                0.358890089937244,
-                                                0.464030776465580,
-                                                0.445993103539891,
-                                                0.273774321638299,
-                                                0.214176752360862,
-                                                0.621807100373737,
-                                                0.356965167293123,
-                                                0.376619470434398,
-                                                0.289744640131841,
-                                                0.369076302531657,
-                                                0.674687609116932,
-                                                0.639591093149570,
-                                                0.556966464257456,
-                                                0.651793451901132,
-                                                0.363504215341530,
-                                                0.662096134248347,
-                                                0.599963606291628,
-                                                -20.6402542760799 };
+                var scatterGain = new double[37]  {0.207583486310340,
+0.197378617654247 ,
+0.134143497193450 ,
+0.350795612936240 ,
+0.365945323071866 ,
+0.169767500915951 ,
+0.250029018792162 ,
+0.257436772257243 ,
+0.180262246045204 ,
+0.122534704286570 ,
+0.243337498004493 ,
+0.315226084314086 ,
+0.141924535715014 ,
+0.173801413648601 ,
+0.156002799209616 ,
+0.107450094661035 ,
+0.114231575985511 ,
+0.304549612177718 ,
+0.266789891182305 ,
+0.100228059111417 ,
+0.104187271753870 ,
+0.332072906087907 ,
+0.125365155392261 ,
+0.157917759109811 ,
+0.154776351938155 ,
+0.173901827136405 ,
+0.225933092606352 ,
+0.160176422879037 ,
+0.146448386501010 ,
+0.358212260296200 ,
+0.480430155445668 ,
+0.264496676194317 ,
+0.227795361479290 ,
+0.339992966549734 ,
+0.189348098309348 ,
+0.321090890371102 ,
+1.82850526010004  };
+                var absorberGain = new double[37] { 0.547118426,
+                                                    0.423998687,
+                                                    0.426206901,
+                                                    0.408303161,
+                                                    0.410912616,
+                                                    0.557610406,
+                                                    0.444274915,
+                                                    0.513597437,
+                                                    0.371204235,
+                                                    0.279542663,
+                                                    0.355811448,
+                                                    0.405420482,
+                                                    0.346096898,
+                                                    0.358584417,
+                                                    0.439085018,
+                                                    0.381797553,
+                                                    0.324406816,
+                                                    0.486858039,
+                                                    0.604246889,
+                                                    0.357470801,
+                                                    0.473510762,
+                                                    0.437615232,
+                                                    0.289740831,
+                                                    0.200805523,
+                                                    0.57044647 ,
+                                                    0.383966989,
+                                                    0.322863322,
+                                                    0.3249445  ,
+                                                    0.329417575,
+                                                    0.743689349,
+                                                    0.485597352,
+                                                    0.733393991,
+                                                    0.453444903,
+                                                    0.433348959,
+                                                    0.754890154,
+                                                    0.5538563  ,
+                                                    -0.430917509
+                                                    };
 
                 Debug.WriteLine("Making Scatter Module");
                 TEST = "Making Scatter Module";

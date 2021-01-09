@@ -791,13 +791,13 @@ namespace HUREL.Compton
                 // Stop (전부 0)
                 reset_send_buffer(ref outData, ref outData_BufSz);
 
-                EndPoint.TimeOut = 10;
+                EndPoint.TimeOut = 1;
                 int i = 0;
                 for (i = 0; i < 1000; ++i)
                 {
                     if (EndPoint.XferData(ref outData, ref outData_BufSz))
                         break;
-                    Thread.Sleep(10);
+                    Thread.Sleep(0);
                 }
                 Trace.WriteLine($"HY : [Try] 0000 send done : {i}");
             }

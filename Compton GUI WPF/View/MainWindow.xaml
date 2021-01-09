@@ -332,23 +332,23 @@
                     </Grid.RowDefinitions>
                     <syncfusion:SfChart Grid.Column="0" Grid.Row="0" Header="Scatter 0" Margin="10">
                         <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-80" Maximum="+80" ShowGridLines="False"/>
+                            <syncfusion:NumericalAxis Minimum="-150" Maximum="+150" ShowGridLines="False"/>
                         </syncfusion:SfChart.PrimaryAxis>
                         <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-80" Maximum="+80" ShowGridLines="False"/>
+                            <syncfusion:NumericalAxis Minimum="-150" Maximum="+150" ShowGridLines="False"/>
                         </syncfusion:SfChart.SecondaryAxis>
-                        <syncfusion:FastScatterBitmapSeries Interior="Orange" ItemsSource="{Binding ScatterPositionData}" XBindingPath="X" YBindingPath="Y" ScatterHeight="0.5" ScatterWidth="0.5"/>
+                        <syncfusion:FastScatterBitmapSeries ItemsSource="{Binding ScatterPositionData}" XBindingPath="X" YBindingPath="Y" />
                     </syncfusion:SfChart>
                     <syncfusion:SfChart Grid.Column="1" Grid.Row="0" Header="Scatter 1" Margin="10">
                     </syncfusion:SfChart>
                     <syncfusion:SfChart Grid.Column="0" Grid.Row="1" Header="Absorber 0" Margin="10">
                         <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-80" Maximum="+80" ShowGridLines="False"/>
+                            <syncfusion:NumericalAxis Minimum="-150" Maximum="+150" ShowGridLines="False"/>
                         </syncfusion:SfChart.PrimaryAxis>
                         <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-80" Maximum="+80" ShowGridLines="False"/>
+                            <syncfusion:NumericalAxis Minimum="-150" Maximum="+150" ShowGridLines="False"/>
                         </syncfusion:SfChart.SecondaryAxis>
-                        <syncfusion:FastScatterBitmapSeries Interior="Orange" ItemsSource="{Binding AbsorberPositionData}" XBindingPath="X" YBindingPath="Y" ScatterHeight="0.5" ScatterWidth="0.5"/>
+                        <syncfusion:FastScatterBitmapSeries Interior="Orange" ItemsSource="{Binding AbsorberPositionData}" XBindingPath="X" YBindingPath="Y" ScatterHeight="2" ScatterWidth="2"/>
                     </syncfusion:SfChart>
                     <syncfusion:SfChart Grid.Column="1" Grid.Row="1" Header="Absorber 1" Margin="10">
                     </syncfusion:SfChart>

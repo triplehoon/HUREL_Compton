@@ -24,7 +24,7 @@
             <syncfusion:SfChart.SecondaryAxis>
                 <syncfusion:LogarithmicAxis/>
             </syncfusion:SfChart.SecondaryAxis>
-            <syncfusion:ColumnSeries Interior="Black" ListenPropertyChange="True" Label="Energy" ItemsSource="{Binding SpectrumHistoModels}" XBindingPath="LowerBound" YBindingPath="Count" ShowTooltip="True" syncfusion:ChartSeriesBase.Spacing="0" />
+            <syncfusion:FastScatterBitmapSeries Interior="Black" ListenPropertyChange="True" Label="Energy" ItemsSource="{Binding Positions}" XBindingPath="X" YBindingPath="Y" ScatterHeight="2" ScatterWidth="2" ShowTooltip="True" syncfusion:ChartSeriesBase.Spacing="0" />
 
         </syncfusion:SfChart>
 

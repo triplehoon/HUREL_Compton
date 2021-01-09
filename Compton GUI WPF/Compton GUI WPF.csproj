@@ -46,7 +46,7 @@
 
   <ItemGroup>
     <Reference Include="CyUSB">
-      <HintPath>..\..\..\CRUXELL\HY_PMT_DAQ_100MSPS\HY_PMT_DAQ_100MSPS\bin\Debug\CyUSB.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\FPGA_CC\HY_PMT_DAQ_100MSPS_200211\Release\CyUSB.dll</HintPath>
     </Reference>
   </ItemGroup>
 

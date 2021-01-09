@@ -342,27 +342,32 @@ namespace HUREL.Compton.LACC
             //sw.Stop();
             //Debug.WriteLine("0: " + sw.ElapsedTicks);
             //sw.Restart();
-
-            for (int i = 0; i < PmtCount; i++)
-            {
-                if (pmtADCValue[i] > max)
-                {
-                    max = pmtADCValue[i];
-                }
-            }
-
             if (ModulePMTOrder.IsOrderChange)
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    normalizePMTValue[i] = (pmtADCValue[ModulePMTOrder.Order[i]] / max);
+                    if (pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i] > max)
+                    {
+                        max = pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i];
+                    }
+                }
+                for (int i = 0; i < PmtCount; i++)
+                {
+                    normalizePMTValue[i] = ((pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i]) / max);
                 }
             }
             else
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    normalizePMTValue[i] = (pmtADCValue[i] / max);
+                    if (pmtADCValue[i] * ModuleGain[i] > max)
+                    {
+                        max = pmtADCValue[i] * ModuleGain[i];
+                    }
+                }
+                for (int i = 0; i < PmtCount; i++)
+                {
+                    normalizePMTValue[i] = ((pmtADCValue[i] * ModuleGain[i]) / max);
                 }
             }
 
@@ -385,8 +390,8 @@ namespace HUREL.Compton.LACC
                 val = 0;
             }
 
-            point.X = pos[0] - sizeX / 2 + ModuleOffsetX;
-            point.Y = pos[1] - sizeY / 2 + ModuleOffsetY;
+            point.X = pos[0] + ModuleOffsetX;
+            point.Y = pos[1] + ModuleOffsetY;
             point.Z = ModuleOffsetZ;
 
 
@@ -485,18 +490,15 @@ namespace HUREL.Compton.LACC
             //sw.Stop();
             //Debug.WriteLine("0: " + sw.ElapsedTicks);
             //sw.Restart();
-
-            for (int i = 0; i < PmtCount; i++)
-            {
-                if (pmtADCValue[i] > max)
-                {
-                    max = pmtADCValue[i];
-                }
-            }
-
-
             if (ModulePMTOrder.IsOrderChange)
             {
+                for (int i = 0; i < PmtCount; i++)
+                {
+                    if (pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i] > max)
+                    {
+                        max = pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i];
+                    }
+                }
                 for (int i = 0; i < PmtCount; i++)
                 {
                     normalizePMTValue[i] = ((pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i]) / max);
@@ -504,6 +506,13 @@ namespace HUREL.Compton.LACC
             }
             else
             {
+                for (int i = 0; i < PmtCount; i++)
+                {
+                    if (pmtADCValue[i] > max)
+                    {
+                        max = pmtADCValue[i]* ModuleGain[i];
+                    }
+                }
                 for (int i = 0; i < PmtCount; i++)
                 {
                     normalizePMTValue[i] = ( (pmtADCValue[i] * ModuleGain[i]) / max);
@@ -516,13 +525,14 @@ namespace HUREL.Compton.LACC
             {
                 for (int y1 = GridSize1; y1 < sizeY; y1 += GridSize1)
                 {
+                    if (double.IsNaN(XYLogMue[x1][y1][0]))
+                        continue;
                     for (int j = 0; j < PmtCount; j++)
                     {
                         if (XYLogMue[x1][y1] != null)
                             val += XYLogMue[x1][y1][j] * normalizePMTValue[j];
                     }
-                    if (XYSumMu[x1][y1] != 0)
-                        val -= XYSumMu[x1][y1];
+                    val -= XYSumMu[x1][y1];
                     if (val > valMaxChk)
                     {
                         valMaxChk = val;
@@ -545,13 +555,15 @@ namespace HUREL.Compton.LACC
                     {
                         if (y2 > -1)
                         {
+                            if (double.IsNaN(XYLogMue[x2][y2][0]))
+                                continue;
                             for (int j = 0; j < PmtCount; j++)
                             {
                                 if (XYLogMue[x2][y2] != null)
                                     val += XYLogMue[x2][y2][j] * normalizePMTValue[j];
                             }
-                            if (XYSumMu[x2][y2] != 0)
-                                val -= XYSumMu[x2][y2];
+                            
+                            val -= XYSumMu[x2][y2];
                             if (val > valMaxChk)
                             {
                                 valMaxChk = val;
@@ -578,12 +590,14 @@ namespace HUREL.Compton.LACC
                     {
                         if (y2 > -1)
                         {
+                            if (double.IsNaN(XYLogMue[x2][y2][0]))
+                                continue;
                             for (int j = 0; j < PmtCount; j++)
                             {
-                                if (XYLogMue[x2][y2] == null) break;
+                                if (XYLogMue[x2][y2] == null) continue;
                                 val += XYLogMue[x2][y2][j] * normalizePMTValue[j];
                             }
-                            if (XYSumMu[x2][y2] == 0) break;
+                            
                             val -= XYSumMu[x2][y2];
                             if (val > valMaxChk)
                             {
