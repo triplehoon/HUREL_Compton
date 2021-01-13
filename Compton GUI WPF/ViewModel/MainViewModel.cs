@@ -25,7 +25,7 @@ using MathNet.Numerics.Statistics;
 
 namespace Compton_GUI_WPF.ViewModel
 {
-    public class MainViewModel : INotifyPropertyChanged
+    public partial class MainViewModel : INotifyPropertyChanged
     {
 
         public static CRUXELLLACC FPGAControl;
@@ -58,10 +58,12 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 spectrumHistoModels.Add(new List<SpectrumHisto.SpectrumHistoModel>());
             }
+
+            Task.Run(() => GetRealTimePointCloud());
             //Messenger.Default.Register<WindowStateMessage>(this,
             //    (action) => ReceiveIsEnableOpenFPGAWindow(action)
             //    );
-            
+
             InitiateLACC();
         }
 

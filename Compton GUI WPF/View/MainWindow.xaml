@@ -10,7 +10,7 @@
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
         xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
-        
+         xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
         mc:Ignorable="d"
         Title="MainWindow" Height="900" Width="1600"
         syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"        
@@ -86,8 +86,30 @@
                                   EnableLabelEdit="False">
             <syncfusion:TabItemExt Header="Main" Background="White" BorderBrush="#FFEAEAEA">
                 <Grid >
-                    <StackPanel>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
                         <TextBlock Text="Hello" />
+                        <hx:Viewport3DX 
+                           
+                           Background="Silver" 
+                           x:Name="mainViewport"                      
+                                        Width="480"
+                                        Height="270"
+                                        
+                          >
+                            <hx:Viewport3DX.EffectsManager>
+                                <hx:DefaultEffectsManager/>
+                            </hx:Viewport3DX.EffectsManager>
+                            <hx:Viewport3DX.Camera>
+                                <hx:PerspectiveCamera Position="0,0,0" LookDirection="0,0,1" UpDirection="0,1,0"/>
+                            </hx:Viewport3DX.Camera>
+                            <hx:PointGeometryModel3D Geometry="{Binding RTPointCloud}" Color="White" FixedSize="True" Size="3,3">
+                            </hx:PointGeometryModel3D>
+
+                        </hx:Viewport3DX>
                     </StackPanel>
                 </Grid>
             </syncfusion:TabItemExt>
