@@ -545,7 +545,7 @@ namespace HUREL.Compton.LACC
             valMaxChk = -5000;
 
             int[] Max2 = new int[2];
-            int GridSize2 = sizeX / 25;
+            int GridSize2 = sizeX / 20;
             for (int x2 = Max1[0] - GridSize1; x2 < Math.Min(Max1[0] + GridSize1,sizeX); x2 += GridSize2)
             {
                 if (x2 > -1)
