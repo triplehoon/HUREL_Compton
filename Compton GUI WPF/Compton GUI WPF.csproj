@@ -53,10 +53,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="C:\Users\tpgns\source\repos\SLAM wrapper\SLAM wrapper\SLAM wrapper.vcxproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="CyUSB">
       <HintPath>bin\x64\Debug\net5.0-windows\CyUSB.dll</HintPath>
     </Reference>
