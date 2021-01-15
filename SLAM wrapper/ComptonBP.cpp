@@ -40,8 +40,11 @@ open3d::geometry::PointCloud CComptonBP::BPtoPointCloud(std::vector<ListModeData
             auto scatterPhotonEnergy = (*lmdata)[i].scatterPhotonEnergy;
             auto absorberPhotonPosition = (*lmdata)[i].absorberPhotonPosition;
             auto absorberPhotonEnergy = (*lmdata)[i].absorberPhotonEnergy;
-            if (CheckEffectedBP(scatterPhotonPosition, scatterPhotonEnergy, absorberPhotonPosition, absorberPhotonEnergy, imageSpacePosition , angleThreshold))
-                imgSpace->colors_[j] = imgSpace->colors_[j] + Eigen::Vector3d(0, -1 / 255, -1 / 255);
+            if (CheckEffectedBP(scatterPhotonPosition, scatterPhotonEnergy, absorberPhotonPosition, absorberPhotonEnergy, imageSpacePosition, angleThreshold))
+            {
+                imgSpace->colors_[j][1] = imgSpace->colors_[j][1]* 4999 / 5000;
+                imgSpace->colors_[j][2] = imgSpace->colors_[j][2]* 4999 / 5000;
+            }
         }
     }
 

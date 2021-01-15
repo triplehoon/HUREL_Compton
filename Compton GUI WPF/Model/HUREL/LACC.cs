@@ -182,14 +182,14 @@ namespace HUREL.Compton.LACC
         /// <summary>
         /// x, y, z offset in [mm]
         /// </summary>
-        public struct ModuleOffet
+        public struct ModuleOffset
         {
             public double x;
             public double y;
             public double z;
         }
 
-        public ModuleOffet ModuleOffetData { get; set; }
+        public ModuleOffset ModuleOffetData { get; set; }
         private double ModuleOffsetX;
         private double ModuleOffsetY;
         private double ModuleOffsetZ;
@@ -236,7 +236,7 @@ namespace HUREL.Compton.LACC
         /// <param name="gain"> Scintilator check. </param>    
         /// <param name="channelNumber"> Channel check. </param>    
         /// <param name="csvFileLUT"> cvsFile link </param>    
-        public LACC_Module(ModuleInfo mode, ModuleOffet offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int channelNumber = 0)
+        public LACC_Module(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int channelNumber = 0)
         {
             SetupModuleInfo = mode;
             ChannelNumber = channelNumber;
@@ -291,7 +291,7 @@ namespace HUREL.Compton.LACC
                 int i = 0;
                 foreach (var lut in LUT)
                 {
-                    XposArray[i] = lut.Xpos;
+                    XposArray[i] = lut.Xpos; //mm to meter
                     YposArray[i] = lut.Ypos;
                     ZposArray[i] = lut.Zpos;
                     LogMue[i] = new double[PmtCount];
@@ -611,8 +611,8 @@ namespace HUREL.Compton.LACC
                 }
             }
 
-            point.X = Max3[0] - sizeX / 2 + ModuleOffsetX;
-            point.Y = Max3[1] - sizeY / 2 + ModuleOffsetY;
+            point.X = Convert.ToDouble(Max3[1] - sizeY / 2) / 1000 + ModuleOffsetX; //mm to meter
+            point.Y = Convert.ToDouble(Max3[0] - sizeX / 2) / 1000 + ModuleOffsetY;
             point.Z = ModuleOffsetZ;
 
 

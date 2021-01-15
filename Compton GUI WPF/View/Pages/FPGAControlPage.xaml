@@ -13,8 +13,8 @@
          syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"
         mc:Ignorable="d"
         Title="CRUXELL FPGA" Height="800" Width="500">
-    
-    
+
+
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
             <mvvm:EventToCommand Command="{Binding OffCommand}"/>
@@ -400,7 +400,9 @@
             <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
                 <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" >
                     <TextBlock TextWrapping="WrapWithOverflow" Margin="5"
-                    Text="Description about GUI program, FPGA, copyright (MIT) and more... &#10;HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version HUREL Developer Version "/>
+                    Text="Description about GUI program, FPGA, copyright (MIT) &#10;HUREL Developer Version "/>
+                    <Image x:Name="image" Height="98" Width="275" Source="/View/Pages/symbol_hurel.png" HorizontalAlignment="Left" Margin="5"/>
+
                 </StackPanel>
             </ScrollViewer>
         </Grid>

@@ -13,7 +13,7 @@ namespace HUREL.Compton
         /// </summary>
         public DateTime MeasurementTime { get; }
 
-        public record LMDataInfo(Point3D TransformedInteractionPoint3D, double InteractionEnergy);       
+        public record LMDataInfo(Point3D RelativeInteractionPoint3D, Point3D TransformedInteractionPoint3D, double InteractionEnergy);       
 
         public enum InteractionType
         {
@@ -69,7 +69,7 @@ namespace HUREL.Compton
 
                     for (int i = 0; i < ScatterInteractionCount; i++)
                     {
-                        var tempLMDataInfo = new LMDataInfo(DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]) ;
+                        var tempLMDataInfo = new LMDataInfo(ScatterInteractionPoint3Ds[i],DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]) ;
                         scatterLMDataInfos.Add(tempLMDataInfo);
                     }
                     return scatterLMDataInfos;
@@ -119,7 +119,7 @@ namespace HUREL.Compton
 
                     for (int i = 0; i < AbsorberInteractionCount; i++)
                     {
-                        var tempLMDataInfo = new LMDataInfo (DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]),AbsorberInteractionEnergys[i] );
+                        var tempLMDataInfo = new LMDataInfo (AbsorberInteractionPoint3Ds[i],DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]),AbsorberInteractionEnergys[i] );
                         absorberLMDataInfos.Add(tempLMDataInfo);
                     }
                     return absorberLMDataInfos;

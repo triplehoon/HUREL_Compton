@@ -39,6 +39,7 @@ class RealsenseControl
 
 
 		RealsenseControl();
+		~RealsenseControl();
 
 		std::queue<std::tuple<open3d::geometry::PointCloud >> m_QueueSLAMedCloudTrans;
 
@@ -69,8 +70,8 @@ class RealsenseControl
 
 		open3d::geometry::PointCloud m_SLAMEDPointCloud;
 		Eigen::Matrix4d m_RTPose;
-		bool m_IsPipeLineOn;
 
+		bool m_IsPipeLineOn;
 		bool m_IsSLAMON;
 
 

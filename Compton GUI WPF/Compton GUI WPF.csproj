@@ -7,6 +7,7 @@
     <UseWPF>true</UseWPF>
 	<UseWindowsForms>true</UseWindowsForms>
 	<Platforms>AnyCPU;x64</Platforms>
+	<ApplicationIcon>hanynagicon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -24,6 +25,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="View\Pages\symbol_hurel.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Cyotek.Drawing.BitmapFont" Version="2.0.1" />
@@ -53,9 +58,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SLAM wrapper\SLAM wrapper.vcxproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="CyUSB">
       <HintPath>bin\x64\Debug\net5.0-windows\CyUSB.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="View\Pages\symbol_hurel.png" />
   </ItemGroup>
 
 </Project>

@@ -63,7 +63,10 @@ namespace HUREL.Compton
                     if(flag==2)
                     { 
                         writer.Write(item);
-                        Trace.WriteLine("DataInQueCount is " + DataInQueue.Count);
+                        if (DataInQueue.Count + 1 % 20==0)
+                        {
+                            Trace.WriteLine("DataInQueCount is " + DataInQueue.Count);
+                        }
                     }
 
                     foreach (byte b in item)

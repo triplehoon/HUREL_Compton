@@ -5,7 +5,7 @@
 #define _USE_MATH_DEFINES 
 
 #include <math.h>
-#include <open3d/Open3D.h>
+#include <open3d/geometry/PointCloud.h>
 
 
 namespace HUREL {

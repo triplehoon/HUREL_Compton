@@ -15,11 +15,11 @@ namespace Compton_GUI_WPF.ViewModel
 {
     public class ModuleInfoViewModel : INotifyPropertyChanged
     {
-        protected int channelNum;
-        public int ChannelNum
+        protected int moduleNum;
+        public int ModuleNum
         {
-            get { return channelNum; }
-            set { channelNum = value; }
+            get { return moduleNum; }
+            set { moduleNum = value; }
         }
 
         public LACC_Module Module { get; set; }
@@ -84,7 +84,7 @@ namespace Compton_GUI_WPF.ViewModel
                                          Module.ModuleGain,
                                          Module.ModulePMTOrder,
                                          LUTCSVFileLink,
-                                         ChannelNum);
+                                         ModuleNum);
             }
             catch
             {
@@ -108,15 +108,20 @@ namespace Compton_GUI_WPF.ViewModel
             Module.ModuleGain = ModuleGain.ToArray();
         }
 
+        private bool isModuleSet = false;
+        public bool IsModuleSet { get; set; }
+
+        public ModuleOffset Offset { get; set; }
 
         public ObservableCollection<EcalInfo> EcalInfos { get; }
         public ModuleInfoViewModel()
         {
 
         }
-        public ModuleInfoViewModel(ModuleInfo mode, ModuleOffet offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int channelNumber = 0)
+        public ModuleInfoViewModel(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int moduleNumber = 0)
         {
-            this.ChannelNum = channelNumber;
+            Offset = offset;
+            this.ModuleNum = moduleNumber;
             EcalInfos = new ObservableCollection<EcalInfo>();
             EcalInfos.Add(new EcalInfo(60, 60, "Am-241"));
             EcalInfos.Add(new EcalInfo(662, 662, "Cs-137"));
@@ -137,11 +142,12 @@ namespace Compton_GUI_WPF.ViewModel
                                          gain,
                                          pmtOrder,
                                          csvFileLUT,
-                                         channelNumber);
+                                         moduleNum);
+                IsModuleSet = true;
             }
             catch
             {
-                Debug.WriteLine("LACC Module Setting Failed");
+                IsModuleSet = false;
             }
         }
 

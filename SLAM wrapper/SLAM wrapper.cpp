@@ -53,10 +53,6 @@ void SLAMwrapper::Realsense_Control::GetRealTimePointCloud(List<array<double>^>^
 	if (pose.colors_.size() != pose.points_.size())
 		return;
 
-	if (isMLPEOn) {
-		HUREL::CComptonBP::BPtoPointCloud(m_LMDataVec, &pose, 5);
-	}
-
 	for (int i = 0; i < pose.colors_.size(); i++) {		
 		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
 		vectors->Add(poseVector);
@@ -69,10 +65,38 @@ void SLAMwrapper::Realsense_Control::GetRealTimePointCloud(List<array<double>^>^
 
 }
 
+void SLAMwrapper::Realsense_Control::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
+{
+	vectors = gcnew List< array<double>^>();
+	colors = gcnew List< array<double>^>();
+	//Width 640 Heigh 480
+
+	open3d::geometry::PointCloud pose = realsenseVariables->m_SLAMEDPointCloud;
+	int count = 0;
+	if (pose.colors_.size() < pose.points_.size())
+	{
+		count = pose.colors_.size();
+	}
+	else {
+		count = pose.points_.size();
+	}
+
+
+	for (int i = 0; i < count-1; i++) {
+		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
+		vectors->Add(poseVector);
+
+		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][0], pose.colors_[i][1], pose.colors_[i][2]};
+		colors->Add(colorVector);
+	}
+}
+
+
 
 void SLAMwrapper::Realsense_Control::StartPipeLine() {
 	realsenseVariables->StartPipeLine();
 }
+
 
 
 
@@ -88,7 +112,7 @@ array<double> ^ SLAMwrapper::Realsense_Control::GetPoseFrame()
 		double dx = System::Convert::ToDouble(x);
 		double dy = System::Convert::ToDouble(y);
 		double dz = System::Convert::ToDouble(z);
-		Console::WriteLine("x: {0} , y: {1} , z: {2}", dx* 100.0, dy*100, dz*100);
+		//Console::WriteLine("x: {0} , y: {1} , z: {2}", dx* 100.0, dy*100, dz*100);
 		array<double>^ tempArray = gcnew array<double>(16);
 		for (int i = 0; i < 16; i++) {
 			tempArray[i] = transform[i];
@@ -129,5 +153,32 @@ void SLAMwrapper::Realsense_Control::SetLMData(List<array<double>^>^ scatterPhot
 	}
 
 	m_LMDataVec = lmDataSet;
+}
+
+void SLAMwrapper::Realsense_Control::StartSLAM()
+{
+	realsenseVariables->m_SLAMEDPointCloud = open3d::geometry::PointCloud();
+	realsenseVariables->m_IsSLAMON = true;
+	Thread^ pipeThread = gcnew Thread(gcnew ThreadStart(SLAMwrapper::Realsense_Control::StartSLAMThread));
+	pipeThread->Start();
+}
+
+void SLAMwrapper::Realsense_Control::StartSLAMThread()
+{
+	realsenseVariables->SLAM_RT();
+}
+
+
+void SLAMwrapper::Realsense_Control::StopSLAM()
+{
+	realsenseVariables->m_IsSLAMON = false;
+
+}
+
+
+SLAMwrapper::Realsense_Control::~Realsense_Control()
+{
+	delete(realsenseVariables);
+	delete(m_LMDataVec);
 }
 

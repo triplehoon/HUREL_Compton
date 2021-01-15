@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Compton GUI WPF", "Compton GUI WPF\Compton GUI WPF.csproj", "{0C6A08D3-9E16-424B-A54C-2CBF4B5FB2B9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D97493EF-BB66-40AB-BF63-D02BF7B3C911} = {D97493EF-BB66-40AB-BF63-D02BF7B3C911}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mono-LACC MLPE", "mono-LACC MLPE\mono-LACC MLPE.csproj", "{CD1A9E8A-B2BF-40A6-A614-E681AC4EC37D}"
 EndProject
@@ -14,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFchart", "SFchart\SFchart.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ComtponBP-WrapperTEst", "ComtponBP-WrapperTEst\ComtponBP-WrapperTEst.csproj", "{D8BB1202-A897-4750-9F06-0E31DE93C687}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HUREL-Compton-Class", "HUREL-Compton-Class\HUREL-Compton-Class.csproj", "{1A164310-FD2E-4737-B135-68CE2C5DA304}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HUREL-Compton-Class", "HUREL-Compton-Class\HUREL-Compton-Class.csproj", "{1A164310-FD2E-4737-B135-68CE2C5DA304}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Compton Wrapper", "SLAM wrapper\SLAM wrapper.vcxproj", "{D97493EF-BB66-40AB-BF63-D02BF7B3C911}"
 EndProject

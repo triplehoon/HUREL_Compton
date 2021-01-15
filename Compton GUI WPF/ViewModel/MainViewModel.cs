@@ -58,11 +58,21 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 spectrumHistoModels.Add(new List<SpectrumHisto.SpectrumHistoModel>());
             }
+            BPPointCloud = new HelixToolkit.Wpf.SharpDX.PointGeometry3D();
 
-            Task.Run(() => GetRealTimePointCloud());
+            RTPointCloudTask =Task.Run(() => GetRealTimePointCloud());
+
             //Messenger.Default.Register<WindowStateMessage>(this,
             //    (action) => ReceiveIsEnableOpenFPGAWindow(action)
             //    );
+
+
+            ModuleInfoViewModels = new ObservableCollection<ModuleInfoViewModel>();
+
+            for (int i = 0; i < 16; i++)
+            {
+                ModuleInfoViewModels.Add(new ModuleInfoViewModel());
+            }
 
             InitiateLACC();
         }
@@ -77,9 +87,11 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private void CloseMainWindow()
         {
-
+            IsRealTimePointCloudOn = false;
+            RTPointCloudTask.Wait();
             FPGAControl.SetVaribles(FPGAVariable);
             FPGAControl.Dispose();
+           // rsControl.Dispose();
         }
 
         private string test;
@@ -185,6 +197,7 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private void StartorStopSession()
         {
+            IsHistoGramTooSlow = false;
             if (MeasurementTime == "")
                 return;
             IsSessionAvailable = false;
@@ -221,7 +234,7 @@ namespace Compton_GUI_WPF.ViewModel
                 AddListModeDataTask.Wait();
                 timer.Stop();
                 RecordTimeSpan = TimeSpan.Zero;
-                DrawMLPEPositions();
+                Task taskDrawing = Task.Run(()=>DrawMLPEPositions());
             }
 
 
@@ -275,8 +288,13 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
+        bool IsHistoGramTooSlow = false;
         public void DrawSpectrum()
         {
+            if (IsHistoGramTooSlow)
+            {
+                return;
+            }
             Stopwatch sw = new Stopwatch();
             sw.Start();
             for (int i = 0; i < 16; i++)
@@ -288,6 +306,8 @@ namespace Compton_GUI_WPF.ViewModel
                 SpectrumHistoModels[i] = histo.SpectrumData;
             }
             sw.Stop();
+            if (sw.ElapsedMilliseconds > 800)
+                IsHistoGramTooSlow = true;
             Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
         }
 
@@ -306,7 +326,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 foreach (var lmdatum in lmdata)
                 {
-                    temp1.Add(new MlpePositionInfo(lmdatum.TransformedInteractionPoint3D.X, lmdatum.TransformedInteractionPoint3D.Y));
+                    temp1.Add(new MlpePositionInfo(lmdatum.RelativeInteractionPoint3D.X - ModuleInfoViewModels[0].Offset.x, lmdatum.RelativeInteractionPoint3D.Y-ModuleInfoViewModels[0].Offset.y));
                 }
             }
             AbsorberPositionData = temp1;
@@ -317,7 +337,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 foreach (var lmdatum in lmdata)
                 {
-                    temp2.Add(new MlpePositionInfo(lmdatum.TransformedInteractionPoint3D.X, lmdatum.TransformedInteractionPoint3D.Y));
+                    temp2.Add(new MlpePositionInfo(lmdatum.RelativeInteractionPoint3D.X - ModuleInfoViewModels[8].Offset.x, lmdatum.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[8].Offset.y));
                 }
             }
             ScatterPositionData = temp2;
@@ -497,45 +517,53 @@ namespace Compton_GUI_WPF.ViewModel
         {
             Task.Run(() =>
             {
-                var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = true, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 12, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
+                if(ModuleInfoViewModels[0].IsModuleSet && ModuleInfoViewModels[8].IsModuleSet)
+                {
 
-                var scatterGain = new double[37]  {0.207583486310340,
-0.197378617654247 ,
-0.134143497193450 ,
-0.350795612936240 ,
-0.365945323071866 ,
-0.169767500915951 ,
-0.250029018792162 ,
-0.257436772257243 ,
-0.180262246045204 ,
-0.122534704286570 ,
-0.243337498004493 ,
-0.315226084314086 ,
-0.141924535715014 ,
-0.173801413648601 ,
-0.156002799209616 ,
-0.107450094661035 ,
-0.114231575985511 ,
-0.304549612177718 ,
-0.266789891182305 ,
-0.100228059111417 ,
-0.104187271753870 ,
-0.332072906087907 ,
-0.125365155392261 ,
-0.157917759109811 ,
-0.154776351938155 ,
-0.173901827136405 ,
-0.225933092606352 ,
-0.160176422879037 ,
-0.146448386501010 ,
-0.358212260296200 ,
-0.480430155445668 ,
-0.264496676194317 ,
-0.227795361479290 ,
-0.339992966549734 ,
-0.189348098309348 ,
-0.321090890371102 ,
-1.82850526010004  };
+                    LACC_Control_Static = new LACC_Control(ModuleInfoViewModels[0].Module, ModuleInfoViewModels[8].Module);
+                    IsLACCModuleInitiate = true;
+                    initiating = false;
+                    return;
+                }
+
+                var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = true, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 10, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
+                var scatterGain = new double[37]  {0.222287552011680,
+                                                    0.208847009962622,
+                                                    0.160835530297629,
+                                                    0.350623925414967,
+                                                    0.404254384165359,
+                                                    0.173114587164014,
+                                                    0.251973705604810,
+                                                    0.287514444819041,
+                                                    0.197784900587933,
+                                                    0.113205828176507,
+                                                    0.270750509096893,
+                                                    0.324814715062910,
+                                                    0.159132032020835,
+                                                    0.179033913500545,
+                                                    0.177842115156326,
+                                                    0.108344401828327,
+                                                    0.122989511991333,
+                                                    0.333935336242705,
+                                                    0.256168970319604,
+                                                    0.115470302451087,
+                                                    0.107632624571028,
+                                                    0.343022471533058,
+                                                    0.129540635721655,
+                                                    0.184271389706723,
+                                                    0.154867557833026,
+                                                    0.183742374044755,
+                                                    0.235758007303454,
+                                                    0.183618330027555,
+                                                    0.149858076110482,
+                                                    0.404494624248347,
+                                                    0.452139539299007,
+                                                    0.304594382211978,
+                                                    0.243182810827749,
+                                                    0.343234564555548,
+                                                    0.220940431055765,
+                                                    0.370428100393800,
+                                                    -19.3920305409253  };
                 var absorberGain = new double[37] { 0.547118426,
                                                     0.423998687,
                                                     0.426206901,
@@ -578,7 +606,7 @@ namespace Compton_GUI_WPF.ViewModel
                 Debug.WriteLine("Making Scatter Module");
                 TEST = "Making Scatter Module";
                 ModuleInfoViewModels[0] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffet { x = 0, y = 0, z = 0 },
+                                                            new LACC_Module.ModuleOffset { x = 0, y = -0.22, z = 0 },
                                                             new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                             scatterGain,
                                                             pmtOrderInfo,
@@ -587,11 +615,20 @@ namespace Compton_GUI_WPF.ViewModel
                 Debug.WriteLine("Making Abosrober Module");
                 TEST = "Making Absorber Module";
                 ModuleInfoViewModels[8] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffet { x = 0, y = 0, z = -150 },
+                                                            new LACC_Module.ModuleOffset { x = 0, y = -0.220, z = -0.250 },
                                                             new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                             absorberGain,
                                                             pmtOrderInfo,
                                                             Path.Combine(LUTFolderDirectory, "MonoAbsorberLUT.csv"));
+                if (!ModuleInfoViewModels[0].IsModuleSet || !ModuleInfoViewModels[8].IsModuleSet)
+                {
+
+                    LACC_Control_Static = new LACC_Control(ModuleInfoViewModels[0].Module, ModuleInfoViewModels[8].Module);
+                    IsLACCModuleInitiate = false;
+                    initiating = false;
+                    VMStatus = "Mono-Type Module Setting Failed";
+                    return;
+                }
 
                 LACC_Control_Static = new LACC_Control(ModuleInfoViewModels[0].Module, ModuleInfoViewModels[8].Module);
                 IsLACCModuleInitiate = true;
@@ -624,16 +661,9 @@ namespace Compton_GUI_WPF.ViewModel
             if (initiating == true)
                 return;
 
-            ModuleInfoViewModels = new ObservableCollection<ModuleInfoViewModel>();
-
-            for (int i = 0; i < 16; i++)
-            {
-                ModuleInfoViewModels.Add(new ModuleInfoViewModel());
-            }
 
             initiating = true;
             IsLACCModuleInitiate = false;
-            InitiateLACC();
             switch (this.selectedModuleInfo)
             {
                 case ModuleInfo.Mono:

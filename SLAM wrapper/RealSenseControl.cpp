@@ -9,6 +9,13 @@ RealsenseControl::RealsenseControl()
 	CurrentVideoFrame = new rs2::video_frame(nullptr);
 }
 
+RealsenseControl::~RealsenseControl()
+{
+	m_IsSLAMON = false;
+	m_IsPipeLineOn = false;
+	delete(CurrentVideoFrame);
+}
+
 std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose poseData)
 {
 
@@ -43,9 +50,15 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 	std::tuple<double, double, double> RGB_Color;
 	auto Texture_Coord = points.get_texture_coordinates();
 	auto Vertex = points.get_vertices();
+	Eigen::Matrix4d T265toLACCTransform;
+	T265toLACCTransform << -1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, -1, 0,
+		0, 0, 0, 1;
+
 
 	Eigen::Vector3d D436ToT265Coord = { -0.017, 0.03, 0 };
-	Eigen::Vector3d	TransPoseMat = { pose.translation.x, pose.translation.y, pose.translation.z };
+	Eigen::Vector3d	TransPoseMat = { -pose.translation.x, pose.translation.y, -pose.translation.z };
 	Eigen::Vector4d Quaternion = { pose.rotation.w, pose.rotation.x ,pose.rotation.y,pose.rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
 	Eigen::Matrix4d TransF; // Your Transformation Matrix
@@ -54,12 +67,14 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 	TransF.block<3, 1>(0, 3) = TransPoseMat;
 	for (int i = 0; i < points.size(); i++)
 	{
-		if (Texture_Coord[i].u > 0 && Texture_Coord[i].v > 0)// && (Vertex[i].x) * (Vertex[i].x) + (Vertex[i].y) * (Vertex[i].y) + (Vertex[i].z) * (Vertex[i].z) < 9)
+		if (Texture_Coord[i].u > 0 && Texture_Coord[i].v > 0 && Texture_Coord[i].u <1 && Texture_Coord[i].v <1)// && (Vertex[i].x) * (Vertex[i].x) + (Vertex[i].y) * (Vertex[i].y) + (Vertex[i].z) * (Vertex[i].z) < 9)
 		{
 			//===================================
 			// Mapping Depth Coordinates
 			// - Depth data stored as XYZ values
 			//===================================
+			if (-Vertex[i].y + D436ToT265Coord[1] > 0.7)
+				continue;
 			Eigen::Vector3d pointVector = { Vertex[i].x + D436ToT265Coord[0], -Vertex[i].y + D436ToT265Coord[1], -Vertex[i].z + D436ToT265Coord[2] };
 			cloud.points_.push_back(pointVector);
 
@@ -70,7 +85,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 		}
 
 	}
-	return std::make_tuple(cloud, TransF);
+	return std::make_tuple(cloud, TransF * T265toLACCTransform);
 }
 
 std::tuple<double, double, double> RealsenseControl::RGB_Texture(rs2::video_frame texture, rs2::texture_coordinate Texture_XY)
@@ -108,11 +123,11 @@ void RealsenseControl::SLAM_RT()
 
 	Eigen::Matrix4d T265toLACCTransform;
 	T265toLACCTransform << -1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, -1, 0,
-		0, 0, 0, 1;
+							0, 1, 0, 0,
+							0, 0, -1, 0,
+							0, 0, 0, 1;
 
-	int i = 0;
+	int i = 1;
 	while (m_IsSLAMON)
 	{
 		if (!m_QueueRealtimeCloudTrans.empty())
@@ -127,7 +142,7 @@ void RealsenseControl::SLAM_RT()
 
 				if (!(*CombinedCloud_ptr).HasPoints())
 				{
-					*CombinedCloud_ptr = (*TempPCL_T265.VoxelDownSample(ptCloud_Voxel)).Transform(T265toLACCTransform);
+					*CombinedCloud_ptr = (*TempPCL_T265.VoxelDownSample(ptCloud_Voxel)).Transform(T265toLACCTransform).Transform(TransMat_init);
 					m_SLAMEDPointCloud = *CombinedCloud_ptr;
 				}
 				else
@@ -136,7 +151,7 @@ void RealsenseControl::SLAM_RT()
 					open3d::pipelines::registration::RegistrationResult regResult;
 
 					*pointcloud_ptr = *TempPCL_T265.VoxelDownSample(ptCloud_Voxel);
-					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr).Transform(TransMat_init).Transform(T265toLACCTransform);
+					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr).Transform(T265toLACCTransform).Transform(TransMat_init);
 					m_SLAMEDPointCloud=*CombinedCloud_ptr;
 
 				};
@@ -162,6 +177,16 @@ void RealsenseControl::StartPipeLine()
 		0, 1, 0, 0,
 		0, 0, -1, 0,
 		0, 0, 0, 1;
+
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
+	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.1);
+	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 4.0);
+	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0);
+	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4);
+	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0);
+
 
 	while (m_IsPipeLineOn)
 	{
@@ -205,7 +230,7 @@ void RealsenseControl::StartPipeLine()
 				RealTimeCloudPose = PCL_Conversion(points, color, tempPoseData);
 				m_RTPointCloud = std::get<0>(RealTimeCloudPose).Transform(T265toLACCTransform);
 				std::chrono::duration<double> duration = std::chrono::high_resolution_clock::now() - timeCheck; //as second
-				if (m_IsSLAMON &&tempPoseData.tracker_confidence > 2 && duration.count() > 0.5)
+				if (m_IsSLAMON &&tempPoseData.tracker_confidence > 2 && duration.count() > 1.5)
 				{
 					timeCheck = std::chrono::high_resolution_clock::now();
 
