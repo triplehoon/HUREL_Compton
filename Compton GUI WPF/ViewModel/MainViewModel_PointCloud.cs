@@ -11,6 +11,7 @@ using System.Diagnostics;
 using GalaSoft.MvvmLight.Command;
 using System.Windows.Input;
 using HUREL.Compton;
+using System.Windows.Media.Media3D;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -97,6 +98,16 @@ namespace Compton_GUI_WPF.ViewModel
                     else 
                     {
                         RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
+                    }
+
+                    var marix3DElement = rsControl.GetPoseFrame();
+                   if (marix3DElement != null)
+                    {
+                        IsTrackingConfidence3 = true;
+                        CurrentPos = new Matrix3D(marix3DElement[0], marix3DElement[1], marix3DElement[2], marix3DElement[3],
+                                                marix3DElement[4], marix3DElement[5], marix3DElement[6], marix3DElement[7], 
+                                                marix3DElement[8], marix3DElement[9], marix3DElement[10], marix3DElement[11], 
+                                                marix3DElement[12], marix3DElement[13], marix3DElement[14], marix3DElement[15]);
                     }
                 }
                 catch
@@ -193,7 +204,40 @@ namespace Compton_GUI_WPF.ViewModel
         private void StopSLAM()
         {
             rsControl.StopSLAM();
+
+            var bpvc = new Vector3Collection();
+            var bpcc = new Color4Collection();
+           
+            bpvc.AddRange(SLAMPointCloud.Positions);
+            bpcc.AddRange(SLAMPointCloud.Colors);
+
+
+            Task.Run(() => AddMonoSlamListModeDataToComptonBP(bpvc, bpcc));
             IsSLAMOn = false;
+        }
+
+        public void AddMonoSlamListModeDataToComptonBP(Vector3Collection vector3s, Color4Collection color4s)
+        {
+            VMStatus = "Running BP To SLAM";
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            var timeSortedLMData = LACC_Control_Static.ListedLMData;
+                                    
+            Debug.WriteLine("LinQ Time: " + sw.ElapsedMilliseconds + " ms");
+            var bpData = Backprojection.BPtoPointCloudSLAM(vector3s, color4s, timeSortedLMData);
+            bpVectors = bpData.Item1.ToList();
+            bpColor4s = bpData.Item2.ToList();
+
+            var bpvc = new Vector3Collection();
+            var bpcc = new Color4Collection();
+
+            bpvc.AddRange(bpVectors);
+            bpcc.AddRange(bpColor4s);
+
+            Debug.WriteLine("Adding Elasped Time: " + sw.ElapsedMilliseconds + " ms");
+            VMStatus = "BP To SLAM is Done!";
+            SLAMBPPointCloud = new PointGeometry3D() { Positions = bpvc, Colors = bpcc };
         }
 
         public void GetSLAMPointCloud()
@@ -218,7 +262,7 @@ namespace Compton_GUI_WPF.ViewModel
                     {
 
                         vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
-                        cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 1));
+                        cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
                         id.Add(i);
                     }
                     SLAMPointCloud = new PointGeometry3D() { Positions = vc, Indices = id, Colors = cc };
@@ -238,5 +282,13 @@ namespace Compton_GUI_WPF.ViewModel
             get { return slamPointCloud; }
             set { slamPointCloud = value; OnPropertyChanged(nameof(SLAMPointCloud)); }
         }
+
+        private PointGeometry3D slamBPPointCloud;
+        public PointGeometry3D SLAMBPPointCloud
+        {
+            get { return slamBPPointCloud; }
+            set { slamBPPointCloud = value; OnPropertyChanged(nameof(SLAMBPPointCloud)); }
+        }
+
     }
 }

@@ -22,6 +22,7 @@ std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose po
 	Eigen::Vector4d Quaternion = { poseData.rotation.w, poseData.rotation.x ,poseData.rotation.y,poseData.rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
 	Eigen::Matrix4d T265toLACCTransform;
+	Eigen::Vector3d	TransPoseMat = { -poseData.translation.x, poseData.translation.y, -poseData.translation.z };
 	T265toLACCTransform << -1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, -1, 0,
@@ -29,12 +30,13 @@ std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose po
 	Eigen::Matrix4d TransF; // Your Transformation Matrix
 	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
 	TransF.block<3, 3>(0, 0) = RMat;
+	TransF.block<3, 1>(0, 3) = TransPoseMat;
 	TransF = TransF * T265toLACCTransform;
 	auto Matrix3Dtype = TransF.adjoint();
 	std::vector<double> matrix3DOneLine;
 	int idx = 0;
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
 			matrix3DOneLine.push_back(Matrix3Dtype(i, j));
 			idx++;
 		}

@@ -106,12 +106,12 @@ array<double> ^ SLAMwrapper::Realsense_Control::GetPoseFrame()
 	{
 		auto transform = realsenseVariables->getMatrix3DOneLineFromPoseData(realsenseVariables->posedata);
 
-		float^ x = realsenseVariables->posedata.translation.x;
+	/*	float^ x = realsenseVariables->posedata.translation.x;
 		float^ y = realsenseVariables->posedata.translation.y;
 		float^ z = realsenseVariables->posedata.translation.z;
 		double dx = System::Convert::ToDouble(x);
 		double dy = System::Convert::ToDouble(y);
-		double dz = System::Convert::ToDouble(z);
+		double dz = System::Convert::ToDouble(z);*/
 		//Console::WriteLine("x: {0} , y: {1} , z: {2}", dx* 100.0, dy*100, dz*100);
 		array<double>^ tempArray = gcnew array<double>(16);
 		for (int i = 0; i < 16; i++) {

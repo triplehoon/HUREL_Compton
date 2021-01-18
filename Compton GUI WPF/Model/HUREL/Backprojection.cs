@@ -47,9 +47,10 @@ namespace HUREL.Compton
             }
                 
             int[] counts = new int[vector3s.Count];
-            
-            
-            foreach(var lmData in lmDataList)
+            var templmlist = lmDataList;
+
+
+            foreach (var lmData in templmlist)
             {
                 if (lmData.Type == LMData.InteractionType.Compton)
                 {
@@ -66,8 +67,10 @@ namespace HUREL.Compton
                     }
                 }
             }
-            
-            int maximumCount = counts.Max();
+
+           
+
+                int maximumCount = counts.Max();
             int minimum = maximumCount*2/3;
             if (maximumCount < 5)
             {
@@ -89,6 +92,68 @@ namespace HUREL.Compton
             return tupleOut3;
 
         }
+
+        public static Tuple<Vector3Collection, Color4Collection> BPtoPointCloudSLAM(Vector3Collection vector3s, Color4Collection color4s, List<LMData> lmDataList)
+        {
+            Vector3Collection vector3sOut = new Vector3Collection();
+            Color4Collection color4sOut = new Color4Collection();
+
+            if (vector3s.Count == 0 || lmDataList.Count == 0)
+            {
+                var tupleOut1 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
+                return tupleOut1;
+            }
+
+            int[] counts = new int[vector3s.Count];
+            var templmlist = lmDataList;
+
+
+            foreach (var lmData in templmlist)
+            {
+                if (lmData.Type == LMData.InteractionType.Compton)
+                {
+
+                    for (int i = 0; i < vector3s.Count(); i = i + 100)
+                    {
+                        if (IsEffectedPoint(lmData.ScatterLMDataInfos.First().TransformedInteractionPoint3D, lmData.ScatterLMDataInfos.First().InteractionEnergy,
+                            lmData.AbsorberLMDataInfos.First().TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos.First().InteractionEnergy,
+                            vector3s[i].ToPoint3D(), 5))
+                        {
+                            counts[i]++;
+
+                        }
+                    }
+                }
+            }
+
+
+
+            int maximumCount = counts.Max();
+            int minimum = maximumCount * 2 / 3;
+            if (maximumCount < 5)
+            {
+                var tupleOut2 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
+                return tupleOut2;
+            }
+
+
+            Parallel.For(0, vector3s.Count(), (i) =>
+            {
+                if (counts[i] > minimum)
+                {
+                    vector3sOut.Add(vector3s[i]);
+                    color4sOut.Add(ColorScale(counts[i], minimum, maximumCount));
+                }
+            });
+
+            var tupleOut3 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
+            return tupleOut3;
+
+        }
+
+
+
+
 
         private static Color4 ColorScale(int idx, int minimum, int maximum)
         {

@@ -282,11 +282,53 @@ namespace Compton_GUI_WPF.ViewModel
                     {
                         Debug.WriteLine("CEHK");
                     }
+                  
+                   
                     check2 = item;
-                    LACC_Control_Static.AddListModeData(item, Matrix3D.Identity,isMLPEOn,minMLPE_Energy,maxMLPE_Energy);
+                    LACC_Control_Static.AddListModeData(item, CurrentPos,isMLPEOn,minMLPE_Energy,maxMLPE_Energy);
                 }
             }
         }
+
+        private Matrix3D currentPos = Matrix3D.Identity;
+        Matrix3D CurrentPos
+        {
+            get { return currentPos; }
+            set
+            {
+                currentPos = value;
+                SystemXPos = value.OffsetX;
+                SystemYPos = value.OffsetY;
+                SystemZPos = value.OffsetZ;
+            }
+        }
+
+        public bool isTrackingConfidence3 = false;
+        public bool IsTrackingConfidence3
+        {
+            get { return isTrackingConfidence3; }
+            set { isTrackingConfidence3 = value; OnPropertyChanged(nameof(IsTrackingConfidence3)); }
+        }
+        private double systemXPos;
+        public double SystemXPos
+        {
+            get { return systemXPos; }
+            set { systemXPos = value; OnPropertyChanged(nameof(SystemXPos)); }
+        }
+        private double systemYPos;
+        public double SystemYPos
+        {
+            get { return systemYPos; }
+            set { systemYPos = value; OnPropertyChanged(nameof(SystemYPos)); }
+        }
+
+        private double systemZPos;
+        public double SystemZPos
+        {
+            get { return systemZPos; }
+            set { systemZPos = value; OnPropertyChanged(nameof(SystemZPos)); }
+        }
+
 
         bool IsHistoGramTooSlow = false;
         public void DrawSpectrum()
