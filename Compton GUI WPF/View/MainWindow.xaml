@@ -11,6 +11,7 @@
         xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
         xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
          xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+
         mc:Ignorable="d"
         Title="HUREL Compton GUI" Height="900" Width="1600"
         syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"        

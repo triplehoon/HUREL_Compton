@@ -20,7 +20,7 @@ namespace HUREL.Compton.LACC
         QuadDualHead
     }
 
-    public record ChannelEnergy(int Channel, double Energy);
+    public record ModuleEnergy(int ModuleNum, double Energy);
     public class LACC_Control
     {
         public ModuleInfo Module;
@@ -32,8 +32,14 @@ namespace HUREL.Compton.LACC
         /// FPGA Channel 8 to 15. For mono index 0 is Channel 8 to 11
         /// </summary>
         public LACC_Module[/*Channel Numer*/] LACC_Absorber_Modules; 
+        /// <summary>
+        /// List of list-mode data
+        /// </summary>
         public List<LMData> ListedLMData = new List<LMData>();
-        public List<ChannelEnergy> EnergySpect = new List<ChannelEnergy>();
+        /// <summary>
+        /// Energy data by Module number
+        /// </summary>
+        public List<ModuleEnergy> ModulesEnergy = new List<ModuleEnergy>();
         
 
         /// <summary>
@@ -103,9 +109,9 @@ namespace HUREL.Compton.LACC
                     double scatterEcal = LACC_Scatter_Modules[0].GetEcal(scatter);
                     double absorberEcal = LACC_Absorber_Modules[0].GetEcal(absorber);
 
-                    double combinedEcal = scatterEcal + absorberEcal;                    
-                    EnergySpect.Add(new ChannelEnergy(0,scatterEcal));
-                    EnergySpect.Add(new ChannelEnergy(8, absorberEcal));
+                    double combinedEcal = scatterEcal + absorberEcal;
+                    ModulesEnergy.Add(new ModuleEnergy(0,scatterEcal));
+                    ModulesEnergy.Add(new ModuleEnergy(8, absorberEcal));
 
                     if (combinedEcal > minE && combinedEcal < maxE && isMLPEOn)
                     {
@@ -119,7 +125,7 @@ namespace HUREL.Compton.LACC
                 else if(scatterProd != 0 && absorberProd ==0)
                 {
                     double scatterEcal = LACC_Scatter_Modules[0].GetEcal(scatter);
-                    EnergySpect.Add(new ChannelEnergy(0, scatterEcal));
+                    ModulesEnergy.Add(new ModuleEnergy(0, scatterEcal));
 
                     if (scatterEcal > minE && scatterEcal < maxE && isMLPEOn)
                     {
@@ -132,7 +138,7 @@ namespace HUREL.Compton.LACC
                 else if(scatterProd == 0 && absorberProd != 0)
                 {
                     double absorberEcal = LACC_Absorber_Modules[0].GetEcal(absorber);
-                    EnergySpect.Add(new ChannelEnergy(8, absorberEcal));
+                    ModulesEnergy.Add(new ModuleEnergy(8, absorberEcal));
                 }
                 else
                 {
@@ -152,10 +158,14 @@ namespace HUREL.Compton.LACC
         public void ResetLMData()
         {
             ListedLMData = new List<LMData>();
-            EnergySpect = new List<ChannelEnergy>();
+            ModulesEnergy = new List<ModuleEnergy>();
             LMData.Reset();
         }
 
+        public void ResetModuleEnergy()
+        {
+            ModulesEnergy = new List<ModuleEnergy>();
+        }
     }
 
 

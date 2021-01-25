@@ -28,22 +28,12 @@ namespace Compton_GUI_WPF.ViewModel
     public partial class MainViewModel : INotifyPropertyChanged
     {
 
-        public static CRUXELLLACC FPGAControl;
+        public static LACC_Control LACC_Control_Static { get => lACC_Control_Static; set => lACC_Control_Static = value; }
+        private static LACC_Control lACC_Control_Static;
 
-        public static CRUXELLLACC.VariableInfo FPGAVariable;
-
-        public static LACC_Control LACC_Control_Static;
-
-        private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
-        public ModuleInfo SelecteModuleInfo 
-        { get { return selectedModuleInfo; } 
-            set { 
-                selectedModuleInfo = value; 
-            } 
-        }
-
-        private string CurrentPath = Directory.GetCurrentDirectory();
-        
+        /// <summary>
+        /// Contructor
+        /// </summary>
         public MainViewModel()
         {
             FPGAControl = new CRUXELLLACC();
@@ -53,19 +43,19 @@ namespace Compton_GUI_WPF.ViewModel
 
             FPGAControl.USBChangeHandler += UpdateDeviceList;
             FPGAControl.USBChange();
-            spectrumHistoModels = new ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>>();
+
+            SpectrumMaximumRangeByModuleNum = new ObservableCollection<int>();
+            SpectrumHistoModels = new ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>>();
             for(int i = 0; i <16; i++)
             {
-                spectrumHistoModels.Add(new List<SpectrumHisto.SpectrumHistoModel>());
+                SpectrumMaximumRangeByModuleNum.Add(2000);
+                SpectrumHistoModels.Add(new List<SpectrumHisto.SpectrumHistoModel>());
             }
+
+            
             BPPointCloud = new HelixToolkit.Wpf.SharpDX.PointGeometry3D();
 
             RTPointCloudTask =Task.Run(() => GetRealTimePointCloud());
-
-            //Messenger.Default.Register<WindowStateMessage>(this,
-            //    (action) => ReceiveIsEnableOpenFPGAWindow(action)
-            //    );
-
 
             ModuleInfoViewModels = new ObservableCollection<ModuleInfoViewModel>();
 
@@ -78,7 +68,18 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
 
+        private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
+        public ModuleInfo SelecteModuleInfo
+        {
+            get { return selectedModuleInfo; }
+            set
+            {
+                selectedModuleInfo = value;
+            }
+        }
 
+
+        private readonly string CurrentPath = Directory.GetCurrentDirectory();
 
         private RelayCommand mianWindowCloseCommand;
         public ICommand MianWindowCloseCommand
@@ -94,201 +95,6 @@ namespace Compton_GUI_WPF.ViewModel
            // rsControl.Dispose();
         }
 
-        private string test;
-        public string TEST
-        {
-            get { return test; }
-            set { test = value; OnPropertyChanged(nameof(TEST)); }
-        }
-
-
-
-        #region FPGA Setting Window
-        private object ReceiveIsEnableOpenFPGAWindow(WindowStateMessage action)
-        {
-            IsEnableOpenFPGAWindow = !action.state;
-            return null;
-        }
-        private bool isEnableOpenFPGAWindow;
-        public bool IsEnableOpenFPGAWindow
-        {
-            get { return isEnableOpenFPGAWindow; }
-            set { isEnableOpenFPGAWindow = value; OnPropertyChanged(nameof(IsEnableOpenFPGAWindow)); }
-        }
-
-        public bool CanOpenFPGAWindow()
-        {
-            return IsEnableOpenFPGAWindow;
-        }
-        #endregion
-
-        #region Setting
-
-        private CRUXELLLACC.DeviceInfo selectDevice;
-        public CRUXELLLACC.DeviceInfo SelectDevice
-        {
-            get
-            {
-                return selectDevice;
-            }
-            set
-            {
-                FPGAControl.SelectedDevice = value;
-                selectDevice = value;
-                OnPropertyChanged(nameof(SelectDevice));
-            }
-        }
-
-        private ObservableCollection<CRUXELLLACC.DeviceInfo> deviceInfos = new ObservableCollection<CRUXELLLACC.DeviceInfo>();
-        public ObservableCollection<CRUXELLLACC.DeviceInfo> DeviceInfos
-        {
-            get
-            {
-                return deviceInfos;
-            }
-            set
-            {
-                deviceInfos = value;
-                OnPropertyChanged(nameof(DeviceInfos));
-            }
-        }
-
-        private void UpdateDeviceList(object sender, EventArgs e)
-        {
-            DeviceInfos = new ObservableCollection<CRUXELLLACC.DeviceInfo>(FPGAControl.DeviceList);
-            SelectDevice = FPGAControl.SelectedDevice;
-            if (DeviceInfos.Count > 0)
-            {
-                IsSessionAvailable = true;
-            }
-            else
-            {
-                IsSessionAvailable = false;
-            }
-        }
-
-
-
-        private string fileName;
-        public string FileName
-        {
-            get
-            {
-                fileName = MainViewModel.FPGAVariable.FileName;
-                return fileName;
-            }
-            set
-            {
-                fileName = value;
-                MainViewModel.FPGAVariable.FileName = value;
-                OnPropertyChanged(nameof(FileName));
-            }
-        }
-
-
-        #endregion
-
-        #region Start or Stop USB
-
-        private RelayCommand startorStopSessionCommand;
-        public ICommand StartorStopSessionCommand
-        {
-            get { return (this.startorStopSessionCommand) ?? (this.startorStopSessionCommand = new RelayCommand(StartorStopSession, IsSessionAvailable)); }
-        }
-        private void StartorStopSession()
-        {
-            IsHistoGramTooSlow = false;
-            if (MeasurementTime == "")
-                return;
-            IsSessionAvailable = false;
-            if (!IsSessionStart)
-            {
-                if (!FPGAControl.SetVaribles(FPGAVariable))
-                {
-                    VMStatus = "Please configure FPGA.";
-                    IsSessionAvailable = true;
-                    return;
-                }
-                else
-                {
-                    VMStatus = "FPGA setting Start";
-
-                    string status;
-                    if (FPGAControl.Start_usb(out status))
-                    {
-                        IsSessionStart = true;
-                        StartTimer();
-                        IsAddingListModeData = true;
-                        AddListModeDataTask = new Task(() => AddListModeData());
-                        AddListModeDataTask.Start();
-                        
-                    }
-                    VMStatus = status;
-                }
-            }
-            else
-            {
-                VMStatus = FPGAControl.Stop_usb();
-                IsSessionStart = false;
-                IsAddingListModeData = false;
-                AddListModeDataTask.Wait();
-                timer.Stop();
-                RecordTimeSpan = TimeSpan.Zero;
-                Task taskDrawing = Task.Run(()=>DrawMLPEPositions());
-            }
-
-
-
-            IsSessionAvailable = true;
-        }
-
-        private bool isMLPEOn = false;
-        public bool IsMLPEOn
-        {
-            get { return isMLPEOn; }
-            set { isMLPEOn = value; OnPropertyChanged(nameof(IsMLPEOn)); }
-        }
-
-        private int minMLPE_Energy = 0;
-        public int MinMLPE_Energy
-        {
-            get { return minMLPE_Energy; }
-            set { minMLPE_Energy = value; OnPropertyChanged(nameof(MinMLPE_Energy)); }
-        }
-        private int maxMLPE_Energy = 100;
-        public int MaxMLPE_Energy
-        {
-            get { return maxMLPE_Energy; }
-            set { 
-                maxMLPE_Energy = value; 
-                OnPropertyChanged(nameof(MaxMLPE_Energy)); }
-        }
-
-
-        private Task AddListModeDataTask;
-        private bool IsAddingListModeData;
-        private void AddListModeData()
-        {
-            short[] check1;
-            short[] check2 = new short[256];
-            LACC_Control_Static.ResetLMData();
-            while (IsAddingListModeData)
-            {
-                short[] item;
-                while(FPGAControl.ShortArrayQueue.TryTake(out item))
-                {
-                    check1 = item;
-                    if(check1==check2)
-                    {
-                        Debug.WriteLine("CEHK");
-                    }
-                  
-                   
-                    check2 = item;
-                    LACC_Control_Static.AddListModeData(item, CurrentPos,isMLPEOn,minMLPE_Energy,maxMLPE_Energy);
-                }
-            }
-        }
 
         private Matrix3D currentPos = Matrix3D.Identity;
         Matrix3D CurrentPos
@@ -303,18 +109,21 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
+
         public bool isTrackingConfidence3 = false;
         public bool IsTrackingConfidence3
         {
             get { return isTrackingConfidence3; }
             set { isTrackingConfidence3 = value; OnPropertyChanged(nameof(IsTrackingConfidence3)); }
         }
+
         private double systemXPos;
         public double SystemXPos
         {
             get { return systemXPos; }
             set { systemXPos = value; OnPropertyChanged(nameof(SystemXPos)); }
         }
+
         private double systemYPos;
         public double SystemYPos
         {
@@ -329,36 +138,27 @@ namespace Compton_GUI_WPF.ViewModel
             set { systemZPos = value; OnPropertyChanged(nameof(SystemZPos)); }
         }
 
+        #region Draw Graph
 
-        bool IsHistoGramTooSlow = false;
-        public void DrawSpectrum()
+        private void DataUpdate()
         {
-            if (IsHistoGramTooSlow)
+            while (IsSessionStart)
             {
-                return;
+                DrawSpectrum();
+                if (RecordTimeSpan.TotalSeconds > 60 && IsMLPEOn)
+                {
+                    ResetSpectrum();
+                }
+                Thread.Sleep(1000);
             }
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            for (int i = 0; i < 16; i++)
-            {
-                var SelectedESpect = (from selESpect in LACC_Control_Static.EnergySpect
-                                      where selESpect.Channel == i
-                                      select selESpect.Energy).ToList();
-                SpectrumHisto histo = new SpectrumHisto(SelectedESpect, 405, 0, 2100);
-                SpectrumHistoModels[i] = histo.SpectrumData;
-            }
-            sw.Stop();
-            if (sw.ElapsedMilliseconds > 800)
-                IsHistoGramTooSlow = true;
-            Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
+            Debug.WriteLine("DataUpdate End");
         }
-
         public void DrawMLPEPositions()
         {
             var absorberLMData = (from LMData in LACC_Control_Static.ListedLMData
                                   select LMData.AbsorberLMDataInfos).ToList();
             var scatterLMData = (from LMData in LACC_Control_Static.ListedLMData
-                                  select LMData.ScatterLMDataInfos).ToList();
+                                 select LMData.ScatterLMDataInfos).ToList();
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -368,13 +168,13 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 foreach (var lmdatum in lmdata)
                 {
-                    temp1.Add(new MlpePositionInfo(lmdatum.RelativeInteractionPoint3D.X - ModuleInfoViewModels[0].Offset.x, lmdatum.RelativeInteractionPoint3D.Y-ModuleInfoViewModels[0].Offset.y));
+                    temp1.Add(new MlpePositionInfo(lmdatum.RelativeInteractionPoint3D.X - ModuleInfoViewModels[0].Offset.x, lmdatum.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[0].Offset.y));
                 }
             }
             AbsorberPositionData = temp1;
             //ScatterPositionData.Clear();
             var temp2 = new List<MlpePositionInfo>();
-           
+
             foreach (var lmdata in scatterLMData)
             {
                 foreach (var lmdatum in lmdata)
@@ -385,11 +185,9 @@ namespace Compton_GUI_WPF.ViewModel
             ScatterPositionData = temp2;
             sw.Stop();
             Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
-
-
-
-
         }
+
+
         public record MlpePositionInfo(double X, double Y);
 
         private List<MlpePositionInfo> absorberPositionData = new List<MlpePositionInfo>();
@@ -400,19 +198,44 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
         private List<MlpePositionInfo> scatterPositionData = new List<MlpePositionInfo>();
-        public List<MlpePositionInfo> ScatterPositionData 
-        { get { return scatterPositionData; } 
-           set { scatterPositionData = value; OnPropertyChanged(nameof(ScatterPositionData)); }
-        }
-
-
-
-        private ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> spectrumHistoModels;
-        public ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> SpectrumHistoModels
+        public List<MlpePositionInfo> ScatterPositionData
         {
-            get { return spectrumHistoModels; }
+            get { return scatterPositionData; }
+            set { scatterPositionData = value; OnPropertyChanged(nameof(ScatterPositionData)); }
         }
 
+        private RelayCommand resetSepctrumCommand;
+        public ICommand ResetSpectrumCommand
+        {
+            get { return (this.resetSepctrumCommand) ?? (this.resetSepctrumCommand = new RelayCommand(CloseMainWindow)); }
+        }
+        private void ResetSpectrum()
+        {
+            LACC_Control_Static.ResetModuleEnergy();
+        }
+
+        public ObservableCollection<int> SpectrumMaximumRangeByModuleNum { get; set; }
+
+        bool IsHistoGramTooSlow = false;
+        public void DrawSpectrum()
+        {
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            for (int i = 0; i < 16; i++)
+            {
+                var SelectedESpect = (from selESpect in LACC_Control_Static.ModulesEnergy
+                                      where selESpect.ModuleNum == i
+                                      select selESpect.Energy).ToList();
+                SpectrumHisto histo = new SpectrumHisto(SelectedESpect, 405, 0, SpectrumMaximumRangeByModuleNum[i]+100);
+                SpectrumHistoModels[i] = histo.SpectrumData;
+            }
+            sw.Stop();
+
+            Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
+        }
+        
+        public ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> SpectrumHistoModels{ get; set; }
         public class SpectrumHisto
         {
             public List<SpectrumHistoModel> SpectrumData = new List<SpectrumHistoModel>();
@@ -433,112 +256,28 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
-        private bool isSessionAvailable;
-        public bool IsSessionAvailable
-        {
-            get
-            {
-                bool allSessionAvailable = IsLACCModuleInitiate && isSessionAvailable;
-                return allSessionAvailable;
-            }
-            set
-            {
-                isSessionAvailable = value;
-                OnPropertyChanged(nameof(IsSessionAvailable));
-            }
-        }
-
-        private bool isSessionStart = false;
-        public bool IsSessionStart
-        {
-            get { return isSessionStart; }
-            set { isSessionStart = value; IsSesstionStop = !value; OnPropertyChanged(nameof(IsSessionStart)); }
-        }
-        private bool isSessionStop = true;
-        public bool IsSesstionStop
-        {
-            get { return isSessionStop; }
-            set { isSessionStop = value; OnPropertyChanged(nameof(IsSesstionStop)); }
-        }
-        private string measurementTime;
-        public string MeasurementTime
-        {
-            get
-            {
-                return measurementTime;
-            }
-            set
-            {
-                try
-                {
-                    FPGAVariable.RecordTime0x0a = Convert.ToInt32(value);
-                    MeasurementTimeSpan = TimeSpan.FromSeconds(FPGAVariable.RecordTime0x0a);
-                }
-                catch { MeasurementTimeSpan = TimeSpan.Zero; }
-                measurementTime = value;
-                OnPropertyChanged(nameof(MeasurementTime));
-            }
-        }
-        private TimeSpan measurementTimeSpan = TimeSpan.Zero;
-        public TimeSpan MeasurementTimeSpan
-        {
-            get { return measurementTimeSpan; }
-            set
-            {
-                measurementTimeSpan = value;
-                OnPropertyChanged(nameof(MeasurementTimeSpan));
-            }
-        }
-
-        private TimeSpan recordTimeSpan = TimeSpan.Zero;
-        public TimeSpan RecordTimeSpan
-        {
-            get { return recordTimeSpan; }
-            set
-            {
-
-                recordTimeSpan = value;
-                if (IsSessionStart && MeasurementTimeSpan == value)
-                {
-                    timer.Stop();
-                    Task stopSession = new Task(StartorStopSession);
-                    stopSession.Start();
-                    VMStatus = "Wait For Stop";
-                    stopSession.Wait();
-                    recordTimeSpan = TimeSpan.Zero;
-                    VMStatus = "Done!";
-                }
-                OnPropertyChanged(nameof(RecordTimeSpan));
-            }
-        }
-
-        private DispatcherTimer timer = new DispatcherTimer();
-        
-        private void StartTimer()
-        {
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(1);
-            timer.Tick += new EventHandler(TimerTick);
-            timer.Start();
-            Task.Run(()=>DataUpdate());
-        }
-
-        private void TimerTick(object sender, EventArgs e)
-        {
-            RecordTimeSpan = RecordTimeSpan.Add(TimeSpan.FromSeconds(1));
-        }
-
-        private void DataUpdate()
-        {
-            while (IsSessionStart)
-            {
-                DrawSpectrum();
-                Thread.Sleep(1000);
-            }
-            Debug.WriteLine("DataUpdate End");
-        }
-
         #endregion
+
+        #region FPGA Setting Window
+        private object ReceiveIsEnableOpenFPGAWindow(WindowStateMessage action)
+        {
+            IsEnableOpenFPGAWindow = !action.state;
+            return null;
+        }
+        private bool isEnableOpenFPGAWindow;
+        public bool IsEnableOpenFPGAWindow
+        {
+            get { return isEnableOpenFPGAWindow; }
+            set { isEnableOpenFPGAWindow = value; OnPropertyChanged(nameof(IsEnableOpenFPGAWindow)); }
+        }
+
+        public bool CanOpenFPGAWindow()
+        {
+            return IsEnableOpenFPGAWindow;
+        }
+        #endregion
+
+
 
         #region LACC Module Setting
 
@@ -646,22 +385,23 @@ namespace Compton_GUI_WPF.ViewModel
                                                     };
 
                 Debug.WriteLine("Making Scatter Module");
-                TEST = "Making Scatter Module";
+                VMStatus = "Making Scatter Module";
                 ModuleInfoViewModels[0] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffset { x = 0, y = -0.22, z = 0 },
+                                                            new LACC_Module.ModuleOffset { x = T265ToLACCCenterPosition.X, y = T265ToLACCCenterPosition.Y, z = T265ToLACCCenterPosition.Z },
                                                             new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                             scatterGain,
                                                             pmtOrderInfo,
                                                             Path.Combine(LUTFolderDirectory, "MonoScatterLUT.csv"));
 
                 Debug.WriteLine("Making Abosrober Module");
-                TEST = "Making Absorber Module";
+                VMStatus = "Making Absorber Module";
                 ModuleInfoViewModels[8] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffset { x = 0, y = -0.220, z = -0.250 },
+                                                            new LACC_Module.ModuleOffset { x = T265ToLACCCenterPosition.X, y = T265ToLACCCenterPosition.Y, z = T265ToLACCCenterPosition.Z },
                                                             new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                             absorberGain,
                                                             pmtOrderInfo,
                                                             Path.Combine(LUTFolderDirectory, "MonoAbsorberLUT.csv"));
+               
                 if (!ModuleInfoViewModels[0].IsModuleSet || !ModuleInfoViewModels[8].IsModuleSet)
                 {
 
@@ -691,7 +431,6 @@ namespace Compton_GUI_WPF.ViewModel
 
         public ObservableCollection<ModuleInfoViewModel> ModuleInfoViewModels { get; set; } //16 Channels
 
-
         private RelayCommand initiateLACCommand;
         public ICommand InitiateLACCommand
         {
@@ -720,7 +459,6 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
-
         private RelayCommand<string> ecalInfoChangedCommand;
         public ICommand EcalInfoChangedCommand
         {
@@ -744,11 +482,27 @@ namespace Compton_GUI_WPF.ViewModel
         #endregion
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         private RelayCommand<object> testCommand;
         public ICommand TestCommand
         {
             get { return (this.testCommand) ?? (this.testCommand = new RelayCommand<object>(TestFunction)); }
         }
+
         private void TestFunction(object obj)
         {
             var a = obj;
@@ -762,8 +516,6 @@ namespace Compton_GUI_WPF.ViewModel
             set { vmStatus = value; OnPropertyChanged(nameof(VMStatus)); }
         }
 
-
-
         private RelayCommand<TextCompositionEventArgs> tbPrivewTextInputOnlyNumericCommand;
         public ICommand TBPrivewTextInputOnlyNumericCommand
         {
@@ -773,15 +525,13 @@ namespace Compton_GUI_WPF.ViewModel
                     (this.tbPrivewTextInputOnlyNumericCommand = new RelayCommand<TextCompositionEventArgs>(TBPrivewTextInputOnlyNumeric));
             }
         }
+
         public void TBPrivewTextInputOnlyNumeric(TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
             Debug.WriteLine(e.Text);
         }
-
-
-
         
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)

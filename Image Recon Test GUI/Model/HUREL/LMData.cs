@@ -13,11 +13,7 @@ namespace HUREL.Compton
         /// </summary>
         public DateTime MeasurementTime { get; }
 
-        public class LMDataInfo
-        {
-            public Point3D TransformedInteractionPoint3D;
-            public double InteractionEnergy;
-        }
+        public record LMDataInfo(Point3D RelativeInteractionPoint3D, Point3D TransformedInteractionPoint3D, double InteractionEnergy);       
 
         public enum InteractionType
         {
@@ -46,101 +42,73 @@ namespace HUREL.Compton
             }
         }
 
-        public Matrix3D DeviceTransformMatrix { get; init; }
+        private Matrix3D deviceTransformMatrix;
+        public Matrix3D DeviceTransformMatrix
+        {
+            get { return deviceTransformMatrix; }
+            set 
+            {
+                deviceTransformMatrix = value;              
+            }
+        }
 
         #region Scatter
-
-        private List<LMDataInfo> scatterLMDataInfos = null;
         public List<LMDataInfo> ScatterLMDataInfos
         {
-            get 
-            {
-                if (scatterLMDataInfos != null)
-                    return scatterLMDataInfos;
-                else
-                {
-                    scatterLMDataInfos = new List<LMDataInfo>();
-
-                    for (int i = 0; i < ScatterInteractionCount; i++)
-                    {
-                        var tempLMDataInfo = new LMDataInfo { TransformedInteractionPoint3D = DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), InteractionEnergy = ScatterInteractionEnergys[i] };
-                        scatterLMDataInfos.Add(tempLMDataInfo);
-                    }
-                    return scatterLMDataInfos;
-                }
-            }
+            get; init;
         }
 
         /// <summary>
         /// Scatter Interaction Count
         /// </summary>
-        public int ScatterInteractionCount { get { return ScatterInteractionPoint3Ds.Count; } }
+        private int ScatterInteractionCount { get { return ScatterInteractionPoint3Ds.Count; } }
 
         /// <summary>
         /// Scatter Interaction Point in Liset
         /// </summary>
-        public List<Point3D> ScatterInteractionPoint3Ds { get; init; }
+        private List<Point3D> ScatterInteractionPoint3Ds { get; init; }
 
         /// <summary>
         /// Scatter Energy in keV
         /// </summary>
-        public List<double> ScatterInteractionEnergys { get; init; }
+        private List<double> ScatterInteractionEnergys { get; init; }
 
         /// <summary>
         /// Total Scatter Interaction Count
         /// </summary>
-        public static int TotalScatterInteractionCount = 0;
+        private static int TotalScatterInteractionCount = 0;
 
         /// <summary>
         /// Total Scater Energy List
         /// </summary>
-        public static List<double> TotalScatterInteractionEnergys = new List<double>();
+        private static List<double> TotalScatterInteractionEnergys = new List<double>();
         #endregion
 
         #region Abosrber
 
-
-        private List<LMDataInfo> absorberLMDataInfos = null;
-        public List<LMDataInfo> AbsorberLMDataInfos
-        {
-            get
-            {
-                if (absorberLMDataInfos != null)
-                    return absorberLMDataInfos;
-                else
-                {
-                    absorberLMDataInfos = new List<LMDataInfo>();
-
-                    for (int i = 0; i < AbsorberInteractionCount; i++)
-                    {
-                        var tempLMDataInfo = new LMDataInfo { TransformedInteractionPoint3D = DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]), InteractionEnergy = AbsorberInteractionEnergys[i] };
-                        absorberLMDataInfos.Add(tempLMDataInfo);
-                    }
-                    return absorberLMDataInfos;
-                }
-            }
-        }
+        
+        public List<LMDataInfo> AbsorberLMDataInfos{ get; init;}
 
         /// <summary>
         /// Abosober Interaction Count
         /// </summary>
-        public int AbsorberInteractionCount { get { return AbsorberInteractionPoint3Ds.Count; } }
+        private int AbsorberInteractionCount { get { return AbsorberInteractionPoint3Ds.Count; } }
 
         /// <summary>
         /// Abosober Interaction Point in List
         /// </summary>
-        public List<Point3D> AbsorberInteractionPoint3Ds { get; init; }
+        private List<Point3D> AbsorberInteractionPoint3Ds { get; init; }
 
         /// <summary>
         /// Abosober Energy in keV
         /// </summary>
-        public List<double> AbsorberInteractionEnergys { get; init; }
+        private List<double> AbsorberInteractionEnergys { get; init; }
 
         /// <summary>
         /// Total Abosober Interaction Count
         /// </summary>
-        public static int TotalAbsorberInteractionCount = 0;
-        public static List<double> TotalAbsorberInteractionEnergys = new List<double>();
+        private static int TotalAbsorberInteractionCount = 0;
+        private static List<double> TotalAbsorberInteractionEnergys = new List<double>();
 
         #endregion
 
@@ -178,6 +146,22 @@ namespace HUREL.Compton
             DeviceTransformMatrix = Matrix3D.Identity;
 
             TotalAbsorberInteractionCount++;
+
+            ScatterLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < ScatterInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(ScatterInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]);
+                ScatterLMDataInfos.Add(tempLMDataInfo);
+            }
+
+            AbsorberLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < AbsorberInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(AbsorberInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]), AbsorberInteractionEnergys[i]);
+                AbsorberLMDataInfos.Add(tempLMDataInfo);
+            }
         }
 
         public LMData(Point3D scatterPoint, Point3D absorberPoint, double scatterEnergy, double absorberEnergy)
@@ -214,6 +198,22 @@ namespace HUREL.Compton
             DeviceTransformMatrix = Matrix3D.Identity;
 
             TotalAbsorberInteractionCount++;
+
+            ScatterLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < ScatterInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(ScatterInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]);
+                ScatterLMDataInfos.Add(tempLMDataInfo);
+            }
+
+            AbsorberLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < AbsorberInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(AbsorberInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]), AbsorberInteractionEnergys[i]);
+                AbsorberLMDataInfos.Add(tempLMDataInfo);
+            }
         }
 
         public LMData(IEnumerable<Point3D> scatterPoint, IEnumerable<Point3D> absorberPoint, IEnumerable<double> scatterEnergy, IEnumerable<double> absorberEnergy)
@@ -243,6 +243,22 @@ namespace HUREL.Compton
             TotalAbsorberInteractionCount += AbsorberInteractionCount;
 
             DeviceTransformMatrix = Matrix3D.Identity;
+
+            ScatterLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < ScatterInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(ScatterInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]);
+                ScatterLMDataInfos.Add(tempLMDataInfo);
+            }
+
+            AbsorberLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < AbsorberInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(AbsorberInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]), AbsorberInteractionEnergys[i]);
+                AbsorberLMDataInfos.Add(tempLMDataInfo);
+            }
 
         }
 
@@ -277,6 +293,22 @@ namespace HUREL.Compton
             DeviceTransformMatrix = tranformation;
 
             TotalAbsorberInteractionCount++;
+
+            ScatterLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < ScatterInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(ScatterInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]);
+                ScatterLMDataInfos.Add(tempLMDataInfo);
+            }
+
+            AbsorberLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < AbsorberInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(AbsorberInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]), AbsorberInteractionEnergys[i]);
+                AbsorberLMDataInfos.Add(tempLMDataInfo);
+            }
         }
 
         public LMData(Point3D scatterPoint, Point3D absorberPoint, double scatterEnergy, double absorberEnergy, Matrix3D tranformation)
@@ -314,7 +346,23 @@ namespace HUREL.Compton
 
             DeviceTransformMatrix = tranformation;
 
-            TotalAbsorberInteractionCount++;      
+            TotalAbsorberInteractionCount++;
+
+            ScatterLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < ScatterInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(ScatterInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]);
+                ScatterLMDataInfos.Add(tempLMDataInfo);
+            }
+
+            AbsorberLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < AbsorberInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(AbsorberInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]), AbsorberInteractionEnergys[i]);
+                AbsorberLMDataInfos.Add(tempLMDataInfo);
+            }
         }
 
         public LMData( IEnumerable<Point3D> scatterPoint, IEnumerable<Point3D> absorberPoint, IEnumerable<double> scatterEnergy, IEnumerable<double> absorberEnergy, Matrix3D tranformation)
@@ -344,7 +392,23 @@ namespace HUREL.Compton
             TotalAbsorberInteractionCount += AbsorberInteractionCount;
 
             DeviceTransformMatrix = tranformation;
- 
+
+            ScatterLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < ScatterInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(ScatterInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]);
+                ScatterLMDataInfos.Add(tempLMDataInfo);
+            }
+
+            AbsorberLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < AbsorberInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(AbsorberInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]), AbsorberInteractionEnergys[i]);
+                AbsorberLMDataInfos.Add(tempLMDataInfo);
+            }
+
         }
 
         public LMData(IEnumerable<(Point3D,double)> scatterMLPEdata, IEnumerable<(Point3D, double)> absorberMLPEdata, Matrix3D tranformation)
@@ -383,6 +447,22 @@ namespace HUREL.Compton
             TotalAbsorberInteractionCount += AbsorberInteractionCount;
 
             DeviceTransformMatrix = tranformation;
+
+            ScatterLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < ScatterInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(ScatterInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(ScatterInteractionPoint3Ds[i]), ScatterInteractionEnergys[i]);
+                ScatterLMDataInfos.Add(tempLMDataInfo);
+            }
+
+            AbsorberLMDataInfos = new List<LMDataInfo>();
+
+            for (int i = 0; i < AbsorberInteractionCount; i++)
+            {
+                var tempLMDataInfo = new LMDataInfo(AbsorberInteractionPoint3Ds[i], DeviceTransformMatrix.Transform(AbsorberInteractionPoint3Ds[i]), AbsorberInteractionEnergys[i]);
+                AbsorberLMDataInfos.Add(tempLMDataInfo);
+            }
 
         }
 

@@ -23,6 +23,28 @@ namespace Compton_GUI_WPF.ViewModel
             get { return mlpeTime; }
             set { mlpeTime = value; OnPropertyChanged(nameof(MLPETime)); }
         }
+
+
+
+        private List<Vector3> bpVectors = new List<Vector3>();
+        private List<Color4> bpColor4s = new List<Color4>();
+
+        private static Realsense_Control rsControl = new Realsense_Control();
+
+        private Vector3D t265ToLACCCenterPosition;
+        public Vector3D T265ToLACCCenterPosition
+        {
+            get
+            {
+                return t265ToLACCCenterPosition;
+            }
+            set
+            {
+                value = t265ToLACCCenterPosition;
+                OnPropertyChanged(nameof(T265ToLACCCenterPosition));
+            }
+        }
+
         public void AddMonoRealTimeListModeDataToComptonBP(Vector3Collection vector3s, Color4Collection color4s)
         {
             Stopwatch sw = new Stopwatch();
@@ -37,17 +59,13 @@ namespace Compton_GUI_WPF.ViewModel
                                    where DateTime.Now.Subtract(lmData.MeasurementTime).TotalSeconds < mlpeTime
                                    select lmData).ToList();
             Debug.WriteLine("LinQ Time: " + sw.ElapsedMilliseconds + " ms");
-            var bpData =  Backprojection.BPtoPointCloud(vector3s, color4s, timeSortedLMData);
+            var bpData = ImageRecon.BPtoPointCloud(vector3s, timeSortedLMData, 5);
             bpVectors = bpData.Item1.ToList();
             bpColor4s = bpData.Item2.ToList();
             Debug.WriteLine("Adding Elasped Time: " + sw.ElapsedMilliseconds + " ms");
             isBPNeedUpdated = true;
         }
 
-        private List<Vector3> bpVectors = new List<Vector3>();
-        private List<Color4> bpColor4s = new List<Color4>();
-
-        private static Realsense_Control rsControl = new Realsense_Control();
 
         private Task RTPointCloudTask;
         private bool IsRealTimePointCloudOn = true;
@@ -76,31 +94,11 @@ namespace Compton_GUI_WPF.ViewModel
                         cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.8f));
                         //id.Add(i);
                     }
+                    
+                    
+                    RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
 
-
-                    if (isMLPEOn && isSessionStart && !isBPNeedUpdated)
-                    {
-                        var bpvc = new Vector3Collection();
-                        var bpcc = new Color4Collection();
-                        bpvc.AddRange(bpVectors);
-                        bpcc.AddRange(bpColor4s);
-                        BPPointCloud = new PointGeometry3D() { Positions = bpvc, Colors = bpcc };
-                        RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
-                    }
-                    else if(isMLPEOn && isSessionStart && isBPNeedUpdated)
-                    {
-                        isBPNeedUpdated = false;
-                        Task.Run(() => AddMonoRealTimeListModeDataToComptonBP(vc, cc));
-
-                        RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
-                        
-                    }
-                    else 
-                    {
-                        RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
-                    }
-
-                    var marix3DElement = rsControl.GetPoseFrame();
+                   var marix3DElement = rsControl.GetPoseFrame();
                    if (marix3DElement != null)
                     {
                         IsTrackingConfidence3 = true;
@@ -115,8 +113,7 @@ namespace Compton_GUI_WPF.ViewModel
                     Error++;
                     Trace.WriteLine("Error Count is " + Error);
                 }
-                if(isMLPEOn&& isSessionStart)
-                { }
+
                 Thread.Sleep(10);
 
 
@@ -124,97 +121,9 @@ namespace Compton_GUI_WPF.ViewModel
 
         }
 
-        private bool isBPNeedUpdated= true;
-
-        public void AddPoints()
-        {
-            var vc = new Vector3Collection();
-            var id = new IntCollection();
-            var cc = new Color4Collection();
-
-            vc.Add(new Vector3(0, 0, 0));
-            cc.Add(new Color4(1, 0, 0, 1));
-            id.Add(0);
-
-            vc.Add(new Vector3(2, 0, 0));
-            cc.Add(new Color4(1, 0, 0, 1));
-            id.Add(1);
-
-            vc.Add(new Vector3(0, 2, 0));
-            cc.Add(new Color4(1, 0, 0, 1));
-            id.Add(2);
-
-            vc.Add(new Vector3(0, 0, 2));
-            cc.Add(new Color4(0, 1, 0, 1));
-            id.Add(3);
-
-            vc.Add(new Vector3(2, 2, 0));
-            cc.Add(new Color4(0, 1, 0, 1));
-            id.Add(4);
-
-            vc.Add(new Vector3(0, 2, 2));
-            cc.Add(new Color4(0, 0, 1, 1));
-            id.Add(5);
-
-            vc.Add(new Vector3(2, 0, 2));
-            cc.Add(new Color4(0, 0, 1, 1));
-            id.Add(6);
-
-            RTPointCloud = new PointGeometry3D() { Positions = vc, Indices = id, Colors = cc };
-
-
-        }
-
-        private PointGeometry3D rtPointCloud;
-        public PointGeometry3D RTPointCloud
-        {
-            get { return rtPointCloud; }
-            set { rtPointCloud = value; OnPropertyChanged(nameof(RTPointCloud)); }
-        }
-
-        private PointGeometry3D bpPointCloud;
-        public PointGeometry3D BPPointCloud
-        {
-            get { return bpPointCloud; }
-            set { bpPointCloud = value; OnPropertyChanged(nameof(BPPointCloud)); }
-        }
 
 
 
-        private bool IsSLAMOn = false;
-
-        private RelayCommand startSLAMCommand;
-        public ICommand StartSLAMCommand
-        {
-            get { return (this.startSLAMCommand) ?? (this.startSLAMCommand = new RelayCommand(StartSLAM)); }
-        }
-        private void StartSLAM()
-        {
-            IsSLAMOn = true;
-            rsControl.StartSLAM();
-            Thread.Sleep(2000);
-            Task.Run(() => GetSLAMPointCloud()) ;
-        }
-        private RelayCommand stopSLAMCommand;
-        public ICommand StopSLAMCommand
-        {
-            get { return (this.stopSLAMCommand) ?? (this.stopSLAMCommand = new RelayCommand(StopSLAM)); }
-        }
-
-        private void StopSLAM()
-        {
-            rsControl.StopSLAM();
-
-            var bpvc = new Vector3Collection();
-            var bpcc = new Color4Collection();
-           
-            bpvc.AddRange(SLAMPointCloud.Positions);
-            bpcc.AddRange(SLAMPointCloud.Colors);
-
-
-            Task.Run(() => AddMonoSlamListModeDataToComptonBP(bpvc, bpcc));
-            IsSLAMOn = false;
-        }
 
         public void AddMonoSlamListModeDataToComptonBP(Vector3Collection vector3s, Color4Collection color4s)
         {
@@ -223,9 +132,9 @@ namespace Compton_GUI_WPF.ViewModel
             sw.Start();
 
             var timeSortedLMData = LACC_Control_Static.ListedLMData;
-                                    
+
             Debug.WriteLine("LinQ Time: " + sw.ElapsedMilliseconds + " ms");
-            var bpData = Backprojection.BPtoPointCloudSLAM(vector3s, color4s, timeSortedLMData);
+            var bpData = ImageRecon.BPtoPointCloudSLAM(vector3s, timeSortedLMData);
             bpVectors = bpData.Item1.ToList();
             bpColor4s = bpData.Item2.ToList();
 
@@ -275,6 +184,64 @@ namespace Compton_GUI_WPF.ViewModel
                 Thread.Sleep(50);
             }
         }
+
+        private bool isBPNeedUpdated= true;
+
+
+        private PointGeometry3D rtPointCloud;
+        public PointGeometry3D RTPointCloud
+        {
+            get { return rtPointCloud; }
+            set { rtPointCloud = value; OnPropertyChanged(nameof(RTPointCloud)); }
+        }
+
+        private PointGeometry3D bpPointCloud;
+        public PointGeometry3D BPPointCloud
+        {
+            get { return bpPointCloud; }
+            set { bpPointCloud = value; OnPropertyChanged(nameof(BPPointCloud)); }
+        }
+
+
+
+        private bool IsSLAMOn = false;
+
+        private RelayCommand startSLAMCommand;
+        public ICommand StartSLAMCommand
+        {
+            get { return (this.startSLAMCommand) ?? (this.startSLAMCommand = new RelayCommand(StartSLAM)); }
+        }
+        private void StartSLAM()
+        {
+            IsSLAMOn = true;
+            rsControl.StartSLAM();
+            Thread.Sleep(2000);
+            Task.Run(() => GetSLAMPointCloud()) ;
+        }
+       
+        
+        private RelayCommand stopSLAMCommand;
+        public ICommand StopSLAMCommand
+        {
+            get { return (this.stopSLAMCommand) ?? (this.stopSLAMCommand = new RelayCommand(StopSLAM)); }
+        }
+
+        private void StopSLAM()
+        {
+            rsControl.StopSLAM();
+
+            var bpvc = new Vector3Collection();
+            var bpcc = new Color4Collection();
+           
+            bpvc.AddRange(SLAMPointCloud.Positions);
+            bpcc.AddRange(SLAMPointCloud.Colors);
+
+
+            Task.Run(() => AddMonoSlamListModeDataToComptonBP(bpvc, bpcc));
+            IsSLAMOn = false;
+        }
+
+
 
         private PointGeometry3D slamPointCloud;
         public PointGeometry3D SLAMPointCloud

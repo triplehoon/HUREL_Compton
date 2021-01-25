@@ -107,8 +107,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
             Module.ModuleGain = ModuleGain.ToArray();
         }
-
-        private bool isModuleSet = false;
+      
         public bool IsModuleSet { get; set; }
 
         public ModuleOffset Offset { get; set; }
@@ -159,8 +158,8 @@ namespace Compton_GUI_WPF.ViewModel
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-
     }
+
     public class EcalInfo
     {
 
@@ -204,7 +203,5 @@ namespace Compton_GUI_WPF.ViewModel
             this.MeasuredEnergy = measuredEnergy;
             this.SourceName = sourceName;
         }
-
-
     }
 }
