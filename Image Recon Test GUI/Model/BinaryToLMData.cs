@@ -133,7 +133,7 @@ namespace HUREL.Compton
             byte[] chk2 = new byte[296];
 
             Task.Run(() => GenerateShortArrayBuffAsync());
-            Task.Run(() => AddListModeData());
+            Task addingLMData = Task.Run(() => AddListModeData());
             byte[] bytes = File.ReadAllBytes(fileDirectory);
 
 
@@ -182,8 +182,10 @@ namespace HUREL.Compton
                 }
             }
 
+           
             IsGenerateShortArrayBuff = false;
             IsAddingListModeData = false;
+            addingLMData.Wait();
 
         }
 

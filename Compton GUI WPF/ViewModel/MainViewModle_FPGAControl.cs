@@ -125,7 +125,9 @@ namespace Compton_GUI_WPF.ViewModel
                         StartTimer();
                         IsAddingListModeData = true;
                         AddListModeDataTask = new Task(() => AddListModeData());
+                        RealTimeImageReconTask = new Task(() => RealTimeImageRecon());
                         AddListModeDataTask.Start();
+                        RealTimeImageReconTask.Start();
 
                     }
                     VMStatus = status;
@@ -179,6 +181,7 @@ namespace Compton_GUI_WPF.ViewModel
             short[] check1;
             short[] check2 = new short[256];
             LACC_Control_Static.ResetLMData();
+            var Position = Matrix3D.Identity;
             while (IsAddingListModeData)
             {
                 short[] item;
@@ -190,15 +193,28 @@ namespace Compton_GUI_WPF.ViewModel
                         Debug.WriteLine("CEHK");
                     }
 
-
-                    check2 = item;
-                    LACC_Control_Static.AddListModeData(item, CurrentPos, isMLPEOn, minMLPE_Energy, maxMLPE_Energy);
+                    if (IsSLAMOn)
+                    LACC_Control_Static.AddListModeData(item, Position, isMLPEOn, minMLPE_Energy, maxMLPE_Energy);
                 }
             }
         }
 
 
-      
+
+        private bool isSavingBinaryFile = false;
+        public bool IsSavingBinaryFile
+        {
+            get
+            {                
+                return isSavingBinaryFile;
+            }
+            set
+            {
+                isSavingBinaryFile = value;
+                FPGAControl.IsSavingBinaryData = value;
+                OnPropertyChanged(nameof(IsSavingBinaryFile));
+            }
+        }
 
         private bool isSessionAvailable;
         public bool IsSessionAvailable

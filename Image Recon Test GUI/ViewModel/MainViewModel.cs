@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,7 +20,8 @@ namespace Image_Recon_Test_GUI.ViewModel
         {
             SetImageSpace();
             AddAxisPoints();
-
+            Bitmap hey;
+            hey = null;
             VMStatus = "VM Status";
         }
 
@@ -82,20 +84,74 @@ namespace Image_Recon_Test_GUI.ViewModel
             vector3s.Add(new SharpDX.Vector3());
             color4s.Add(new SharpDX.Color4(0, 0, 0, 1));
 
-            for (int i = 1; i < 20; i++)
+            for (int i = 1; i < 50; i++)
             {
-                vector3s.Add(new SharpDX.Vector3() { X = 0.1f * i });
-                color4s.Add(new SharpDX.Color4(1,0,0,1));
-                vector3s.Add(new SharpDX.Vector3() { Y = 0.1f * i });
-                color4s.Add(new SharpDX.Color4(0, 1, 0, 1));
-                vector3s.Add(new SharpDX.Vector3() { Z = 0.1f * i });
-                color4s.Add(new SharpDX.Color4(0, 0, 1, 1));
+                if (i % 10 == 0)
+                {
+                    vector3s.Add(new SharpDX.Vector3() { X = 0.1f * i });
+                    color4s.Add(new SharpDX.Color4(0, 1, 1, 1));
+                    vector3s.Add(new SharpDX.Vector3() { Y = 0.1f * i });
+                    color4s.Add(new SharpDX.Color4(1, 0, 1, 1));
+                    vector3s.Add(new SharpDX.Vector3() { Z = 0.1f * i });
+                    color4s.Add(new SharpDX.Color4(1, 1, 0, 1));
+                }
+                else
+                {
+                    vector3s.Add(new SharpDX.Vector3() { X = 0.1f * i });
+                    color4s.Add(new SharpDX.Color4(1, 0, 0, 1));
+                    vector3s.Add(new SharpDX.Vector3() { Y = 0.1f * i });
+                    color4s.Add(new SharpDX.Color4(0, 1, 0, 1));
+                    vector3s.Add(new SharpDX.Vector3() { Z = 0.1f * i });
+                    color4s.Add(new SharpDX.Color4(0, 0, 1, 1));
+                }
             }
             
 
             AxisPoint = new PointGeometry3D() { Positions = vector3s, Colors = color4s };
 
         }
+
+        private double bpAngleThershold = 5;
+        public double BPAngleThreshold
+        {
+            get 
+            { 
+                return bpAngleThershold;
+            }
+            set
+            {
+                bpAngleThershold = value;
+                OnPropertyChanged(nameof(BPAngleThreshold)); 
+            }
+        }
+
+        private double bpMinCountPercent = 0;
+        public double BPMinCountPercent
+        {
+            get 
+            { 
+                return bpMinCountPercent; 
+            }
+            set 
+            { 
+                if (value >= 1)
+                {
+                    bpMinCountPercent = 1;
+                }
+                else if (value < 0)
+                {
+                    bpMinCountPercent = 0;
+                }
+                else
+                {
+                    bpMinCountPercent = value;
+                }
+
+                OnPropertyChanged(nameof(BPMinCountPercent));
+                
+            }
+        }
+
 
         private RelayCommand drawBPCommand;
         public ICommand DrawBPCommand
@@ -109,15 +165,13 @@ namespace Image_Recon_Test_GUI.ViewModel
 
             Task.Run(() =>
             {
-                var bpData = ImageRecon.BPtoPointCloud(ImageSpace, binaryToLMData.LACC.ListedLMData, 5);
+                var bpData = ImageRecon.BPtoPointCloud(ImageSpace, binaryToLMData.LACC.ListedLMData, BPAngleThreshold,BPMinCountPercent);
                 var bpVectors = bpData.Item1;
                 var bpColor4s = bpData.Item2;
 
                 ReconPoint = new PointGeometry3D() { Positions = bpVectors, Colors = bpColor4s };
                 VMStatus = "Drawing BP Done";
             });
-
-            
         }
 
 

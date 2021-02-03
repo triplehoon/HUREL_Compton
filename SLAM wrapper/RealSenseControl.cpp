@@ -1,37 +1,83 @@
-
 #include "RealsenseControl.h"
+
 
 
 
 RealsenseControl::RealsenseControl()
 {
+	
+	T265toLACCTransform << -1, 0, 0, 0,
+							0, 1, 0, 0,
+							0, 0, -1, 0,
+							0, 0, 0, 1;
 	m_IsSLAMON = false;
-	CurrentVideoFrame = new rs2::video_frame(nullptr);
 }
 
 RealsenseControl::~RealsenseControl()
 {
 	m_IsSLAMON = false;
 	m_IsPipeLineOn = false;
-	delete(CurrentVideoFrame);
+}
+
+bool RealsenseControl::InitiateRealsense(std::string* message)
+{
+	try {
+		ctx = rs2::context();
+
+		cfgD435 = rs2::config();
+		//cfgD435.enable_device("935322071433");	
+		cfgD435.enable_stream(RS2_STREAM_COLOR, 1920, 1080, RS2_FORMAT_BGR8, 30);
+		cfgD435.enable_stream(RS2_STREAM_DEPTH, 848, 480, RS2_FORMAT_Z16, 30);
+		pipeD435 = rs2::pipeline();
+
+		cfgT265 = rs2::config();
+		cfgT265.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
+		pipeT265 = rs2::pipeline(ctx);
+		Sleep(1000);
+		pipeD435.start(cfgD435);
+		pipeT265.start(cfgT265);
+
+		pipeD435.stop();
+		pipeT265.stop();
+	}
+	catch (const rs2::camera_disconnected_error& e)
+	{
+		*message = "Camera was disconnected! Please connect it back";
+		return false;
+		// wait for connect event
+	}
+	// continue with more general cases
+	catch (const rs2::recoverable_error& e)
+	{
+		*message = "Operation failed, please try again";
+		return false;
+	}
+	// you can also catch "anything else" raised from the library by catching rs2::error
+	catch (const rs2::error& e)
+	{
+		*message = "Some other error occurred!";
+		return false;
+	}
+
+	*message = "Success";
+	return true;
 }
 
 std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose poseData)
 {
-
+	Eigen::Matrix4d S_T265toLACCTransform; 
+	S_T265toLACCTransform << -1, 0, 0, 0,
+							0, 1, 0, 0,
+							0, 0, -1, 0,
+							0, 0, 0, 1;
 	Eigen::Vector4d Quaternion = { poseData.rotation.w, poseData.rotation.x ,poseData.rotation.y,poseData.rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
-	Eigen::Matrix4d T265toLACCTransform;
-	Eigen::Vector3d	TransPoseMat = { -poseData.translation.x, poseData.translation.y, -poseData.translation.z };
-	T265toLACCTransform << -1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, -1, 0,
-		0, 0, 0, 1;
+	Eigen::Vector3d	TransPoseMat = { poseData.translation.x, poseData.translation.y, poseData.translation.z };
 	Eigen::Matrix4d TransF; // Your Transformation Matrix
 	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
 	TransF.block<3, 3>(0, 0) = RMat;
 	TransF.block<3, 1>(0, 3) = TransPoseMat;
-	TransF = TransF * T265toLACCTransform;
+	TransF = S_T265toLACCTransform * TransF;
 	auto Matrix3Dtype = TransF.adjoint();
 	std::vector<double> matrix3DOneLine;
 	int idx = 0;
@@ -52,17 +98,11 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 	std::tuple<double, double, double> RGB_Color;
 	auto Texture_Coord = points.get_texture_coordinates();
 	auto Vertex = points.get_vertices();
-	Eigen::Matrix4d T265toLACCTransform;
-	T265toLACCTransform << -1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, -1, 0,
-		0, 0, 0, 1;
-
 
 	Eigen::Vector3d D436ToT265Coord = { -0.017, 0.03, 0 };
-	Eigen::Vector3d	TransPoseMat = { -pose.translation.x, pose.translation.y, -pose.translation.z };
 	Eigen::Vector4d Quaternion = { pose.rotation.w, pose.rotation.x ,pose.rotation.y,pose.rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
+	Eigen::Vector3d	TransPoseMat = { pose.translation.x, pose.translation.y, pose.translation.z };
 	Eigen::Matrix4d TransF; // Your Transformation Matrix
 	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
 	TransF.block<3, 3>(0, 0) = RMat;
@@ -87,7 +127,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 		}
 
 	}
-	return std::make_tuple(cloud, TransF * T265toLACCTransform);
+	return std::make_tuple(cloud, T265toLACCTransform * TransF);
 }
 
 std::tuple<double, double, double> RealsenseControl::RGB_Texture(rs2::video_frame texture, rs2::texture_coordinate Texture_XY)
@@ -116,18 +156,13 @@ std::tuple<double, double, double> RealsenseControl::RGB_Texture(rs2::video_fram
 	return std::tuple<double, double, double>(NT1, NT2, NT3);
 }
 
-void RealsenseControl::SLAM_RT()
+void RealsenseControl::SLAMPipeline()
 {
 	std::shared_ptr<open3d::geometry::PointCloud > CombinedCloud_ptr(new open3d::geometry::PointCloud);
 	std::shared_ptr<open3d::geometry::PointCloud> pointcloud_ptr(new open3d::geometry::PointCloud);
 
 	double ptCloud_Voxel = 0.05;
-
-	Eigen::Matrix4d T265toLACCTransform;
-	T265toLACCTransform << -1, 0, 0, 0,
-							0, 1, 0, 0,
-							0, 0, -1, 0,
-							0, 0, 0, 1;
+	double Cominbed_ptCloud_Voxel = 0.1;
 
 	int i = 1;
 	while (m_IsSLAMON)
@@ -138,25 +173,21 @@ void RealsenseControl::SLAM_RT()
 			m_QueueRealtimeCloudTrans.pop();
 
 			if (i > 0) {
-				auto TempPCL_T265 = std::get<0>(pointPose);
+				auto TempPCL_T265 = std::get<0>(pointPose).Transform(T265toLACCTransform); //Change alignment from T265 to LACC
 				Eigen::Matrix4d TransMat_init = std::get<1>(pointPose);
 
 
 				if (!(*CombinedCloud_ptr).HasPoints())
 				{
-					*CombinedCloud_ptr = (*TempPCL_T265.VoxelDownSample(ptCloud_Voxel)).Transform(T265toLACCTransform).Transform(TransMat_init);
-					m_SLAMEDPointCloud = *CombinedCloud_ptr;
+					*CombinedCloud_ptr = (*TempPCL_T265.VoxelDownSample(ptCloud_Voxel)).Transform(TransMat_init);
+					m_SLAMEDPointCloud = *CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel);
 				}
 				else
 				{
-					std::cerr << "resgitration start" << std::endl;
-					open3d::pipelines::registration::RegistrationResult regResult;
-
 					*pointcloud_ptr = *TempPCL_T265.VoxelDownSample(ptCloud_Voxel);
-					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr).Transform(T265toLACCTransform).Transform(TransMat_init);
-					m_SLAMEDPointCloud=*CombinedCloud_ptr;
-
-				};
+					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr).Transform(TransMat_init);;
+					m_SLAMEDPointCloud = *CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel);
+				}
 
 			}
 
@@ -166,34 +197,37 @@ void RealsenseControl::SLAM_RT()
 }
 
 
-
-
-
-
-void RealsenseControl::StartPipeLine()
+void RealsenseControl::RealsensesPipeline()
 {
+	m_Posedata = rs2_pose();
 	auto timeCheck = std::chrono::high_resolution_clock::now();
 	rs2::pose_frame pose_frame(nullptr);
-	Eigen::Matrix4d T265toLACCTransform;
-	T265toLACCTransform << -1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, -1, 0,
-		0, 0, 0, 1;
 
 	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
-	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.1);
+	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.2);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 4.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
-	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4);
-	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 15);
 	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4);
 	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0);
 
 
+
+	pipelines.clear();
+	
+	rs2::pipeline_profile pipe_profile_D435 = pipeD435.start(cfgD435);
+	/*auto depth_device = pipe_profile_D435.get_device().query_sensors()[0];
+	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_MEDIUM_DENSITY);
+	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);*/
+	pipeT265.start(cfgT265);
+	pipelines.emplace_back(pipeD435);
+	pipelines.emplace_back(pipeT265);
+
+	Sleep(1000);
+
 	while (m_IsPipeLineOn)
 	{
-
-
 		for (auto&& pipe : pipelines) // loop over pipelines
 		{
 			auto frames = pipe.wait_for_frames();
@@ -202,13 +236,15 @@ void RealsenseControl::StartPipeLine()
 			auto depth = frames.get_depth_frame();
 			auto pose = frames.get_pose_frame();
 
+		
 			if (color) {
-				CurrentVideoFrame = &color;
+				m_CurrentVideoFrame = color;				
 				pc.map_to(color);
 			}
 			if (depth) {
-				//System::Diagnostics::Debug::WriteLine("Frame");
+				//System::Diagnostics::Debug::WriteLine("Frame");			
 				rs2::frame depth2 = depth;
+				
 				depth2 = dec_filter.process(depth2);
 				depth2 = thr_filter.process(depth2);
 				depth2 = spat_filter.process(depth2);
@@ -222,26 +258,47 @@ void RealsenseControl::StartPipeLine()
 			if (points && pose_frame && color)
 			{
 				rs2_pose tempPoseData = pose_frame.get_pose_data();
-				posedata = tempPoseData;
+				m_Posedata = tempPoseData;
 				rs2::pose_frame null_pose_frame(nullptr);
 				pose_frame = null_pose_frame;
 				int trackerConfidence = tempPoseData.tracker_confidence;
 
 
+
+				/*Eigen::Vector4d Quaternion = { tempPoseData.rotation.w, tempPoseData.rotation.x , tempPoseData.rotation.y, tempPoseData.rotation.z };
+				Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
+				Eigen::Vector3d	TransPoseMat = { tempPoseData.translation.x, tempPoseData.translation.y, tempPoseData.translation.z };
+				Eigen::Matrix4d TransF; // Your Transformation Matrix
+				TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
+				TransF.block<3, 3>(0, 0) = RMat;
+				TransF.block<3, 1>(0, 3) = TransPoseMat;*/
+
+
 				//printf("tracker_confidence is %d. iter: %d \n ", tempPoseData.tracker_confidence, i);
-				RealTimeCloudPose = PCL_Conversion(points, color, tempPoseData);
-				m_RTPointCloud = std::get<0>(RealTimeCloudPose).Transform(T265toLACCTransform);
+				m_RealTimeCloudPose = PCL_Conversion(points, color, tempPoseData);
+				m_RTPointCloud = std::get<0>(m_RealTimeCloudPose).Transform(T265toLACCTransform);
 				std::chrono::duration<double> duration = std::chrono::high_resolution_clock::now() - timeCheck; //as second
+				
 				if (m_IsSLAMON &&tempPoseData.tracker_confidence > 2 && duration.count() > 1.5)
 				{
 					timeCheck = std::chrono::high_resolution_clock::now();
 
-					m_QueueRealtimeCloudTrans.push(RealTimeCloudPose);
+					m_QueueRealtimeCloudTrans.push(m_RealTimeCloudPose);
 					printf("Push QUEUE");
 				}
 			}
 		}
 	}
-}
 
+
+	m_Posedata = rs2_pose();
+	
+	pipeD435.stop();
+	pipeT265.stop();
+
+	m_CurrentVideoFrame = rs2::video_frame(nullptr);
+
+	Sleep(1000);
+	
+}
 

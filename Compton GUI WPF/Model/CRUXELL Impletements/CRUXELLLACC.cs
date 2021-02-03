@@ -41,7 +41,6 @@ namespace HUREL.Compton
 
 
         private Task ListenUBSAsync;
-        private Thread ListenUSBThread;
         private Task ParsingUSBAsync;
         private Task GenerateShortBufferAsyn;
 
@@ -67,10 +66,10 @@ namespace HUREL.Compton
         private int PPX;
         private int IsoPktBlockSize;
         private int Successes;
-        private int Failures;
-        private int p_head = 0; // test2_buffer의 50개중 몇번째인지
-        private int p_tail = 0;
-        private int i_head = 0; // 1메가 배열 내부의 인덱스
+        //private int Failures = 0;
+        //private int p_head = 0; // test2_buffer의 50개중 몇번째인지
+        //private int p_tail = 0;
+        //private int i_head = 0; // 1메가 배열 내부의 인덱스
         private int p_error = 0;
         private static byte DefaultBufInitValue = 0xA5;
         private DateTime t1, t2;
@@ -230,7 +229,7 @@ namespace HUREL.Compton
         public CRUXELLLACC()
         {
             Init_data_and_buffer();
-            Init_USB();
+            //Init_USB();
         }
 
         public void Dispose()
@@ -542,9 +541,13 @@ namespace HUREL.Compton
             handleException = new ExceptionCallback(ThreadException);
 
             // Create the list of USB devices attached to the CyUSB3.sys driver.
-            UsbDevices = new USBDeviceList(CyConst.DEVICES_CYUSB);
-
-            SelectedDevice = new DeviceInfo(); ;
+            try
+            {
+                UsbDevices = new USBDeviceList(CyConst.DEVICES_CYUSB);
+            }
+            catch { }
+            SelectedDevice = new DeviceInfo(); 
+            
             //Assign event handlers for device attachment and device removal.
             UsbDevices.DeviceAttached += new EventHandler(usbDevices_DeviceAttached);
             UsbDevices.DeviceRemoved += new EventHandler(usbDevices_DeviceRemoved);
@@ -1017,7 +1020,10 @@ namespace HUREL.Compton
                         // Pre-load the queue with a request
                         int len = BufSz;
                         if (EndPoint.BeginDataXfer(ref cBufs[j], ref xBufs[j], ref len, ref oLaps[j]) == false)
-                            Failures = 5;// Failures++;
+                        {
+
+                        }
+                            //Failures = 5;// Failures++;
                     }
                     j++;
                 }
@@ -1080,7 +1086,7 @@ namespace HUREL.Compton
             int pre_successes = 0;
 
             Successes = 0;
-            Failures = 0;
+            //Failures = 0;
 
             XferBytes = 0;
             t1 = DateTime.Now;
@@ -1156,7 +1162,7 @@ namespace HUREL.Compton
                             }
                             else
                             {
-                                Failures = 3;// Failures++;
+                                //Failures = 3;// Failures++;
                             }
                         }
                     }
@@ -1179,7 +1185,7 @@ namespace HUREL.Compton
                 // Re-submit this buffer into the queue
                 len = BufSz;
                 if (EndPoint.BeginDataXfer(ref cBufs[k], ref xBufs[k], ref len, ref oLaps[k]) == false)
-                    Failures = 4;// Failures++;
+                    //Failures = 4;// Failures++;
 
                 k++;
                 if (k == QueueSz)  // Only update displayed stats once each time through the queue

@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SLAM wrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -27,24 +24,21 @@
     <ClInclude Include="RealsenseControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ComptonBP.h">
+    <ClInclude Include="RealsenseControlWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SLAM wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AssemblyInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RealSenseControl.cpp">
+    <ClCompile Include="RealsenseControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ComptonBP.cpp">
+    <ClCompile Include="RealsenseControlWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

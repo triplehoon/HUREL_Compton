@@ -39,6 +39,7 @@ namespace HUREL.Compton
 
 
         //}
+        public bool IsSavingBinaryData;
         private void ParsingCyusbBufferAsync()
         {
 
@@ -60,7 +61,7 @@ namespace HUREL.Compton
                 {
 
 
-                    if(flag==2)
+                    if(flag==2 && IsSavingBinaryData)
                     { 
                         writer.Write(item);
                         if (DataInQueue.Count + 1 % 20==0)

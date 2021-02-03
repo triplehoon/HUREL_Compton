@@ -113,21 +113,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ComptonBP.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RealsenseControl.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="SLAM wrapper.h" />
+    <ClInclude Include="RealsenseControlWrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="ComptonBP.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="RealSenseControl.cpp" />
-    <ClCompile Include="SLAM wrapper.cpp" />
+    <ClCompile Include="RealsenseControl.cpp" />
+    <ClCompile Include="RealsenseControlWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />
@@ -136,14 +134,14 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="HUREL-Compton-Class">
-      <HintPath>E:\OneDrive - 한양대학교\01.Hurel\01.현재작업\20201203 Comtpon GUI\Compton GUI Main\HUREL Compton\HUREL-Compton-Class\bin\Release\net5.0\HUREL-Compton-Class.dll</HintPath>
-    </Reference>
     <Reference Include="Intel.RealSense">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Intel RealSense SDK 2.0\bin\x64\Intel.Realsense.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Windows.Design.Extensibility, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.Windows.Design.Interaction, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="System.Drawing.Common">
+      <HintPath>C:\Users\tpgns\.nuget\packages\system.drawing.common\5.0.0\ref\netcoreapp3.0\System.Drawing.Common.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,15 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 using HelixToolkit.Wpf.SharpDX;
-using HUREL.Compton;
 using SharpDX;
 
 namespace HUREL.Compton
 {
-    public static class ImageRecon
-    {       
-        private static bool IsEffectedPoint(Point3D scatterPhotonPosition, double scatterPhotonEnergy, 
-            Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition, double angleThreshold = 5)
+    public class ImageRecon
+    {
+        private static bool IsEffectedBPPoint(Point3D scatterPhotonPosition, double scatterPhotonEnergy,
+           Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition, double angleThreshold = 5)
         {
             double comptonCal = 1 - 511 * scatterPhotonEnergy / absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy);
             if (comptonCal >= 1 || comptonCal <= -1)
@@ -55,16 +54,16 @@ namespace HUREL.Compton
             float sizeY = Convert.ToSingle(Math.Round(maxY - minY));
             float sizeZ = Convert.ToSingle(Math.Round(maxZ - minZ));
 
-            if(voxelSize > sizeX || voxelSize > sizeY || voxelSize > sizeZ)
+            if (voxelSize > sizeX || voxelSize > sizeY || voxelSize > sizeZ)
             {
                 ArgumentOutOfRangeException argumentOutOfRangeException = new ArgumentOutOfRangeException("Voxel Size is too large");
                 throw argumentOutOfRangeException;
-                
+
             }
 
-            int xBinSize = Convert.ToInt32(Math.Ceiling(sizeX / voxelSize));
-            int yBinSize = Convert.ToInt32(Math.Ceiling(sizeY / voxelSize));
-            int zBinSize = Convert.ToInt32(Math.Ceiling(sizeZ / voxelSize));
+            int xBinSize = Convert.ToInt32(Math.Floor(sizeX / voxelSize));
+            int yBinSize = Convert.ToInt32(Math.Floor(sizeY / voxelSize));
+            int zBinSize = Convert.ToInt32(Math.Floor(sizeZ / voxelSize));
 
             for (int x = 0; x < xBinSize; x++)
             {
@@ -74,9 +73,9 @@ namespace HUREL.Compton
                     {
                         imageSpace.Add(new Vector3()
                         {
-                            X = x * voxelSize + minX,
-                            Y = y * voxelSize + minY,
-                            Z = z * voxelSize + minZ
+                            X = (x + 1) * (voxelSize) + minX,
+                            Y = (y + 1) * (voxelSize) + minY,
+                            Z = (z + 1) * (voxelSize) + minZ
                         });
                     }
                 }
@@ -86,131 +85,127 @@ namespace HUREL.Compton
 
             return imageSpace;
         }
-        
-        public static Tuple<Vector3Collection, Color4Collection> BPtoPointCloud(Vector3Collection imageSpace, List<LMData> lmDataList, double angleThreshold = 5)
+
+        public static (Vector3Collection, Color4Collection) BPtoPointCloud(Vector3Collection imageSpace, List<LMData> lmDataList, bool isTransFormed = false, double angleThreshold = 5, double minCountPercent = 0)
         {
+            if (minCountPercent > 1 || minCountPercent < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minCountPercent));
+            }
             Vector3Collection vector3sOut = new Vector3Collection();
             Color4Collection color4sOut = new Color4Collection();
 
             if (imageSpace.Count == 0 || lmDataList.Count == 0)
-            {
-                var tupleOut1 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
-                return tupleOut1;
+            {                
+                return (vector3sOut, color4sOut);
             }
-                
+
             int[] counts = new int[imageSpace.Count];
-            var templmlist = lmDataList;
 
-
-            foreach (var lmData in templmlist)
+            if (isTransFormed)
             {
-                if (lmData.Type == LMData.InteractionType.Compton)
+                foreach (var lmData in lmDataList)
                 {
-
-                    for (int i = 0; i < imageSpace.Count; ++i)
+                    if (lmData.Type == LMData.InteractionType.Compton)
                     {
-                        if (IsEffectedPoint(lmData.ScatterLMDataInfos.First().RelativeInteractionPoint3D, lmData.ScatterLMDataInfos.First().InteractionEnergy,
-                            lmData.AbsorberLMDataInfos.First().RelativeInteractionPoint3D, lmData.AbsorberLMDataInfos.First().InteractionEnergy,
-                            imageSpace[i].ToPoint3D(), angleThreshold))
+                        Parallel.For(0, imageSpace.Count, i =>
                         {
-                            counts[i]++;
-
-                        }
+                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].TransformedInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
+                               lmData.AbsorberLMDataInfos[0].TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                               imageSpace[i].ToPoint3D(), angleThreshold))
+                            {
+                                counts[i]++;
+                            }
+                        });
                     }
                 }
             }
-
-           
-
-            int maximumCount = counts.Max();
-            int minimum = maximumCount*2/3;
-            if (maximumCount < 5)
+            else
             {
-                var tupleOut2 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
-                return tupleOut2;
-            }
-
-
-            for(int i = 0; i< imageSpace.Count; i++)
-            {
-                if (counts[i] > minimum)
+                foreach (var lmData in lmDataList)
                 {
-                    vector3sOut.Add(imageSpace[i]);
-                    color4sOut.Add(ColorScale(counts[i], minimum, maximumCount));
-                }
-            }
-
-            var tupleOut3 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
-            return tupleOut3;
-
-        }
-
-        public static Tuple<Vector3Collection, Color4Collection> BPtoPointCloudSLAM(Vector3Collection imageSpace, List<LMData> lmDataList, double angleThreshold = 5)
-        {
-            Vector3Collection vector3sOut = new Vector3Collection();
-            Color4Collection color4sOut = new Color4Collection();
-
-            if (imageSpace.Count == 0 || lmDataList.Count == 0)
-            {
-                var tupleOut1 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
-                return tupleOut1;
-            }
-
-            int[] counts = new int[imageSpace.Count];
-            var templmlist = lmDataList;
-
-
-            foreach (var lmData in templmlist)
-            {
-                if (lmData.Type == LMData.InteractionType.Compton)
-                {
-
-                    for (int i = 0; i < imageSpace.Count; ++i)
+                    if (lmData.Type == LMData.InteractionType.Compton)
                     {
-                        if (IsEffectedPoint(lmData.ScatterLMDataInfos.First().TransformedInteractionPoint3D, lmData.ScatterLMDataInfos.First().InteractionEnergy,
-                            lmData.AbsorberLMDataInfos.First().TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos.First().InteractionEnergy,
-                            imageSpace[i].ToPoint3D(), angleThreshold))
+                        Parallel.For(0, imageSpace.Count, i =>
                         {
-                            counts[i]++;
-
-                        }
+                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].RelativeInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
+                               lmData.AbsorberLMDataInfos[0].RelativeInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                               imageSpace[i].ToPoint3D(), angleThreshold))
+                            {
+                                counts[i]++;
+                            }
+                        });
                     }
                 }
             }
 
 
-
-            int maximumCount = counts.Max();
-            int minimum = maximumCount * 2 / 3;
-            if (maximumCount < 5)
+            int maxCount = counts.Max();
+            int minCount = Convert.ToInt32(Math.Round(maxCount * minCountPercent));
+            if (maxCount < 5)
             {
-                var tupleOut2 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
-                return tupleOut2;
+                return (vector3sOut, color4sOut);
             }
 
 
-            Parallel.For(0, imageSpace.Count, (i) =>
+            for (int i = 0; i < imageSpace.Count; i++)
             {
-                if (counts[i] > minimum)
+                if (counts[i] > minCount)
                 {
                     vector3sOut.Add(imageSpace[i]);
-                    color4sOut.Add(ColorScale(counts[i], minimum, maximumCount));
+                    color4sOut.Add(ColorScaleJet(counts[i], minCount, maxCount));
                 }
-            });
+            }
 
             var tupleOut3 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
-            return tupleOut3;
+            return (vector3sOut, color4sOut);
 
         }
 
-        private static Color4 ColorScale(int idx, int minimum, int maximum)
+
+        /// <summary>
+        /// Hit map color scale
+        /// </summary>
+        /// <param name="idx"></param>
+        /// <param name="minimum"></param>
+        /// <param name="maximum"></param>
+        /// <returns></returns>
+        private static Color4 ColorScaleJet(float v, float vmin, float vmax)
         {
+            float dv;
+
+            if (v < vmin)
+                v = vmin;
+            if (v > vmax)
+                v = vmax;
+            dv = vmax - vmin;
+            float r = 1.0f, g = 1.0f, b = 1.0f;
+            if (v < (vmin + 0.25 * dv))
+            {
+                r = 0;
+                g = 4 * (v - vmin) / dv;
+            }
+            else if (v < (vmin + 0.5 * dv))
+            {
+                r = 0;
+                b = 1 + 4 * (vmin + 0.25f * dv - v) / dv;
+            }
+            else if (v < (vmin + 0.75 * dv))
+            {
+                r = 4 * (v - vmin - 0.5f * dv) / dv;
+                b = 0;
+            }
+            else
+            {
+                g = 1 + 4 * (vmin + 0.75f * dv - v) / dv;
+                b = 0;
+            }
+
             float alpha = 0.5f;
-            if (idx < minimum+1)
-                alpha = 0;
-            Color4 color = new Color4(idx / (maximum ), (maximum - idx) / (maximum), 0.5f, alpha);
+
+            Color4 color = new Color4(r, g, b, alpha);
             return color;
         }
-        
+
     } 
 }

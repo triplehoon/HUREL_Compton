@@ -38,7 +38,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
             FPGAControl = new CRUXELLLACC();
             FPGAVariable = FPGAControl.Variables;
-            IsEnableOpenFPGAWindow = true;
+           
             IsSessionAvailable = false;
 
             FPGAControl.USBChangeHandler += UpdateDeviceList;
@@ -50,12 +50,9 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 SpectrumMaximumRangeByModuleNum.Add(2000);
                 SpectrumHistoModels.Add(new List<SpectrumHisto.SpectrumHistoModel>());
-            }
+            }                      
 
-            
-            BPPointCloud = new HelixToolkit.Wpf.SharpDX.PointGeometry3D();
-
-            RTPointCloudTask =Task.Run(() => GetRealTimePointCloud());
+            //RTPointCloudTask =Task.Run(() => GetRealTimePointCloud());
 
             ModuleInfoViewModels = new ObservableCollection<ModuleInfoViewModel>();
 
@@ -64,8 +61,13 @@ namespace Compton_GUI_WPF.ViewModel
                 ModuleInfoViewModels.Add(new ModuleInfoViewModel());
             }
 
+            InitiateRealsense();
             InitiateLACC();
+            Task.Run(() => TestFunction(3));
         }
+
+
+        
 
 
         private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
@@ -88,54 +90,10 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private void CloseMainWindow()
         {
-            IsRealTimePointCloudOn = false;
-            RTPointCloudTask.Wait();
+            StopRealsensePipeline();
             FPGAControl.SetVaribles(FPGAVariable);
-            FPGAControl.Dispose();
-           // rsControl.Dispose();
-        }
-
-
-        private Matrix3D currentPos = Matrix3D.Identity;
-        Matrix3D CurrentPos
-        {
-            get { return currentPos; }
-            set
-            {
-                currentPos = value;
-                SystemXPos = value.OffsetX;
-                SystemYPos = value.OffsetY;
-                SystemZPos = value.OffsetZ;
-            }
-        }
-
-
-        public bool isTrackingConfidence3 = false;
-        public bool IsTrackingConfidence3
-        {
-            get { return isTrackingConfidence3; }
-            set { isTrackingConfidence3 = value; OnPropertyChanged(nameof(IsTrackingConfidence3)); }
-        }
-
-        private double systemXPos;
-        public double SystemXPos
-        {
-            get { return systemXPos; }
-            set { systemXPos = value; OnPropertyChanged(nameof(SystemXPos)); }
-        }
-
-        private double systemYPos;
-        public double SystemYPos
-        {
-            get { return systemYPos; }
-            set { systemYPos = value; OnPropertyChanged(nameof(SystemYPos)); }
-        }
-
-        private double systemZPos;
-        public double SystemZPos
-        {
-            get { return systemZPos; }
-            set { systemZPos = value; OnPropertyChanged(nameof(SystemZPos)); }
+            FPGAControl.Dispose();            
+            // rsControl.Dispose();
         }
 
         #region Draw Graph
@@ -258,27 +216,6 @@ namespace Compton_GUI_WPF.ViewModel
 
         #endregion
 
-        #region FPGA Setting Window
-        private object ReceiveIsEnableOpenFPGAWindow(WindowStateMessage action)
-        {
-            IsEnableOpenFPGAWindow = !action.state;
-            return null;
-        }
-        private bool isEnableOpenFPGAWindow;
-        public bool IsEnableOpenFPGAWindow
-        {
-            get { return isEnableOpenFPGAWindow; }
-            set { isEnableOpenFPGAWindow = value; OnPropertyChanged(nameof(IsEnableOpenFPGAWindow)); }
-        }
-
-        public bool CanOpenFPGAWindow()
-        {
-            return IsEnableOpenFPGAWindow;
-        }
-        #endregion
-
-
-
         #region LACC Module Setting
 
         private bool isLACCModuleInitiate = false;
@@ -387,7 +324,7 @@ namespace Compton_GUI_WPF.ViewModel
                 Debug.WriteLine("Making Scatter Module");
                 VMStatus = "Making Scatter Module";
                 ModuleInfoViewModels[0] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffset { x = T265ToLACCCenterPosition.X, y = T265ToLACCCenterPosition.Y, z = T265ToLACCCenterPosition.Z },
+                                                            new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X, y = T265ToLACCOffset.Y, z = T265ToLACCOffset.Z },
                                                             new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                             scatterGain,
                                                             pmtOrderInfo,
@@ -396,7 +333,7 @@ namespace Compton_GUI_WPF.ViewModel
                 Debug.WriteLine("Making Abosrober Module");
                 VMStatus = "Making Absorber Module";
                 ModuleInfoViewModels[8] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffset { x = T265ToLACCCenterPosition.X, y = T265ToLACCCenterPosition.Y, z = T265ToLACCCenterPosition.Z },
+                                                            new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X, y = T265ToLACCOffset.Y, z = T265ToLACCOffset.Z },
                                                             new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                             absorberGain,
                                                             pmtOrderInfo,
@@ -481,32 +418,16 @@ namespace Compton_GUI_WPF.ViewModel
 
         #endregion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        #region Test Functions
         private RelayCommand<object> testCommand;
         public ICommand TestCommand
         {
             get { return (this.testCommand) ?? (this.testCommand = new RelayCommand<object>(TestFunction)); }
         }
 
-        private void TestFunction(object obj)
+        private void TestFunction(object t)
         {
-            var a = obj;
-            Debug.WriteLine("TestFuction");
+            // Write Function to be used     
         }
 
         private string vmStatus;
@@ -515,6 +436,7 @@ namespace Compton_GUI_WPF.ViewModel
             get { return vmStatus; }
             set { vmStatus = value; OnPropertyChanged(nameof(VMStatus)); }
         }
+        #endregion
 
         private RelayCommand<TextCompositionEventArgs> tbPrivewTextInputOnlyNumericCommand;
         public ICommand TBPrivewTextInputOnlyNumericCommand

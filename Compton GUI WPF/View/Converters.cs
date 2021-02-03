@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,8 @@ namespace Compton_GUI_WPF.View
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            TimeSpan timeSpan = TimeSpan.FromSeconds(System.Convert.ToDouble((string)value));
+            return timeSpan;
         }
     }
 
@@ -75,6 +77,7 @@ namespace Compton_GUI_WPF.View
         #endregion
     }
 
+    public class BoolToBrushConverter : BoolToValueConverter<String> { }
     public class BoolToStringConverter : BoolToValueConverter<String> { }
     public class BoolToVisibilityConverter : BoolToValueConverter<Visibility> { }
     public class BoolToValueConverter<T> : IValueConverter
@@ -95,4 +98,6 @@ namespace Compton_GUI_WPF.View
             return value != null ? value.Equals(TrueValue) : false;
         }
     }
+
+    
 }

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Image_Recon_Test_GUI"
+        
         xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
          xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
@@ -68,6 +69,18 @@
 
             <TextBlock Text="Image Recon" HorizontalAlignment="Left" Margin="5" FontSize="20" FontWeight="Bold"/>
             <Button Content="Load Binary File" Command="{Binding LoadBinaryFileCommand}" Margin="5"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="BP Angle Threshold" Margin="5" Grid.Column="0"/>
+                <TextBox Text="{Binding BPAngleThreshold}" Grid.Column="1" Margin="5"/>
+                <TextBlock Text="BP Min %" Margin="5" Grid.Column="2"/>
+                <TextBox Text="{Binding BPMinCountPercent}" Grid.Column="3" Margin="5"/>
+            </Grid>
             <Button Content="Draw BP" Command="{Binding DrawBPCommand}" Margin="5"/>
         </StackPanel>
 

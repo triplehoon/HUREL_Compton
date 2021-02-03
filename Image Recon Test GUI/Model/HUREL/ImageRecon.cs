@@ -87,8 +87,12 @@ namespace HUREL.Compton
             return imageSpace;
         }
         
-        public static Tuple<Vector3Collection, Color4Collection> BPtoPointCloud(Vector3Collection imageSpace, List<LMData> lmDataList, double angleThreshold = 5)
+        public static Tuple<Vector3Collection, Color4Collection> BPtoPointCloud(Vector3Collection imageSpace, List<LMData> lmDataList, double angleThreshold = 5, double minCountPercent = 0)
         {
+            if (minCountPercent > 1 || minCountPercent < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minCountPercent));
+            }
             Vector3Collection vector3sOut = new Vector3Collection();
             Color4Collection color4sOut = new Color4Collection();
 
@@ -100,7 +104,7 @@ namespace HUREL.Compton
                 
             int[] counts = new int[imageSpace.Count];
             var templmlist = lmDataList.ToArray();
-
+            
 
             foreach (var lmData in templmlist)
             {
@@ -120,9 +124,9 @@ namespace HUREL.Compton
 
            
 
-            int maximumCount = counts.Max();
-            int minimum = 0;
-            if (maximumCount < 5)
+            int maxCount = counts.Max();
+            int minCount = Convert.ToInt32(Math.Round(maxCount * minCountPercent));
+            if (maxCount < 5)
             {
                 var tupleOut2 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
                 return tupleOut2;
@@ -131,10 +135,10 @@ namespace HUREL.Compton
 
             for(int i = 0; i< imageSpace.Count; i++)
             {
-                if (counts[i] > minimum)
+                if (counts[i] > minCount)
                 {
                     vector3sOut.Add(imageSpace[i]);
-                    color4sOut.Add(ColorScaleJet(counts[i], 0, maximumCount));
+                    color4sOut.Add(ColorScaleJet(counts[i], minCount, maxCount));
                 }
             }
 
@@ -181,12 +185,8 @@ namespace HUREL.Compton
                 g = 1 + 4 * (vmin + 0.75f * dv - v) / dv;
                 b = 0;
             }
-            float alpha = 0.1f;
 
-            if(v > vmax * 0.8f)
-            {
-                alpha = 0.8f;
-            }
+            float alpha = 0.5f;
 
             Color4 color = new Color4(r,g,b, alpha);
             return color;

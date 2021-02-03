@@ -6,7 +6,7 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:VM="clr-namespace:Compton_GUI_WPF.ViewModel"
         xmlns:localView="clr-namespace:Compton_GUI_WPF.View"
-        
+        xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
         xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
@@ -26,8 +26,20 @@
     <Window.DataContext>
         <VM:MainViewModel/>
     </Window.DataContext>
+    
     <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- MahApps.Metro resource dictionaries. Make sure that all file names are Case Sensitive! -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <!-- Theme setting -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        
+
         <localView:BoolToStringConverter x:Key="ConvStartOrStop" FalseValue="Start Session" TrueValue="Stop Session"/>
+        <localView:BoolToBrushConverter x:Key="ConvBoolToGreenOrRed" TrueValue="Green" FalseValue="Red"/>
         <localView:TimespaneToStringConverter x:Key="ConvTimeSpanToStr"/>
         <localView:ObservalbeDoubleToChannelNameConverter x:Key="ConvObservalbeDoubleToChannelName"/>
         <localView:InverseBooleanConverter x:Key="ConvInverseBoolean"/>
@@ -64,7 +76,7 @@
                 </Style>
             </Style.Resources>
         </Style>
-
+        </ResourceDictionary>
     </Window.Resources>
 
     <Grid Background="#FFEAEAEA">
@@ -84,15 +96,25 @@
                                   TabItemHoverBorderBrush="#FF00457E" 
                                   TabItemLayout="SingleLineStar" 
                                   IsCustomTabItemContextMenuEnabled="False" 
-                                  EnableLabelEdit="False">
+                                  EnableLabelEdit="False"
+                                  syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"
+                                  >
             <syncfusion:TabItemExt Header="Main" Background="White" BorderBrush="#FFEAEAEA">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock Text="Real Time Point Cloud Data" Style="{StaticResource TextBlockTitle}" Margin="5,200,5,5" />
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Grid.Column="0">
+                        <TextBlock Text="Real Time RGB Camera Data" Style="{StaticResource TextBlockTitle}" Margin="5"/>
+                        <Image Source="{Binding RealtimeRGB}" Width="480" Height="270" Stretch="Uniform"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Grid.Row="0">
+                        <TextBlock Text="Real Time Point Cloud Data" Style="{StaticResource TextBlockTitle}" Margin="5" />
                         <hx:Viewport3DX 
                           
                            Background="Silver" 
@@ -105,13 +127,13 @@
                                 <hx:DefaultEffectsManager/>
                             </hx:Viewport3DX.EffectsManager>
                             <hx:Viewport3DX.Camera>
-                                <hx:PerspectiveCamera Position="0.017,0.03,0.1" LookDirection="0,0,1" UpDirection="0,1,0"/>
+                                <hx:PerspectiveCamera Position="0.017,0.03,-0.03" LookDirection="0,0,1" UpDirection="0,1,0"/>
                             </hx:Viewport3DX.Camera>
 
-                            <hx:PointGeometryModel3D Geometry="{Binding BPPointCloud}" Color="White" FixedSize="True" Size="20,20">
+                            <hx:PointGeometryModel3D Geometry="{Binding RealtimeReconPointCloud}" Color="White" FixedSize="True" Size="5,5">
                             </hx:PointGeometryModel3D>
 
-                            <hx:PointGeometryModel3D Geometry="{Binding RTPointCloud}" Color="White" FixedSize="True" Size="2,2">
+                            <hx:PointGeometryModel3D Geometry="{Binding RTPointCloud}" Color="Gray" FixedSize="True" Size="1,1">
                             </hx:PointGeometryModel3D>
                         </hx:Viewport3DX>
                         <Grid >
@@ -120,10 +142,17 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <syncfusion:SfTextInputLayout Grid.Column="0" Margin="10" Hint="Data Aquire Time" HelperText="In seconds" Width="200" HorizontalAlignment="Center">
-                                <syncfusion:IntegerTextBox IsScrollingOnCircle="True" Margin="5" Width="100" HorizontalAlignment="Left" Value="{Binding MLPETime}" />
+                                <syncfusion:IntegerTextBox IsScrollingOnCircle="True" Margin="5" Width="100" HorizontalAlignment="Left" Value="{Binding Path =MLPETime, UpdateSourceTrigger=PropertyChanged}"/>
                             </syncfusion:SfTextInputLayout>
                             <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Select acquisition mode" Margin="5" Style="{StaticResource TextBlockTitle2 }"/>
+                                    <mah:ToggleSwitch 
+                                              OffContent="Off"
+                                              OnContent="On"                                              
+                                              IsOn="{Binding IsRealTimeImageReconOn}"
+                                             />
+                                </StackPanel>
                                 <ComboBox Margin="5,5,20,5" Grid.Column="1" SelectedIndex="0">
                                     <ComboBoxItem Content="Simple Back Projetion"/>
                                     <ComboBoxItem Content="Maximum Likelihood Estimation"/>
@@ -133,8 +162,8 @@
                         </Grid>
                         
                     </StackPanel>
-                    <StackPanel Grid.Column="1">
-                        <TextBlock Text="SLAM Pointcloud" Style="{StaticResource TextBlockTitle}" Margin="5,200,5,5" />
+                    <StackPanel Grid.Column="0" Grid.Row="1">
+                        <TextBlock Text="SLAM Pointcloud" Style="{StaticResource TextBlockTitle}" Margin="5" />
                         <hx:Viewport3DX 
                            Background="Silver"                   
                                         Width="480"
@@ -148,10 +177,17 @@
                             </hx:Viewport3DX.Camera>
                             <hx:PointGeometryModel3D Geometry="{Binding SLAMBPPointCloud}" Color="White" FixedSize="True" Size="20,20">
                             </hx:PointGeometryModel3D>
-                            <hx:PointGeometryModel3D Geometry="{Binding SLAMPointCloud}" Color="White" FixedSize="True" Size="5,5">
+                            <hx:PointGeometryModel3D Geometry="{Binding SLAMPointCloud}" Color="White" FixedSize="True" Size="1,1">
                             </hx:PointGeometryModel3D>
+                            <hx:LineGeometryModel3D Geometry="{Binding SLAMPoseInfo}" Color="LightGreen" Thickness="1"/>
 
                         </hx:Viewport3DX>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Tracking Confidence" Margin="5"/>
+                            <Ellipse Width="18" Height="18" Fill="{Binding IsT265TrackingConfidence3, Converter={StaticResource ConvBoolToGreenOrRed}}" Margin="5"/>
+                            <TextBlock Text= "Pointcloud Count: " Margin="5"/>
+                            <TextBlock Text= "{Binding SLAMPointCloudCount}" Margin="5"/>
+                        </StackPanel>
                         <Grid Margin="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -160,6 +196,74 @@
                             <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding StartSLAMCommand}" Content="Start SLAM" Grid.Column="0" Margin="50,0,50,0"/>
                             <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding StopSLAMCommand}" Content="Stop SLAM" Grid.Column="1" Margin="50,0,50,0"/>
                         </Grid>
+      
+                        
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Grid.Row="1">
+                        <TextBlock Text="System Status" Style="{StaticResource TextBlockTitle}" Margin="5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="LAHGI Status" Margin="5" Style="{StaticResource TextBlockTitle2}"/>
+
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.8*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="0.8*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="0.8*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Controller" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <mah:ToggleSwitch Grid.Column="1" Grid.Row="0" 
+                                              OffContent="Off"
+                                              OnContent="On"
+                                              OnCommand=""
+                                              OffCommand=""
+                                              IsEnabled="False"
+                                              IsOn="False"
+                                              />
+                            <TextBlock Text="FPGA Power" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <mah:ToggleSwitch Grid.Column="3" Grid.Row="0" 
+                                              OffContent="Off"
+                                              OnContent="On"
+                                              OnCommand=""
+                                              OffCommand=""
+                                              IsEnabled="False"
+                                              IsOn="False"
+                                             />
+                            <TextBlock Text="High Voltage" Grid.Column="4" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <mah:ToggleSwitch Grid.Column="5" Grid.Row="0" 
+                                              OffContent="Off"
+                                              OnContent="0 V"
+                                              OnCommand=""
+                                              OffCommand=""
+                                              IsEnabled="False"
+                                              IsOn="False"/>
+                            <TextBlock Text="Temperature" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="15 ºC" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="Battery" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal"  Grid.Column="3" Grid.Row="1">
+                                <mah:MetroProgressBar Width="60" Value="50" BorderBrush="Gray" BorderThickness="1" Foreground="Green" Margin="0,7,0,7"/>
+                                <TextBlock Margin="5,0,0,0" Text="12 V" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                
+                                
+
+                            </StackPanel>
+                            
+
+
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Position [m]" Margin="5" Style="{StaticResource TextBlockTitle2}"/>
+                            <Ellipse Width="18" Height="18" Fill="{Binding IsT265TrackingConfidence3, Converter={StaticResource ConvBoolToGreenOrRed}}" Margin="5"/>
+                        </StackPanel>
                         <Grid Margin="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -169,20 +273,42 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="X Position" Grid.Column="0"/>
-                            <TextBlock Text="{Binding SystemXPos, StringFormat=f3}" d:Text="3.15752" Grid.Column="1"/>
-                            <TextBlock Text="Y Position" Grid.Column="2"/>
-                            <TextBlock Text="{Binding SystemYPos , StringFormat=f3}" Grid.Column="3"/>
-                            <TextBlock Text="Z Position" Grid.Column="4"/>
-                            <TextBlock Text="{Binding SystemZPos , StringFormat=f3}" Grid.Column="5"/>
-                        </Grid>
-                        <StackPanel Orientation="Horizontal"  Margin="5">
-                            <TextBlock Text="Tracking Camera" />
-                            <RadioButton IsChecked="{Binding IsTrackingConfidence3}"  Margin="5"/>
-                        </StackPanel>                       
-                        
-                    </StackPanel>
 
+                            <TextBlock Text="X Position" Grid.Column="0"/>
+                            <TextBlock Text="{Binding SystemPoseX, StringFormat=f2}" d:Text="3.15752" Grid.Column="1"/>
+                            <TextBlock Text="Y Position" Grid.Column="2"/>
+                            <TextBlock Text="{Binding SystemPoseY , StringFormat=f2}" Grid.Column="3"/>
+                            <TextBlock Text="Z Position" Grid.Column="4"/>
+                            <TextBlock Text="{Binding SystemPoseZ , StringFormat=f2}" Grid.Column="5"/>
+
+                        </Grid>
+                        <TextBlock Text="Realsense Status" Margin="5" Style="{StaticResource TextBlockTitle2}"/>
+                        <Grid Margin="10,0,10,0">
+                        <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.8*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="1.5*"/>
+                                <ColumnDefinition Width="*"/>
+
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Initiate" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <mah:ToggleSwitch Grid.Column="1" Grid.Row="0"                                               
+                                              OnContent="On"
+                                              OffCommand="{Binding StopRealsensePipelineCommand}"
+                                              OnCommand="{Binding InitiateRealsenseCommand}"                                                                                            
+                                              IsOn="{Binding Path=IsRealsenseOn, Mode=OneWay}"                                              
+                                              />
+                            <TextBlock Text="Tracking Confidence" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding T265TrackingConfidence}" Grid.Column="3" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Button Content="Reset RS" Grid.Column="4" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Margin="1" Command="{Binding ResetRealsensePipelineCommand}"/>
+
+                        </Grid>
+                        <TextBlock Text="{Binding RealsenseState}" Margin="5"/>
+                    </StackPanel>
                 </Grid>
             </syncfusion:TabItemExt>
             <syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA">
@@ -483,6 +609,7 @@
 
             </syncfusion:TabItemExt>
             <syncfusion:TabItemExt Header="Realsense Configuration" Background="White" BorderBrush="#FFEAEAEA"/>
+            <syncfusion:TabItemExt Header="Internal Contemination" Background="White" BorderBrush="#FFEAEAEA"/>
             <syncfusion:TabItemExt Header="System Status" Background="White" BorderBrush="#FFEAEAEA"/>
         </syncfusion:TabControlExt>
 
@@ -537,7 +664,11 @@
             </Border>
             <Border Grid.Row="1" Margin="20,20,20,0" Background="White" CornerRadius="10,10,10,10" >
                 <StackPanel Margin="15,10,10,10">
-                    <TextBlock Text="Setting" Style="{StaticResource TextBlockTitle}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Acquisition Setting" Style="{StaticResource TextBlockTitle}"/>
+                        <TextBlock Text="Save Data" Foreground="Gray" VerticalAlignment="Bottom" Margin="30,0,10,0"/>
+                        <CheckBox IsChecked="{Binding IsSavingBinaryFile}" VerticalAlignment="Bottom" />
+                    </StackPanel>
                     <syncfusion:SfTextInputLayout Margin="0,10,0,0"
                         Hint="Mesurement Time" HelperText="In Seconds" ContainerType="Filled" IsEnabled="{Binding IsSesstionStop}">
                         <TextBox FontSize="15" Text="{Binding MeasurementTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">

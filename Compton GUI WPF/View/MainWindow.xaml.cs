@@ -1,4 +1,5 @@
-﻿using Syncfusion.Windows.Shared;
+﻿using MahApps.Metro.Controls;
+using Syncfusion.Windows.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,7 +26,15 @@ namespace Compton_GUI_WPF
         public MainWindow()
         {
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mzc0OTQ4QDMxMzgyZTM0MmUzMFRlU2dMemQrMXRGZW1iQk96NklnOVBWNnhScjVDckxTT2p1M0crRHpXcjA9");
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+            }
+            catch
+            {
+
+            }
+            Debug.WriteLine("Initial Done");
         }
       
 

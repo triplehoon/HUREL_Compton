@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RealsensWrapperTest": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
