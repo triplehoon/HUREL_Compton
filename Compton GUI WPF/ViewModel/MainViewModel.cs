@@ -15,6 +15,8 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
+using AsyncAwaitBestPractices;
+using AsyncAwaitBestPractices.MVVM;
 using Compton_GUI_WPF.View;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -29,7 +31,7 @@ namespace Compton_GUI_WPF.ViewModel
     {
 
         public static LACC_Control LACC_Control_Static;
-        
+
 
         /// <summary>
         /// Contructor
@@ -38,7 +40,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
             FPGAControl = new CRUXELLLACC();
             FPGAVariable = FPGAControl.Variables;
-           
+
             IsSessionAvailable = false;
 
             FPGAControl.USBChangeHandler += UpdateDeviceList;
@@ -46,11 +48,11 @@ namespace Compton_GUI_WPF.ViewModel
 
             SpectrumMaximumRangeByModuleNum = new ObservableCollection<int>();
             SpectrumHistoModels = new ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>>();
-            for(int i = 0; i <16; i++)
+            for (int i = 0; i < 16; i++)
             {
                 SpectrumMaximumRangeByModuleNum.Add(2000);
                 SpectrumHistoModels.Add(new List<SpectrumHisto.SpectrumHistoModel>());
-            }                      
+            }
 
             //RTPointCloudTask =Task.Run(() => GetRealTimePointCloud());
 
@@ -61,13 +63,12 @@ namespace Compton_GUI_WPF.ViewModel
                 ModuleInfoViewModels.Add(new ModuleInfoViewModel());
             }
 
-            InitiateRealsense();
-            InitiateLACC();
-            Task.Run(() => TestFunction(3));
+            InitiateRealsenseAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
+            InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));            
         }
 
 
-        
+
 
 
         private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
@@ -83,16 +84,16 @@ namespace Compton_GUI_WPF.ViewModel
 
         private readonly string CurrentPath = Directory.GetCurrentDirectory();
 
-        private RelayCommand mianWindowCloseCommand;
+        private AsyncCommand mianWindowCloseCommand;
         public ICommand MianWindowCloseCommand
         {
-            get { return (this.mianWindowCloseCommand) ?? (this.mianWindowCloseCommand = new RelayCommand(CloseMainWindow)); }
+            get { return (this.mianWindowCloseCommand) ?? (this.mianWindowCloseCommand = new AsyncCommand(CloseMainWindow)); }
         }
-        private void CloseMainWindow()
+        private async Task CloseMainWindow()
         {
-            StopRealsensePipeline();
+            await StopRealsensePipeline().ConfigureAwait(false);
             FPGAControl.SetVaribles(FPGAVariable);
-            FPGAControl.Dispose();            
+            await FPGAControl.Dispose().ConfigureAwait(false);
             // rsControl.Dispose();
         }
 
@@ -105,9 +106,9 @@ namespace Compton_GUI_WPF.ViewModel
                 DrawSpectrum();
                 if (RecordTimeSpan.TotalSeconds > 10 && IsMLPEOn)
                 {
-                    ResetSpectrum();
+                    ResetSpectrumCommand.Execute(null);
                 }
-                Thread.Sleep(1000);
+                Thread.Sleep(5000);
             }
             Debug.WriteLine("DataUpdate End");
         }
@@ -162,19 +163,18 @@ namespace Compton_GUI_WPF.ViewModel
             set { scatterPositionData = value; OnPropertyChanged(nameof(ScatterPositionData)); }
         }
 
-        private RelayCommand resetSepctrumCommand;
+        private AsyncCommand resetSepctrumCommand;
         public ICommand ResetSpectrumCommand
         {
-            get { return (this.resetSepctrumCommand) ?? (this.resetSepctrumCommand = new RelayCommand(CloseMainWindow)); }
+            get { return (this.resetSepctrumCommand) ?? (this.resetSepctrumCommand = new AsyncCommand(ResetSpectrum)); }
         }
-        private void ResetSpectrum()
+        private async Task ResetSpectrum()
         {
-            LACC_Control_Static.ResetModuleEnergy();
+            await Task.Run(()=>LACC_Control_Static.ResetModuleEnergy());
         }
 
         public ObservableCollection<int> SpectrumMaximumRangeByModuleNum { get; set; }
-
-        bool IsHistoGramTooSlow = false;
+       
         public void DrawSpectrum()
         {
 
@@ -185,13 +185,13 @@ namespace Compton_GUI_WPF.ViewModel
                 var SelectedESpect = (from selESpect in LACC_Control_Static.ModulesEnergy
                                       where selESpect.ModuleNum == i
                                       select selESpect.Energy).ToList();
-                SpectrumHisto histo = new SpectrumHisto(SelectedESpect, 405, 0, SpectrumMaximumRangeByModuleNum[i]+100);
+                SpectrumHisto histo = new SpectrumHisto(SelectedESpect, 405, 0, SpectrumMaximumRangeByModuleNum[i] + 100);
                 SpectrumHistoModels[i] = histo.SpectrumData;
             }
             sw.Stop();
         }
-        
-        public ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> SpectrumHistoModels{ get; set; }
+
+        public ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> SpectrumHistoModels { get; set; }
         public class SpectrumHisto
         {
             public List<SpectrumHistoModel> SpectrumData = new List<SpectrumHistoModel>();
@@ -222,28 +222,26 @@ namespace Compton_GUI_WPF.ViewModel
             get { return isLACCModuleInitiate; }
             set
             {
-                isLACCModuleInitiate = value;                
+                isLACCModuleInitiate = value;
                 OnPropertyChanged(nameof(IsLACCModuleInitiate));
                 OnPropertyChanged(nameof(IsSessionAvailable));
             }
         }
 
-        private string LUTFolderDirectory = Path.Combine(Directory.GetCurrentDirectory(),"LUT Files");
+        private string LUTFolderDirectory = Path.Combine(Directory.GetCurrentDirectory(), "LUT Files");
         public void InitiateMonoType()
         {
-            Task.Run(() =>
+            if (ModuleInfoViewModels[0].IsModuleSet && ModuleInfoViewModels[8].IsModuleSet)
             {
-                if(ModuleInfoViewModels[0].IsModuleSet && ModuleInfoViewModels[8].IsModuleSet)
-                {
 
-                    LACC_Control_Static = new LACC_Control(ModuleInfoViewModels[0].Module, ModuleInfoViewModels[8].Module);
-                    IsLACCModuleInitiate = true;
-                    initiating = false;
-                    return;
-                }
+                LACC_Control_Static = new LACC_Control(ModuleInfoViewModels[0].Module, ModuleInfoViewModels[8].Module);
+                IsLACCModuleInitiate = true;
+                initiating = false;
+                return;
+            }
 
-                var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = true, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 10, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
-                var scatterGain = new double[37]  {0.222287552011680,
+            var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = true, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 10, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
+            var scatterGain = new double[37]  {0.222287552011680,
                                                     0.208847009962622,
                                                     0.160835530297629,
                                                     0.350623925414967,
@@ -280,7 +278,7 @@ namespace Compton_GUI_WPF.ViewModel
                                                     0.220940431055765,
                                                     0.370428100393800,
                                                     -19.3920305409253  };
-                var absorberGain = new double[37] { 0.547118426,
+            var absorberGain = new double[37] { 0.547118426,
                                                     0.423998687,
                                                     0.426206901,
                                                     0.408303161,
@@ -319,39 +317,41 @@ namespace Compton_GUI_WPF.ViewModel
                                                     -0.430917509
                                                     };
 
-                Debug.WriteLine("Making Scatter Module");
-                VMStatus = "Making Scatter Module";
-                ModuleInfoViewModels[0] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z },
-                                                            new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
-                                                            scatterGain,
-                                                            pmtOrderInfo,
-                                                            Path.Combine(LUTFolderDirectory, "MonoScatterLUT.csv"));
+            Debug.WriteLine("Making Scatter Module");
+            VMStatus = "Making Scatter Module";
+            ModuleInfoViewModels[0] = new ModuleInfoViewModel(ModuleInfo.Mono,
+                                                        new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z },
+                                                        new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                                        scatterGain,
+                                                        pmtOrderInfo,
+                                                        Path.Combine(LUTFolderDirectory, "MonoScatterLUT.csv"));
 
-                Debug.WriteLine("Making Abosrober Module");
-                VMStatus = "Making Absorber Module";
-                ModuleInfoViewModels[8] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z - 0.25 },
-                                                            new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
-                                                            absorberGain,
-                                                            pmtOrderInfo,
-                                                            Path.Combine(LUTFolderDirectory, "MonoAbsorberLUT.csv"));
-               
-                if (!ModuleInfoViewModels[0].IsModuleSet || !ModuleInfoViewModels[8].IsModuleSet)
-                {
+            Debug.WriteLine("Making Abosrober Module");
+            VMStatus = "Making Absorber Module";
+            ModuleInfoViewModels[8] = new ModuleInfoViewModel(ModuleInfo.Mono,
+                                                        new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z - 0.25 },
+                                                        new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                                        absorberGain,
+                                                        pmtOrderInfo,
+                                                        Path.Combine(LUTFolderDirectory, "MonoAbsorberLUT.csv"));
 
-                    LACC_Control_Static = new LACC_Control(ModuleInfoViewModels[0].Module, ModuleInfoViewModels[8].Module);
-                    IsLACCModuleInitiate = false;
-                    initiating = false;
-                    VMStatus = "Mono-Type Module Setting Failed";
-                    return;
-                }
+            if (!ModuleInfoViewModels[0].IsModuleSet || !ModuleInfoViewModels[8].IsModuleSet)
+            {
 
                 LACC_Control_Static = new LACC_Control(ModuleInfoViewModels[0].Module, ModuleInfoViewModels[8].Module);
-                IsLACCModuleInitiate = true;
+                IsLACCModuleInitiate = false;
                 initiating = false;
-            });
-            
+                VMStatus = "Mono-Type Module Setting Failed";
+                return;
+            }
+
+            LACC_Control_Static = new LACC_Control(ModuleInfoViewModels[0].Module, ModuleInfoViewModels[8].Module);
+            IsLACCModuleInitiate = true;
+            initiating = false;
+
+            VMStatus = "Initiate LACC Done";
+
+
         }
 
         public void InitiateSingleHeadQuadType()
@@ -366,13 +366,13 @@ namespace Compton_GUI_WPF.ViewModel
 
         public ObservableCollection<ModuleInfoViewModel> ModuleInfoViewModels { get; set; } //16 Channels
 
-        private RelayCommand initiateLACCommand;
-        public ICommand InitiateLACCommand
+        private AsyncCommand initiateLACCommand;
+        public IAsyncCommand InitiateLACCommand
         {
-            get { return (this.initiateLACCommand) ?? (this.initiateLACCommand = new RelayCommand(InitiateLACC)); }
+            get { return (this.initiateLACCommand) ?? (this.initiateLACCommand = new AsyncCommand(InitiateLACCAsync)); }
         }
         private bool initiating;
-        private void InitiateLACC()
+        private async Task InitiateLACCAsync()
         {
             if (initiating == true)
                 return;
@@ -383,29 +383,29 @@ namespace Compton_GUI_WPF.ViewModel
             switch (this.selectedModuleInfo)
             {
                 case ModuleInfo.Mono:
-                    InitiateMonoType();
+                    await Task.Run(()=>InitiateMonoType()).ConfigureAwait(false);
                     break;
                 case ModuleInfo.QuadSingleHead:
-                    InitiateSingleHeadQuadType();
+                    await Task.Run(() => InitiateSingleHeadQuadType()).ConfigureAwait(false);
                     break;
                 case ModuleInfo.QuadDualHead:
-                    InitiateDualHeadQuadType();
+                    await Task.Run(() => InitiateDualHeadQuadType()).ConfigureAwait(false);
                     break;
             }
         }
 
-        private RelayCommand<string> ecalInfoChangedCommand;
+        private AsyncCommand<string> ecalInfoChangedCommand;
         public ICommand EcalInfoChangedCommand
         {
-            get { return (this.ecalInfoChangedCommand) ?? (this.ecalInfoChangedCommand = new RelayCommand<string>(EcalInfoChanged)); }
+            get { return (this.ecalInfoChangedCommand) ?? (this.ecalInfoChangedCommand = new AsyncCommand<string>(EcalInfoChanged)); }
         }
-        private void EcalInfoChanged(string a)
+        private async Task EcalInfoChanged(string a)
         {
             Debug.WriteLine("Channel num is " + a);
             try
             {
-                int channelNum=Convert.ToInt32(a);
-                ModuleInfoViewModels[channelNum].Fitting();                
+                int channelNum = Convert.ToInt32(a);
+                await Task.Run(()=>ModuleInfoViewModels[channelNum].Fitting()).ConfigureAwait(false);
             }
             catch
             {
@@ -417,20 +417,24 @@ namespace Compton_GUI_WPF.ViewModel
         #endregion
 
         #region Test Functions
-        private RelayCommand<object> testCommand;
+        private AsyncCommand<object> testCommand;
         public ICommand TestCommand
         {
-            get { return (this.testCommand) ?? (this.testCommand = new RelayCommand<object>(TestFunction)); }
+            get { return (this.testCommand) ?? (this.testCommand = new AsyncCommand<object>(TestFunction)); }
         }
 
-        private void TestFunction(object t)
+        private async Task TestFunction(object t)
         {
+            await Task.Run(() =>
+            {
+                VMStatus = "TestFunction";
+            });
             // Write Function to be used     
         }
 
         private string vmStatus;
-        public string VMStatus 
-        { 
+        public string VMStatus
+        {
             get { return vmStatus; }
             set { vmStatus = value; OnPropertyChanged(nameof(VMStatus)); }
         }
@@ -452,7 +456,7 @@ namespace Compton_GUI_WPF.ViewModel
             e.Handled = regex.IsMatch(e.Text);
             Debug.WriteLine(e.Text);
         }
-        
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
@@ -465,10 +469,10 @@ namespace Compton_GUI_WPF.ViewModel
 
     }
 
-    
 
 
-    
+
+
 
 
 }

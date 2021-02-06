@@ -39,8 +39,10 @@ namespace HUREL.Compton
 
 
         //}
+        
+        
         public bool IsSavingBinaryData;
-        private void ParsingCyusbBufferAsync()
+        private void ParsingCyusbBuffer()
         {
 
             short flag = 0; //0 is nothing, 1 is find FE, 2 find second FE
@@ -125,10 +127,11 @@ namespace HUREL.Compton
             writer.Dispose();
         }
 
-        private bool IsGenerateShortArrayBuff;
-        private void GenerateShortArrayBuffAsync()
+
+        private bool IsGenerateShortArrayBuffer;
+        private void GenerateShortArrayBuffer()
         {
-            while (IsGenerateShortArrayBuff)
+            while (IsGenerateShortArrayBuffer)
             {
                 byte[] item;
                 

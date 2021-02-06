@@ -15,6 +15,7 @@ using System.Windows.Media.Media3D;
 using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.IO;
+using AsyncAwaitBestPractices.MVVM;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -74,23 +75,22 @@ namespace Compton_GUI_WPF.ViewModel
             set { isRealsenseOn = value; OnPropertyChanged(nameof(IsRealsenseOn)); }
         }
 
-        private RelayCommand initiateRealsenseCommand;
+        private AsyncCommand initiateRealsenseCommand;
         public ICommand InitiateRealsenseCommand
         {
-            get { return (this.initiateRealsenseCommand) ?? (this.initiateRealsenseCommand = new RelayCommand(InitiateRealsense)); }
+            get { return (this.initiateRealsenseCommand) ?? (this.initiateRealsenseCommand = new AsyncCommand(InitiateRealsenseAsync)); }
         }
-        private void InitiateRealsense()
+        private async Task InitiateRealsenseAsync()
         {
             RealsenseState = "Initiating Realsense";
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 string s = "";
                 IsRealsenseOn = RealsenseControl.InitiateRealsense(ref s);
                 RealsenseState = s;
-                StartRealsensePipeline();
+                
             });
-
-            
+            await StartRealsensePipeline();
         }
 
         #region Realsense Pipeline Setup
@@ -101,39 +101,42 @@ namespace Compton_GUI_WPF.ViewModel
             get { return isRealsensePipelineOn; }
             set { isRealsensePipelineOn = value; OnPropertyChanged(nameof(IsRealsensePipelineOn)); }
         }
-        private RelayCommand startRealsensePipelineCommand;
+        private AsyncCommand startRealsensePipelineCommand;
         public ICommand StartRealsensePipelineCommand
         {
-            get { return (this.startRealsensePipelineCommand) ?? (this.startRealsensePipelineCommand = new RelayCommand(StartRealsensePipeline)); }
+            get { return (this.startRealsensePipelineCommand) ?? (this.startRealsensePipelineCommand = new AsyncCommand(StartRealsensePipeline)); }
         }
 
-        private void StartRealsensePipeline()
+        private async Task StartRealsensePipeline()
         {
-            string s = "";
-            if (!IsRealsenseOn)
+            await Task.Run(() =>
             {
-                RealsenseState = "Please Initiate Realsense.";
-                return;
-            }
-            IsRealsensePipelineOn = RealsenseControl.StartRealsensePipeline(ref s);
-            if (IsRealsensePipelineOn)
-            {
-                UpdateRGBPoseTask = Task.Run(() => UpdateRGBPose());
-                UpdateRealTimePointCloudTask = Task.Run(() => UpdateRealTimePointCloud());
-                //UpdateRGBImageTask.Start();
-            }
-            RealsenseState = s;
+                string s = "";
+                if (!IsRealsenseOn)
+                {
+                    RealsenseState = "Please Initiate Realsense.";
+                    return;
+                }
+                IsRealsensePipelineOn = RealsenseControl.StartRealsensePipeline(ref s);
+                if (IsRealsensePipelineOn)
+                {
+                    UpdateRGBPoseTask = Task.Run(() => UpdateRGBPose());
+                    UpdateRealTimePointCloudTask = Task.Run(() => UpdateRealTimePointCloud());
+                    //UpdateRGBImageTask.Start();
+                }
+                RealsenseState = s;
+            }).ConfigureAwait(false);
         }
 
-        private RelayCommand resetRealsensePipelineCommand;
+        private AsyncCommand resetRealsensePipelineCommand;
         public ICommand ResetRealsensePipelineCommand
         {
-            get { return (this.resetRealsensePipelineCommand) ?? (this.resetRealsensePipelineCommand = new RelayCommand(ResetRealsensePipeline)); }
+            get { return (this.resetRealsensePipelineCommand) ?? (this.resetRealsensePipelineCommand = new AsyncCommand(ResetRealsensePipeline)); }
         }
 
-        private void ResetRealsensePipeline()
+        private async Task ResetRealsensePipeline()
         {
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 string temp = "";
                 RealsenseControl.ResetPipeline(ref temp);
@@ -142,12 +145,12 @@ namespace Compton_GUI_WPF.ViewModel
 
         }
 
-        private RelayCommand stopRealsensePipelineCommand;
+        private AsyncCommand stopRealsensePipelineCommand;
         public ICommand StopRealsensePipelineCommand
         {
-            get { return (this.stopRealsensePipelineCommand) ?? (this.stopRealsensePipelineCommand = new RelayCommand(StopRealsensePipeline)); }
+            get { return (this.stopRealsensePipelineCommand) ?? (this.stopRealsensePipelineCommand = new AsyncCommand(StopRealsensePipeline)); }
         }
-        private void StopRealsensePipeline()
+        private async Task StopRealsensePipeline()
         {
             if (!IsRealsensePipelineOn)
             {
@@ -156,8 +159,8 @@ namespace Compton_GUI_WPF.ViewModel
             }
             RealsenseControl.StopRealsensePipeline();
             IsRealsensePipelineOn = false;
-            UpdateRGBPoseTask.Wait();
-            UpdateRealTimePointCloudTask.Wait();
+            await UpdateRGBPoseTask;
+            await UpdateRealTimePointCloudTask;
         }
 
         private BitmapImage realtimeRGB;
@@ -304,8 +307,7 @@ namespace Compton_GUI_WPF.ViewModel
             int error = 0;
             while (IsRealsensePipelineOn)
             {
-                var vc = new Vector3Collection();
-                var id = new IntCollection();
+                var vc = new Vector3Collection();               
                 var cc = new Color4Collection();
 
                 var poseVect = new List<double[]>();
@@ -360,43 +362,50 @@ namespace Compton_GUI_WPF.ViewModel
 
         private bool IsSLAMOn = false;
 
-        private RelayCommand startSLAMCommand;
+        private AsyncCommand startSLAMCommand;
         public ICommand StartSLAMCommand
         {
-            get { return (this.startSLAMCommand) ?? (this.startSLAMCommand = new RelayCommand(StartSLAM)); }
+            get { return (this.startSLAMCommand) ?? (this.startSLAMCommand = new AsyncCommand(StartSLAM, CanStartSLAMCommnd)); }
         }
-        private void StartSLAM()
+        private bool CanStartSLAMCommnd(object obj)
+        {
+            bool checkAll = !IsSLAMOn && IsRealsensePipelineOn;
+            return checkAll;
+        }
+        private async Task StartSLAM()
         {
             IsSLAMOn = true;
             string temp = "";
-            RealsenseControl.StartSLAM(ref temp);
+            await Task.Run(()=>RealsenseControl.StartSLAM(ref temp)).ConfigureAwait(false);
             RealsenseState = temp;
             SLAMPointCloud = new PointGeometry3D();
             SLAMPoseInfo = new LineGeometry3D();
             UpdateSLAMPointCloudTask = Task.Run(() => UpdateSLAMPointCloud());
-            //SLAMReconTask = Task.Run(() => SLAMRecon());
+            SLAMReconTaskAsync = Task.Run(() => SLAMRecon());
         }
 
 
-        private RelayCommand stopSLAMCommand;
+        private AsyncCommand stopSLAMCommand;
         public ICommand StopSLAMCommand
         {
-            get { return (this.stopSLAMCommand) ?? (this.stopSLAMCommand = new RelayCommand(StopSLAM)); }
+            get { return (this.stopSLAMCommand) ?? (this.stopSLAMCommand = new AsyncCommand(StopSLAM, CanStopSLAMCommnd)); }
         }
-        private void StopSLAM()
+        private bool CanStopSLAMCommnd(object obj)
         {
-            RealsenseControl.StopSLAM();
+            return IsSLAMOn;
+        }
+        private async Task StopSLAM()
+        {
+            await Task.Run(() => RealsenseControl.StopSLAM());
             IsSLAMOn = false;
-            UpdateSLAMPointCloudTask.Wait();
+            await UpdateSLAMPointCloudTask;
+            await SLAMReconTaskAsync;
             //SLAMReconTask.Wait();
         }
 
         private Task UpdateSLAMPointCloudTask;
         public void UpdateSLAMPointCloud()
-        {
-
-            int Error = 0;
-            var pose = new List<HelixToolkit.Wpf.SharpDX.Geometry3D.Line>();
+        {           
             var line = new LineBuilder();
             Vector3 previousPose = new Vector3(Convert.ToSingle(systemPoseX), Convert.ToSingle(systemPoseY), Convert.ToSingle(systemPoseZ));
            
@@ -463,7 +472,7 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
-        private Task RealTimeImageReconTask;
+        private Task RealTimeImageReconTaskAsync;
         private void RealTimeImageRecon()
         {
             while (IsRealTimeImageReconOn)
@@ -525,7 +534,7 @@ namespace Compton_GUI_WPF.ViewModel
             set { slamReconPointCloud = value; OnPropertyChanged(nameof(SLAMReconPointCloud)); }
         }
 
-        private Task SLAMReconTask;
+        private Task SLAMReconTaskAsync;
         private void SLAMRecon()
         {
             while (IsRealTimeImageReconOn && IsSLAMOn)

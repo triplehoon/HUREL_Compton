@@ -24,7 +24,7 @@ namespace HUREL.Compton
 
         private byte[] DATA_BUFFER; // FEFE제외하고 데이터만 담은 294 data buffer
         private short[] SDATA_BUFFER; // short 버퍼
-        private int DATA_BUFFER_read_count; // 514 DATA_BUFFER 채울때 count
+        //private int DATA_BUFFER_read_count; // 514 DATA_BUFFER 채울때 count
         string INI_PATH = Application.StartupPath + @"\\setting.ini";
         // These are needed to close the app from the Thread exception(exception handling)
         delegate void ExceptionCallback();
@@ -40,9 +40,9 @@ namespace HUREL.Compton
        
 
 
-        private Task ListenUBSAsync;
+        private Task ListenUBSTask;
         private Task ParsingUSBAsync;
-        private Task GenerateShortBufferAsyn;
+        private Task GenerateShortBufferAsync;
 
         public bool IsStart;
 
@@ -66,10 +66,10 @@ namespace HUREL.Compton
         private int PPX;
         private int IsoPktBlockSize;
         private int Successes;
-        private int Failures = 0;
-        private int p_head = 0; // test2_buffer의 50개중 몇번째인지
-        private int p_tail = 0;
-        private int i_head = 0; // 1메가 배열 내부의 인덱스
+        private int Failures;
+        //private int p_head = 0; // test2_buffer의 50개중 몇번째인지
+        //private int p_tail = 0;
+        //private int i_head = 0; // 1메가 배열 내부의 인덱스
         private int p_error = 0;
         private static byte DefaultBufInitValue = 0xA5;
         private DateTime t1, t2;
@@ -232,7 +232,7 @@ namespace HUREL.Compton
             Init_USB();
         }
 
-        public void Dispose()
+        public async Task Dispose()
         {
             IsListening = false;
             IsParsing = false;
@@ -242,8 +242,9 @@ namespace HUREL.Compton
             Write_current_ini(); // 현재 설정 저장하기
             if(IsStart)
             {
-                ListenUBSAsync.Wait();
-                ParsingUSBAsync.Wait();
+                ListenUBSTask.GetAwaiter().GetResult();
+                await ParsingUSBAsync;
+                await GenerateShortBufferAsync;
             }
 
             Trace.WriteLine("HY : EXIT");
@@ -348,14 +349,14 @@ namespace HUREL.Compton
             Debug.WriteLine("HY : [Try] Start XferThread");
             //ListenUSBThread = new Thread(new ThreadStart( XferThread));
             //ListenUSBThread.Start();
-            ListenUBSAsync = Task.Run(() => XferThread());
+            ListenUBSTask = Task.Run(() => XferThread());
 
             IsParsing = true;
             Debug.WriteLine("HY : [Try] Start ParsingThread");
-            ParsingUSBAsync = Task.Run(() => ParsingCyusbBufferAsync());
+            ParsingUSBAsync = Task.Run(() => ParsingCyusbBuffer());
 
-            IsGenerateShortArrayBuff = true;
-            GenerateShortBufferAsyn = Task.Run(() => GenerateShortArrayBuffAsync());
+            IsGenerateShortArrayBuffer = true;
+            GenerateShortBufferAsync = Task.Run(() => GenerateShortArrayBuffer());
             status = "Data Aquisition Start";
             IsStart = true;
 
@@ -363,7 +364,7 @@ namespace HUREL.Compton
 
             return true;
         }
-        public string Stop_usb()
+        public async Task<string> Stop_usb()
         {
             if (!IsStart)
             {
@@ -372,21 +373,20 @@ namespace HUREL.Compton
             IsStart = false;
             Debug.WriteLine("wait for ListenUBSAsync");
             IsListening = false;
-            ListenUBSAsync.Wait();
-            ListenUBSAsync = null;
-            //ListenUSBThread.Join();
-            //ListenUSBThread = null;
+            ListenUBSTask.GetAwaiter().GetResult();
+            ListenUBSTask = null;
+            
             IsParsing = false;
             Debug.WriteLine("wait for tParsing");
-            ParsingUSBAsync.Wait();
+            await ParsingUSBAsync;
             ParsingUSBAsync = null;
 
-            IsGenerateShortArrayBuff = false;
-            GenerateShortBufferAsyn.Wait();
+            IsGenerateShortArrayBuffer = false;
+            await GenerateShortBufferAsync;
 
             usb_setting(3); // 모든처리 끝났을때 stop
 
-            DATA_BUFFER_read_count = 0;
+           // DATA_BUFFER_read_count = 0;
 
             return "Done";
         }
@@ -574,9 +574,9 @@ namespace HUREL.Compton
         private void usbDevices_DeviceRemoved(object sender, EventArgs e)
         {
             IsListening = false;
-            if (ListenUBSAsync != null)
+            if (ListenUBSTask != null)
             {
-                ListenUBSAsync.Wait();
+                ListenUBSTask.GetAwaiter().GetResult();
 
             }
             SelectedDevice = new DeviceInfo(); ;
@@ -661,7 +661,7 @@ namespace HUREL.Compton
         public void ThreadException()
         {
             IsListening = false;
-            ListenUBSAsync = null;
+            ListenUBSTask = null;
         }
         #endregion
 
@@ -935,7 +935,7 @@ namespace HUREL.Compton
                 e.GetBaseException();
                 //this.Invoke(handleException);
             }
-
+           
             //////////////////////////////////////////////////////////////////////////////
             ///////////////Release the pinned memory and make it available to GC./////////
             //////////////////////////////////////////////////////////////////////////////
@@ -1021,15 +1021,107 @@ namespace HUREL.Compton
                         int len = BufSz;
                         if (EndPoint.BeginDataXfer(ref cBufs[j], ref xBufs[j], ref len, ref oLaps[j]) == false)
                         {
-                            Failures = 5;// Failures++;
+                            Failures++;// Failures++;
                         }
                            
                     }
                     j++;
                 }
             }
+            try
+            {
+                XferData(cBufs, xBufs, oLaps, pktsInfo, handleOverlap);          // All loaded. Let's go!
+            }
+            catch (CyUSBBufferFailException e)
+            {
+                Debug.WriteLine(e.Message);
+                Trace.WriteLine("XferData Fail, Restart UBS");
+                unsafe
+                {
+                    //Trace.WriteLine("HY : [Try] TryTake loop(test_buffer reset)");
+                    while (true)
+                    {
+                        int testBuffcount = DataInQueue.Count;
+                        if (testBuffcount != 0)
+                        {
+                            Thread.Sleep(0);
+                            //Debug.WriteLine("Remaining test_buffer count is " + testBuffcount);
+                        }
+                        else
+                            break;
+                    }
 
-            XferData(cBufs, xBufs, oLaps, pktsInfo, handleOverlap);          // All loaded. Let's go!
+                    for (nLocalCount = 0; nLocalCount < QueueSz; nLocalCount++)
+                    {
+                        CyUSB.OVERLAPPED ovLapStatus = new CyUSB.OVERLAPPED();
+                        ovLapStatus = (CyUSB.OVERLAPPED)Marshal.PtrToStructure(handleOverlap[nLocalCount].AddrOfPinnedObject(), typeof(CyUSB.OVERLAPPED));
+                        PInvoke.CloseHandle(ovLapStatus.hEvent);
+
+                        /*////////////////////////////////////////////////////////////////////////////////////////////
+                         * 
+                         * Release the pinned allocation handles.
+                         * 
+                        ////////////////////////////////////////////////////////////////////////////////////////////*/
+                        bufSingleTransfer[nLocalCount].Free();
+                        bufDataAllocation[nLocalCount].Free();
+                        bufPktsInfo[nLocalCount].Free();
+                        handleOverlap[nLocalCount].Free();
+
+                        cBufs[nLocalCount] = null;
+                        xBufs[nLocalCount] = null;
+                        oLaps[nLocalCount] = null;
+                    }
+                }
+                GC.Collect();
+
+                usb_setting(3);
+
+                EndPointListSelectIdx = 1;
+                EndPoint.TimeOut = 500;
+
+                bool bResult = true;
+                int xferLen = 4096;
+                byte[] inData = new byte[xferLen];
+                while (bResult)
+                {
+                    bResult = EndPoint.XferData(ref inData, ref xferLen);
+                }
+                EndPoint.TimeOut = 500;
+
+                Trace.WriteLine("HY : [Try] send setting value");
+                // 3. 셋팅값 전송
+                usb_setting(1);
+
+                // 4. 데이터 Read
+                EndPointListSelectIdx = 1;
+
+                BufSz = EndPoint.MaxPktSize * PpxInfo;
+                p_error = EndPoint.MaxPktSize; // 16384
+                QueueSz = QueueInfo; // 값 1로 고정
+                PPX = PpxInfo;
+
+                EndPoint.XferSize = BufSz;
+
+                if (EndPoint is CyIsocEndPoint)
+                    IsoPktBlockSize = (EndPoint as CyIsocEndPoint).GetPktBlockSize(BufSz);
+                else
+                    IsoPktBlockSize = 0;
+
+
+
+
+
+
+                IsListening = true;
+                FlagFinalCall = 0;
+                Debug.WriteLine("HY : [Try] Start XferThread");
+                //ListenUSBThread = new Thread(new ThreadStart( XferThread));
+                //ListenUSBThread.Start();
+                ListenUBSTask = Task.Run(() => XferThread());
+
+                return;
+            }            
+
             Debug.WriteLine("XferData Done!!!");
             unsafe
             {
@@ -1086,7 +1178,7 @@ namespace HUREL.Compton
             int pre_successes = 0;
 
             Successes = 0;
-            //Failures = 0;
+            Failures = 0;
 
             XferBytes = 0;
             t1 = DateTime.Now;
@@ -1163,7 +1255,7 @@ namespace HUREL.Compton
                             else
                             {
                                 Trace.WriteLine("Fail");
-                                Failures = 3;// Failures++;
+                                Failures++;// Failures++;
                             }
                         }
                     }
@@ -1187,7 +1279,7 @@ namespace HUREL.Compton
                 len = BufSz;
                 if (EndPoint.BeginDataXfer(ref cBufs[k], ref xBufs[k], ref len, ref oLaps[k]) == false)
                 {
-                    Failures = 4;// Failures++;
+                    Failures++;// Failures++;
                 }
                 k++;
                 if (k == QueueSz)  // Only update displayed stats once each time through the queue
@@ -1209,6 +1301,11 @@ namespace HUREL.Compton
                     Thread.Sleep(0);
                 }
                 Thread.Sleep(0);
+                if (Failures > 100)
+                {
+                    throw new CyUSBBufferFailException();                    
+                }
+                
 
             } // End infinite loop
             // Let's recall all the queued buffer and abort the end point.
@@ -1217,6 +1314,23 @@ namespace HUREL.Compton
 
 
         #endregion
+    }
+
+    public class CyUSBBufferFailException : Exception
+    {
+        public CyUSBBufferFailException()
+        {
+        }
+
+        public CyUSBBufferFailException(string message)
+            : base(message)
+        {
+        }
+
+        public CyUSBBufferFailException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using GalaSoft.MvvmLight.Command;
+﻿using AsyncAwaitBestPractices;
+using AsyncAwaitBestPractices.MVVM;
 using HUREL.Compton;
 using MathNet.Numerics.Statistics;
 using System;
@@ -94,14 +95,18 @@ namespace Compton_GUI_WPF.ViewModel
 
         #region Start or Stop USB
 
-        private RelayCommand startorStopSessionCommand;
+        private AsyncCommand startorStopSessionCommand;
         public ICommand StartorStopSessionCommand
         {
-            get { return (this.startorStopSessionCommand) ?? (this.startorStopSessionCommand = new RelayCommand(StartorStopSession, IsSessionAvailable)); }
+            get { return (this.startorStopSessionCommand) ?? (this.startorStopSessionCommand = new AsyncCommand(StartorStopSessionAsync, CanExecuteStartorStopSession)); }
         }
-        private void StartorStopSession()
+        private bool CanExecuteStartorStopSession(object arg)
         {
-            IsHistoGramTooSlow = false;
+            bool allSessionAvailable = IsLACCModuleInitiate && isSessionAvailable;
+            return allSessionAvailable;
+        }
+        private async Task StartorStopSessionAsync()
+        {                        
             if (MeasurementTime == "")
                 return;
             IsSessionAvailable = false;
@@ -123,28 +128,25 @@ namespace Compton_GUI_WPF.ViewModel
                         IsSessionStart = true;
                         StartTimer();
                         IsAddingListModeData = true;
-                        AddListModeDataTask = new Task(() => AddListModeData());
-                        RealTimeImageReconTask = new Task(() => RealTimeImageRecon());
-                        AddListModeDataTask.Start();
-                        RealTimeImageReconTask.Start();
+                        AddListModeDataTaskAsync = Task.Run(() => AddListModeData());
+                        RealTimeImageReconTaskAsync = Task.Run(() => RealTimeImageRecon());
+                       
+                       
 
                     }
                     VMStatus = status;
                 }
             }
-            else
+            else // Stoppping Usb
             {
-                VMStatus = FPGAControl.Stop_usb();
+                VMStatus = await FPGAControl.Stop_usb();
                 IsSessionStart = false;
                 IsAddingListModeData = false;
-                AddListModeDataTask.Wait();
-                FPGADispatchTimer.Stop();
-                RecordTimeSpan = TimeSpan.Zero;
-                Task taskDrawing = Task.Run(() => DrawMLPEPositions());
+                await AddListModeDataTaskAsync.ConfigureAwait(false);
+                FPGADispatchTimer.Stop();                
+                await RealTimeImageReconTaskAsync;
+                await Task.Run(() => DrawMLPEPositions()).ConfigureAwait(false);                
             }
-
-
-
             IsSessionAvailable = true;
         }
 
@@ -173,7 +175,7 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
 
-        private Task AddListModeDataTask;
+        private Task AddListModeDataTaskAsync;
         private bool IsAddingListModeData;
         private void AddListModeData()
         {
@@ -224,8 +226,8 @@ namespace Compton_GUI_WPF.ViewModel
         private bool isSessionAvailable;
         public bool IsSessionAvailable
         {
-            get
-            {
+            get 
+            { 
                 bool allSessionAvailable = IsLACCModuleInitiate && isSessionAvailable;
                 return allSessionAvailable;
             }
@@ -235,6 +237,7 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged(nameof(IsSessionAvailable));
             }
         }
+        
 
         private bool isSessionStart = false;
         public bool IsSessionStart
@@ -287,17 +290,7 @@ namespace Compton_GUI_WPF.ViewModel
             get { return recordTimeSpan; }
             set
             {
-                recordTimeSpan = value;
-                if (IsSessionStart && MeasurementTimeSpan == value)
-                {
-                    FPGADispatchTimer.Stop();
-                    Task stopSession = new Task(StartorStopSession);
-                    stopSession.Start();
-                    VMStatus = "Wait For Stop";
-                    stopSession.Wait();
-                    recordTimeSpan = TimeSpan.Zero;
-                    VMStatus = "Done!";
-                }
+                recordTimeSpan = value;                
                 OnPropertyChanged(nameof(RecordTimeSpan));
             }
         }
@@ -307,14 +300,21 @@ namespace Compton_GUI_WPF.ViewModel
         {
             FPGADispatchTimer = new DispatcherTimer();
             FPGADispatchTimer.Interval = TimeSpan.FromSeconds(1);
-            FPGADispatchTimer.Tick += new EventHandler(TimerTick);
+            FPGADispatchTimer.Tick += new EventHandler(OnTimerTick);
             FPGADispatchTimer.Start();
             Task.Run(() => DataUpdate());
         }
 
-        private void TimerTick(object sender, EventArgs e)
+        private void OnTimerTick(object sender, EventArgs e)
         {
             RecordTimeSpan = RecordTimeSpan.Add(TimeSpan.FromSeconds(1));
+            if (IsSessionStart && MeasurementTimeSpan == RecordTimeSpan)
+            {
+                FPGADispatchTimer.Stop();                
+                StartorStopSessionAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
+                recordTimeSpan = TimeSpan.Zero;
+                VMStatus = "Done!";
+            }
         }
 
         

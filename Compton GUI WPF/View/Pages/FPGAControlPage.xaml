@@ -15,11 +15,7 @@
         Title="CRUXELL FPGA" Height="800" Width="500">
 
 
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Closing">
-            <mvvm:EventToCommand Command="{Binding OffCommand}"/>
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
+
     <Page.DataContext>
         <VM:FPGAConrolPannelViewModel/>
     </Page.DataContext>

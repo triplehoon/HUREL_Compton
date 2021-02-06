@@ -16,30 +16,9 @@ namespace Compton_GUI_WPF.ViewModel
 
         public FPGAConrolPannelViewModel()
         {
-            On();
+            
         }
-
-        private void On()
-        {
-            var msg = new WindowStateMessage() { state = true };
-            Messenger.Default.Send<WindowStateMessage>(msg);
-        }
-
-        private RelayCommand<object> offCommand;
-        public ICommand OffCommand
-        {
-            get
-            {
-                return this.offCommand ??
-                    (this.offCommand = new RelayCommand<object>(this.Off));
-            }
-        }
-        private void Off(object obj)
-        {
-            var msg = new WindowStateMessage() { state = false };
-            Messenger.Default.Send<WindowStateMessage>(msg);
-        }
-
+        
         #region Varibles Set
         private string smoothWindowSamples;
         public string SmoothWindowSamples

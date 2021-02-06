@@ -31,13 +31,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AsyncAwaitBestPractices" Version="5.0.2" />
+    <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="5.0.2" />
     <PackageReference Include="Cyotek.Drawing.BitmapFont" Version="2.0.1" />
     <PackageReference Include="HelixToolkit" Version="2.14.0" />
-    <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="2.14.0" />
+    <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="2.14.0">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
     <PackageReference Include="MahApps.Metro" Version="2.4.3" />
     <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
     <PackageReference Include="MvvmLight" Version="5.4.1.1" />
-    <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
+    <PackageReference Include="MvvmLightLibs" Version="5.4.1.1">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
     <PackageReference Include="NuGet.CommandLine" Version="5.8.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -60,7 +66,9 @@
     <PackageReference Include="Syncfusion.Themes.Saffron.WPF" Version="18.4.0.35" />
     <PackageReference Include="Syncfusion.Tools.WPF" Version="18.4.0.35" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
-    <PackageReference Include="System.Windows.Interactivity.WPF" Version="2.0.20525" />
+    <PackageReference Include="System.Windows.Interactivity.WPF" Version="2.0.20525">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
