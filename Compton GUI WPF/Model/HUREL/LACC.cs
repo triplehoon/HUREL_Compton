@@ -77,7 +77,7 @@ namespace HUREL.Compton.LACC
             LACC_Absorber_Modules = new LACC_Module[1] { absorber };
         }
 
-        public void AddListModeData(short[] fullADCArrayValue,Matrix3D deviceTransformation,bool isMLPEOn = false, double minE =0, double maxE=10000)
+        public void AddListModeData(short[] fullADCArrayValue,Matrix3D deviceTransformation, bool isMLPEOn = false, double minE =0, double maxE=10000)
         {
 
             LMData lmData;

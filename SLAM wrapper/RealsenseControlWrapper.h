@@ -35,10 +35,10 @@ namespace HUREL {
 				RealsenseControlWrapper();
 
 
-				void GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors, double xOffset, double yOffset, double zOffset);
+				void GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 				array<double>^ GetPoseFrame(int% tranckingConf);
 
-				void GetRealTimeRGB(Bitmap^% img);
+				void GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data);
 
 				Boolean ResetPipeline(String^% msg);
 
@@ -48,7 +48,7 @@ namespace HUREL {
 				Boolean StartSLAM(String^% msg);
 				void StopSLAM();
 
-				void GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors, double xOffset, double yOffset, double zOffset);
+				void GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
 				// C# 소멸자. Finalize 메서드임
 				~RealsenseControlWrapper();

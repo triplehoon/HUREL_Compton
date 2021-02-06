@@ -20,11 +20,10 @@ namespace Compton_GUI_WPF.ViewModel
 
 
 
-        private static CRUXELLLACC fPGAControl;
-        public static CRUXELLLACC FPGAControl { get => fPGAControl; set => fPGAControl = value; }
+        public static CRUXELLLACC FPGAControl;
+       
+        public static CRUXELLLACC.VariableInfo FPGAVariable;
 
-        private static CRUXELLLACC.VariableInfo fPGAVariable;
-        public static CRUXELLLACC.VariableInfo FPGAVariable { get => fPGAVariable; set => fPGAVariable = value; }
 
         #region FPGA Setting
 
@@ -181,7 +180,7 @@ namespace Compton_GUI_WPF.ViewModel
             short[] check1;
             short[] check2 = new short[256];
             LACC_Control_Static.ResetLMData();
-            var Position = Matrix3D.Identity;
+            var Identity = Matrix3D.Identity;
             while (IsAddingListModeData)
             {
                 short[] item;
@@ -193,8 +192,14 @@ namespace Compton_GUI_WPF.ViewModel
                         Debug.WriteLine("CEHK");
                     }
 
-                    if (IsSLAMOn)
-                    LACC_Control_Static.AddListModeData(item, Position, isMLPEOn, minMLPE_Energy, maxMLPE_Energy);
+                    if (!IsSLAMOn)
+                    {
+                        LACC_Control_Static.AddListModeData(item, Identity, isMLPEOn, minMLPE_Energy, maxMLPE_Energy);
+                    }  
+                    else
+                    {
+                        LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, isMLPEOn, minMLPE_Energy, maxMLPE_Energy);
+                    }
                 }
             }
         }

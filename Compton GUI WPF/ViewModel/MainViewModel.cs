@@ -28,8 +28,8 @@ namespace Compton_GUI_WPF.ViewModel
     public partial class MainViewModel : INotifyPropertyChanged
     {
 
-        public static LACC_Control LACC_Control_Static { get => lACC_Control_Static; set => lACC_Control_Static = value; }
-        private static LACC_Control lACC_Control_Static;
+        public static LACC_Control LACC_Control_Static;
+        
 
         /// <summary>
         /// Contructor
@@ -103,7 +103,7 @@ namespace Compton_GUI_WPF.ViewModel
             while (IsSessionStart)
             {
                 DrawSpectrum();
-                if (RecordTimeSpan.TotalSeconds > 60 && IsMLPEOn)
+                if (RecordTimeSpan.TotalSeconds > 10 && IsMLPEOn)
                 {
                     ResetSpectrum();
                 }
@@ -189,8 +189,6 @@ namespace Compton_GUI_WPF.ViewModel
                 SpectrumHistoModels[i] = histo.SpectrumData;
             }
             sw.Stop();
-
-            Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
         }
         
         public ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> SpectrumHistoModels{ get; set; }
@@ -324,7 +322,7 @@ namespace Compton_GUI_WPF.ViewModel
                 Debug.WriteLine("Making Scatter Module");
                 VMStatus = "Making Scatter Module";
                 ModuleInfoViewModels[0] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X, y = T265ToLACCOffset.Y, z = T265ToLACCOffset.Z },
+                                                            new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z },
                                                             new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                             scatterGain,
                                                             pmtOrderInfo,
@@ -333,7 +331,7 @@ namespace Compton_GUI_WPF.ViewModel
                 Debug.WriteLine("Making Abosrober Module");
                 VMStatus = "Making Absorber Module";
                 ModuleInfoViewModels[8] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                            new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X, y = T265ToLACCOffset.Y, z = T265ToLACCOffset.Z },
+                                                            new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z - 0.25 },
                                                             new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                             absorberGain,
                                                             pmtOrderInfo,

@@ -341,7 +341,7 @@ namespace HUREL.Compton
             {
                 absorberEnergy
             };
-            TotalScatterInteractionEnergys.Add(absorberEnergy);
+            TotalAbsorberInteractionEnergys.Add(absorberEnergy);
             AbsorberInteractionEnergys = absorberEnergys;
 
             DeviceTransformMatrix = tranformation;

@@ -66,10 +66,10 @@ namespace HUREL.Compton
         private int PPX;
         private int IsoPktBlockSize;
         private int Successes;
-        //private int Failures = 0;
-        //private int p_head = 0; // test2_buffer의 50개중 몇번째인지
-        //private int p_tail = 0;
-        //private int i_head = 0; // 1메가 배열 내부의 인덱스
+        private int Failures = 0;
+        private int p_head = 0; // test2_buffer의 50개중 몇번째인지
+        private int p_tail = 0;
+        private int i_head = 0; // 1메가 배열 내부의 인덱스
         private int p_error = 0;
         private static byte DefaultBufInitValue = 0xA5;
         private DateTime t1, t2;
@@ -229,7 +229,7 @@ namespace HUREL.Compton
         public CRUXELLLACC()
         {
             Init_data_and_buffer();
-            //Init_USB();
+            Init_USB();
         }
 
         public void Dispose()
@@ -1021,9 +1021,9 @@ namespace HUREL.Compton
                         int len = BufSz;
                         if (EndPoint.BeginDataXfer(ref cBufs[j], ref xBufs[j], ref len, ref oLaps[j]) == false)
                         {
-
+                            Failures = 5;// Failures++;
                         }
-                            //Failures = 5;// Failures++;
+                           
                     }
                     j++;
                 }
@@ -1105,7 +1105,7 @@ namespace HUREL.Compton
                         if (!EndPoint.WaitForXfer(ovData.hEvent, 1000))
                         {
                             EndPoint.Abort();
-                            PInvoke.WaitForSingleObject(ovData.hEvent, 1000);
+                            PInvoke.WaitForSingleObject(ovData.hEvent, 0);
 
                             EndPoint.FinishDataXfer(ref cBufs[k], ref xBufs[k], ref len, ref oLaps[k]);
                             
@@ -1162,7 +1162,8 @@ namespace HUREL.Compton
                             }
                             else
                             {
-                                //Failures = 3;// Failures++;
+                                Trace.WriteLine("Fail");
+                                Failures = 3;// Failures++;
                             }
                         }
                     }
@@ -1185,8 +1186,9 @@ namespace HUREL.Compton
                 // Re-submit this buffer into the queue
                 len = BufSz;
                 if (EndPoint.BeginDataXfer(ref cBufs[k], ref xBufs[k], ref len, ref oLaps[k]) == false)
-                    //Failures = 4;// Failures++;
-
+                {
+                    Failures = 4;// Failures++;
+                }
                 k++;
                 if (k == QueueSz)  // Only update displayed stats once each time through the queue
                 {

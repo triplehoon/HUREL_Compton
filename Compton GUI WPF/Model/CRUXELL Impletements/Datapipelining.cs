@@ -86,7 +86,7 @@ namespace HUREL.Compton
                                 chk2 = dataBuffer;
                                 ParsedQueue.Add(dataBuffer);
                                 dataInCount++;
-                                if(dataInCount %10000 ==0)
+                                if(dataInCount % 100000 ==0)
                                 {
                                     Debug.WriteLine("Data in count is " + dataInCount);
                                 }

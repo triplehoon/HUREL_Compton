@@ -22,7 +22,7 @@ namespace Compton_GUI_WPF.ViewModel
     {
         private RealsenseControlWrapper RealsenseControl = new RealsenseControlWrapper();
 
-        private Vector3D T265ToLACCOffset = new Vector3D(0, 0, 0.4);
+        private Vector3D T265ToLACCOffset = new Vector3D(0, 0.24, +0.03);
         private double t265ToLACCOffsetX;
         public double T265ToLACCOffsetX
         {
@@ -203,10 +203,20 @@ namespace Compton_GUI_WPF.ViewModel
                 }
 
                 Bitmap tempBitmap = new Bitmap(1, 1);
-                RealsenseControl.GetRealTimeRGB(ref tempBitmap);
+                int width = 1;
+                int height = 1;
+                int stride = 1;
+                IntPtr data = IntPtr.Zero;
+                RealsenseControl.GetRealTimeRGB(ref width, ref height, ref stride, ref data);
+                
                 //tempBitmap.Save("E:\\OneDrive - 한양대학교\\01.Hurel\\01.현재작업\\20201203 Comtpon GUI\\Compton GUI Main\\HUREL Compton\\RealsensWrapperTest\\bin\\Debug\\net5.0-windows\\test.png");
                 // Bitmap 담을 메모리스트림 
-                if (tempBitmap == null || tempBitmap.Width == 1)
+                if (data == IntPtr.Zero)
+                {
+                    continue;
+                }
+                tempBitmap = new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format24bppRgb, data);
+                if (tempBitmap.Width == 1)
                 {
                     continue;
                 }
@@ -303,8 +313,7 @@ namespace Compton_GUI_WPF.ViewModel
                 //Debug.WriteLine("Start to get Reatime Data");
                 try
                 {
-                    RealsenseControl.GetRealTimePointCloud(ref poseVect, ref colorVect, T265ToLACCOffset.X, T265ToLACCOffset.Y, T265ToLACCOffset.Z);
-
+                    RealsenseControl.GetRealTimePointCloud(ref poseVect, ref colorVect);
                     for (int i = 0; i < poseVect.Count; i++)
                     {
 
@@ -362,10 +371,10 @@ namespace Compton_GUI_WPF.ViewModel
             string temp = "";
             RealsenseControl.StartSLAM(ref temp);
             RealsenseState = temp;
-            Thread.Sleep(2000);
             SLAMPointCloud = new PointGeometry3D();
             SLAMPoseInfo = new LineGeometry3D();
             UpdateSLAMPointCloudTask = Task.Run(() => UpdateSLAMPointCloud());
+            //SLAMReconTask = Task.Run(() => SLAMRecon());
         }
 
 
@@ -379,6 +388,7 @@ namespace Compton_GUI_WPF.ViewModel
             RealsenseControl.StopSLAM();
             IsSLAMOn = false;
             UpdateSLAMPointCloudTask.Wait();
+            //SLAMReconTask.Wait();
         }
 
         private Task UpdateSLAMPointCloudTask;
@@ -408,28 +418,23 @@ namespace Compton_GUI_WPF.ViewModel
                 SLAMPoseInfo = line.ToLineGeometry3D();
                 previousPose = currentPose;
 
-                try
-                {
-                    RealsenseControl.GetSLAMPointCloud(ref poseVect, ref colorVect, T265ToLACCOffset.X, T265ToLACCOffset.Y, T265ToLACCOffset.Z);
 
-                    for (int i = 0; i < poseVect.Count; i++)
-                    {
+                RealsenseControl.GetSLAMPointCloud(ref poseVect, ref colorVect);
 
-                        vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
-                        cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
-                        //cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
-                        //id.Add(i);
-                    }
-                    SLAMVector3s = vc;
-                    SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
-                    SLAMPointCloudCount = vc.Count();
-                }
-                catch
+                for (int i = 0; i < poseVect.Count; i++)
                 {
-                    Error++;
-                    Trace.WriteLine("Error Count is " + Error);
+
+                    vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
+                    cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
+                    //cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
+                    //id.Add(i);
                 }
-                Thread.Sleep(50);                
+                SLAMVector3s = vc;
+                SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
+                SLAMPointCloudCount = vc.Count();
+
+
+                //Thread.Sleep(500);                
             }
             Debug.WriteLine("SLAM Point Cloud Count is " + poseVect.Count);
         }
@@ -481,19 +486,33 @@ namespace Compton_GUI_WPF.ViewModel
         }
         void DrawBPPointCloudToRealTimePointCloud()
         {
+            List<LMData> tempListModeData = new List<LMData>();
             if (RealtimeVector3s == null || RealtimeVector3s.Count() == 0)
             {
                 return;
             }
-            List<LMData> tempListModeData = (from LM in LACC_Control_Static.ListedLMData
-                                             where LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(MLPETime)
-                                             select LM).ToList();
+            if (LACC_Control_Static.ListedLMData.Count == 0)
+            {
+                return;
+            }
+            try
+            {
+                tempListModeData = (from LM in LACC_Control_Static.ListedLMData
+                                    where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(MLPETime)
+                                    select LM).ToList();
+            }
+            catch (NullReferenceException e)
+            {
+                Debug.WriteLine(e.ToString());
+                return;
+            }
             if (tempListModeData.Count == 0)
             {
                 return;
             }
+            //Trace.WriteLine("LM Data count " + tempListModeData.Count());
 
-            var (v3, c4) = ImageRecon.BPtoPointCloud(RealtimeVector3s, tempListModeData, false ,5, 0.5);
+            var (v3, c4) = ImageRecon.BPtoPointCloud(RealtimeVector3s, tempListModeData, false ,5, 0.8);
 
             RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
@@ -505,17 +524,55 @@ namespace Compton_GUI_WPF.ViewModel
             get { return slamReconPointCloud; }
             set { slamReconPointCloud = value; OnPropertyChanged(nameof(SLAMReconPointCloud)); }
         }
+
+        private Task SLAMReconTask;
+        private void SLAMRecon()
+        {
+            while (IsRealTimeImageReconOn && IsSLAMOn)
+            {
+                //Stopwatch sw = new Stopwatch();
+                //sw.Start();
+                DrawBPPointCloudToSLAMPointCloud();
+                //sw.Stop();
+                //Debug.WriteLine("BP Draw Image tooks " + sw.ElapsedMilliseconds + " ms.");
+            }
+            DrawBPPointCloudToSLAMPointCloud();
+        }
         void DrawBPPointCloudToSLAMPointCloud()
         {
             if (SLAMVector3s == null || SLAMVector3s.Count() == 0)
             {
                 return;
             }
-            List<LMData> tempListModeData = LACC_Control_Static.ListedLMData;
+            List<LMData> tempListModeData = new List<LMData>();
+            if (RealtimeVector3s == null || RealtimeVector3s.Count() == 0)
+            {
+                return;
+            }
+            if (LACC_Control_Static.ListedLMData.Count == 0)
+            {
+                return;
+            }
+            try
+            {
+                tempListModeData = (from LM in LACC_Control_Static.ListedLMData
+                                     where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(3000)
+                                     select LM).ToList();
+            }
+            catch (NullReferenceException e)
+            {
+                Debug.WriteLine(e.ToString());
+                return;
+            }
+            if (tempListModeData.Count == 0)
+            {
+                return;
+            }
+         
                                              
 
-            var (v3, c4) = ImageRecon.BPtoPointCloud(SLAMVector3s, tempListModeData, true, 5, 0.5);
-
+            var (v3, c4) = ImageRecon.BPtoPointCloud(SLAMVector3s, tempListModeData, true, 5, 0.6);
+            Trace.WriteLine(v3.Count());
             SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
                 
         }

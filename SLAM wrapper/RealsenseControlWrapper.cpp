@@ -31,7 +31,7 @@ HUREL::Compton::LACC::RealsenseControlWrapper::RealsenseControlWrapper()
 {
 }
 
-void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors, double xOffset, double yOffset, double zOffset)
+void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
@@ -45,7 +45,7 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 		return;
 
 	for (int i = 0; i < pose.colors_.size(); i++) {
-		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0] - xOffset, pose.points_[i][1] - yOffset, pose.points_[i][2] - zOffset};
+		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
 		vectors->Add(poseVector);
 
 		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
@@ -53,7 +53,7 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 	}
 }
 
-void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors, double xOffset, double yOffset, double zOffset)
+void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
@@ -77,7 +77,7 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 
 
 	for (int i = 0; i < count - 1; i++) {
-		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0] - xOffset, pose.points_[i][1] - yOffset, pose.points_[i][2] - zOffset};
+		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
 		vectors->Add(poseVector);
 
 		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
@@ -85,14 +85,10 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 	}
 }
 
-void RealsenseControlWrapper::GetRealTimeRGB(Bitmap^% img) {
+void RealsenseControlWrapper::GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data) {
 	
-	if (img == nullptr) {
-		throw gcnew ArgumentNullException();
-	}
-
 	if (!m_RealsenseControlNative->m_IsPipeLineOn) {
-		img = nullptr;
+		data = IntPtr::Zero;
 		return;
 	}
 
@@ -111,20 +107,19 @@ void RealsenseControlWrapper::GetRealTimeRGB(Bitmap^% img) {
 
 		if (color->get_data() == nullptr) {
 			System::Diagnostics::Debug::WriteLine("color.getdata null ptr");
-			img == nullptr;
+			data == IntPtr::Zero;
 			return;
 		}
 
-		int width = color->get_width();
-		int height = color->get_height();
-		int stride = color->get_stride_in_bytes();
+		width = color->get_width();
+		height = color->get_height();
+		stride = color->get_stride_in_bytes();
 
 		void* ptr = (void*)color->get_data();
-	
 
-		IntPtr data = IntPtr(ptr);
 
-		img = gcnew Bitmap(width, height, stride, System::Drawing::Imaging::PixelFormat::Format24bppRgb, data);
+		data = IntPtr(ptr);
+
 	}
 }
 
@@ -170,7 +165,7 @@ array<double> ^ RealsenseControlWrapper::GetPoseFrame(int% tranckingConf)
 {
 	tranckingConf = (int) m_RealsenseControlNative->m_Posedata.tracker_confidence;
 	
-	if (tranckingConf >= 3)
+	if (tranckingConf  > 0)
 	{
 		auto transform = m_RealsenseControlNative->getMatrix3DOneLineFromPoseData(m_RealsenseControlNative->m_Posedata);
 

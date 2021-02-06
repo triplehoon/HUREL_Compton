@@ -127,13 +127,13 @@
                                 <hx:DefaultEffectsManager/>
                             </hx:Viewport3DX.EffectsManager>
                             <hx:Viewport3DX.Camera>
-                                <hx:PerspectiveCamera Position="0.017,0.03,-0.03" LookDirection="0,0,1" UpDirection="0,1,0"/>
+                                <hx:PerspectiveCamera Position="0.05,0.05,0.07" LookDirection="0,0,1" UpDirection="0,1,0"/>
                             </hx:Viewport3DX.Camera>
 
                             <hx:PointGeometryModel3D Geometry="{Binding RealtimeReconPointCloud}" Color="White" FixedSize="True" Size="5,5">
                             </hx:PointGeometryModel3D>
 
-                            <hx:PointGeometryModel3D Geometry="{Binding RTPointCloud}" Color="Gray" FixedSize="True" Size="1,1">
+                            <hx:PointGeometryModel3D Geometry="{Binding RTPointCloud}" Color="Gray" FixedSize="True" Size="0.8,0.87">
                             </hx:PointGeometryModel3D>
                         </hx:Viewport3DX>
                         <Grid >
@@ -173,9 +173,9 @@
                                 <hx:DefaultEffectsManager/>
                             </hx:Viewport3DX.EffectsManager>
                             <hx:Viewport3DX.Camera>
-                                <hx:PerspectiveCamera Position="0,2,-2" LookDirection="0,-0.2,0.5" UpDirection="0,1,0"/>
+                                <hx:PerspectiveCamera Position="0,2,-4" LookDirection="0,-0.2,0.5" UpDirection="0,1,0"/>
                             </hx:Viewport3DX.Camera>
-                            <hx:PointGeometryModel3D Geometry="{Binding SLAMBPPointCloud}" Color="White" FixedSize="True" Size="20,20">
+                            <hx:PointGeometryModel3D Geometry="{Binding SLAMReconPointCloud}" Color="White" FixedSize="True" Size="5,5">
                             </hx:PointGeometryModel3D>
                             <hx:PointGeometryModel3D Geometry="{Binding SLAMPointCloud}" Color="White" FixedSize="True" Size="1,1">
                             </hx:PointGeometryModel3D>
