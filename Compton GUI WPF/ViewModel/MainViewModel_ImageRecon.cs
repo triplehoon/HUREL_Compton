@@ -99,7 +99,7 @@ namespace Compton_GUI_WPF.ViewModel
         public bool IsRealsensePipelineOn
         {
             get { return isRealsensePipelineOn; }
-            set { isRealsensePipelineOn = value; OnPropertyChanged(nameof(IsRealsensePipelineOn)); }
+            set { isRealsensePipelineOn = value; OnPropertyChanged(nameof(IsRealsensePipelineOn)); CanStartSLAMCommnd(""); CanStopSLAMCommnd(""); }
         }
         private AsyncCommand startRealsensePipelineCommand;
         public ICommand StartRealsensePipelineCommand
@@ -359,16 +359,16 @@ namespace Compton_GUI_WPF.ViewModel
             get { return slamPointCloudCount; }
             set { slamPointCloudCount = value; OnPropertyChanged(nameof(SLAMPointCloudCount)); }
         }
-
+ 
         private bool IsSLAMOn = false;
 
         private AsyncCommand startSLAMCommand;
         public ICommand StartSLAMCommand
         {
-            get { return (this.startSLAMCommand) ?? (this.startSLAMCommand = new AsyncCommand(StartSLAM, CanStartSLAMCommnd)); }
+            get { return (this.startSLAMCommand) ?? (this.startSLAMCommand = new AsyncCommand(StartSLAM)); }
         }
         private bool CanStartSLAMCommnd(object obj)
-        {
+        { 
             bool checkAll = !IsSLAMOn && IsRealsensePipelineOn;
             return checkAll;
         }
@@ -388,7 +388,7 @@ namespace Compton_GUI_WPF.ViewModel
         private AsyncCommand stopSLAMCommand;
         public ICommand StopSLAMCommand
         {
-            get { return (this.stopSLAMCommand) ?? (this.stopSLAMCommand = new AsyncCommand(StopSLAM, CanStopSLAMCommnd)); }
+            get { return (this.stopSLAMCommand) ?? (this.stopSLAMCommand = new AsyncCommand(StopSLAM)); }
         }
         private bool CanStopSLAMCommnd(object obj)
         {
