@@ -16,6 +16,9 @@ using System.Windows.Media.Imaging;
 using System.Drawing;
 using System.IO;
 using AsyncAwaitBestPractices.MVVM;
+using System.Windows;
+using System.Windows.Threading;
+using System.Windows.Interop;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -99,12 +102,27 @@ namespace Compton_GUI_WPF.ViewModel
         public bool IsRealsensePipelineOn
         {
             get { return isRealsensePipelineOn; }
-            set { isRealsensePipelineOn = value; OnPropertyChanged(nameof(IsRealsensePipelineOn)); CanStartSLAMCommnd(""); CanStopSLAMCommnd(""); }
+            set 
+            { 
+                isRealsensePipelineOn = value; 
+                OnPropertyChanged(nameof(IsRealsensePipelineOn));
+                Application.Current.Dispatcher.Invoke(
+                    DispatcherPriority.ApplicationIdle,
+                    new Action(() => {
+                        ((AsyncCommand)StartSLAMCommand).RaiseCanExecuteChanged();
+                        ((AsyncCommand)StopSLAMCommand).RaiseCanExecuteChanged();
+                    }));
+                
+            }
         }
+
         private AsyncCommand startRealsensePipelineCommand;
         public ICommand StartRealsensePipelineCommand
         {
-            get { return (this.startRealsensePipelineCommand) ?? (this.startRealsensePipelineCommand = new AsyncCommand(StartRealsensePipeline)); }
+            get 
+            { 
+                return (this.startRealsensePipelineCommand) ?? (this.startRealsensePipelineCommand = new AsyncCommand(StartRealsensePipeline)); 
+            }
         }
 
         private async Task StartRealsensePipeline()
@@ -126,6 +144,7 @@ namespace Compton_GUI_WPF.ViewModel
                 }
                 RealsenseState = s;
             }).ConfigureAwait(false);
+            RealsenseState = "Pipeline has started";
         }
 
         private AsyncCommand resetRealsensePipelineCommand;
@@ -234,10 +253,70 @@ namespace Compton_GUI_WPF.ViewModel
                 img.EndInit();
                 img.Freeze();
                 //Debug.WriteLine("Img Update");
+               
                 RealtimeRGB = img;
+
+                if(ReconBitmap != null)
+                {
+                    Bitmap imgBitmap = BitmapImage2Bitmap(img);
+                    imgBitmap = MergedBitmaps(imgBitmap, ReconBitmap);
+                    RealtimeRGB = Bitmap2BitmapImage(imgBitmap);
+                }
+
                 tempBitmap.Dispose();
 
             }
+        }
+
+        private Bitmap MergedBitmaps(Bitmap bmp1, Bitmap bmp2)
+        {
+            Bitmap result = new Bitmap(Math.Max(bmp1.Width, bmp2.Width),
+                                       Math.Max(bmp1.Height, bmp2.Height));
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                g.DrawImage(bmp2, System.Drawing.Point.Empty);
+                g.DrawImage(bmp1, System.Drawing.Point.Empty);
+            }
+            return result;
+        }
+        #region Bitmap converter
+        private Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
+        {
+            // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
+
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(bitmapImage));
+                enc.Save(outStream);
+                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(outStream);
+
+                return new Bitmap(bitmap);
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+        #endregion
+        private BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
+        {
+            IntPtr hBitmap = bitmap.GetHbitmap();
+            BitmapImage retval;
+
+            try
+            {
+                retval = (BitmapImage)Imaging.CreateBitmapSourceFromHBitmap(
+                             hBitmap,
+                             IntPtr.Zero,
+                             Int32Rect.Empty,
+                             BitmapSizeOptions.FromEmptyOptions());
+            }
+            finally
+            {
+                DeleteObject(hBitmap);
+            }
+
+            return retval;
         }
 
         private Matrix3D currentSystemPose;
@@ -312,10 +391,11 @@ namespace Compton_GUI_WPF.ViewModel
 
                 var poseVect = new List<double[]>();
                 var colorVect = new List<double[]>();
+                var uvVect = new List<float[]>();
                 //Debug.WriteLine("Start to get Reatime Data");
                 try
                 {
-                    RealsenseControl.GetRealTimePointCloud(ref poseVect, ref colorVect);
+                    RealsenseControl.GetRealTimePointCloud(ref poseVect, ref colorVect, ref uvVect);
                     for (int i = 0; i < poseVect.Count; i++)
                     {
 
@@ -325,6 +405,7 @@ namespace Compton_GUI_WPF.ViewModel
                     }
 
                     RealtimeVector3s = vc;
+                    RealtimeUVs = uvVect;
                     RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
 
                 }
@@ -359,16 +440,33 @@ namespace Compton_GUI_WPF.ViewModel
             get { return slamPointCloudCount; }
             set { slamPointCloudCount = value; OnPropertyChanged(nameof(SLAMPointCloudCount)); }
         }
- 
-        private bool IsSLAMOn = false;
+
+        private bool _isSLAMOn = false;
+        private bool IsSLAMOn
+        {
+            get
+            {
+                return _isSLAMOn;
+            }
+            set
+            {
+                _isSLAMOn = value;
+                Application.Current.Dispatcher.Invoke(
+                    DispatcherPriority.ApplicationIdle,
+                    new Action(() => {
+                        ((AsyncCommand)StartSLAMCommand).RaiseCanExecuteChanged();
+                        ((AsyncCommand)StopSLAMCommand).RaiseCanExecuteChanged();
+                    }));
+            }
+        }
 
         private AsyncCommand startSLAMCommand;
         public ICommand StartSLAMCommand
         {
-            get { return (this.startSLAMCommand) ?? (this.startSLAMCommand = new AsyncCommand(StartSLAM)); }
+            get { return (this.startSLAMCommand) ?? (this.startSLAMCommand = new AsyncCommand(StartSLAM,CanStartSLAMCommand)); }
         }
-        private bool CanStartSLAMCommnd(object obj)
-        { 
+        private bool CanStartSLAMCommand(object obj)
+        {
             bool checkAll = !IsSLAMOn && IsRealsensePipelineOn;
             return checkAll;
         }
@@ -388,9 +486,9 @@ namespace Compton_GUI_WPF.ViewModel
         private AsyncCommand stopSLAMCommand;
         public ICommand StopSLAMCommand
         {
-            get { return (this.stopSLAMCommand) ?? (this.stopSLAMCommand = new AsyncCommand(StopSLAM)); }
+            get { return (this.stopSLAMCommand) ?? (this.stopSLAMCommand = new AsyncCommand(StopSLAM,CanStopSLAMCommand)); }
         }
-        private bool CanStopSLAMCommnd(object obj)
+        private bool CanStopSLAMCommand(object obj)
         {
             return IsSLAMOn;
         }
@@ -487,13 +585,14 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
         private Vector3Collection RealtimeVector3s;
+        private List<float[]> RealtimeUVs;
         private PointGeometry3D realtimeReconPointCloud;
         public PointGeometry3D RealtimeReconPointCloud
         {
             get { return realtimeReconPointCloud; }
             set { realtimeReconPointCloud = value; OnPropertyChanged(nameof(RealtimeReconPointCloud)); }
         }
-        void DrawBPPointCloudToRealTimePointCloud()
+        private void DrawBPPointCloudToRealTimePointCloud()
         {
             List<LMData> tempListModeData = new List<LMData>();
             if (RealtimeVector3s == null || RealtimeVector3s.Count() == 0)
@@ -523,6 +622,45 @@ namespace Compton_GUI_WPF.ViewModel
 
             var (v3, c4) = ImageRecon.BPtoPointCloud(RealtimeVector3s, tempListModeData, false ,5, 0.8);
 
+            RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
+        }
+
+        private Bitmap ReconBitmap;
+        private Vector3Collection SurfaceImageVector3;
+        private List<float[]> SurfaceImageUVs;
+        private void DrawBPPointCloudToRealTimePointCloudRGB()
+        {
+            List<LMData> tempListModeData = new List<LMData>();
+            if (RealtimeVector3s == null || RealtimeVector3s.Count() == 0)
+            {
+                return;
+            }
+            if (LACC_Control_Static.ListedLMData.Count == 0)
+            {
+                return;
+            }
+            try
+            {
+                tempListModeData = (from LM in LACC_Control_Static.ListedLMData
+                                    where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(MLPETime)
+                                    select LM).ToList();
+            }
+            catch (NullReferenceException e)
+            {
+                Debug.WriteLine(e.ToString());
+                return;
+            }
+            if (tempListModeData.Count == 0)
+            {
+                return;
+            }
+            //Trace.WriteLine("LM Data count " + tempListModeData.Count());
+            var tempVector3s = SurfaceImageVector3;
+            tempVector3s.AddRange(RealtimeVector3s);
+            var tempUVs = SurfaceImageUVs;
+            tempUVs.AddRange(RealtimeUVs);
+            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, 1920, 980, false, 5, 0.8);
+            ReconBitmap = bitmap;
             RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
 

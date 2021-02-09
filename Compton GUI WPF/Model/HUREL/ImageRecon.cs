@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ namespace HUREL.Compton
 {
     public class ImageRecon
     {
+        private record ImagePoint(Point3D ImageSpace, int count, float u, float v);
+
         private static bool IsEffectedBPPoint(Point3D scatterPhotonPosition, double scatterPhotonEnergy,
            Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition, double angleThreshold = 5)
         {
@@ -85,20 +88,21 @@ namespace HUREL.Compton
 
             return imageSpace;
         }
-
-        public static (Vector3Collection, Color4Collection) BPtoPointCloud(Vector3Collection imageSpace, List<LMData> lmDataList, bool isTransFormed = false, double angleThreshold = 5, double minCountPercent = 0)
+         
+        public static (Vector3Collection, Color4Collection, Bitmap) BPtoPointCloudBitmap(Vector3Collection imageSpace, List<float[]> uvs, List<LMData> lmDataList, int height, int width, bool isTransFormed = false, double angleThreshold = 5, double minCountPercent = 0)
         {
             if (minCountPercent > 1 || minCountPercent < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(minCountPercent));
             }
             Vector3Collection vector3sOut = new Vector3Collection();
-            Color4Collection color4sOut = new Color4Collection();
-
+            Color4Collection color4sOut = new Color4Collection();            
+            Bitmap bitmapOut = new Bitmap(width, height);           
             if (imageSpace.Count == 0 || lmDataList.Count == 0)
             {                
-                return (vector3sOut, color4sOut);
+                return (vector3sOut, color4sOut, bitmapOut);
             }
+            
 
             int[] counts = new int[imageSpace.Count];
 
@@ -144,6 +148,84 @@ namespace HUREL.Compton
             int minCount = Convert.ToInt32(Math.Round(maxCount * minCountPercent));
             if (maxCount < 5)
             {
+                return (vector3sOut, color4sOut, bitmapOut);
+            }
+
+
+            for (int i = 0; i < imageSpace.Count; i++)
+            {
+                if (counts[i] > minCount)
+                {
+                    vector3sOut.Add(imageSpace[i]);
+                    Color4 jetColor = ColorScaleJet(counts[i], minCount, maxCount);
+                    System.Drawing.Color bitMapColor = System.Drawing.Color.FromArgb(jetColor.ToRgba());
+                    color4sOut.Add(jetColor);
+                    bitmapOut.SetPixel((int)Math.Round((decimal)(uvs[i][0] * width)), (int)Math.Round((decimal)(uvs[i][1] * width)), bitMapColor);                       
+                }               
+            }
+
+            var tupleOut3 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
+            return (vector3sOut, color4sOut, bitmapOut);
+
+
+        }
+        public static (Vector3Collection, Color4Collection) BPtoPointCloud(Vector3Collection imageSpace, List<LMData> lmDataList, bool isTransFormed = false, double angleThreshold = 5, double minCountPercent = 0)
+        {
+            if (minCountPercent > 1 || minCountPercent < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minCountPercent));
+            }
+            Vector3Collection vector3sOut = new Vector3Collection();
+            Color4Collection color4sOut = new Color4Collection();
+
+            if (imageSpace.Count == 0 || lmDataList.Count == 0)
+            {
+                return (vector3sOut, color4sOut);
+            }
+
+            int[] counts = new int[imageSpace.Count];
+
+            if (isTransFormed)
+            {
+                foreach (var lmData in lmDataList)
+                {
+                    if (lmData.Type == LMData.InteractionType.Compton)
+                    {
+                        Parallel.For(0, imageSpace.Count, i =>
+                        {
+                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].TransformedInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
+                               lmData.AbsorberLMDataInfos[0].TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                               imageSpace[i].ToPoint3D(), angleThreshold))
+                            {
+                                counts[i]++;
+                            }
+                        });
+                    }
+                }
+            }
+            else
+            {
+                foreach (var lmData in lmDataList)
+                {
+                    if (lmData.Type == LMData.InteractionType.Compton)
+                    {
+                        Parallel.For(0, imageSpace.Count, i =>
+                        {
+                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].RelativeInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
+                               lmData.AbsorberLMDataInfos[0].RelativeInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                               imageSpace[i].ToPoint3D(), angleThreshold))
+                            {
+                                counts[i]++;
+                            }
+                        });
+                    }
+                }
+            }
+
+            int maxCount = counts.Max();
+            int minCount = Convert.ToInt32(Math.Round(maxCount * minCountPercent));
+            if (maxCount < 5)
+            {
                 return (vector3sOut, color4sOut);
             }
 
@@ -160,6 +242,26 @@ namespace HUREL.Compton
             var tupleOut3 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
             return (vector3sOut, color4sOut);
 
+        }
+
+        public static (Vector3Collection, List<float[]>) GetImageSpaceBySurfaceFOV(int rgbWidth, int rgbHeight, double hfov, double vfov, double distance)
+        {
+            Vector3Collection vector3s = new Vector3Collection();
+            List<float[]> uvs = new List<float[]>();
+            double hfovRad = hfov * Math.PI / 180;
+            double vfovRad = vfov * Math.PI / 180;
+            for (int u = 0; u < rgbWidth; ++u)
+            {
+                for (int v = 0; v < rgbHeight; ++v)
+                {
+                    double theta = hfovRad - hfovRad * u / rgbWidth;
+                    double omega = vfovRad - vfovRad * v / rgbWidth;
+                    vector3s.Add(new Vector3((float)(distance * Math.Cos(omega) * Math.Sin(theta)), (float)(distance * Math.Sin(omega)), (float)(distance * Math.Cos(omega) * Math.Cos(theta))));
+                    uvs.Add(new float[2] { u / rgbWidth, v / rgbHeight });
+                }
+            }
+
+            return (vector3s, uvs);
         }
 
 

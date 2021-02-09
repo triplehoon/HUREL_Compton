@@ -308,6 +308,7 @@
 
                         </Grid>
                         <TextBlock Text="{Binding RealsenseState}" Margin="5"/>
+                        <Button Content="Test Buton" Command="{Binding TestCommand}"/>
                     </StackPanel>
                 </Grid>
             </syncfusion:TabItemExt>
@@ -631,7 +632,7 @@
                     <TextBlock Text="Status:" Style="{StaticResource TextBlockTitle2}"/>
                     <TextBlock Text="{Binding VMStatus}"/>
                     <Button Command="{Binding StartorStopSessionCommand}"
-                        Style="{StaticResource ButtonDesignHYU}" IsEnabled="{Binding IsSessionAvailable}">
+                        Style="{StaticResource ButtonDesignHYU}">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal">
                                 <syncfusion:SfBusyIndicator  IsBusy="{Binding IsSessionStart}" 
