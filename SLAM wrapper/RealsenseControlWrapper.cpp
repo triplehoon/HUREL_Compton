@@ -31,7 +31,7 @@ HUREL::Compton::LACC::RealsenseControlWrapper::RealsenseControlWrapper()
 {
 }
 
-void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
+void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors, List<array<float>^>^% uvs)
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
@@ -40,9 +40,10 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = m_RealsenseControlNative->m_RTPointCloud;
+	open3d::geometry::PointCloud pose = std::get<0>(m_RealsenseControlNative->m_RTPointCloud);
+	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->m_RTPointCloud);
 	if (pose.IsEmpty()) {
-		return;
+		return;		
 	}
 
 	if (pose.colors_.size() > pose.points_.size())
@@ -59,6 +60,10 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 
 		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
 		colors->Add(colorVector);
+	
+		array<float, 1>^ uvVector = gcnew array<float>{uv[i][0], uv[i][1]};
+		uvs->Add(uvVector);
+
 	}
 }
 

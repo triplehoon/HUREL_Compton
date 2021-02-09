@@ -27,6 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ViewModel\MainViewModle_FPGAControl.cs~RFc958123.TMP" />
     <None Remove="View\Pages\symbol_hurel.png" />
   </ItemGroup>
 

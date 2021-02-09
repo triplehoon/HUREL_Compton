@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
@@ -102,7 +103,7 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private bool CanExecuteStartorStopSession(object arg)
         {
-            bool allSessionAvailable = IsLACCModuleInitiate && isSessionAvailable;
+            bool allSessionAvailable = IsLACCModuleInitiate && IsSessionAvailable;
             return allSessionAvailable;
         }
         private async Task StartorStopSessionAsync()
@@ -122,11 +123,12 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     VMStatus = "FPGA setting Start";
 
-                    string status;
-                    if (FPGAControl.Start_usb(out status))
+                    string status = "";
+                    bool isFPGAStart = await Task.Run(() => FPGAControl.Start_usb(out status)).ConfigureAwait(false);
+                    if (isFPGAStart) 
                     {
                         IsSessionStart = true;
-                        StartTimer();
+                        await Task.Run(()=>StartTimer());
                         IsAddingListModeData = true;
                         AddListModeDataTaskAsync = Task.Run(() => AddListModeData());
                         RealTimeImageReconTaskAsync = Task.Run(() => RealTimeImageRecon());
@@ -228,13 +230,17 @@ namespace Compton_GUI_WPF.ViewModel
         {
             get 
             { 
-                bool allSessionAvailable = IsLACCModuleInitiate && isSessionAvailable;
-                return allSessionAvailable;
+                return isSessionAvailable;
             }
             set
             {
                 isSessionAvailable = value;
                 OnPropertyChanged(nameof(IsSessionAvailable));
+                Application.Current.Dispatcher.Invoke(
+                    DispatcherPriority.ApplicationIdle,
+                    new Action(() => {
+                        ((AsyncCommand)StartorStopSessionCommand).RaiseCanExecuteChanged();
+                    }));
             }
         }
         
@@ -295,12 +301,12 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
-        private DispatcherTimer FPGADispatchTimer = new DispatcherTimer();
+        private System.Timers.Timer FPGADispatchTimer = new System.Timers.Timer();
         private void StartTimer()
         {
-            FPGADispatchTimer = new DispatcherTimer();
-            FPGADispatchTimer.Interval = TimeSpan.FromSeconds(1);
-            FPGADispatchTimer.Tick += new EventHandler(OnTimerTick);
+            FPGADispatchTimer = new System.Timers.Timer();
+            FPGADispatchTimer.Interval = 1000;
+            FPGADispatchTimer.Elapsed += OnTimerTick;
             FPGADispatchTimer.Start();
             Task.Run(() => DataUpdate());
         }
@@ -308,11 +314,13 @@ namespace Compton_GUI_WPF.ViewModel
         private void OnTimerTick(object sender, EventArgs e)
         {
             RecordTimeSpan = RecordTimeSpan.Add(TimeSpan.FromSeconds(1));
+            Debug.WriteLine("timer_tick");
             if (IsSessionStart && MeasurementTimeSpan == RecordTimeSpan)
             {
                 FPGADispatchTimer.Stop();                
                 StartorStopSessionAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
                 recordTimeSpan = TimeSpan.Zero;
+                FPGADispatchTimer.Dispose();
                 VMStatus = "Done!";
             }
         }

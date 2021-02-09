@@ -90,24 +90,24 @@ std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose po
 	return matrix3DOneLine;
 }
 
-std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_Conversion(const rs2::points& points, const rs2::video_frame& color, const rs2_pose& pose)
+std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_Conversion(const rs2::points* points, const rs2::video_frame* color, const rs2_pose* pose, std::vector<Eigen::Vector2f>* uv)
 {
 	// Object Declaration (Point Cloud)
 	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> tupleCloudTrans;
 	open3d::geometry::PointCloud cloud;
 	std::tuple<double, double, double> RGB_Color;
-	auto Texture_Coord = points.get_texture_coordinates();
-	auto Vertex = points.get_vertices();
+	auto Texture_Coord = (*points).get_texture_coordinates();
+	auto Vertex = (*points).get_vertices();
 
 	Eigen::Vector3d D436ToT265Coord = { -0.017, 0.03, 0 };
-	Eigen::Vector4d Quaternion = { pose.rotation.w, pose.rotation.x ,pose.rotation.y,pose.rotation.z };
+	Eigen::Vector4d Quaternion = { (*pose).rotation.w, (*pose).rotation.x ,(*pose).rotation.y,(*pose).rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
-	Eigen::Vector3d	TransPoseMat = { pose.translation.x, pose.translation.y, pose.translation.z };
+	Eigen::Vector3d	TransPoseMat = { (*pose).translation.x, (*pose).translation.y, (*pose).translation.z };
 	Eigen::Matrix4d TransF; // Your Transformation Matrix
 	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
 	TransF.block<3, 3>(0, 0) = RMat;
 	TransF.block<3, 1>(0, 3) = TransPoseMat;
-	for (int i = 0; i < points.size(); i++)
+	for (int i = 0; i < (*points).size(); i++)
 	{
 		if (Texture_Coord[i].u > 0 && Texture_Coord[i].v > 0 && Texture_Coord[i].u <1 && Texture_Coord[i].v <1)// && (Vertex[i].x) * (Vertex[i].x) + (Vertex[i].y) * (Vertex[i].y) + (Vertex[i].z) * (Vertex[i].z) < 9)
 		{
@@ -120,12 +120,11 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 			Eigen::Vector3d pointVector = { Vertex[i].x + D436ToT265Coord[0], -Vertex[i].y + D436ToT265Coord[1], -Vertex[i].z + D436ToT265Coord[2] };
 			cloud.points_.push_back(pointVector);
 
-			RGB_Color = RGB_Texture(color, Texture_Coord[i]);
+			RGB_Color = RGB_Texture(*color, Texture_Coord[i]);
 			Eigen::Vector3d colorVector = { std::get<0>(RGB_Color), std::get<1>(RGB_Color),  std::get<2>(RGB_Color) }; // RGB vector
 			cloud.colors_.push_back(colorVector);
-
+			(*uv).push_back(Eigen::Vector2f(Texture_Coord[i].u, Texture_Coord[i].v));
 		}
-
 	}
 	return std::make_tuple(cloud, T265toLACCTransform * TransF);
 }
@@ -275,8 +274,9 @@ void RealsenseControl::RealsensesPipeline()
 
 
 				//printf("tracker_confidence is %d. iter: %d \n ", tempPoseData.tracker_confidence, i);
-				m_RealTimeCloudPose = PCL_Conversion(points, color, tempPoseData);
-				m_RTPointCloud = std::get<0>(m_RealTimeCloudPose).Transform(T265toLACCTransform);
+				std::vector<Eigen::Vector2f> uv;
+				m_RealTimeCloudPose = PCL_Conversion(&points, &color, &tempPoseData, &uv);
+				m_RTPointCloud = std::make_tuple(std::get<0>(m_RealTimeCloudPose).Transform(T265toLACCTransform), uv);
 				std::chrono::duration<double> duration = std::chrono::high_resolution_clock::now() - timeCheck; //as second
 				
 				if (m_IsSLAMON &&tempPoseData.tracker_confidence > 2 && duration.count() > 1.5)
@@ -286,13 +286,13 @@ void RealsenseControl::RealsensesPipeline()
 					m_QueueRealtimeCloudTrans.push(m_RealTimeCloudPose);
 					printf("Push QUEUE");
 				}
+
 			}
 		}
 	}
 
 
-	m_Posedata = rs2_pose();
-	
+	m_Posedata = rs2_pose();	
 	pipeD435.stop();
 	pipeT265.stop();
 

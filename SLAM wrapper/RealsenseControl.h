@@ -24,7 +24,7 @@ class RealsenseControl
 {
 private:
 	std::queue<std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d>> m_QueueRealtimeCloudTrans;
-	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> PCL_Conversion(const rs2::points& points, const rs2::video_frame& color, const rs2_pose& pose);
+	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_Conversion(const rs2::points* points, const rs2::video_frame* color, const rs2_pose* pose, std::vector<Eigen::Vector2f>* uv);
 	std::tuple<double, double, double> RGB_Texture(rs2::video_frame texture, rs2::texture_coordinate Texture_XY);
 	std::queue<std::tuple<open3d::geometry::PointCloud >> m_QueueSLAMedCloudTrans;
 	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> m_RealTimeCloudPose;
@@ -52,7 +52,7 @@ public:
 
 	rs2_pose m_Posedata;
 	rs2::video_frame m_CurrentVideoFrame = rs2::video_frame(nullptr);
-	open3d::geometry::PointCloud m_RTPointCloud;
+	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> m_RTPointCloud;
 	open3d::geometry::PointCloud m_SLAMEDPointCloud;
 
 	bool m_IsPipeLineOn;
