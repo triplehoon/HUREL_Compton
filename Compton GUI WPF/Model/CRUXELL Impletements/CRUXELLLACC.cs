@@ -356,12 +356,13 @@ namespace HUREL.Compton
             ParsingUSBAsync = Task.Run(() => ParsingCyusbBuffer());
 
             IsGenerateShortArrayBuffer = true;
+            Debug.WriteLine("HY : [Try] Start Generate Short Array Buffer");
             GenerateShortBufferAsync = Task.Run(() => GenerateShortArrayBuffer());
             status = "Data Aquisition Start";
             IsStart = true;
 
             
-
+            Debug.WriteLine("HY: FPGA Start Setup Done");
             return true;
         }
         public async Task<string> Stop_usb()

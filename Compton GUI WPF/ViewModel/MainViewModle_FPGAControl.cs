@@ -98,7 +98,7 @@ namespace Compton_GUI_WPF.ViewModel
         private AsyncCommand startorStopSessionCommand;
         public ICommand StartorStopSessionCommand
         {
-            get { return (this.startorStopSessionCommand) ?? (this.startorStopSessionCommand = new AsyncCommand(StartorStopSessionAsync, CanExecuteStartorStopSession)); }
+            get { return (this.startorStopSessionCommand) ?? (this.startorStopSessionCommand = new AsyncCommand(StartorStopSessionAsync)); }
         }
         private bool CanExecuteStartorStopSession(object arg)
         {
@@ -122,8 +122,9 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     VMStatus = "FPGA setting Start";
 
-                    string status;
-                    if (FPGAControl.Start_usb(out status))
+                    string status = "";
+                    bool isStartSuccess = await Task.Run(() => FPGAControl.Start_usb(out status));
+                    if (isStartSuccess)
                     {
                         IsSessionStart = true;
                         StartTimer();
