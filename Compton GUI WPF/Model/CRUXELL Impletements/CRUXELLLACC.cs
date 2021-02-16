@@ -614,7 +614,7 @@ namespace HUREL.Compton
                 SelectedDevice.CyDevice = (CyUSBDevice)dev;
 
                 GetEndpointsOfNode(SelectedDevice.CyDevice.Tree);
-                PpxInfo = 16; //Set default value to 8 Packets
+                PpxInfo = 256; //Set default value to 8 Packets
                 QueueInfo = 128; //128
                 if (EndPointList.Count > 0)
                 {
@@ -1203,7 +1203,7 @@ namespace HUREL.Compton
 
                             EndPoint.FinishDataXfer(ref cBufs[k], ref xBufs[k], ref len, ref oLaps[k]);
                             
-                            for (int i = 0; i < 16; ++i) // 16384 * 16
+                            for (int i = 0; i < 512; ++i) // 16384 * 16
                             {
                                 int check_write = 0;
                                 for (int ii = 0; ii < 16384; ++ii)
@@ -1305,6 +1305,7 @@ namespace HUREL.Compton
                 Thread.Sleep(0);
                 if (Failures > 100)
                 {
+                    EndPoint.Abort();
                     throw new CyUSBBufferFailException();                    
                 }
                 
