@@ -145,9 +145,11 @@ namespace Compton_GUI_WPF.ViewModel
                 IsSessionStart = false;
                 IsAddingListModeData = false;
                 await AddListModeDataTaskAsync.ConfigureAwait(false);
-                FPGADispatchTimer.Stop();                
+                FPGADispatchTimer.Stop();
+                IsRealTimeImageReconOn = false;
                 await RealTimeImageReconTaskAsync;
-                await Task.Run(() => DrawMLPEPositions()).ConfigureAwait(false);                
+                await Task.Run(() => DrawMLPEPositions()).ConfigureAwait(false);
+                IsRealTimeImageReconOn = true;
             }
             IsSessionAvailable = true;
         }

@@ -614,7 +614,7 @@ namespace HUREL.Compton
                 SelectedDevice.CyDevice = (CyUSBDevice)dev;
 
                 GetEndpointsOfNode(SelectedDevice.CyDevice.Tree);
-                PpxInfo = 256; //Set default value to 8 Packets
+                PpxInfo = 64; //Set default value to 8 Packets
                 QueueInfo = 128; //128
                 if (EndPointList.Count > 0)
                 {
