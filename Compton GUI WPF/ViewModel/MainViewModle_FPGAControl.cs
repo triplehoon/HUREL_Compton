@@ -99,7 +99,7 @@ namespace Compton_GUI_WPF.ViewModel
         private AsyncCommand startorStopSessionCommand;
         public ICommand StartorStopSessionCommand
         {
-            get { return (this.startorStopSessionCommand) ?? (this.startorStopSessionCommand = new AsyncCommand(StartorStopSessionAsync)); }
+            get { return (this.startorStopSessionCommand) ?? (this.startorStopSessionCommand = new AsyncCommand(StartorStopSessionAsync, CanExecuteStartorStopSession)); }
         }
         private bool CanExecuteStartorStopSession(object arg)
         {
@@ -314,7 +314,7 @@ namespace Compton_GUI_WPF.ViewModel
         private void OnTimerTick(object sender, EventArgs e)
         {
             RecordTimeSpan = RecordTimeSpan.Add(TimeSpan.FromSeconds(1));
-            Debug.WriteLine("timer_tick");
+            
             if (IsSessionStart && MeasurementTimeSpan == RecordTimeSpan)
             {
                 FPGADispatchTimer.Stop();                

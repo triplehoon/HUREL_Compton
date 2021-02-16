@@ -39,7 +39,7 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 	if (!IsPipelineOn) {
 		return;
 	}
-
+	
 	open3d::geometry::PointCloud pose = std::get<0>(m_RealsenseControlNative->m_RTPointCloud);
 	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->m_RTPointCloud);
 	if (pose.IsEmpty()) {
@@ -53,6 +53,11 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 	else 
 	{
 		size = pose.colors_.size();
+	}
+
+	if (uv.size() == 0)
+	{
+		return;
 	}
 	for (int i = 0; i < size; i++) {
 		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};

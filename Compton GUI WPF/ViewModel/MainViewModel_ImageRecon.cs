@@ -254,13 +254,17 @@ namespace Compton_GUI_WPF.ViewModel
                 img.Freeze();
                 //Debug.WriteLine("Img Update");
                
-                RealtimeRGB = img;
 
                 if(ReconBitmap != null)
                 {
                     Bitmap imgBitmap = BitmapImage2Bitmap(img);
                     imgBitmap = MergedBitmaps(imgBitmap, ReconBitmap);
-                    RealtimeRGB = Bitmap2BitmapImage(imgBitmap);
+                    RealtimeRGB = Bitmap2BitmapImage(ReconBitmap);
+                }
+                else
+                {
+
+                    RealtimeRGB = img;
                 }
 
                 tempBitmap.Dispose();
@@ -276,6 +280,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 g.DrawImage(bmp2, System.Drawing.Point.Empty);
                 g.DrawImage(bmp1, System.Drawing.Point.Empty);
+                g.Dispose();
             }
             return result;
         }
@@ -295,29 +300,28 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
-        #endregion
-        private BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
+
+        public BitmapImage Bitmap2BitmapImage(Bitmap bitmap)
         {
-            IntPtr hBitmap = bitmap.GetHbitmap();
-            BitmapImage retval;
-
-            try
+            using (var memory = new MemoryStream())
             {
-                retval = (BitmapImage)Imaging.CreateBitmapSourceFromHBitmap(
-                             hBitmap,
-                             IntPtr.Zero,
-                             Int32Rect.Empty,
-                             BitmapSizeOptions.FromEmptyOptions());
-            }
-            finally
-            {
-                DeleteObject(hBitmap);
-            }
+                bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                memory.Position = 0;
 
-            return retval;
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+
+                return bitmapImage;
+            }
         }
+
+
+        #endregion
+
 
         private Matrix3D currentSystemPose;
         private Matrix3D CurrentSystemTranformation
@@ -414,6 +418,7 @@ namespace Compton_GUI_WPF.ViewModel
                     error++;
                     Trace.WriteLine("Error Count is " + error);
                 }
+                Thread.Sleep(500);
             }
         }
 
@@ -571,17 +576,21 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
         private Task RealTimeImageReconTaskAsync;
-        private void RealTimeImageRecon()
+        private void RealTimeImageRecon() 
         {
+
+            
+            (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(RealtimeRGB.PixelHeight, RealtimeRGB.PixelWidth, 64, 41, 5);
             while (IsRealTimeImageReconOn)
             {
                 //Stopwatch sw = new Stopwatch();
                 //sw.Start();
-                DrawBPPointCloudToRealTimePointCloud();
+                ////DrawBPPointCloudToRealTimePointCloud();
+                DrawBPPointCloudToRealTimePointCloudRGB();
                 //sw.Stop();
                 //Debug.WriteLine("BP Draw Image tooks " + sw.ElapsedMilliseconds + " ms.");
             }
-            DrawBPPointCloudToRealTimePointCloud();
+            DrawBPPointCloudToRealTimePointCloudRGB();
         }
 
         private Vector3Collection RealtimeVector3s;
@@ -624,7 +633,7 @@ namespace Compton_GUI_WPF.ViewModel
 
             RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
-
+        
         private Bitmap ReconBitmap;
         private Vector3Collection SurfaceImageVector3;
         private List<float[]> SurfaceImageUVs;
@@ -659,7 +668,8 @@ namespace Compton_GUI_WPF.ViewModel
             tempVector3s.AddRange(RealtimeVector3s);
             var tempUVs = SurfaceImageUVs;
             tempUVs.AddRange(RealtimeUVs);
-            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, 1920, 980, false, 5, 0.8);
+            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, RealtimeRGB.PixelHeight, RealtimeRGB.PixelWidth, false, 5, 0.8);
+            
             ReconBitmap = bitmap;
             RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }

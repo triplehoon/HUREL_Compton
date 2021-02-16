@@ -158,9 +158,14 @@ namespace HUREL.Compton
                 {
                     vector3sOut.Add(imageSpace[i]);
                     Color4 jetColor = ColorScaleJet(counts[i], minCount, maxCount);
-                    System.Drawing.Color bitMapColor = System.Drawing.Color.FromArgb(jetColor.ToRgba());
+
+                    System.Drawing.Color bitMapColor = System.Drawing.Color.FromArgb(Convert.ToInt32(jetColor.Alpha * 255),
+                        Convert.ToInt32(jetColor.Red * 255),
+                        Convert.ToInt32(jetColor.Green * 255),
+                        Convert.ToInt32(jetColor.Blue * 255));
                     color4sOut.Add(jetColor);
-                    bitmapOut.SetPixel((int)Math.Round((decimal)(uvs[i][0] * width)), (int)Math.Round((decimal)(uvs[i][1] * width)), bitMapColor);                       
+                    
+                    bitmapOut.SetPixel((int)Math.Floor(uvs[i][0] * width), (int)Math.Floor(uvs[i][1] * height), bitMapColor);                       
                 }               
             }
 
@@ -248,16 +253,16 @@ namespace HUREL.Compton
         {
             Vector3Collection vector3s = new Vector3Collection();
             List<float[]> uvs = new List<float[]>();
-            double hfovRad = hfov * Math.PI / 180;
-            double vfovRad = vfov * Math.PI / 180;
+            double hfovRad = hfov * Math.PI / 180 ;
+            double vfovRad = vfov * Math.PI / 180 ;
             for (int u = 0; u < rgbWidth; ++u)
             {
                 for (int v = 0; v < rgbHeight; ++v)
                 {
-                    double theta = hfovRad - hfovRad * u / rgbWidth;
-                    double omega = vfovRad - vfovRad * v / rgbWidth;
+                    double theta = - hfovRad / 2 + hfovRad * u / rgbWidth;
+                    double omega = vfovRad / 2 - vfovRad * v / rgbHeight;
                     vector3s.Add(new Vector3((float)(distance * Math.Cos(omega) * Math.Sin(theta)), (float)(distance * Math.Sin(omega)), (float)(distance * Math.Cos(omega) * Math.Cos(theta))));
-                    uvs.Add(new float[2] { u / rgbWidth, v / rgbHeight });
+                    uvs.Add(new float[2] { (float)u / (float)rgbWidth, (float)v / (float)rgbHeight });
                 }
             }
 

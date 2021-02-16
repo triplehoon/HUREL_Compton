@@ -237,7 +237,8 @@ namespace HUREL.Compton
             IsListening = false;
             IsParsing = false;
             if (DeviceList.Count != 0)
-                UsbDevices.Dispose();
+            { }
+                //UsbDevices.Dispose();
 
             Write_current_ini(); // 현재 설정 저장하기
             if(IsStart)

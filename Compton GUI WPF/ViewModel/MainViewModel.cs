@@ -63,7 +63,7 @@ namespace Compton_GUI_WPF.ViewModel
                 ModuleInfoViewModels.Add(new ModuleInfoViewModel());
             }
 
-            (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(1920, 980, 64, 41, 5);
+            
 
             InitiateRealsenseAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));          
@@ -228,7 +228,11 @@ namespace Compton_GUI_WPF.ViewModel
                 isLACCModuleInitiate = value;
                 OnPropertyChanged(nameof(IsLACCModuleInitiate));
                 OnPropertyChanged(nameof(IsSessionAvailable));
-                ((AsyncCommand)StartorStopSessionCommand).RaiseCanExecuteChanged();
+                Application.Current.Dispatcher.Invoke(
+                    DispatcherPriority.ApplicationIdle,
+                    new Action(() => {
+                        ((AsyncCommand)StartorStopSessionCommand).RaiseCanExecuteChanged();
+                    }));
             }
         }
 
