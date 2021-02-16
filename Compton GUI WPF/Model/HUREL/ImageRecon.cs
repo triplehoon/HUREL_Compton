@@ -96,13 +96,14 @@ namespace HUREL.Compton
                 throw new ArgumentOutOfRangeException(nameof(minCountPercent));
             }
             Vector3Collection vector3sOut = new Vector3Collection();
-            Color4Collection color4sOut = new Color4Collection();            
-            Bitmap bitmapOut = new Bitmap(width, height);           
-            if (imageSpace.Count == 0 || lmDataList.Count == 0)
+            Color4Collection color4sOut = new Color4Collection();
+            Bitmap bitmapOut = new Bitmap(1, 1);
+            if (imageSpace.Count == 0 || lmDataList.Count == 0 || height == 0 || width == 0)
             {                
                 return (vector3sOut, color4sOut, bitmapOut);
             }
-            
+
+            bitmapOut = new Bitmap(width, height);
 
             int[] counts = new int[imageSpace.Count];
 
@@ -259,7 +260,7 @@ namespace HUREL.Compton
             {
                 for (int v = 0; v < rgbHeight; ++v)
                 {
-                    double theta = - hfovRad / 2 + hfovRad * u / rgbWidth;
+                    double theta = hfovRad / 2 - hfovRad * u / rgbWidth;
                     double omega = vfovRad / 2 - vfovRad * v / rgbHeight;
                     vector3s.Add(new Vector3((float)(distance * Math.Cos(omega) * Math.Sin(theta)), (float)(distance * Math.Sin(omega)), (float)(distance * Math.Cos(omega) * Math.Cos(theta))));
                     uvs.Add(new float[2] { (float)u / (float)rgbWidth, (float)v / (float)rgbHeight });

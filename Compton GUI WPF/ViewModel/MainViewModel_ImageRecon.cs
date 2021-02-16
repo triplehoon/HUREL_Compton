@@ -574,13 +574,15 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged(nameof(MLPETime)); 
             }
         }
+        private int ReconRGBPixelWidth;
+        private int ReconRGBPixelHeight;
 
         private Task RealTimeImageReconTaskAsync;
         private void RealTimeImageRecon() 
         {
-
-            
-            (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(RealtimeRGB.PixelHeight, RealtimeRGB.PixelWidth, 64, 41, 5);
+            ReconRGBPixelWidth = RealtimeRGB.PixelWidth / 10;
+            ReconRGBPixelHeight = RealtimeRGB.PixelHeight / 10;
+            (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(ReconRGBPixelWidth, ReconRGBPixelHeight, 64, 41, 10);
             while (IsRealTimeImageReconOn)
             {
                 //Stopwatch sw = new Stopwatch();
@@ -668,7 +670,7 @@ namespace Compton_GUI_WPF.ViewModel
             tempVector3s.AddRange(RealtimeVector3s);
             var tempUVs = SurfaceImageUVs;
             tempUVs.AddRange(RealtimeUVs);
-            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, RealtimeRGB.PixelHeight, RealtimeRGB.PixelWidth, false, 5, 0.8);
+            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, false, 5, 0.8);
             
             ReconBitmap = bitmap;
             RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
