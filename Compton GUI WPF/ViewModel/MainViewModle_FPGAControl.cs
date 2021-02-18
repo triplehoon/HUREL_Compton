@@ -276,7 +276,11 @@ namespace Compton_GUI_WPF.ViewModel
                     FPGAVariable.RecordTime0x0a = Convert.ToInt32(value);
                     MeasurementTimeSpan = TimeSpan.FromSeconds(FPGAVariable.RecordTime0x0a);
                 }
-                catch { MeasurementTimeSpan = TimeSpan.Zero; }
+                catch(FormatException e) 
+                {
+                    Debug.WriteLine(e);
+                    MeasurementTimeSpan = TimeSpan.Zero; 
+                }
                 measurementTime = value;
                 OnPropertyChanged(nameof(MeasurementTime));
             }

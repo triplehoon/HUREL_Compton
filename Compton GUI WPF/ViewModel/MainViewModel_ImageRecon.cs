@@ -242,7 +242,8 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     continue;
                 }
-
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
                 MemoryStream ms = new MemoryStream();
                 tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
                 BitmapImage img = new BitmapImage();
@@ -266,7 +267,8 @@ namespace Compton_GUI_WPF.ViewModel
 
                     RealtimeRGB = img;
                 }
-
+                sw.Stop();
+                Trace.WriteLine(sw.ElapsedMilliseconds + " ms");
                 tempBitmap.Dispose();
 
             }
@@ -282,8 +284,8 @@ namespace Compton_GUI_WPF.ViewModel
 
             using (Graphics g = Graphics.FromImage(result))
             {
-                g.DrawImage(resizeImage, System.Drawing.Point.Empty);
                 g.DrawImage(bmp1Large, System.Drawing.Point.Empty);
+                g.DrawImage(bmp2Small, System.Drawing.Point.Empty);
                 g.Dispose();
             }
             return result;
@@ -422,7 +424,6 @@ namespace Compton_GUI_WPF.ViewModel
                     error++;
                     Trace.WriteLine("Error Count is " + error);
                 }
-                Thread.Sleep(500);
             }
         }
 
@@ -607,7 +608,7 @@ namespace Compton_GUI_WPF.ViewModel
                 switch (RealtimeReconMode)
                 {
                     case RTReconMode.RTRECONMODE_FAR:
-                        DrawBPPointCloudToSurce();
+                        DrawBPPointCloudToSurface();
                         break;
                     case RTReconMode.RTRECONMODE_NEAR:
                         DrawBPPointCloudToRealTimePointCloudRGB();
@@ -693,13 +694,13 @@ namespace Compton_GUI_WPF.ViewModel
             //Trace.WriteLine("LM Data count " + tempListModeData.Count());
             var tempVector3s = RealtimeVector3s;
             var tempUVs = RealtimeUVs;
-            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, false, 15, 0.8);
+            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, false, 5, 0.8);
             
             ReconBitmap = bitmap;
             RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
 
-        private void DrawBPPointCloudToSurce()
+        private void DrawBPPointCloudToSurface()
         {
             List<LMData> tempListModeData = new List<LMData>();         
             if (LACC_Control_Static.ListedLMData.Count == 0)

@@ -36,29 +36,29 @@ namespace HUREL.Compton
                 return false;
         }
 
-        private static bool IsEffectedBPPoint_KN(Point3D scatterPhotonPosition, double scatterPhotonEnergy,
-           Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition)
-        {
-            double comptonCal = 1 - 511 * scatterPhotonEnergy / absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy);
-            if (comptonCal >= 1 || comptonCal <= -1)
-                return false;
-            double comptonScatteringAngle = Math.Acos(comptonCal) / Math.PI * 180;
+        //private static bool IsEffectedBPPoint_KN(Point3D scatterPhotonPosition, double scatterPhotonEnergy,
+        //   Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition)
+        //{
+        //    double comptonCal = 1 - 511 * scatterPhotonEnergy / absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy);
+        //    if (comptonCal >= 1 || comptonCal <= -1)
+        //        return false;
+        //    double comptonScatteringAngle = Math.Acos(comptonCal) / Math.PI * 180;
 
-            double kne = (Math.Pow(absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy), 2)) * ((scatterPhotonEnergy + absorberPhotonEnergy) / absorberPhotonEnergy + absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy) - Math.Pow(Math.Sin(comptonScatteringAngle), 2));
+        //    double kne = (Math.Pow(absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy), 2)) * ((scatterPhotonEnergy + absorberPhotonEnergy) / absorberPhotonEnergy + absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy) - Math.Pow(Math.Sin(comptonScatteringAngle), 2));
 
-            Vector3D effectToScatterVector = (scatterPhotonPosition - imgSpacePosition);
-            Vector3D scatterToAbsorberVector = (absorberPhotonPosition - scatterPhotonPosition);
-            effectToScatterVector.Normalize();
-            scatterToAbsorberVector.Normalize();
-            double positionDotPord = Vector3D.DotProduct(effectToScatterVector, scatterToAbsorberVector);
+        //    Vector3D effectToScatterVector = (scatterPhotonPosition - imgSpacePosition);
+        //    Vector3D scatterToAbsorberVector = (absorberPhotonPosition - scatterPhotonPosition);
+        //    effectToScatterVector.Normalize();
+        //    scatterToAbsorberVector.Normalize();
+        //    double positionDotPord = Vector3D.DotProduct(effectToScatterVector, scatterToAbsorberVector);
 
-            double effectedAngle = Math.Acos(positionDotPord) / Math.PI * 180;
+        //    double effectedAngle = Math.Acos(positionDotPord) / Math.PI * 180;
 
-            if (Math.Abs(effectedAngle - comptonScatteringAngle) < angleThreshold)
-                return true;
-            else
-                return false;
-        }
+        //    if (Math.Abs(effectedAngle - comptonScatteringAngle) < angleThreshold)
+        //        return true;
+        //    else
+        //        return false;
+        //}
 
 
         /// <summary>
@@ -187,8 +187,19 @@ namespace HUREL.Compton
                         Convert.ToInt32(jetColor.Green * 255),
                         Convert.ToInt32(jetColor.Blue * 255));
                     color4sOut.Add(jetColor);
-                    
-                    bitmapOut.SetPixel((int)Math.Round(uvs[i][0] * width), (int)Math.Round(uvs[i][1] * height), bitMapColor);                       
+
+                    int u = (int)Math.Round(uvs[i][0] * width);
+                    int v = (int)Math.Round(uvs[i][1] * height);
+                    if (u == width)
+                    {
+                        --u;
+                    }
+                    if (v == height)
+                    {
+                        --v;
+                    }
+
+                    bitmapOut.SetPixel(u, v, bitMapColor);                       
                 }               
             }
 
