@@ -14,14 +14,37 @@ namespace HUREL.Compton
     {
         private record ImagePoint(Point3D ImageSpace, int count, float u, float v);
 
+
         private static bool IsEffectedBPPoint(Point3D scatterPhotonPosition, double scatterPhotonEnergy,
            Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition, double angleThreshold = 5)
         {
             double comptonCal = 1 - 511 * scatterPhotonEnergy / absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy);
             if (comptonCal >= 1 || comptonCal <= -1)
                 return false;
+            double comptonScatteringAngle = Math.Acos(comptonCal) / Math.PI * 180;                       
+            Vector3D effectToScatterVector = (scatterPhotonPosition - imgSpacePosition);
+            Vector3D scatterToAbsorberVector = (absorberPhotonPosition - scatterPhotonPosition);
+            effectToScatterVector.Normalize();
+            scatterToAbsorberVector.Normalize();
+            double positionDotPord = Vector3D.DotProduct(effectToScatterVector, scatterToAbsorberVector);
 
+            double effectedAngle = Math.Acos(positionDotPord) / Math.PI * 180;
+
+            if (Math.Abs(effectedAngle - comptonScatteringAngle) < angleThreshold)
+                return true;
+            else
+                return false;
+        }
+
+        private static bool IsEffectedBPPoint_KN(Point3D scatterPhotonPosition, double scatterPhotonEnergy,
+           Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition)
+        {
+            double comptonCal = 1 - 511 * scatterPhotonEnergy / absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy);
+            if (comptonCal >= 1 || comptonCal <= -1)
+                return false;
             double comptonScatteringAngle = Math.Acos(comptonCal) / Math.PI * 180;
+
+            double kne = (Math.Pow(absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy), 2)) * ((scatterPhotonEnergy + absorberPhotonEnergy) / absorberPhotonEnergy + absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy) - Math.Pow(Math.Sin(comptonScatteringAngle), 2));
 
             Vector3D effectToScatterVector = (scatterPhotonPosition - imgSpacePosition);
             Vector3D scatterToAbsorberVector = (absorberPhotonPosition - scatterPhotonPosition);
@@ -61,7 +84,6 @@ namespace HUREL.Compton
             {
                 ArgumentOutOfRangeException argumentOutOfRangeException = new ArgumentOutOfRangeException("Voxel Size is too large");
                 throw argumentOutOfRangeException;
-
             }
 
             int xBinSize = Convert.ToInt32(Math.Floor(sizeX / voxelSize));
@@ -87,8 +109,8 @@ namespace HUREL.Compton
 
 
             return imageSpace;
-        }
-         
+        } 
+        
         public static (Vector3Collection, Color4Collection, Bitmap) BPtoPointCloudBitmap(Vector3Collection imageSpace, List<float[]> uvs, List<LMData> lmDataList, int height, int width, bool isTransFormed = false, double angleThreshold = 5, double minCountPercent = 0)
         {
             if (minCountPercent > 1 || minCountPercent < 0)
@@ -166,7 +188,7 @@ namespace HUREL.Compton
                         Convert.ToInt32(jetColor.Blue * 255));
                     color4sOut.Add(jetColor);
                     
-                    bitmapOut.SetPixel((int)Math.Floor(uvs[i][0] * width), (int)Math.Floor(uvs[i][1] * height), bitMapColor);                       
+                    bitmapOut.SetPixel((int)Math.Round(uvs[i][0] * width), (int)Math.Round(uvs[i][1] * height), bitMapColor);                       
                 }               
             }
 
@@ -175,6 +197,7 @@ namespace HUREL.Compton
 
 
         }
+        
         public static (Vector3Collection, Color4Collection) BPtoPointCloud(Vector3Collection imageSpace, List<LMData> lmDataList, bool isTransFormed = false, double angleThreshold = 5, double minCountPercent = 0)
         {
             if (minCountPercent > 1 || minCountPercent < 0)
@@ -249,7 +272,7 @@ namespace HUREL.Compton
             return (vector3sOut, color4sOut);
 
         }
-
+        
         public static (Vector3Collection, List<float[]>) GetImageSpaceBySurfaceFOV(int rgbWidth, int rgbHeight, double hfov, double vfov, double distance)
         {
             Vector3Collection vector3s = new Vector3Collection();

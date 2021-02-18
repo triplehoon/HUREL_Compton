@@ -128,6 +128,7 @@ namespace Compton_GUI_WPF.ViewModel
                     if (isFPGAStart) 
                     {
                         IsSessionStart = true;
+                        IsRealTimeImageReconOn = true;
                         await Task.Run(()=>StartTimer());
                         IsAddingListModeData = true;
                         AddListModeDataTaskAsync = Task.Run(() => AddListModeData());
