@@ -19,7 +19,6 @@ using AsyncAwaitBestPractices.MVVM;
 using System.Windows;
 using System.Windows.Threading;
 using System.Windows.Interop;
-using System.Windows.Media;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -183,8 +182,8 @@ namespace Compton_GUI_WPF.ViewModel
             await UpdateRealTimePointCloudTask;
         }
 
-        private DrawingImage realtimeRGB;
-        public DrawingImage RealtimeRGB
+        private BitmapImage realtimeRGB;
+        public BitmapImage RealtimeRGB
         {
             get { return realtimeRGB; }
             set
@@ -243,11 +242,10 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     continue;
                 }
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
+              
                 MemoryStream ms = new MemoryStream();
                 tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-                BitmapImage img = new BitmapImage();                
+                BitmapImage img = new BitmapImage();
                 img.BeginInit();
                 ms.Seek(0, SeekOrigin.Begin);
                 img.StreamSource = ms;
@@ -255,32 +253,14 @@ namespace Compton_GUI_WPF.ViewModel
                 img.EndInit();
                 img.Freeze();
                 //Debug.WriteLine("Img Update");
-               
 
-                if(ReconBitmapImage != null)
-                {
-                    RealtimeRGB = MergedBitmapImgae(img, ReconBitmapImage);
-                }
-                else
-                {
-                    var group = new DrawingGroup();
-                    group.Children.Add(new ImageDrawing(img, new Rect(0, 0, img.Width, img.Height)));
-                    RealtimeRGB = new DrawingImage(group);
-                }
-                sw.Stop();
-                Trace.WriteLine(sw.ElapsedMilliseconds + " ms");
+                RealtimeRGB = img;
+
                 tempBitmap.Dispose();
 
             }
         }
-        private DrawingImage MergedBitmapImgae(BitmapImage bmp1Large, BitmapImage bmp2Small)
-        {
-            var group = new DrawingGroup();
-            group.Children.Add(new ImageDrawing(bmp1Large, new Rect(0, 0, bmp1Large.Width, bmp1Large.Height)));
-            group.Children.Add(new ImageDrawing(bmp2Small, new Rect(0, 0, bmp1Large.Width, bmp1Large.Height)));
-            return new DrawingImage(group);
-           
-        }
+
         private Bitmap MergedBitmaps(Bitmap bmp1Large, Bitmap bmp2Small)
         {
             System.Drawing.Size resize = new System.Drawing.Size(bmp1Large.Width, bmp1Large.Height);
@@ -604,8 +584,8 @@ namespace Compton_GUI_WPF.ViewModel
         private Task RealTimeImageReconTaskAsync;
         private void RealTimeImageRecon() 
         {
-            ReconRGBPixelWidth = Convert.ToInt32(RealtimeRGB.Width / 10);
-            ReconRGBPixelHeight = Convert.ToInt32(RealtimeRGB.Height / 10);
+            ReconRGBPixelWidth = RealtimeRGB.PixelWidth / 10;
+            ReconRGBPixelHeight = RealtimeRGB.PixelHeight / 10;
             (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(ReconRGBPixelWidth, ReconRGBPixelHeight, 64, 41, 10);
             while (IsRealTimeImageReconOn)
             {

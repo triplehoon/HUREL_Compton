@@ -111,7 +111,10 @@
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Grid.Column="0">
                         <TextBlock Text="Real Time RGB Camera Data" Style="{StaticResource TextBlockTitle}" Margin="5"/>
-                        <Image Source="{Binding RealtimeRGB}" Width="480" Height="270" Stretch="Uniform"/>
+                        <Grid>
+                            <Image Source="{Binding RealtimeRGB}" Width="480" Height="270" Stretch="Uniform"/>
+                            <Image Source="{Binding ReconBitmapImage}" Width="480" Height="270" Stretch="Uniform"/>
+                        </Grid>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="0">
                         <TextBlock Text="Real Time Point Cloud Data" Style="{StaticResource TextBlockTitle}" Margin="5" />
