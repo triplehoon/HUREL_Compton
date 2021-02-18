@@ -117,6 +117,8 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 			//===================================
 			if (-Vertex[i].y + D436ToT265Coord[1] > 0.7)
 				continue;
+			if (Vertex[i].z - D436ToT265Coord[2] < 0.5)
+				continue;
 			Eigen::Vector3d pointVector = { Vertex[i].x + D436ToT265Coord[0], -Vertex[i].y + D436ToT265Coord[1], -Vertex[i].z + D436ToT265Coord[2] };
 			cloud.points_.push_back(pointVector);
 
@@ -203,7 +205,7 @@ void RealsenseControl::RealsensesPipeline()
 	rs2::pose_frame pose_frame(nullptr);
 
 	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
-	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.2);
+	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 4.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25);

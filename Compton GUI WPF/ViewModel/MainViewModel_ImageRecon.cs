@@ -493,8 +493,12 @@ namespace Compton_GUI_WPF.ViewModel
         {
             await Task.Run(() => RealsenseControl.StopSLAM());
             IsSLAMOn = false;
-            await UpdateSLAMPointCloudTask;
-            await SLAMReconTaskAsync;
+            if (UpdateSLAMPointCloudTask != null) {
+                await UpdateSLAMPointCloudTask;
+            }
+            if(SLAMReconTaskAsync != null) {
+                await SLAMReconTaskAsync;
+            }
             //SLAMReconTask.Wait();
         }
 
@@ -537,7 +541,7 @@ namespace Compton_GUI_WPF.ViewModel
                 SLAMPointCloudCount = vc.Count();
 
 
-                //Thread.Sleep(500);                
+                Thread.Sleep(500);                
             }
             Debug.WriteLine("SLAM Point Cloud Count is " + poseVect.Count);
         }
@@ -649,7 +653,7 @@ namespace Compton_GUI_WPF.ViewModel
 
             var (v3, c4) = ImageRecon.BPtoPointCloud(RealtimeVector3s, tempListModeData, false ,5, 0.8);
 
-            RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
+           // RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
 
         private BitmapImage reconBitmapImage;
@@ -736,7 +740,9 @@ namespace Compton_GUI_WPF.ViewModel
         public PointGeometry3D SLAMReconPointCloud
         {
             get { return slamReconPointCloud; }
-            set { slamReconPointCloud = value; OnPropertyChanged(nameof(SLAMReconPointCloud)); }
+            set { 
+                slamReconPointCloud = value; 
+                OnPropertyChanged(nameof(SLAMReconPointCloud)); }
         }
 
         private Task SLAMReconTaskAsync;
@@ -747,6 +753,7 @@ namespace Compton_GUI_WPF.ViewModel
                 //Stopwatch sw = new Stopwatch();
                 //sw.Start();
                 DrawBPPointCloudToSLAMPointCloud();
+                Thread.Sleep(1000);
                 //sw.Stop();
                 //Debug.WriteLine("BP Draw Image tooks " + sw.ElapsedMilliseconds + " ms.");
             }
@@ -767,9 +774,12 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 return;
             }
-            tempListModeData = LACC_Control_Static.ListedLMData;                                    
-                
-            var (v3, c4) = ImageRecon.BPtoPointCloud(SLAMVector3s, tempListModeData, true, 5, 0.8);            
+            
+            tempListModeData = (from LM in LACC_Control_Static.ListedLMData
+                                where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(5000)
+                                select LM).ToList();
+
+            var (v3, c4) = ImageRecon.BPtoPointCloud(SLAMVector3s, tempListModeData, true, 5, 0.1);            
             SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };               
         }
         #endregion

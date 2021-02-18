@@ -153,7 +153,7 @@ namespace HUREL.Compton
                 {
                     if (lmData.Type == LMData.InteractionType.Compton)
                     {
-                        Parallel.For(0, imageSpace.Count, i =>
+                        for (int i = 0; i < imageSpace.Count; ++i)
                         {
                             if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].RelativeInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
                                lmData.AbsorberLMDataInfos[0].RelativeInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
@@ -161,7 +161,7 @@ namespace HUREL.Compton
                             {
                                 counts[i]++;
                             }
-                        });
+                        }
                     }
                 }
             }
@@ -231,7 +231,16 @@ namespace HUREL.Compton
                 {
                     if (lmData.Type == LMData.InteractionType.Compton)
                     {
-                        Parallel.For(0, imageSpace.Count, i =>
+                        //Parallel.For(0, imageSpace.Count, i =>
+                        //{
+                        //    if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].TransformedInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
+                        //       lmData.AbsorberLMDataInfos[0].TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                        //       imageSpace[i].ToPoint3D(), angleThreshold))
+                        //    {
+                        //        counts[i]++;
+                        //    }
+                        //});
+                        for (int i = 0; i < imageSpace.Count;++i)
                         {
                             if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].TransformedInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
                                lmData.AbsorberLMDataInfos[0].TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
@@ -239,7 +248,7 @@ namespace HUREL.Compton
                             {
                                 counts[i]++;
                             }
-                        });
+                        }
                     }
                 }
             }
@@ -249,7 +258,7 @@ namespace HUREL.Compton
                 {
                     if (lmData.Type == LMData.InteractionType.Compton)
                     {
-                        Parallel.For(0, imageSpace.Count, i =>
+                        for (int i = 0; i < imageSpace.Count; ++i)
                         {
                             if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].RelativeInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
                                lmData.AbsorberLMDataInfos[0].RelativeInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
@@ -257,7 +266,7 @@ namespace HUREL.Compton
                             {
                                 counts[i]++;
                             }
-                        });
+                        }
                     }
                 }
             }
