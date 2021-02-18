@@ -403,7 +403,7 @@ namespace Compton_GUI_WPF.ViewModel
 
                     RealtimeVector3s = vc;
                     RealtimeUVs = uvVect;
-                    RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
+                    //RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
 
                 }
                 catch
@@ -527,7 +527,6 @@ namespace Compton_GUI_WPF.ViewModel
 
                 for (int i = 0; i < poseVect.Count; i++)
                 {
-
                     vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
                     cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
                     //cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
@@ -578,7 +577,11 @@ namespace Compton_GUI_WPF.ViewModel
         public RTReconMode RealtimeReconMode
         {
             get { return realtimeReconMode; }
-            set { RealtimeReconMode = value; OnPropertyChanged(nameof(RealtimeReconMode)); }
+            set 
+            { 
+                realtimeReconMode = value; 
+                OnPropertyChanged(nameof(RealtimeReconMode)); 
+            }
         }
 
         private Task RealTimeImageReconTaskAsync;
@@ -648,8 +651,18 @@ namespace Compton_GUI_WPF.ViewModel
 
             RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
-        
-        private BitmapImage ReconBitmapImage;
+
+        private BitmapImage reconBitmapImage;
+        public BitmapImage ReconBitmapImage
+        {
+            get { return reconBitmapImage; }
+            set
+            {
+                reconBitmapImage = value;
+                OnPropertyChanged(nameof(ReconBitmapImage));
+            }
+        }
+
         private Vector3Collection SurfaceImageVector3;
         private List<float[]> SurfaceImageUVs;
         private void DrawBPPointCloudToRealTimePointCloudRGB()
@@ -684,7 +697,7 @@ namespace Compton_GUI_WPF.ViewModel
             var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, false, 5, 0.8);
             
             ReconBitmapImage = Bitmap2BitmapImage(bitmap);
-            RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
+            //RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
 
         private void DrawBPPointCloudToSurface()
@@ -712,10 +725,10 @@ namespace Compton_GUI_WPF.ViewModel
             //Trace.WriteLine("LM Data count " + tempListModeData.Count());
             var tempVector3s = SurfaceImageVector3;
             var tempUVs = SurfaceImageUVs;
-            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, false, 15, 0.8);
+            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, false, 5, 0.8);
 
             ReconBitmapImage = Bitmap2BitmapImage(bitmap);
-            RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
+            //RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
 
         private Vector3Collection SLAMVector3s;
@@ -755,8 +768,8 @@ namespace Compton_GUI_WPF.ViewModel
                 return;
             }
             tempListModeData = LACC_Control_Static.ListedLMData;                                    
- 
-            var (v3, c4) = ImageRecon.BPtoPointCloud(SLAMVector3s, tempListModeData, true, 15, 0.6);            
+                
+            var (v3, c4) = ImageRecon.BPtoPointCloud(SLAMVector3s, tempListModeData, true, 5, 0.8);            
             SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };               
         }
         #endregion

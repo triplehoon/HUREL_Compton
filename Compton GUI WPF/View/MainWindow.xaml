@@ -43,6 +43,8 @@
         <localView:TimespaneToStringConverter x:Key="ConvTimeSpanToStr"/>
         <localView:ObservalbeDoubleToChannelNameConverter x:Key="ConvObservalbeDoubleToChannelName"/>
         <localView:InverseBooleanConverter x:Key="ConvInverseBoolean"/>
+        <localView:RTReconModeToBooleanConverter x:Key="ConvRTReconModeToBoolean"/>
+            
         <Style TargetType="TextBlock" x:Key="TextBlockTitle">
             <Setter Property="FontSize" Value="20"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -110,41 +112,28 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Grid.Column="0">
-                        <TextBlock Text="Real Time RGB Camera Data" Style="{StaticResource TextBlockTitle}" Margin="5"/>
+                        <TextBlock Style="{StaticResource TextBlockTitle}" Margin="5"><Run Text="Real Time"/><Run Language="ko-kr" Text=" 2-D Image Reconstruction"/></TextBlock>
                         <Grid>
                             <Image Source="{Binding RealtimeRGB}" Width="480" Height="270" Stretch="Uniform"/>
                             <Image Source="{Binding ReconBitmapImage}" Width="480" Height="270" Stretch="Uniform"/>
                         </Grid>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="0">
-                        <TextBlock Text="Real Time Point Cloud Data" Style="{StaticResource TextBlockTitle}" Margin="5" />
-                        <hx:Viewport3DX 
-                          
-                           Background="Silver" 
-                           x:Name="mainViewport"                      
-                                        Width="480"
-                                        Height="270" ChangeFieldOfViewCursor="ScrollNS" PanCursor="Hand" RotateCursor="SizeAll" ZoomCursor="SizeNS" ZoomRectangleCursor="SizeNWSE"
-                                        
-                          >
-                            <hx:Viewport3DX.EffectsManager>
-                                <hx:DefaultEffectsManager/>
-                            </hx:Viewport3DX.EffectsManager>
-                            <hx:Viewport3DX.Camera>
-                                <hx:PerspectiveCamera Position="0.05,0.05,0.07" LookDirection="0,0,1" UpDirection="0,1,0"/>
-                            </hx:Viewport3DX.Camera>
+                        <TextBlock Text="Real-time Reconstruction Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
+                        <StackPanel Orientation="Horizontal" >
 
-                            <hx:PointGeometryModel3D Geometry="{Binding RealtimeReconPointCloud}" Color="White" FixedSize="True" Size="5,5">
-                            </hx:PointGeometryModel3D>
-
-                            <hx:PointGeometryModel3D Geometry="{Binding RTPointCloud}" Color="Gray" FixedSize="True" Size="0.8,0.87">
-                            </hx:PointGeometryModel3D>
-                        </hx:Viewport3DX>
+                            <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_NEAR}" 
+                                         Content="Near-field mode" 
+                                         FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
+                            <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_FAR}" 
+                                Content="Far-field mode" FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
+                        </StackPanel>
                         <Grid >
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <syncfusion:SfTextInputLayout Grid.Column="0" Margin="10" Hint="Data Aquire Time" HelperText="In seconds" Width="200" HorizontalAlignment="Center">
+                            <syncfusion:SfTextInputLayout Grid.Column="0" Margin="10" Hint="Data Aquire Time" HelperText="In seconds" Width="200" HorizontalAlignment="Left">
                                 <syncfusion:IntegerTextBox IsScrollingOnCircle="True" Margin="5" Width="100" HorizontalAlignment="Left" Value="{Binding Path =MLPETime, UpdateSourceTrigger=PropertyChanged}"/>
                             </syncfusion:SfTextInputLayout>
                             <StackPanel Grid.Column="1">
@@ -164,6 +153,7 @@
                             </StackPanel>
                         </Grid>
                         
+
                     </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="1">
                         <TextBlock Text="SLAM Pointcloud" Style="{StaticResource TextBlockTitle}" Margin="5" />

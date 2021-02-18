@@ -12,6 +12,40 @@ using System.Windows.Data;
 
 namespace Compton_GUI_WPF.View
 {
+
+
+    public class RTReconModeToBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo cultureInfo)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+
+            if (Enum.IsDefined(value.GetType(), value) == false)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+
+            object parameterValue = Enum.Parse(value.GetType(), parameterString);
+
+            return parameterValue.Equals(value);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo cultureInfo)
+        {
+            string parameterString = parameter as string;
+
+            if (parameterString == null)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+
+            return Enum.Parse(targetType, parameterString);
+        }
+   }
     public class TimespaneToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
