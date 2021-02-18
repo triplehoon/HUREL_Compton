@@ -59,10 +59,11 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 	{
 		return;
 	}
+	double averageDepth = 0.0;
 	for (int i = 0; i < size; i++) {
 		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
 		vectors->Add(poseVector);
-
+		averageDepth = averageDepth + System::Double( pose.points_[i][2]);
 		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
 		colors->Add(colorVector);
 	
@@ -70,6 +71,7 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 		uvs->Add(uvVector);
 
 	}
+	AverageDepth = averageDepth / size;
 }
 
 void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)

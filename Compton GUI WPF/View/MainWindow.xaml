@@ -152,7 +152,11 @@
                                 </ComboBox>
                             </StackPanel>
                         </Grid>
-                        
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Average Depth of Points in Point Cloud :" Margin="5"/>
+                            <TextBlock Text="{Binding AveragePointCloudDepth, StringFormat=f2}" Margin="0,5,0,5"/>
+                            <TextBlock Text=" m " Margin="0,5,0,5"/>
+                        </StackPanel>
 
                     </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="1">

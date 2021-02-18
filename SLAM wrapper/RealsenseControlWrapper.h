@@ -30,6 +30,7 @@ namespace HUREL {
 				static  RealsenseControl* m_RealsenseControlNative = new RealsenseControl();
 				
 			public:
+				double AverageDepth;
 				Boolean InitiateRealsense(String^% message);
 
 				RealsenseControlWrapper();

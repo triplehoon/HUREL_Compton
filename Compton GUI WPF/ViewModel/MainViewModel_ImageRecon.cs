@@ -376,7 +376,21 @@ namespace Compton_GUI_WPF.ViewModel
             get { return rtPointCloud; }
             set { rtPointCloud = value; OnPropertyChanged(nameof(RTPointCloud)); }
         }
-        
+
+        private double averagePointCloudDepth;
+        public double AveragePointCloudDepth
+        {
+            get
+            {
+                return averagePointCloudDepth;
+            }
+            set
+            {
+                averagePointCloudDepth = value;
+                OnPropertyChanged(nameof(AveragePointCloudDepth));
+            }
+        }
+
         private Task UpdateRealTimePointCloudTask;
         public void UpdateRealTimePointCloud()
         {
@@ -400,7 +414,7 @@ namespace Compton_GUI_WPF.ViewModel
                         cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.8f));
                         //id.Add(i);
                     }
-
+                    AveragePointCloudDepth = RealsenseControl.AverageDepth;
                     RealtimeVector3s = vc;
                     RealtimeUVs = uvVect;
                     //RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };

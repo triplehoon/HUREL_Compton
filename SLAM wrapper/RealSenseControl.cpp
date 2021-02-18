@@ -115,7 +115,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 			// Mapping Depth Coordinates
 			// - Depth data stored as XYZ values
 			//===================================
-			if (-Vertex[i].y + D436ToT265Coord[1] > 0.7)
+			if (-Vertex[i].y + D436ToT265Coord[1] > 1)
 				continue;
 			if (Vertex[i].z - D436ToT265Coord[2] < 0.5)
 				continue;
