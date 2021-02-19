@@ -793,7 +793,7 @@ namespace Compton_GUI_WPF.ViewModel
                                 where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(5000)
                                 select LM).ToList();
 
-            var (v3, c4) = ImageRecon.BPtoPointCloud(SLAMVector3s, tempListModeData, true, 5, 0.1);            
+            var (v3, c4) = ImageRecon.BPtoPointCloud2Pi(SLAMVector3s, tempListModeData, 5, 0.1);            
             SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };               
         }
         #endregion
