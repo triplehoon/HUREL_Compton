@@ -22,12 +22,12 @@ namespace HUREL.Compton
             if (comptonCal >= 1 || comptonCal <= -1)
                 return false;
             double comptonScatteringAngle = Math.Acos(comptonCal) / Math.PI * 180;                       
-            Vector3D effectToScatterVector = (scatterPhotonPosition - imgSpacePosition);
-            Vector3D scatterToAbsorberVector = (absorberPhotonPosition - scatterPhotonPosition);
+            Vector3D effectToScatterVector = (imgSpacePosition - scatterPhotonPosition);
+            Vector3D scatterToAbsorberVector = (scatterPhotonPosition - absorberPhotonPosition);
             effectToScatterVector.Normalize();
             scatterToAbsorberVector.Normalize();
             double positionDotPord = Vector3D.DotProduct(effectToScatterVector, scatterToAbsorberVector);
-            if (positionDotPord < 0)
+            if (positionDotPord <= 0)
             {
                 return false;
             }

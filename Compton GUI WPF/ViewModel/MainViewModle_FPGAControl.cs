@@ -151,6 +151,7 @@ namespace Compton_GUI_WPF.ViewModel
                 await RealTimeImageReconTaskAsync;
                 await Task.Run(() => DrawMLPEPositions()).ConfigureAwait(false);
                 IsRealTimeImageReconOn = true;
+                
             }
             IsSessionAvailable = true;
         }
@@ -311,6 +312,7 @@ namespace Compton_GUI_WPF.ViewModel
         private System.Timers.Timer FPGADispatchTimer = new System.Timers.Timer();
         private void StartTimer()
         {
+            RecordTimeSpan = TimeSpan.Zero;
             FPGADispatchTimer = new System.Timers.Timer();
             FPGADispatchTimer.Interval = 1000;
             FPGADispatchTimer.Elapsed += OnTimerTick;
