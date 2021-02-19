@@ -38,12 +38,12 @@ namespace HUREL.Compton
 
 
         private static bool IsEffectedBPPoint2Pi(Point3D scatterPhotonPosition, double scatterPhotonEnergy,
-           Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition, Matrix3D transform, double angleThreshold = 5)
+           Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition, Matrix3D transformM, double angleThreshold = 5)
         {
-            var frontVector = (Vector3D)transform.Transform(new Point3D(0, 0, 1));
-            Vector3D effectToScatterVector = (imgSpacePosition - scatterPhotonPosition);
-            Vector3D scatterToAbsorberVector = (absorberPhotonPosition - scatterPhotonPosition);
-            if (Vector3D.DotProduct(frontVector, effectToScatterVector) < 0) 
+            var frontVector = (Vector3D)transformM.Transform(new Point3D(0, 0, 1));
+            Vector3D effectToScatterVector = imgSpacePosition - scatterPhotonPosition;
+            Vector3D scatterToAbsorberVector = absorberPhotonPosition - scatterPhotonPosition;
+            if (Vector3D.DotProduct(frontVector, effectToScatterVector) > 0) 
             {
                 return false;
             }
@@ -323,7 +323,6 @@ namespace HUREL.Compton
             return (vector3sOut, color4sOut);
 
         }
-
 
         public static (Vector3Collection, Color4Collection) BPtoPointCloud2Pi(Vector3Collection imageSpace, List<LMData> lmDataList, double angleThreshold = 5, double minCountPercent = 0)
         {
