@@ -200,14 +200,8 @@ namespace Compton_GUI_WPF.ViewModel
                         Debug.WriteLine("CEHK");
                     }
 
-                    if (!IsSLAMOn)
-                    {
-                        LACC_Control_Static.AddListModeData(item, Identity, isMLPEOn, minMLPE_Energy, maxMLPE_Energy);
-                    }  
-                    else
-                    {
-                        LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, isMLPEOn, minMLPE_Energy, maxMLPE_Energy);
-                    }
+                    LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, isMLPEOn, minMLPE_Energy, maxMLPE_Energy);
+                    
                 }
             }
         }

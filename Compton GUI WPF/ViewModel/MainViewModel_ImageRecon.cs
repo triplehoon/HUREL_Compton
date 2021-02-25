@@ -462,6 +462,10 @@ namespace Compton_GUI_WPF.ViewModel
             set
             {
                 _isSLAMOn = value;
+                if (Application.Current == null)
+                {
+                    return;
+                }
                 Application.Current.Dispatcher.Invoke(
                     DispatcherPriority.ApplicationIdle,
                     new Action(() => {
@@ -525,12 +529,13 @@ namespace Compton_GUI_WPF.ViewModel
 
             var poseVect = new List<double[]>();
             var colorVect = new List<double[]>();
-
+            Point3D lineVect = new Point3D(0, 0, 0.3);
             while (IsSLAMOn)
             {
+                Thread.Sleep(500);
                 var vc = new Vector3Collection();               
                 var cc = new Color4Collection();
-
+                var frontPoint = CurrentSystemTranformation.Transform(lineVect);
                 poseVect = new List<double[]>();
                 colorVect = new List<double[]>();
                 Vector3 currentPose = new Vector3(Convert.ToSingle(systemPoseX), Convert.ToSingle(systemPoseY), Convert.ToSingle(systemPoseZ));
@@ -550,12 +555,12 @@ namespace Compton_GUI_WPF.ViewModel
                     //cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
                     //id.Add(i);
                 }
-                SLAMVector3s = vc;
+               
                 SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
                 SLAMPointCloudCount = vc.Count();
 
 
-                Thread.Sleep(500);                
+                               
             }
             Debug.WriteLine("SLAM Point Cloud Count is " + poseVect.Count);
         }
@@ -790,10 +795,10 @@ namespace Compton_GUI_WPF.ViewModel
             }
             
             tempListModeData = (from LM in LACC_Control_Static.ListedLMData
-                                where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(5000)
+                                where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(6000)
                                 select LM).ToList();
 
-            var (v3, c4) = ImageRecon.BPtoPointCloud2Pi(SLAMVector3s, tempListModeData, 5, 0.1);            
+            var (v3, c4) = ImageRecon.BPtoPointCloud2Pi(SLAMVector3s, tempListModeData, 5, 0.5);            
             SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };               
         }
         #endregion
