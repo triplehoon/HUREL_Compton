@@ -435,8 +435,15 @@ namespace Compton_GUI_WPF.ViewModel
         private async Task TestFunction(object t)
         {
             await Task.Run(() =>
-            {                
-                VMStatus = "TestFunction";
+            {
+                while (true)
+                {
+                    Trace.WriteLine("DataInQueue count: " + FPGAControl.DataInQueue.Count);
+                    Trace.WriteLine("ParsedQueue count: " + FPGAControl.ParsedQueue.Count);                    
+                    Trace.WriteLine("ShortArrayQueue count: " + FPGAControl.ShortArrayQueue.Count);
+                    Thread.Sleep(1000);
+                }
+                
             });
             // Write Function to be used     
         }

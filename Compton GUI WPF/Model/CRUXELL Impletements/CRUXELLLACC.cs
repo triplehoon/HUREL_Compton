@@ -1300,9 +1300,9 @@ namespace HUREL.Compton
 
                     // For small QueueSz or PPX, the loop is too tight for UI thread to ever get service.   
                     // Without this, app hangs in those scenarios.
-                    Thread.Sleep(0);
+                    
                 }
-                Thread.Sleep(0);
+                
                 if (Failures > 100)
                 {
                     EndPoint.Abort();
