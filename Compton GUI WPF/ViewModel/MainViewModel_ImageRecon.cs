@@ -555,7 +555,12 @@ namespace Compton_GUI_WPF.ViewModel
                     //cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
                     //id.Add(i);
                 }
-               
+                for (int i = 0; i < 10; ++i)
+                {
+                    vc.Add(new Vector3(Convert.ToSingle(currentSystemPose.OffsetX) + 0.1f*i, Convert.ToSingle(currentSystemPose.OffsetY), Convert.ToSingle(currentSystemPose.OffsetZ)));
+                    cc.Add(new Color4(1f, 0f, 0f, 1f));
+                }
+                
                 SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
                 SLAMPointCloudCount = vc.Count();
 
