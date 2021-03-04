@@ -44,15 +44,8 @@ namespace Compton_GUI_WPF.ViewModel
             IsSessionAvailable = false;
 
             FPGAControl.USBChangeHandler += UpdateDeviceList;
-            FPGAControl.USBChange();
-
-            SpectrumMaximumRangeByModuleNum = new ObservableCollection<int>();
-            SpectrumHistoModels = new ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>>();
-            for (int i = 0; i < 16; i++)
-            {
-                SpectrumMaximumRangeByModuleNum.Add(2000);
-                SpectrumHistoModels.Add(new List<SpectrumHisto.SpectrumHistoModel>());
-            }
+            FPGAControl.USBChange();            
+           
 
             //RTPointCloudTask =Task.Run(() => GetRealTimePointCloud());
 
@@ -60,6 +53,7 @@ namespace Compton_GUI_WPF.ViewModel
 
             for (int i = 0; i < 16; i++)
             {
+                ModuleEnergySpectrums.Add(new ObservableCollection<HistoEnergy>());
                 ModuleInfoViewModels.Add(new ModuleInfoViewModel());
             }
 
@@ -177,44 +171,28 @@ namespace Compton_GUI_WPF.ViewModel
             await Task.Run(()=>LACC_Control_Static.ResetModuleEnergy());
         }
 
-        public ObservableCollection<int> SpectrumMaximumRangeByModuleNum { get; set; }
-       
+        public List<ObservableCollection<HistoEnergy>> ModuleEnergySpectrums = new List<ObservableCollection<HistoEnergy>>();
+        
         public void DrawSpectrum()
         {
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            for (int i = 0; i < 16; i++)
+            int i = 0;
+            foreach (var data in LACC_Control_Static.LACC_Scatter_Modules)
             {
-                var SelectedESpect = (from selESpect in LACC_Control_Static.ModulesEnergy
-                                      where selESpect.ModuleNum == i
-                                      select selESpect.Energy).ToList();
-                SpectrumHisto histo = new SpectrumHisto(SelectedESpect, 405, 0, SpectrumMaximumRangeByModuleNum[i] + 100);
-                SpectrumHistoModels[i] = histo.SpectrumData;
+                ModuleEnergySpectrums[i] = new ObservableCollection<HistoEnergy>(data.SpectrumEnergy.HistoEnergies);
+                ++i;
             }
+            foreach (var data in LACC_Control_Static.LACC_Absorber_Modules)
+            {
+                ModuleEnergySpectrums[i] = new ObservableCollection<HistoEnergy>(data.SpectrumEnergy.HistoEnergies);
+                ++i;
+            }            
             sw.Stop();
         }
 
-        public ObservableCollection<List<SpectrumHisto.SpectrumHistoModel>> SpectrumHistoModels { get; set; }
-        public class SpectrumHisto
-        {
-            public List<SpectrumHistoModel> SpectrumData = new List<SpectrumHistoModel>();
-            public SpectrumHisto(IEnumerable<double> data, int nbuckets, double lower, double upper)
-            {
-                Histogram hist = new Histogram(data, nbuckets, lower, upper);
-                for (int i = 0; i < hist.BucketCount; i++)
-                {
-                    SpectrumData.Add(new SpectrumHistoModel { LowerBound = hist[i].LowerBound, Count = hist[i].Count });
-                }
-
-            }
-
-            public class SpectrumHistoModel
-            {
-                public double LowerBound { get; set; }
-                public double Count { get; set; }
-            }
-        }
+        
 
         #endregion
 

@@ -20,9 +20,68 @@ namespace HUREL.Compton.LACC
         QuadDualHead
     }
 
-    public record ModuleEnergy(int ModuleNum, double Energy);
-    public class LACC_Control
+   
+    public class HistoEnergy
     {
+        public double Energy;
+        public int Count;
+        public HistoEnergy(double e, int c)
+        {
+            Energy = e;
+            Count = c;
+        }
+
+    }
+    public class SpectrumEnergy
+    {        
+        public List<HistoEnergy> HistoEnergies = new List<HistoEnergy>();
+
+        private List<double> EnergyBin = new List<double>();
+
+        public SpectrumEnergy(int binSize, double MaxEnergy)
+        {
+            int binCount = (int)(MaxEnergy / binSize);
+            for (int i = 0; i < binCount; ++i)
+            {
+                double energy = i * binSize;
+
+                EnergyBin.Add(energy);
+                HistoEnergies.Add(new HistoEnergy(energy, 0));
+            }                
+        }
+
+        public void AddEnergy(double energy)
+        {
+            for(int i = 0; i < EnergyBin.Count - 1; ++i)
+            {
+                if(energy < EnergyBin[i + 1] && energy > EnergyBin[i])
+                {
+                    HistoEnergies[i].Count++;
+                    break;
+                }
+            }
+        }
+        public void AddEnergy(List<double> energy)
+        {
+            foreach(double d in energy)
+            {
+                AddEnergy(d);
+            }
+        }
+
+        public void Reset()
+        {
+            foreach(var data in HistoEnergies)
+            {
+                data.Count = 0;
+            }
+        }
+    }
+    public class LACC_Control
+    {        
+        /// <summary>
+        /// Module Information
+        /// </summary>
         public ModuleInfo Module;
         /// <summary>
         /// FPGA Channel 0 to 7. For mono index 0 is Channel 0 to 3
@@ -36,11 +95,7 @@ namespace HUREL.Compton.LACC
         /// List of list-mode data
         /// </summary>
         public List<LMData> ListedLMData = new List<LMData>();
-        /// <summary>
-        /// Energy data by Module number
-        /// </summary>
-        public List<ModuleEnergy> ModulesEnergy = new List<ModuleEnergy>();
-        
+
 
         /// <summary>
         /// Quad type setting
@@ -71,7 +126,7 @@ namespace HUREL.Compton.LACC
         /// <param name="absorber"></param>
         /// <param name="module"></param>
         public LACC_Control(LACC_Module scatter, LACC_Module absorber, ModuleInfo module = ModuleInfo.Mono)
-        {
+        {           
             Module = ModuleInfo.Mono;            
             LACC_Scatter_Modules = new LACC_Module[1] { scatter };
             LACC_Absorber_Modules = new LACC_Module[1] { absorber };
@@ -107,12 +162,12 @@ namespace HUREL.Compton.LACC
                 if(scatterProd != 0 && absorberProd != 0)
                 {
                     double scatterEcal = LACC_Scatter_Modules[0].GetEcal(scatter);
+                    LACC_Scatter_Modules[0].SpectrumEnergy.AddEnergy(scatterEcal);
                     double absorberEcal = LACC_Absorber_Modules[0].GetEcal(absorber);
+                    LACC_Absorber_Modules[0].SpectrumEnergy.AddEnergy(absorberEcal);
 
                     double combinedEcal = scatterEcal + absorberEcal;
-                    ModulesEnergy.Add(new ModuleEnergy(0,scatterEcal));
-                    ModulesEnergy.Add(new ModuleEnergy(8, absorberEcal));
-
+                   
                     if (combinedEcal > minE && combinedEcal < maxE && isMLPEOn)
                     {
                         var scatterMLPEdata = LACC_Scatter_Modules[0].FastPosAndEEstimate(scatter);
@@ -125,7 +180,7 @@ namespace HUREL.Compton.LACC
                 else if(scatterProd != 0 && absorberProd ==0)
                 {
                     double scatterEcal = LACC_Scatter_Modules[0].GetEcal(scatter);
-                    ModulesEnergy.Add(new ModuleEnergy(0, scatterEcal));
+                    LACC_Scatter_Modules[0].SpectrumEnergy.AddEnergy(scatterEcal);
 
                     if (scatterEcal > minE && scatterEcal < maxE && isMLPEOn)
                     {
@@ -138,7 +193,7 @@ namespace HUREL.Compton.LACC
                 else if(scatterProd == 0 && absorberProd != 0)
                 {
                     double absorberEcal = LACC_Absorber_Modules[0].GetEcal(absorber);
-                    ModulesEnergy.Add(new ModuleEnergy(8, absorberEcal));
+                    LACC_Absorber_Modules[0].SpectrumEnergy.AddEnergy(absorberEcal);
                 }
                 else
                 {
@@ -158,13 +213,27 @@ namespace HUREL.Compton.LACC
         public void ResetLMData()
         {
             ListedLMData = new List<LMData>();
-            ModulesEnergy = new List<ModuleEnergy>();
+            foreach(var m in LACC_Scatter_Modules)
+            {
+                m.SpectrumEnergy.Reset();
+            }
+            foreach (var m in LACC_Absorber_Modules)
+            {
+                m.SpectrumEnergy.Reset();
+            }
             LMData.Reset();
         }
 
         public void ResetModuleEnergy()
         {
-            ModulesEnergy = new List<ModuleEnergy>();
+            foreach (var m in LACC_Scatter_Modules)
+            {
+                m.SpectrumEnergy.Reset();
+            }
+            foreach (var m in LACC_Absorber_Modules)
+            {
+                m.SpectrumEnergy.Reset();
+            }
         }
     }
 
@@ -174,6 +243,8 @@ namespace HUREL.Compton.LACC
     public class LACC_Module
     {
         public int ChannelNumber;
+
+        public SpectrumEnergy SpectrumEnergy;
 
         public ModuleInfo SetupModuleInfo { get; init; }
         private int PmtCount;
@@ -246,7 +317,7 @@ namespace HUREL.Compton.LACC
         /// <param name="gain"> Scintilator check. </param>    
         /// <param name="channelNumber"> Channel check. </param>    
         /// <param name="csvFileLUT"> cvsFile link </param>    
-        public LACC_Module(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int channelNumber = 0)
+        public LACC_Module(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int channelNumber = 0, int spectrumBinSize = 2, double spectrumMaxE = 3000)
         {
             SetupModuleInfo = mode;
             ChannelNumber = channelNumber;
@@ -261,6 +332,8 @@ namespace HUREL.Compton.LACC
 
             loadLUT(csvFileLUT);
             MuArrays();
+
+            SpectrumEnergy = new SpectrumEnergy(spectrumBinSize, spectrumMaxE);
         }
 
         /// <summary>

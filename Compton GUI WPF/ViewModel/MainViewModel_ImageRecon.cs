@@ -316,13 +316,13 @@ namespace Compton_GUI_WPF.ViewModel
         #endregion
 
 
-        private Matrix3D currentSystemPose;
+        private Matrix3D currentSystemTranformation;
         private Matrix3D CurrentSystemTranformation
         {
-            get { return currentSystemPose; }
+            get { return currentSystemTranformation; }
             set
             {
-                currentSystemPose = value;
+                currentSystemTranformation = value;
                 SystemPoseX = value.OffsetX;
                 SystemPoseY = value.OffsetY;
                 SystemPoseZ = value.OffsetZ;
@@ -535,7 +535,6 @@ namespace Compton_GUI_WPF.ViewModel
                 Thread.Sleep(500);
                 var vc = new Vector3Collection();               
                 var cc = new Color4Collection();
-                var frontPoint = CurrentSystemTranformation.Transform(lineVect);
                 poseVect = new List<double[]>();
                 colorVect = new List<double[]>();
                 Vector3 currentPose = new Vector3(Convert.ToSingle(systemPoseX), Convert.ToSingle(systemPoseY), Convert.ToSingle(systemPoseZ));
@@ -557,8 +556,29 @@ namespace Compton_GUI_WPF.ViewModel
                 }
                 for (int i = 0; i < 10; ++i)
                 {
-                    vc.Add(new Vector3(Convert.ToSingle(currentSystemPose.OffsetX) + 0.1f*i, Convert.ToSingle(currentSystemPose.OffsetY), Convert.ToSingle(currentSystemPose.OffsetZ)));
+                    var pointx = new Point3D(0.1 * i, 0, 0);
+                    var pointy = new Point3D(0, 0.1 * i, 0);
+                    var pointz = new Point3D(0, 0, 0.1 * i);
+                    vc.Add(new Vector3(Convert.ToSingle(pointx.X), Convert.ToSingle(pointx.Y), Convert.ToSingle(pointx.Z)));
                     cc.Add(new Color4(1f, 0f, 0f, 1f));
+                    vc.Add(new Vector3(Convert.ToSingle(pointy.X), Convert.ToSingle(pointy.Y), Convert.ToSingle(pointy.Z)));
+                    cc.Add(new Color4(0f, 1f, 0f, 1f));
+                    vc.Add(new Vector3(Convert.ToSingle(pointz.X), Convert.ToSingle(pointz.Y), Convert.ToSingle(pointz.Z)));
+                    cc.Add(new Color4(0f, 0f, 1f, 1f));
+                }
+
+
+                for (int i = 0; i < 10; ++i)
+                {
+                    var pointx = currentSystemTranformation.Transform(new Point3D(0.1 * i, 0, 0));
+                    var pointy = currentSystemTranformation.Transform(new Point3D(0, 0.1 * i, 0));
+                    var pointz = currentSystemTranformation.Transform(new Point3D(0, 0, 0.1 * i));
+                    vc.Add(new Vector3(Convert.ToSingle(pointx.X), Convert.ToSingle(pointx.Y), Convert.ToSingle(pointx.Z)));
+                    cc.Add(new Color4(1f, 0f, 0f, 1f));
+                    vc.Add(new Vector3(Convert.ToSingle(pointy.X), Convert.ToSingle(pointy.Y), Convert.ToSingle(pointy.Z)));
+                    cc.Add(new Color4(0f, 1f, 0f, 1f));
+                    vc.Add(new Vector3(Convert.ToSingle(pointz.X), Convert.ToSingle(pointz.Y), Convert.ToSingle(pointz.Z)));
+                    cc.Add(new Color4(0f, 0f, 1f, 1f));
                 }
                 
                 SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };

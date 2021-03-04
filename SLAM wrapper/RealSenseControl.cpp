@@ -66,18 +66,15 @@ bool RealsenseControl::InitiateRealsense(std::string* message)
 std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose poseData)
 {
 	Eigen::Matrix4d S_T265toLACCTransform; 
-	S_T265toLACCTransform << -1, 0, 0, 0,
-							0, 1, 0, 0,
-							0, 0, -1, 0,
-							0, 0, 0, 1;
-	Eigen::Vector4d Quaternion = { poseData.rotation.w, poseData.rotation.x ,poseData.rotation.y,poseData.rotation.z };
+	
+	Eigen::Vector4d Quaternion = { poseData.rotation.w, -poseData.rotation.x ,poseData.rotation.y,-poseData.rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
-	Eigen::Vector3d	TransPoseMat = { poseData.translation.x, poseData.translation.y, poseData.translation.z };
+	Eigen::Vector3d	TransPoseMat = { -poseData.translation.x, poseData.translation.y, -poseData.translation.z };
 	Eigen::Matrix4d TransF; // Your Transformation Matrix
 	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
 	TransF.block<3, 3>(0, 0) = RMat;
 	TransF.block<3, 1>(0, 3) = TransPoseMat;
-	TransF = S_T265toLACCTransform * TransF;
+	TransF = TransF;
 	auto Matrix3Dtype = TransF.adjoint();
 	std::vector<double> matrix3DOneLine;
 	int idx = 0;
@@ -162,8 +159,8 @@ void RealsenseControl::SLAMPipeline()
 	std::shared_ptr<open3d::geometry::PointCloud > CombinedCloud_ptr(new open3d::geometry::PointCloud);
 	std::shared_ptr<open3d::geometry::PointCloud> pointcloud_ptr(new open3d::geometry::PointCloud);
 
-	double ptCloud_Voxel = 0.05;
-	double Cominbed_ptCloud_Voxel = 0.1;
+	double ptCloud_Voxel = 0.025;
+	double Cominbed_ptCloud_Voxel = 0.05;
 
 	int i = 1;
 	while (m_IsSLAMON)

@@ -150,8 +150,7 @@ namespace Compton_GUI_WPF.ViewModel
                 IsRealTimeImageReconOn = false;
                 await RealTimeImageReconTaskAsync;
                 await Task.Run(() => DrawMLPEPositions()).ConfigureAwait(false);
-                IsRealTimeImageReconOn = true;
-                
+                IsRealTimeImageReconOn = true;                
             }
             IsSessionAvailable = true;
         }
