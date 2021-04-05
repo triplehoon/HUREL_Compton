@@ -168,8 +168,8 @@ namespace HUREL.Compton
                     {
                         for (int i = 0; i < imageSpace.Count; ++i)
                         {
-                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].TransformedInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
-                               lmData.AbsorberLMDataInfos[0].TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfo.TransformedInteractionPoint3D, lmData.ScatterLMDataInfo.InteractionEnergy,
+                               lmData.AbsorberLMDataInfo.TransformedInteractionPoint3D, lmData.AbsorberLMDataInfo.InteractionEnergy,
                                imageSpace[i].ToPoint3D(), angleThreshold))
                             {
                                 counts[i]++;
@@ -186,8 +186,8 @@ namespace HUREL.Compton
                     {
                         for (int i = 0; i < imageSpace.Count; ++i)
                         {
-                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].RelativeInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
-                               lmData.AbsorberLMDataInfos[0].RelativeInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfo.RelativeInteractionPoint3D, lmData.ScatterLMDataInfo.InteractionEnergy,
+                               lmData.AbsorberLMDataInfo.RelativeInteractionPoint3D, lmData.AbsorberLMDataInfo.InteractionEnergy,
                                imageSpace[i].ToPoint3D(), angleThreshold))
                             {
                                 counts[i]++;
@@ -261,20 +261,11 @@ namespace HUREL.Compton
                 foreach (var lmData in lmDataList)
                 {
                     if (lmData.Type == LMData.InteractionType.Compton)
-                    {
-                        //Parallel.For(0, imageSpace.Count, i =>
-                        //{
-                        //    if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].TransformedInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
-                        //       lmData.AbsorberLMDataInfos[0].TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
-                        //       imageSpace[i].ToPoint3D(), angleThreshold))
-                        //    {
-                        //        counts[i]++;
-                        //    }
-                        //});
+                    {                       
                         for (int i = 0; i < imageSpace.Count;++i)
                         {
-                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].TransformedInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
-                               lmData.AbsorberLMDataInfos[0].TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfo.TransformedInteractionPoint3D, lmData.ScatterLMDataInfo.InteractionEnergy,
+                               lmData.AbsorberLMDataInfo.TransformedInteractionPoint3D, lmData.AbsorberLMDataInfo.InteractionEnergy,
                                imageSpace[i].ToPoint3D(), angleThreshold))
                             {
                                 counts[i]++;
@@ -291,8 +282,8 @@ namespace HUREL.Compton
                     {
                         for (int i = 0; i < imageSpace.Count; ++i)
                         {
-                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].RelativeInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
-                               lmData.AbsorberLMDataInfos[0].RelativeInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                            if (IsEffectedBPPoint(lmData.ScatterLMDataInfo.RelativeInteractionPoint3D, lmData.ScatterLMDataInfo.InteractionEnergy,
+                               lmData.AbsorberLMDataInfo.RelativeInteractionPoint3D, lmData.AbsorberLMDataInfo.InteractionEnergy,
                                imageSpace[i].ToPoint3D(), angleThreshold))
                             {
                                 counts[i]++;
@@ -344,20 +335,11 @@ namespace HUREL.Compton
             foreach (var lmData in lmDataList)
             {
                 if (lmData.Type == LMData.InteractionType.Compton)
-                {
-                    //Parallel.For(0, imageSpace.Count, i =>
-                    //{
-                    //    if (IsEffectedBPPoint(lmData.ScatterLMDataInfos[0].TransformedInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
-                    //       lmData.AbsorberLMDataInfos[0].TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
-                    //       imageSpace[i].ToPoint3D(), angleThreshold))
-                    //    {
-                    //        counts[i]++;
-                    //    }
-                    //});
+                {                     
                     for (int i = 0; i < imageSpace.Count; ++i)
                     {
-                        if (IsEffectedBPPoint2Pi(lmData.ScatterLMDataInfos[0].TransformedInteractionPoint3D, lmData.ScatterLMDataInfos[0].InteractionEnergy,
-                           lmData.AbsorberLMDataInfos[0].TransformedInteractionPoint3D, lmData.AbsorberLMDataInfos[0].InteractionEnergy,
+                        if (IsEffectedBPPoint2Pi(lmData.ScatterLMDataInfo.TransformedInteractionPoint3D, lmData.ScatterLMDataInfo.InteractionEnergy,
+                           lmData.AbsorberLMDataInfo.TransformedInteractionPoint3D, lmData.AbsorberLMDataInfo.InteractionEnergy,
                            imageSpace[i].ToPoint3D(), lmData.DeviceTransformMatrix, angleThreshold))
                         {
                             counts[i]++;
@@ -385,7 +367,6 @@ namespace HUREL.Compton
                 }
             }
 
-            var tupleOut3 = new Tuple<Vector3Collection, Color4Collection>(vector3sOut, color4sOut);
             return (vector3sOut, color4sOut);
 
         }
@@ -423,9 +404,13 @@ namespace HUREL.Compton
             float dv;
 
             if (v < vmin)
+            {
                 v = vmin;
+            }
             if (v > vmax)
+            {
                 v = vmax;
+            }
             dv = vmax - vmin;
             float r = 1.0f, g = 1.0f, b = 1.0f;
             if (v < (vmin + 0.25 * dv))
@@ -450,8 +435,9 @@ namespace HUREL.Compton
             }
 
             float alpha = 0.5f;
-
-            Color4 color = new Color4(r, g, b, alpha);
+           
+            var color = new Color4(r, g, b, alpha);
+            
             return color;
         }
 

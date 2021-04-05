@@ -224,7 +224,12 @@ void RealsenseControlWrapper::StartSLAMNative()
 void RealsenseControlWrapper::StopSLAM()
 {
 	m_RealsenseControlNative->m_IsSLAMON = false;
-	SLAMThread->Join();
+	if (SLAMThread != nullptr)
+	{
+		SLAMThread->Join();
+		SLAMThread = nullptr;
+	}
+	
 	IsSLAMOn = false;	
 }
 

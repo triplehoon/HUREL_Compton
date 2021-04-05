@@ -3,7 +3,7 @@
     "Compton GUI WPF": {
       "commandName": "Project",
       "sqlDebugging": false,
-      "nativeDebugging": false
+      "nativeDebugging": true
     }
   }
 }

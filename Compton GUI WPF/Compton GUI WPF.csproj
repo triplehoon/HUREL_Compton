@@ -27,8 +27,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="realsense2.dll" />
     <None Remove="ViewModel\MainViewModle_FPGAControl.cs~RFc958123.TMP" />
     <None Remove="View\Pages\symbol_hurel.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="realsense2.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -79,6 +86,9 @@
   <ItemGroup>
     <Reference Include="CyUSB">
       <HintPath>bin\x64\Release\net5.0-windows\CyUSB.dll</HintPath>
+    </Reference>
+    <Reference Include="Intel.RealSense">
+      <HintPath>C:\Program Files (x86)\Intel RealSense SDK 2.0\bin\x64\Intel.Realsense.dll</HintPath>
     </Reference>
   </ItemGroup>
 

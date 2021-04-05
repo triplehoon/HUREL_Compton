@@ -113,9 +113,9 @@ namespace Compton_GUI_WPF.ViewModel
         public void DrawMLPEPositions()
         {
             var absorberLMData = (from LMData in LACC_Control_Static.ListedLMData
-                                  select LMData.AbsorberLMDataInfos).ToList();
+                                  select LMData.AbsorberLMDataInfo).ToList();
             var scatterLMData = (from LMData in LACC_Control_Static.ListedLMData
-                                 select LMData.ScatterLMDataInfos).ToList();
+                                 select LMData.ScatterLMDataInfo).ToList();
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -123,21 +123,17 @@ namespace Compton_GUI_WPF.ViewModel
             var temp1 = new List<MlpePositionInfo>();
             foreach (var lmdata in absorberLMData)
             {
-                foreach (var lmdatum in lmdata)
-                {
-                    temp1.Add(new MlpePositionInfo(lmdatum.RelativeInteractionPoint3D.X - ModuleInfoViewModels[0].Offset.x, lmdatum.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[0].Offset.y));
-                }
+                
+               temp1.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - ModuleInfoViewModels[0].Offset.x, lmdata.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[0].Offset.y));
+                
             }
             AbsorberPositionData = temp1;
             //ScatterPositionData.Clear();
             var temp2 = new List<MlpePositionInfo>();
 
             foreach (var lmdata in scatterLMData)
-            {
-                foreach (var lmdatum in lmdata)
-                {
-                    temp2.Add(new MlpePositionInfo(lmdatum.RelativeInteractionPoint3D.X - ModuleInfoViewModels[8].Offset.x, lmdatum.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[8].Offset.y));
-                }
+            {                
+                temp2.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - ModuleInfoViewModels[8].Offset.x, lmdata.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[8].Offset.y));               
             }
             ScatterPositionData = temp2;
             sw.Stop();

@@ -1,5 +1,6 @@
 ﻿using AsyncAwaitBestPractices;
 using AsyncAwaitBestPractices.MVVM;
+using HUREL.Compton.LACC;
 using HUREL.Compton;
 using MathNet.Numerics.Statistics;
 using System;
@@ -162,11 +163,17 @@ namespace Compton_GUI_WPF.ViewModel
             set { isMLPEOn = value; OnPropertyChanged(nameof(IsMLPEOn)); }
         }
 
+        private List<AddListModeDataEchk> Echks = new List<AddListModeDataEchk>();
+
         private int minMLPE_Energy = 0;
         public int MinMLPE_Energy
         {
             get { return minMLPE_Energy; }
-            set { minMLPE_Energy = value; OnPropertyChanged(nameof(MinMLPE_Energy)); }
+            set 
+            {
+                Echks = new List<AddListModeDataEchk> { new AddListModeDataEchk(value, maxMLPE_Energy) };
+                minMLPE_Energy = value; OnPropertyChanged(nameof(MinMLPE_Energy));
+            }
         }
         private int maxMLPE_Energy = 100;
         public int MaxMLPE_Energy
@@ -174,7 +181,7 @@ namespace Compton_GUI_WPF.ViewModel
             get { return maxMLPE_Energy; }
             set
             {
-                maxMLPE_Energy = value;
+                Echks = new List<AddListModeDataEchk> { new AddListModeDataEchk(minMLPE_Energy, value) };
                 OnPropertyChanged(nameof(MaxMLPE_Energy));
             }
         }
@@ -199,7 +206,7 @@ namespace Compton_GUI_WPF.ViewModel
                         Debug.WriteLine("CEHK");
                     }
 
-                    LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, isMLPEOn, minMLPE_Energy, maxMLPE_Energy);
+                    LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, Echks, IsMLPEOn);
                     
                 }
             }
