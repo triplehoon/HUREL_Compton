@@ -5,7 +5,6 @@
 
 RealsenseControl::RealsenseControl()
 {
-	
 	T265toLACCTransform << -1, 0, 0, 0,
 							0, 1, 0, 0,
 							0, 0, -1, 0,

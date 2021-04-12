@@ -7,11 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Compton GUI WPF", "Compton 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SFchart", "SFchart\SFchart.csproj", "{E4C79EEF-73FA-4681-AA0B-98C3B429FC68}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Compton Wrapper", "SLAM wrapper\SLAM wrapper.vcxproj", "{D97493EF-BB66-40AB-BF63-D02BF7B3C911}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SLAM Wrapper", "SLAM wrapper\SLAM wrapper.vcxproj", "{D97493EF-BB66-40AB-BF63-D02BF7B3C911}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Image Recon Test GUI", "Image Recon Test GUI\Image Recon Test GUI.csproj", "{86C5E4E5-50EE-405B-9E14-889418B6455E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealsensWrapperTest", "RealsensWrapperTest\RealsensWrapperTest.csproj", "{F05121FE-63D3-4576-A4AB-839499843289}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealsensWrapperTest", "RealsensWrapperTest\RealsensWrapperTest.csproj", "{F05121FE-63D3-4576-A4AB-839499843289}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SRE3021 API", "..\SRE3021-CZT-API\SRE3021 API\SRE3021 API.csproj", "{1F13F92D-99EA-4E9B-BF29-36207719DAC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,18 @@ Global
 		{F05121FE-63D3-4576-A4AB-839499843289}.Release|x64.Build.0 = Release|Any CPU
 		{F05121FE-63D3-4576-A4AB-839499843289}.Release|x86.ActiveCfg = Release|Any CPU
 		{F05121FE-63D3-4576-A4AB-839499843289}.Release|x86.Build.0 = Release|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Debug|x64.Build.0 = Debug|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Debug|x86.Build.0 = Debug|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Release|x64.ActiveCfg = Release|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Release|x64.Build.0 = Release|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Release|x86.ActiveCfg = Release|Any CPU
+		{1F13F92D-99EA-4E9B-BF29-36207719DAC6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

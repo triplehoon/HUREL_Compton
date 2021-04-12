@@ -395,6 +395,7 @@ namespace Compton_GUI_WPF.ViewModel
         public void UpdateRealTimePointCloud()
         {
             int error = 0;
+            Thread.Sleep(2000);
             while (IsRealsensePipelineOn)
             {
                 var vc = new Vector3Collection();               
@@ -613,8 +614,8 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged(nameof(MLPETime)); 
             }
         }
-        private int ReconRGBPixelWidth;
-        private int ReconRGBPixelHeight;
+        private int ReconRGBPixelWidth = 0;
+        private int ReconRGBPixelHeight = 0;
 
         public enum RTReconMode
         {
@@ -635,8 +636,12 @@ namespace Compton_GUI_WPF.ViewModel
         private Task RealTimeImageReconTaskAsync;
         private void RealTimeImageRecon() 
         {
-            ReconRGBPixelWidth = RealtimeRGB.PixelWidth / 10;
-            ReconRGBPixelHeight = RealtimeRGB.PixelHeight / 10;
+            if (RealtimeRGB != null)
+            {
+                ReconRGBPixelWidth = RealtimeRGB.PixelWidth / 10;
+                ReconRGBPixelHeight = RealtimeRGB.PixelHeight / 10;
+            }
+
             (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(ReconRGBPixelWidth, ReconRGBPixelHeight, 64, 41, 10);
             while (IsRealTimeImageReconOn)
             {
@@ -779,7 +784,7 @@ namespace Compton_GUI_WPF.ViewModel
             //RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
 
-        private Vector3Collection SLAMVector3s;
+        private Vector3Collection SLAMVector3s = new Vector3Collection();
         private PointGeometry3D slamReconPointCloud;
         public PointGeometry3D SLAMReconPointCloud
         {

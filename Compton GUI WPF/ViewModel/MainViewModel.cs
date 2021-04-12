@@ -50,6 +50,7 @@ namespace Compton_GUI_WPF.ViewModel
             //RTPointCloudTask =Task.Run(() => GetRealTimePointCloud());
 
             ModuleInfoViewModels = new ObservableCollection<ModuleInfoViewModel>();
+            ModuleEnergySpectrums = new List<ObservableCollection<HistoEnergy>>();
 
             for (int i = 0; i < 16; i++)
             {
@@ -68,7 +69,7 @@ namespace Compton_GUI_WPF.ViewModel
 
 
 
-        private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
+        private ModuleInfo selectedModuleInfo = ModuleInfo.QuadSingleHead;
         public ModuleInfo SelecteModuleInfo
         {
             get { return selectedModuleInfo; }
@@ -104,9 +105,9 @@ namespace Compton_GUI_WPF.ViewModel
                 DrawSpectrum();
                 if (RecordTimeSpan.TotalSeconds > 10 && IsMLPEOn)
                 {
-                    ResetSpectrumCommand.Execute(null);
+                    //ResetSpectrumCommand.Execute(null);
                 }
-                Thread.Sleep(5000);
+                Thread.Sleep(1000);
             }
             Debug.WriteLine("DataUpdate End");
         }
@@ -123,17 +124,28 @@ namespace Compton_GUI_WPF.ViewModel
             var temp1 = new List<MlpePositionInfo>();
             foreach (var lmdata in absorberLMData)
             {
-                
+               if (lmdata == null)
+               {
+                   continue;
+               }
                temp1.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - ModuleInfoViewModels[0].Offset.x, lmdata.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[0].Offset.y));
-                
+               if (sw.ElapsedMilliseconds > 5000)
+                {
+                    break;
+                }
             }
             AbsorberPositionData = temp1;
             //ScatterPositionData.Clear();
             var temp2 = new List<MlpePositionInfo>();
 
             foreach (var lmdata in scatterLMData)
-            {                
-                temp2.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - ModuleInfoViewModels[8].Offset.x, lmdata.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[8].Offset.y));               
+            {
+                if (lmdata == null)
+                {
+                    continue;
+                }
+                temp2.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - ModuleInfoViewModels[8].Offset.x, lmdata.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[8].Offset.y));      
+                
             }
             ScatterPositionData = temp2;
             sw.Stop();
@@ -167,24 +179,30 @@ namespace Compton_GUI_WPF.ViewModel
             await Task.Run(()=>LACC_Control_Static.ResetModuleEnergy());
         }
 
-        public List<ObservableCollection<HistoEnergy>> ModuleEnergySpectrums = new List<ObservableCollection<HistoEnergy>>();
-        
+        public List<ObservableCollection<HistoEnergy>> ModuleEnergySpectrums { get; set; }
+        public ObservableCollection<HistoEnergy> TestModuleEnergySpectrums { get; set; } 
         public void DrawSpectrum()
         {
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
             int i = 0;
+            if (IsLACCModuleInitiate == false)
+            {
+                return;
+            }
             foreach (var data in LACC_Control_Static.LACC_Scatter_Modules)
             {
                 ModuleEnergySpectrums[i] = new ObservableCollection<HistoEnergy>(data.SpectrumEnergy.HistoEnergies);
                 ++i;
             }
+            i = 8;
             foreach (var data in LACC_Control_Static.LACC_Absorber_Modules)
             {
                 ModuleEnergySpectrums[i] = new ObservableCollection<HistoEnergy>(data.SpectrumEnergy.HistoEnergies);
                 ++i;
-            }            
+            }
+            OnPropertyChanged(nameof(ModuleEnergySpectrums));
             sw.Stop();
         }
 
@@ -339,12 +357,12 @@ namespace Compton_GUI_WPF.ViewModel
 
         public void InitiateSingleHeadQuadType()
         {
-            IsLACCModuleInitiate = true;
+            IsLACCModuleInitiate = false;
         }
 
         public void InitiateDualHeadQuadType()
         {
-            IsLACCModuleInitiate = true;
+            IsLACCModuleInitiate = false;
         }
 
         public ObservableCollection<ModuleInfoViewModel> ModuleInfoViewModels { get; set; } //16 Channels
@@ -410,11 +428,12 @@ namespace Compton_GUI_WPF.ViewModel
         {
             await Task.Run(() =>
             {
-                while (true)
+                while (false)
                 {
-                    Trace.WriteLine("DataInQueue count: " + FPGAControl.DataInQueue.Count);
-                    Trace.WriteLine("ParsedQueue count: " + FPGAControl.ParsedQueue.Count);                    
-                    Trace.WriteLine("ShortArrayQueue count: " + FPGAControl.ShortArrayQueue.Count);
+                    
+                    //Trace.WriteLine("DataInQueue count: " + FPGAControl.DataInQueue.Count);
+                    //Trace.WriteLine("ParsedQueue count: " + FPGAControl.ParsedQueue.Count);                    
+                    //Trace.WriteLine("ShortArrayQueue count: " + FPGAControl.ShortArrayQueue.Count);
                     Thread.Sleep(1000);
                 }
                 

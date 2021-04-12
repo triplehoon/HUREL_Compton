@@ -23,8 +23,8 @@ namespace HUREL.Compton.LACC
    
     public class HistoEnergy
     {
-        public double Energy;
-        public int Count = 0;
+        public double Energy { get; set; }
+        public int Count { get; set; }
         public HistoEnergy(double energy)
         {
             Energy = energy;
@@ -56,7 +56,7 @@ namespace HUREL.Compton.LACC
             {
                 if(energy < EnergyBin[i + 1] && energy > EnergyBin[i])
                 {
-                    HistoEnergies[i].Count++;
+                    ++HistoEnergies[i].Count;
                     break;
                 }
             }
@@ -385,7 +385,7 @@ namespace HUREL.Compton.LACC
         /// <param name="gain"> Scintilator check. </param>    
         /// <param name="channelNumber"> Channel check. </param>    
         /// <param name="csvFileLUT"> cvsFile link </param>    
-        public LACC_Module(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int channelNumber = 0, int spectrumBinSize = 2, double spectrumMaxE = 2000)
+        public LACC_Module(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int channelNumber = 0, int spectrumBinSize = 5, double spectrumMaxE = 2000)
         {
             SetupModuleInfo = mode;
             ChannelNumber = channelNumber;
@@ -582,7 +582,7 @@ namespace HUREL.Compton.LACC
                               select lut).ToArray();
 
             int i = 0;
-             for(int x = 0; x<sizeX;x++)
+             for(int x = 0; x < sizeX; x++)
              {
                  XYLogMue[x] = new double[sizeY][];
                  XYSumMu[x] = new double[sizeY];
@@ -633,7 +633,6 @@ namespace HUREL.Compton.LACC
             double max = 0;
             double valMaxChk = -50000;
             double val = 0;
-            double[] pos = new double[3];
             double[] normalizePMTValue = new double[PmtCount];
 
 
@@ -670,7 +669,7 @@ namespace HUREL.Compton.LACC
             }
 
             int[] Max1 = new int[2];
-            int GridSize1 = sizeX / 5;
+            int GridSize1 = sizeX / 4;
             for (int x1 = GridSize1; x1 < sizeX; x1 += GridSize1)
             {
                 for (int y1 = GridSize1; y1 < sizeY; y1 += GridSize1)
@@ -761,8 +760,8 @@ namespace HUREL.Compton.LACC
                 }
             }
 
-            point.X = Convert.ToDouble(Max3[1] - sizeY / 2) / 1000 + ModuleOffsetX; //mm to meter
-            point.Y = Convert.ToDouble(Max3[0] - sizeX / 2) / 1000 + ModuleOffsetY;
+            point.X = (Convert.ToDouble(Max3[1]) - sizeY / 2) / 1000 + ModuleOffsetX; //mm to meter
+            point.Y = (Convert.ToDouble(Max3[0]) - sizeX / 2) / 1000 + ModuleOffsetY;
             point.Z = ModuleOffsetZ;
 
 

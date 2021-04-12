@@ -172,7 +172,8 @@ namespace Compton_GUI_WPF.ViewModel
             set 
             {
                 Echks = new List<AddListModeDataEchk> { new AddListModeDataEchk(value, maxMLPE_Energy) };
-                minMLPE_Energy = value; OnPropertyChanged(nameof(MinMLPE_Energy));
+                minMLPE_Energy = value; 
+                OnPropertyChanged(nameof(MinMLPE_Energy));
             }
         }
         private int maxMLPE_Energy = 100;
@@ -182,6 +183,7 @@ namespace Compton_GUI_WPF.ViewModel
             set
             {
                 Echks = new List<AddListModeDataEchk> { new AddListModeDataEchk(minMLPE_Energy, value) };
+                maxMLPE_Energy = value;
                 OnPropertyChanged(nameof(MaxMLPE_Energy));
             }
         }
