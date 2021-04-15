@@ -220,9 +220,9 @@
                             <mah:ToggleSwitch Grid.Column="1" Grid.Row="0" 
                                               OffContent="Off"
                                               OnContent="On"
-                                              OnCommand="{Binding StartCommunicationCommand}"
+                                              OnCommand="{Binding StartCommunicationAsyncCommand}"
                                               OffCommand="{Binding StopCommunicationCommand}"
-                                              IsEnabled="{Binding Path=IsUpdateHvRunning, Converter={StaticResource ConvInverseBoolean}}"
+                                              IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
                                               IsOn="{Binding IsSerialOpen}"
                                               />
                             <TextBlock Text="FPGA Power" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -231,7 +231,7 @@
                                               OnContent="On"
                                               OnCommand="{Binding StartFpgaCommand}"
                                               OffCommand="{Binding StopFpgaCommand}"
-                                              IsEnabled="{Binding Path=IsUpdateHvRunning, Converter={StaticResource ConvInverseBoolean}}"
+                                              IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
                                               IsOn="{Binding IsFPGAOn}"
                                              />
                             <TextBlock Text="High Voltage" Grid.Column="4" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -240,7 +240,7 @@
                                               OnContent="{Binding HvModuleVoltage}"
                                               OnCommand="{Binding StartHvModuleCommand}"
                                               OffCommand="{Binding StopHvModuleCommand}"
-                                              IsEnabled="{Binding Path=IsUpdateHvRunning, Converter={StaticResource ConvInverseBoolean}}"
+                                              IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
                                               IsOn="{Binding IsHvModuleOn}"/>
                             <TextBlock Text="Temperature" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBlock Text="15 ºC" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>

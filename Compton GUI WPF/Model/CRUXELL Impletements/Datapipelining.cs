@@ -14,7 +14,7 @@ namespace HUREL.Compton
     public partial class CRUXELLLACC
     {
 
-        public BlockingCollection<short[]> ShortArrayQueue = new BlockingCollection<short[]>();
+        public BlockingCollection<ushort[]> ShortArrayQueue = new BlockingCollection<ushort[]>();
 
         //private void ParsingCyusbBufferOrign()
         //{
@@ -80,25 +80,25 @@ namespace HUREL.Compton
                             countflag++;
                             if (countflag == 296 && dataBuffer[294] == 0xFE && dataBuffer[295] == 0xFE)
                             {
-                                chk1 = dataBuffer;
-                                if (chk1 == chk2)
-                                {
-                                    Debug.WriteLine("item is not changed");
-                                }
-                                chk2 = dataBuffer;
+                                //chk1 = dataBuffer;
+                                //if (chk1 == chk2)
+                                //{
+                                //    Debug.WriteLine("item is not changed");
+                                //}
+                                //chk2 = dataBuffer;
                                 ParsedQueue.Add(dataBuffer);
                                 dataInCount++;
                                 if(dataInCount % 100000 ==0)
                                 {
                                     Debug.WriteLine("Data in count is " + dataInCount);
                                 }
-                                dataBuffer = new byte[296];
+                                //dataBuffer = new byte[296];
                                 countflag = 0;
                             }
                             else if (countflag == 296)
                             {
                                 countflag = 0;
-                                dataBuffer = new byte[296];
+                                //dataBuffer = new byte[296];
                             }
                         }
                         else
@@ -127,27 +127,126 @@ namespace HUREL.Compton
             writer.Dispose();
         }
 
+        private enum ShortBufferMode
+        {
+            Coin = 0,
+            Single = 1,
+            SingleCoin1 = 2,
+            SingelCoin2 = 3
+
+        }
+
 
         private bool IsGenerateShortArrayBuffer;
-        private void GenerateShortArrayBuffer()
+        private void GenerateShortArrayBuffer_Single()
         {
+            byte[] item;
+            ushort[] shortCheck = new ushort[1];
+
+
             while (IsGenerateShortArrayBuffer)
             {
-                byte[] item;
+
                 
                 while (ParsedQueue.TryTake(out item))
                 {
-                    short[] shortArray = new short[144];
+                    ushort[] shortArray = new ushort[144];
+                    Buffer.BlockCopy(item, 288, shortCheck, 0, 2);
+                    Buffer.BlockCopy(item, shortCheck[0] * 18, shortArray, shortCheck[0] * 18, 18);
+                    ShortArrayQueue.Add(shortArray);
+                }
+            }
+        }
+
+
+        private void GenerateShortArrayBuffer_Coin()
+        {
+            byte[] item;
+            ushort[] shortArray = new ushort[144];
+
+
+            while (IsGenerateShortArrayBuffer)
+            {
+
+
+                while (ParsedQueue.TryTake(out item))
+                {
+
                     Buffer.BlockCopy(item, 0, shortArray, 0, 288);
                     ShortArrayQueue.Add(shortArray);
                 }
             }
         }
 
-        
-
-
+        private void GenerateShortArrayBuffer_SingleCoin1()
+        {
+            byte[] item;
+            ushort[] shortCheck = new ushort[1];
+            #region BinaryCheck
+            ushort[] binaryCheck = new ushort[16];
+            binaryCheck[0]  = 0b0000_0000_0000_0001;
+            binaryCheck[1]  = 0b0000_0000_0000_0010;
+            binaryCheck[2]  = 0b0000_0000_0000_0100;
+            binaryCheck[3]  = 0b0000_0000_0000_1000;
+            binaryCheck[4]  = 0b0000_0000_0001_0000;
+            binaryCheck[5]  = 0b0000_0000_0010_0000;
+            binaryCheck[6]  = 0b0000_0000_0100_0000;
+            binaryCheck[7]  = 0b0000_0000_1000_0000;
+            binaryCheck[8]  = 0b0000_0001_0000_0000;
+            binaryCheck[9]  = 0b0000_0010_0000_0000;
+            binaryCheck[10] = 0b0000_0100_0000_0000;
+            binaryCheck[11] = 0b0000_1000_0000_0000;
+            binaryCheck[12] = 0b0001_0000_0000_0000;
+            binaryCheck[13] = 0b0010_0000_0000_0000;
+            binaryCheck[14] = 0b0100_0000_0000_0000;
+            binaryCheck[15] = 0b1000_0000_0000_0000;
+            #endregion
+            while (IsGenerateShortArrayBuffer)
+            {
+                while (ParsedQueue.TryTake(out item))
+                {
+                    ushort[] shortArray = new ushort[144];
+                   
+                    Buffer.BlockCopy(item, 288, shortCheck, 0, 2);
+                    int i = 0;                    
+                    foreach (var s in binaryCheck)
+                    {
+                        if ((s & shortCheck[0]) > 0)
+                        {
+                            Buffer.BlockCopy(item, i * 18, shortArray, i * 18, 18);
+                            
+                        }
+                        ++i;
+                    }                    
+                    ShortArrayQueue.Add(shortArray);
+                }
+            }
         }
+        private void GenerateShortArrayBuffer_SingleCoin2()
+        {
+            byte[] item;
+            ushort[] shortArray = new ushort[144];
+            ushort[] shortArrayTest = new ushort[148];
+
+
+            while (IsGenerateShortArrayBuffer)
+            {
+
+
+                while (ParsedQueue.TryTake(out item))
+                {
+
+                    Buffer.BlockCopy(item, 0, shortArrayTest, 0, 296);
+                    Buffer.BlockCopy(item, 0, shortArray, 0, 288);
+                    ShortArrayQueue.Add(shortArray);
+                }
+            }
+        }
+
+
+
+
+    }
 
 
 }

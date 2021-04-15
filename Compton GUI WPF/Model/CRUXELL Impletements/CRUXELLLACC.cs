@@ -358,7 +358,26 @@ namespace HUREL.Compton
 
             IsGenerateShortArrayBuffer = true;
             Debug.WriteLine("HY : [Try] Start Generate Short Array Buffer");
-            GenerateShortBufferAsync = Task.Run(() => GenerateShortArrayBuffer());
+
+            switch (Variables.CurrentMeasurementMode0x11)
+            {
+                case MeasurementMode.Single:
+                    GenerateShortBufferAsync = Task.Run(() => GenerateShortArrayBuffer_Single());
+                    break;
+                case MeasurementMode.Coincidence:
+                    GenerateShortBufferAsync = Task.Run(() => GenerateShortArrayBuffer_Coin());
+                    break;
+                case MeasurementMode.SingleCoin1:
+                    GenerateShortBufferAsync = Task.Run(() => GenerateShortArrayBuffer_SingleCoin1());
+                    break;
+                case MeasurementMode.SingleCoin2:
+                    GenerateShortBufferAsync = Task.Run(() => GenerateShortArrayBuffer_SingleCoin2());
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
+
+            
             status = "Data Aquisition Start";
             IsStart = true;
 
@@ -1091,6 +1110,10 @@ namespace HUREL.Compton
                 EndPoint.TimeOut = 500;
 
                 Trace.WriteLine("HY : [Try] send setting value");
+                if (!IsListening)
+                {
+                    return;
+                }
                 // 3. 셋팅값 전송
                 usb_setting(1);
 
@@ -1114,7 +1137,7 @@ namespace HUREL.Compton
 
 
 
-                IsListening = true;
+                
                 FlagFinalCall = 0;
                 Debug.WriteLine("HY : [Try] Start XferThread");
                 //ListenUSBThread = new Thread(new ThreadStart( XferThread));
@@ -1202,7 +1225,7 @@ namespace HUREL.Compton
                             PInvoke.WaitForSingleObject(ovData.hEvent, 0);
 
                             EndPoint.FinishDataXfer(ref cBufs[k], ref xBufs[k], ref len, ref oLaps[k]);
-                            
+
                             for (int i = 0; i < 512; ++i) // 16384 * 16
                             {
                                 int check_write = 0;
@@ -1224,6 +1247,8 @@ namespace HUREL.Compton
                                 //Buffer.BlockCopy(xBufs[k], 0, temp_buffer, 0, 16384);
                                 //while (DataInQueue.Post(temp_buffer) == false)
                                 DataInQueue.Add(temp_buffer);
+                                Trace.WriteLine($"Successes {Successes} Fail {Failures}");
+
                                 // 넣을때
                                 for (int ii = 0; ii < 16384; ++ii)
                                 {
@@ -1233,6 +1258,7 @@ namespace HUREL.Compton
                                 test_data += 16384;
                                 //test_data2 = test_buffer.Count();
                                 Successes++;
+                                Failures = 0;
                             }
                         }
                         else
@@ -1250,13 +1276,14 @@ namespace HUREL.Compton
                                 test_data += len;
                                 //test_data2 = test_buffer.Count();
                                 Successes++;
-
+                                Failures = 0;
+                                Trace.WriteLine($"Successes {Successes} Fail {Failures}");
                                 for (int i = 0; i < xBufs[k].Length; i++)
                                     xBufs[k][i] = DefaultBufInitValue;
                             }
                             else
                             {
-                                Trace.WriteLine("Fail");
+                                Trace.WriteLine($"Successes {Successes} Fail {Failures}");
                                 Failures++;// Failures++;
                             }
                         }
@@ -1303,7 +1330,7 @@ namespace HUREL.Compton
                     
                 }
                 
-                if (Failures > 100)
+                if (Failures > 100 && Variables.CurrentMeasurementMode0x11 != MeasurementMode.Coincidence)
                 {
                     EndPoint.Abort();
                     throw new CyUSBBufferFailException();                    

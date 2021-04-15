@@ -192,22 +192,15 @@ namespace Compton_GUI_WPF.ViewModel
         private Task AddListModeDataTaskAsync;
         private bool IsAddingListModeData;
         private void AddListModeData()
-        {
-            short[] check1;
-            short[] check2 = new short[256];
+        {           
             LACC_Control_Static.ResetLMData();
             var Identity = Matrix3D.Identity;
             while (IsAddingListModeData)
             {
-                short[] item;
+                ushort[] item;
                 while (FPGAControl.ShortArrayQueue.TryTake(out item))
                 {
-                    check1 = item;
-                    if (check1 == check2)
-                    {
-                        Debug.WriteLine("CEHK");
-                    }
-
+                    
                     LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, Echks, IsMLPEOn);
                     
                 }

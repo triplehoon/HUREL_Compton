@@ -220,17 +220,18 @@ namespace Compton_GUI_WPF.ViewModel
             ComPorts = new ObservableCollection<string>(LaccControl.PortsName);
             SelectedComport = LaccControl.SelectedPortName;
         }
-        private AsyncCommand startCommunicationCommand;
-        public IAsyncCommand StartCommunicationCommand
+        private AsyncCommand startCommunicationAsyncCommand;
+        public IAsyncCommand StartCommunicationAsyncCommand
         {
-            get { return startCommunicationCommand ?? (startCommunicationCommand = new AsyncCommand(StartCommunication)); }
+            get { return startCommunicationAsyncCommand ?? (startCommunicationAsyncCommand = new AsyncCommand(StartCommunicationAsync)); }
         }
 
-        private async Task StartCommunication()
+        private async Task StartCommunicationAsync()
         {
 
             await Task.Run(() =>
             {
+                IsCommunicating = true;
                 bool check = false;
                 check = LaccControl.StartCommunication();
 
@@ -243,7 +244,7 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     IsSerialOpen = false;
                 }
-                
+                IsCommunicating = false;
             });
 
             
@@ -260,14 +261,17 @@ namespace Compton_GUI_WPF.ViewModel
 
             await Task.Run(() =>
             {
+                IsCommunicating = true;
                 LaccControl.StopCommunication();
                  IsSerialOpen = false;
+                IsCommunicating = false;
             });
 
 
         }
         private void UpdateAllParams()
         {
+            IsCommunicating = true;
             LaccControl.CheckParams();
             IsFPGAOn = LaccControl.IsFPGAOn;
             HvModuleVoltage = LaccControl.HvModuleVoltage;
@@ -296,7 +300,7 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private async Task StartHvModule ()
         {
-            IsUpdateHvRunning = true;
+            IsCommunicating = true;
             UpdateHv().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             await Task.Run(() =>
             {
@@ -312,13 +316,9 @@ namespace Compton_GUI_WPF.ViewModel
                     IsSerialOpen = false;
                     IsHvModuleOn = false;
                 }
-                finally
-                {
-                    IsUpdateHvRunning = false;
-                }
-
 
                 UpdateAllParams();
+                IsCommunicating = false;
             });
 
 
@@ -335,7 +335,7 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private async Task StopHvModule()
         {
-            IsUpdateHvRunning = true;
+            IsCommunicating = true;
             UpdateHv().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             await Task.Run(() =>
             {
@@ -352,31 +352,33 @@ namespace Compton_GUI_WPF.ViewModel
                 }
                 finally
                 {
-                    IsUpdateHvRunning = false;
+                    UpdateAllParams();
+                    IsCommunicating = false;
                     IsHvModuleOn = false;
                 }
 
-                UpdateAllParams();
+
             });
         }
 
-        private bool isUpdateHvRunning = false;
-        public bool IsUpdateHvRunning {
+        private bool isCommunicating = false;
+        public bool IsCommunicating
+        {
             get 
             { 
-                return isUpdateHvRunning; 
+                return isCommunicating; 
             }
             set 
-            { 
-                isUpdateHvRunning = value;
-                OnPropertyChanged(nameof(IsUpdateHvRunning));
+            {
+                isCommunicating = value;
+                OnPropertyChanged(nameof(IsCommunicating));
             }
         }
         private async Task UpdateHv()
         {
             await Task.Run(() =>
             {
-                while (IsUpdateHvRunning)
+                while (IsCommunicating)
                 {
                     HvModuleVoltage = LaccControl.HvModuleVoltage;
                     Thread.Sleep(1);
@@ -395,6 +397,8 @@ namespace Compton_GUI_WPF.ViewModel
         {
             await Task.Run(() =>
             {
+                IsCommunicating = true;
+
                 try
                 {
                     LaccControl.SetFPGA(true);
@@ -406,7 +410,9 @@ namespace Compton_GUI_WPF.ViewModel
                     IsSerialOpen = false;
                 }
                 
-                UpdateAllParams();                
+                UpdateAllParams();
+                IsCommunicating = false;
+
             });
         }
 
@@ -420,6 +426,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
             await Task.Run(() =>
             {
+                IsCommunicating = true;
                 try
                 {
                     LaccControl.SetFPGA(false);
@@ -432,6 +439,8 @@ namespace Compton_GUI_WPF.ViewModel
                 }
 
                 UpdateAllParams();
+                IsCommunicating = false;
+
             });
         }
 

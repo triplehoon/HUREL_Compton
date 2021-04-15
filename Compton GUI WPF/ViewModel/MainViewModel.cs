@@ -59,17 +59,17 @@ namespace Compton_GUI_WPF.ViewModel
             }
 
             
-
             InitiateRealsenseAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));          
             TestFunction("").SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
+
         }
 
 
 
 
 
-        private ModuleInfo selectedModuleInfo = ModuleInfo.QuadSingleHead;
+        private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
         public ModuleInfo SelecteModuleInfo
         {
             get { return selectedModuleInfo; }
@@ -358,6 +358,41 @@ namespace Compton_GUI_WPF.ViewModel
         public void InitiateSingleHeadQuadType()
         {
             IsLACCModuleInitiate = false;
+
+            //var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = true, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 10, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
+
+            //Debug.WriteLine("Making Scatter Module");
+            //VMStatus = "Making Scatter Module";
+            //for (int i = 0; i < 4; ++i)
+            //{
+            //    ModuleInfoViewModels[i] = new ModuleInfoViewModel(ModuleInfo.QuadSingleHead,
+            //                                new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z },
+            //                                new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+            //                                scatterGain,
+            //                                pmtOrderInfo,
+            //                                Path.Combine(LUTFolderDirectory, $"LUT9chEXP_447278_{i + 1}_20210329_1mm_step2.csv"));
+            //}
+
+            //Debug.WriteLine("Making Abosrober Module");
+            //VMStatus = "Making Absorber Module";
+            //for (int i = 0; i < 4; ++i)
+            //{
+
+            //    ModuleInfoViewModels[i + 8] = new ModuleInfoViewModel(ModuleInfo.QuadSingleHead,
+            //                                            new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z - 0.25 },
+            //                                            new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+            //                                            absorberGain,
+            //                                            pmtOrderInfo,
+            //                                            Path.Combine(LUTFolderDirectory, "MonoAbsorberLUT.csv"));
+            //}
+            //LACC_Control_Static = new LACC_Control(new LACC_Module[] {ModuleInfoViewModels[0].Module, ModuleInfoViewModels[1].Module, ModuleInfoViewModels[2].Module, ModuleInfoViewModels[3].Module },
+            //                                        new LACC_Module[] { ModuleInfoViewModels[8].Module, ModuleInfoViewModels[9].Module, ModuleInfoViewModels[10].Module, ModuleInfoViewModels[11].Module });
+            //IsLACCModuleInitiate = true;
+            //initiating = false;
+
+            //VMStatus = "Initiate LACC Done";
+
+
         }
 
         public void InitiateDualHeadQuadType()

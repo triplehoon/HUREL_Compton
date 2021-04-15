@@ -19,7 +19,6 @@ namespace HUREL.Compton.LACC
         QuadSingleHead,
         QuadDualHead
     }
-
    
     public class HistoEnergy
     {
@@ -133,17 +132,17 @@ namespace HUREL.Compton.LACC
         }
 
       
-        public void AddListModeData(short[] fullADCArrayValue, Matrix3D deviceTransformation, List<AddListModeDataEchk> Echks, bool isMLPEOn = false)
+        public void AddListModeData(ushort[] fullADCArrayValue, Matrix3D deviceTransformation, List<AddListModeDataEchk> Echks, bool isMLPEOn = false)
         {
 
             LMData lmData;
             if (Module == ModuleInfo.Mono)
             {
-                short[] scatter = fullADCArrayValue[0..36];
-                short[] absorber = fullADCArrayValue[72..108];
+                ushort[] scatter = fullADCArrayValue[0..36];
+                ushort[] absorber = fullADCArrayValue[72..108];
 
                 int scatterProd = 1;
-                foreach(short s in scatter)
+                foreach(ushort s in scatter)
                 {
                     scatterProd *= s;
                     if (scatterProd == 0)
@@ -152,7 +151,7 @@ namespace HUREL.Compton.LACC
                 }
 
                 int absorberProd = 1;
-                foreach (short s in absorber)
+                foreach (ushort s in absorber)
                 {
                     absorberProd *= s;
                     if (absorberProd == 0)
@@ -209,14 +208,14 @@ namespace HUREL.Compton.LACC
             }
             else if (Module == ModuleInfo.QuadSingleHead)
             {
-                short[][] scatterShorts = new short[4][];
+                ushort[][] scatterShorts = new ushort[4][];
                 scatterShorts[0] = fullADCArrayValue[0..9];
                 scatterShorts[1] = fullADCArrayValue[9..18];
                 scatterShorts[2] = fullADCArrayValue[18..27];
                 scatterShorts[3] = fullADCArrayValue[27..36];
                 double[] scattersEnergy = new double[4];
 
-                short[][] absorberShorts = new short[4][];
+                ushort[][] absorberShorts = new ushort[4][];
                 absorberShorts[0] = fullADCArrayValue[72..80];
                 absorberShorts[1] = fullADCArrayValue[80..88];
                 absorberShorts[2] = fullADCArrayValue[88..89];
@@ -404,6 +403,16 @@ namespace HUREL.Compton.LACC
             SpectrumEnergy = new SpectrumEnergy(spectrumBinSize, spectrumMaxE);
         }
 
+        static public double[] LoadGain(string fileName)
+        {
+            using (StreamReader IO = new StreamReader(fileName))
+            {
+                var line = IO.ReadLine();
+                double[] value = Array.ConvertAll(line.Split(','), Double.Parse);
+                return value;                
+            }
+        }
+
         /// <summary>
         /// Loading Look Up Table for selected scintalator
         /// </summary>
@@ -475,7 +484,7 @@ namespace HUREL.Compton.LACC
         /// </summary>
         /// <param name="pmtADCValue">PMT Value in short array </param>
         /// <returns> {xpos,ypos,zpos,Energy}[mm,mm,mm,keV]</returns>
-        public (Point3D, double) PosAndEEstimate(short[] pmtADCValue)
+        public (Point3D, double) PosAndEEstimate(ushort[] pmtADCValue)
         {
             //Stopwatch sw = new Stopwatch();
             //sw.Start();
@@ -622,9 +631,9 @@ namespace HUREL.Compton.LACC
         /// <summary>
         /// Fast MLPE return x, y, z position and energy
         /// </summary>
-        /// <param name="pmtADCValue">PMT Value in short array </param>
+        /// <param name="pmtADCValue">PMT Value in ushort array </param>
         /// <returns> {xpos,ypos,zpos,Energy}[mm,mm,mm,keV]</returns>
-        public Point3D FastPosEstimate(short[] pmtADCValue)
+        public Point3D FastPosEstimate(ushort[] pmtADCValue)
         {
             //Stopwatch sw = new Stopwatch();
             //sw.Start();
@@ -770,7 +779,7 @@ namespace HUREL.Compton.LACC
             return point;
         }
 
-        public double GetEcal(short[] pmtADCValue)
+        public double GetEcal(ushort[] pmtADCValue)
         {
             double eCalEnergy = 0;
 

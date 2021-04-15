@@ -641,6 +641,10 @@ namespace Compton_GUI_WPF.ViewModel
                 ReconRGBPixelWidth = RealtimeRGB.PixelWidth / 10;
                 ReconRGBPixelHeight = RealtimeRGB.PixelHeight / 10;
             }
+            if (!IsRealsenseOn)
+            {
+                return;
+            }
 
             (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(ReconRGBPixelWidth, ReconRGBPixelHeight, 64, 41, 10);
             while (IsRealTimeImageReconOn)
