@@ -114,8 +114,12 @@
                     <StackPanel Grid.Row="0" Grid.Column="0">
                         <TextBlock Style="{StaticResource TextBlockTitle}" Margin="5"><Run Text="Real Time"/><Run Language="ko-kr" Text=" 2-D Image Reconstruction"/></TextBlock>
                         <Grid>
-                            <Image Source="{Binding RealtimeRGB}" Width="480" Height="270" Stretch="Uniform"/>
-                            <Image Source="{Binding ReconBitmapImage}" Width="480" Height="270" Stretch="Uniform"/>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="351*"/>
+                                <ColumnDefinition Width="233*"/>
+                            </Grid.ColumnDefinitions>
+                            <Image Source="{Binding RealtimeRGB}" Width="576" Height="324" Stretch="Uniform" Grid.ColumnSpan="2" Margin="0,0,52,0"/>
+                            <Image Source="{Binding ReconBitmapImage}" Width="576" Height="324" Stretch="Uniform" Grid.ColumnSpan="2" Margin="0,0,52,0"/>
                         </Grid>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="0">
@@ -246,9 +250,9 @@
                             <TextBlock Text="15 ºC" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBlock Text="Battery" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <StackPanel Orientation="Horizontal"  Grid.Column="3" Grid.Row="1">
-                            <mah:MetroProgressBar Width="60" Value="50" BorderBrush="Gray" BorderThickness="1" Foreground="Green" Margin="0,7,0,7"/>
-                            <TextBlock Margin="5,0,0,0" Text="{Binding BatteryVoltage}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                                
+                                <mah:MetroProgressBar Width="60" Value="50" BorderBrush="Gray" BorderThickness="1" Foreground="Green" Margin="0,7,0,7"/>
+                                <TextBlock Margin="5,0,0,0" Text="{Binding BatteryVoltage}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
 
 
                             </StackPanel>
@@ -334,7 +338,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Style="{StaticResource TextBlockTitle}" Text="System Configuration" Grid.Row="0"/>
-                        
+
                         <syncfusion:TabControlExt Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="10" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
                             <syncfusion:TabItemExt TabIndex="0" Header="LAHGI [Single Head]">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ScrollViewer2">
@@ -572,14 +576,14 @@
                                     </StackPanel>
                                 </ScrollViewer>
                             </syncfusion:TabItemExt>
-                           
+
                             <syncfusion:TabItemExt TabIndex="2" Header="LAHGI [Dual Head]">
                                 <StackPanel>
                                     <TextBlock Text="NOT IMPLEMENTED" FontSize="80" TextWrapping="Wrap"/>
                                 </StackPanel>
 
                             </syncfusion:TabItemExt>
-                          
+
                         </syncfusion:TabControlExt>
 
                     </Grid>
