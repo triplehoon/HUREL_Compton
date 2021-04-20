@@ -1247,7 +1247,7 @@ namespace HUREL.Compton
                                 //Buffer.BlockCopy(xBufs[k], 0, temp_buffer, 0, 16384);
                                 //while (DataInQueue.Post(temp_buffer) == false)
                                 DataInQueue.Add(temp_buffer);
-                                Trace.WriteLine($"Successes {Successes} Fail {Failures}");
+                                //Trace.WriteLine($"Successes {Successes} Fail {Failures}");
 
                                 // 넣을때
                                 for (int ii = 0; ii < 16384; ++ii)
@@ -1277,7 +1277,7 @@ namespace HUREL.Compton
                                 //test_data2 = test_buffer.Count();
                                 Successes++;
                                 Failures = 0;
-                                Trace.WriteLine($"Successes {Successes} Fail {Failures}");
+                                //Trace.WriteLine($"Successes {Successes} Fail {Failures}");
                                 for (int i = 0; i < xBufs[k].Length; i++)
                                     xBufs[k][i] = DefaultBufInitValue;
                             }

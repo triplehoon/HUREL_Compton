@@ -26,7 +26,7 @@ namespace Compton_GUI_WPF.ViewModel
     {
         private RealsenseControlWrapper RealsenseControl = new RealsenseControlWrapper();
 
-        private Vector3D T265ToLACCOffset = new Vector3D(0, 0.24, +0.03);
+        private Vector3D T265ToLACCOffset = new Vector3D(0, -0.32, -0.05);
         private double t265ToLACCOffsetX;
         public double T265ToLACCOffsetX
         {
@@ -584,9 +584,10 @@ namespace Compton_GUI_WPF.ViewModel
                 
                 SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
                 SLAMPointCloudCount = vc.Count();
+                SLAMVector3s = vc;
 
 
-                               
+
             }
             Debug.WriteLine("SLAM Point Cloud Count is " + poseVect.Count);
         }
@@ -814,6 +815,7 @@ namespace Compton_GUI_WPF.ViewModel
         }
         void DrawBPPointCloudToSLAMPointCloud()
         {
+            VMStatus = "Reconing......SLAM!";
             if (SLAMVector3s == null || SLAMVector3s.Count() == 0)
             {
                 return;
@@ -833,7 +835,9 @@ namespace Compton_GUI_WPF.ViewModel
                                 select LM).ToList();
 
             var (v3, c4) = ImageRecon.BPtoPointCloud2Pi(SLAMVector3s, tempListModeData, 5, 0.5);            
-            SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };               
+            SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
+            VMStatus = "Reconing......SLAM Done!";
+
         }
         #endregion
 

@@ -8,13 +8,13 @@ using System.Diagnostics;
 
 namespace HUREL.Compton
 {
-    public static class LaccControl
+    public static class LaccSerialControl
     {
         static SerialPort Serial = new SerialPort();
 
         public static List<string> PortsName = new List<string>();
 
-        static LaccControl()
+        static LaccSerialControl()
         {
             PortsName = new List<string>(SerialPort.GetPortNames());
             SelectedPortName = PortsName[0];

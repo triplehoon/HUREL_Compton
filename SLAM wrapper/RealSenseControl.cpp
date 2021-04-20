@@ -25,8 +25,8 @@ bool RealsenseControl::InitiateRealsense(std::string* message)
 
 		cfgD435 = rs2::config();
 		//cfgD435.enable_device("935322071433");	
-		cfgD435.enable_stream(RS2_STREAM_COLOR, 1920, 1080, RS2_FORMAT_BGR8, 30);
-		cfgD435.enable_stream(RS2_STREAM_DEPTH, 848, 480, RS2_FORMAT_Z16, 30);
+		cfgD435.enable_stream(RS2_STREAM_COLOR, 1280, 720, RS2_FORMAT_BGR8, 30);
+		cfgD435.enable_stream(RS2_STREAM_DEPTH, 480, 270, RS2_FORMAT_Z16, 5);
 		pipeD435 = rs2::pipeline();
 
 		cfgT265 = rs2::config();
@@ -95,7 +95,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 	auto Texture_Coord = (*points).get_texture_coordinates();
 	auto Vertex = (*points).get_vertices();
 
-	Eigen::Vector3d D436ToT265Coord = { -0.017, 0.03, 0 };
+	Eigen::Vector3d D436ToT265Coord = { -0.035, 0.029, 0 };
 	Eigen::Vector4d Quaternion = { (*pose).rotation.w, (*pose).rotation.x ,(*pose).rotation.y,(*pose).rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
 	Eigen::Vector3d	TransPoseMat = { (*pose).translation.x, (*pose).translation.y, (*pose).translation.z };
@@ -202,7 +202,7 @@ void RealsenseControl::RealsensesPipeline()
 
 	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
-	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 4.0);
+	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 15);

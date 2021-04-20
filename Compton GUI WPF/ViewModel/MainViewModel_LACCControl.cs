@@ -84,7 +84,7 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
-        private ObservableCollection<string> comPorts = new ObservableCollection<string>(LaccControl.PortsName);
+        private ObservableCollection<string> comPorts = new ObservableCollection<string>(LaccSerialControl.PortsName);
         public ObservableCollection<string> ComPorts
         {
             get
@@ -122,7 +122,7 @@ namespace Compton_GUI_WPF.ViewModel
             set
             {
                 selectedComPort = value;
-                LaccControl.SelectedPortName = value;
+                LaccSerialControl.SelectedPortName = value;
                 OnPropertyChanged(nameof(SelectedComport));
             }
         }
@@ -216,9 +216,9 @@ namespace Compton_GUI_WPF.ViewModel
 
         private async Task UpdataePorts()
         {
-            await Task.Run(()=>LaccControl.UpdatePortsName());
-            ComPorts = new ObservableCollection<string>(LaccControl.PortsName);
-            SelectedComport = LaccControl.SelectedPortName;
+            await Task.Run(()=>LaccSerialControl.UpdatePortsName());
+            ComPorts = new ObservableCollection<string>(LaccSerialControl.PortsName);
+            SelectedComport = LaccSerialControl.SelectedPortName;
         }
         private AsyncCommand startCommunicationAsyncCommand;
         public IAsyncCommand StartCommunicationAsyncCommand
@@ -233,7 +233,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 IsCommunicating = true;
                 bool check = false;
-                check = LaccControl.StartCommunication();
+                check = LaccSerialControl.StartCommunication();
 
                 if (check)
                 {
@@ -262,7 +262,7 @@ namespace Compton_GUI_WPF.ViewModel
             await Task.Run(() =>
             {
                 IsCommunicating = true;
-                LaccControl.StopCommunication();
+                LaccSerialControl.StopCommunication();
                  IsSerialOpen = false;
                 IsCommunicating = false;
             });
@@ -272,21 +272,23 @@ namespace Compton_GUI_WPF.ViewModel
         private void UpdateAllParams()
         {
             IsCommunicating = true;
-            LaccControl.CheckParams();
-            IsFPGAOn = LaccControl.IsFPGAOn;
-            HvModuleVoltage = LaccControl.HvModuleVoltage;
+            //wait to arduino reset
+            Thread.Sleep(1000);
+            LaccSerialControl.CheckParams();
+            IsFPGAOn = LaccSerialControl.IsFPGAOn;
+            HvModuleVoltage = LaccSerialControl.HvModuleVoltage;
             if (HvModuleVoltage > 500)
             {
                 IsHvModuleOn = true;
             }
-            HvModuleCurrent = LaccControl.HvModuleCurrent;
-            BatteryVoltage = LaccControl.BatteryVoltage;
-            IsSwitch1_On = LaccControl.IsSwitchOn[0];
-            IsSwitch2_On = LaccControl.IsSwitchOn[1];
-            IsSwitch3_On = LaccControl.IsSwitchOn[2];
-            IsSwitch4_On = LaccControl.IsSwitchOn[3];
-            IsSwitch5_On = LaccControl.IsSwitchOn[4];
-            IsSwitch6_On = LaccControl.IsSwitchOn[5];
+            HvModuleCurrent = LaccSerialControl.HvModuleCurrent;
+            BatteryVoltage = LaccSerialControl.BatteryVoltage;
+            IsSwitch1_On = LaccSerialControl.IsSwitchOn[0];
+            IsSwitch2_On = LaccSerialControl.IsSwitchOn[1];
+            IsSwitch3_On = LaccSerialControl.IsSwitchOn[2];
+            IsSwitch4_On = LaccSerialControl.IsSwitchOn[3];
+            IsSwitch5_On = LaccSerialControl.IsSwitchOn[4];
+            IsSwitch6_On = LaccSerialControl.IsSwitchOn[5];
         }
         
 
@@ -306,7 +308,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 try
                 {
-                    LaccControl.SetHvMoudle(true);
+                    LaccSerialControl.SetHvMoudle(true);
                     IsHvModuleOn = true;
                 }
                 catch (TimeoutException e)
@@ -341,7 +343,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 try 
                 {
-                    LaccControl.SetHvMoudle(false);
+                    LaccSerialControl.SetHvMoudle(false);
                     IsHvModuleOn = false;
                 }
                 catch (TimeoutException e)
@@ -380,7 +382,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 while (IsCommunicating)
                 {
-                    HvModuleVoltage = LaccControl.HvModuleVoltage;
+                    HvModuleVoltage = LaccSerialControl.HvModuleVoltage;
                     Thread.Sleep(1);
                 }
 
@@ -401,7 +403,7 @@ namespace Compton_GUI_WPF.ViewModel
 
                 try
                 {
-                    LaccControl.SetFPGA(true);
+                    LaccSerialControl.SetFPGA(true);
                 }
                 catch(TimeoutException e)
                 {
@@ -429,7 +431,7 @@ namespace Compton_GUI_WPF.ViewModel
                 IsCommunicating = true;
                 try
                 {
-                    LaccControl.SetFPGA(false);
+                    LaccSerialControl.SetFPGA(false);
                 }
                 catch (TimeoutException e)
                 {

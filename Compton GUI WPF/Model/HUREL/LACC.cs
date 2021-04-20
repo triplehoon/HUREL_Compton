@@ -48,6 +48,35 @@ namespace HUREL.Compton.LACC
                 HistoEnergies.Add(new HistoEnergy(energy));
             }                
         }
+        //static int check
+        //{
+        //    set
+        //    {
+        //        aftercheck = value;
+        //        if (beforecheck == aftercheck)
+        //        {
+        //            ++checkcount;
+        //        }
+        //        else
+        //        {
+        //            checkcount = 0;
+        //        }
+
+        //        if (checkcount > 100)
+        //        {
+        //            Debug.WriteLine("too many same bins");
+        //        }
+
+
+        //        beforecheck = value;
+
+        //    }
+        //}
+
+        //static int checkcount;
+        //static int beforecheck = 0;
+        //static int aftercheck = 0;
+
 
         public void AddEnergy(double energy)
         {
@@ -131,7 +160,8 @@ namespace HUREL.Compton.LACC
             LACC_Absorber_Modules = new LACC_Module[1] { absorber };
         }
 
-      
+        public static int[] debugCountScatter = new int[4] {0,0,0,0 };
+        public static int[] debugCountAbsorber = new int[4] { 0, 0, 0, 0 };
         public void AddListModeData(ushort[] fullADCArrayValue, Matrix3D deviceTransformation, List<AddListModeDataEchk> Echks, bool isMLPEOn = false)
         {
 
@@ -216,10 +246,10 @@ namespace HUREL.Compton.LACC
                 double[] scattersEnergy = new double[4];
 
                 ushort[][] absorberShorts = new ushort[4][];
-                absorberShorts[0] = fullADCArrayValue[72..80];
-                absorberShorts[1] = fullADCArrayValue[80..88];
-                absorberShorts[2] = fullADCArrayValue[88..89];
-                absorberShorts[3] = fullADCArrayValue[89..108];
+                absorberShorts[0] = fullADCArrayValue[72..81];
+                absorberShorts[1] = fullADCArrayValue[81..90];
+                absorberShorts[2] = fullADCArrayValue[90..99];
+                absorberShorts[3] = fullADCArrayValue[99..108];
                 double[] absorbersEnergy = new double[4];
                 int scatterInteractionCount = 0;
                 int absorberInteractionCount = 0;
@@ -233,6 +263,7 @@ namespace HUREL.Compton.LACC
                         LACC_Scatter_Modules[i].SpectrumEnergy.AddEnergy(scattersEnergy[i]);
                         scatterInteractModuleNum = i;
                         ++scatterInteractionCount;
+                        debugCountScatter[i]++;
                     }
                     absorbersEnergy[i] = LACC_Absorber_Modules[i].GetEcal(absorberShorts[i]);
                     if (absorbersEnergy[i] > 0)
@@ -240,6 +271,7 @@ namespace HUREL.Compton.LACC
                         LACC_Absorber_Modules[i].SpectrumEnergy.AddEnergy(absorbersEnergy[i]);
                         absorberInteractModuleNum = i;
                         ++absorberInteractionCount;
+                        debugCountAbsorber[i]++;
                     }
                 }
 
@@ -248,17 +280,26 @@ namespace HUREL.Compton.LACC
                     if (absorberInteractionCount == 1)
                     {
                         //Compton
-                        int scNum = scatterInteractModuleNum;
-                        int abNum = absorberInteractModuleNum;
-                        ListedLMData.Add(new LMData(LACC_Scatter_Modules[scNum].FastPosEstimate(scatterShorts[scNum]), LACC_Absorber_Modules[abNum].FastPosEstimate(absorberShorts[abNum]),
-                                                    scattersEnergy[scNum], absorbersEnergy[abNum], deviceTransformation));
+                        foreach (var e in Echks)
+                        {
+                            if (e.MinE < absorbersEnergy[absorberInteractModuleNum] + scattersEnergy[scatterInteractModuleNum] && e.MaxE > scattersEnergy[scatterInteractModuleNum] + absorbersEnergy[absorberInteractModuleNum])
+                            {
+                                ListedLMData.Add(new LMData(LACC_Scatter_Modules[scatterInteractModuleNum].FastPosEstimate(scatterShorts[scatterInteractModuleNum]), LACC_Absorber_Modules[absorberInteractModuleNum].FastPosEstimate(absorberShorts[absorberInteractModuleNum]),
+                                                        scattersEnergy[scatterInteractModuleNum], absorbersEnergy[absorberInteractModuleNum], deviceTransformation));
+                            }
+                        }                  
                     }
                     else if (absorberInteractionCount == 0)
                     {
                         //Coded Apature
-                        int scNum = scatterInteractModuleNum;
-                        ListedLMData.Add(new LMData(LACC_Scatter_Modules[scNum].FastPosEstimate(scatterShorts[scNum]),
-                            scattersEnergy[scNum], deviceTransformation));
+                        foreach (var e in Echks)
+                        {
+                            if (e.MinE < scattersEnergy[scatterInteractModuleNum] && e.MaxE > scattersEnergy[scatterInteractModuleNum])
+                            {
+                                ListedLMData.Add(new LMData(LACC_Scatter_Modules[scatterInteractModuleNum].FastPosEstimate(scatterShorts[scatterInteractModuleNum]),
+                                scattersEnergy[scatterInteractModuleNum], deviceTransformation));
+                            }
+                        }
                      
                     }
                     else
@@ -266,6 +307,18 @@ namespace HUREL.Compton.LACC
                         return;
                     }
                 }
+                //else if (absorberInteractionCount == 1)
+                //{
+                //    ////absorber test code
+                //    //foreach (var e in Echks)
+                //    //{
+                //    //    if (e.MinE < absorbersEnergy[absorberInteractModuleNum] && e.MaxE > absorbersEnergy[absorberInteractModuleNum])
+                //    //    {
+                //    //        ListedLMData.Add(new LMData(new Point3D(0,0,0), LACC_Absorber_Modules[absorberInteractModuleNum].FastPosEstimate(absorberShorts[absorberInteractModuleNum]),
+                //    //                                10, absorbersEnergy[absorberInteractModuleNum], deviceTransformation));
+                //    //    }
+                //    //}
+                //}
                 else
                 {
                     return;
@@ -274,6 +327,35 @@ namespace HUREL.Compton.LACC
             else //(Module == ModuleInfo.QuadDualHead)
             {
                throw new NotImplementedException();
+            }
+        }
+
+        public void SaveListmodeData(string path, string fileName)
+        {
+            string csvPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_"+ fileName + "_lmData.csv");
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(csvPath))
+            {
+                // 각 필드에 사용될 제목을 먼저 정의해주자 
+                //file.WriteLine("Time[HHMMssFFF],SCposX[m],SCposY,SCposZ,SCEnergy[keV],ABposX,ABposY,ABposZ,ABEnergy");
+
+                foreach (var lmdata in ListedLMData)
+                {
+                    if (lmdata.AbsorberLMDataInfo != null && lmdata.ScatterLMDataInfo != null)
+                    {
+                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HHMMssFFF")},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.ScatterLMDataInfo.InteractionEnergy}," +
+                        $",{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.AbsorberLMDataInfo.InteractionEnergy}");
+                    }
+                    else if (lmdata.AbsorberLMDataInfo != null && lmdata.ScatterLMDataInfo == null)
+                    {
+                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HHMMssFFF")},NaN,NaN,NaN,NaN," +
+                        $",{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.AbsorberLMDataInfo.InteractionEnergy}");
+                    }
+                    else if (lmdata.AbsorberLMDataInfo == null && lmdata.ScatterLMDataInfo != null)
+                    {
+                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HHMMssFFF")},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.ScatterLMDataInfo.InteractionEnergy}," +
+                      ",NaN,NaN,NaN,NaN");
+                    }
+                }
             }
         }
 
@@ -362,12 +444,12 @@ namespace HUREL.Compton.LACC
         /// </summary>
         private struct MLPELUTElement
         {
-            public double Xpos;
-            public double Ypos;
-            public double Zpos;
+            public double Xpos { get; set; }
+            public double Ypos { get; set; }
+            public double Zpos { get; set; }
 
-            public List<double> LogMu;
-            public double SumMu;
+            public List<double> LogMu { get; set; }
+            public double SumMu { get; set; }
         }
         private double[] XposArray;
         private double[] YposArray;
@@ -448,25 +530,24 @@ namespace HUREL.Compton.LACC
                 ZposArray = new double[LUT.Count()];
                 LogMue = new double[LUT.Count()][];
                 SumMu = new double[LUT.Count()];
-                int i = 0;
-                foreach (var lut in LUT)
+                if (SetupModuleInfo == ModuleInfo.Mono)
                 {
-                    XposArray[i] = lut.Xpos; //mm to meter
-                    YposArray[i] = lut.Ypos;
-                    ZposArray[i] = lut.Zpos;
-                    LogMue[i] = new double[PmtCount];
-                    for (int j = 0; j < PmtCount; j++)
+                    int i = 0;
+                    foreach (var lut in LUT)
                     {
-                        LogMue[i][j] = lut.LogMu[j];
+                        XposArray[i] = lut.Xpos; //mm to meter
+                        YposArray[i] = lut.Ypos;
+                        ZposArray[i] = lut.Zpos;
+                        LogMue[i] = new double[PmtCount];
+                        for (int j = 0; j < PmtCount; j++)
+                        {
+                            LogMue[i][j] = lut.LogMu[j];
+                        }
+                        SumMu[i] = lut.SumMu;
+                        i++;
                     }
-                    SumMu[i] = lut.SumMu;
-                    i++;
-                }
 
-
-
-
-
+                } 
                 Debug.WriteLine("LUT Done!");
             }
             catch
@@ -566,6 +647,15 @@ namespace HUREL.Compton.LACC
         private int sizeY;
         private void MuArrays()
         {
+            if (SetupModuleInfo == ModuleInfo.QuadSingleHead)
+            {
+                for (int k = 0; k < LUT.Count; ++k)
+                {
+                    MLPELUTElement templut = LUT[k];
+                    LUT[k] = new MLPELUTElement() { Xpos = templut.Xpos, Ypos = -templut.Ypos, Zpos = templut.Zpos, LogMu = templut.LogMu, SumMu = templut.SumMu };
+                }
+            }
+
             int minX = (int)(from lut in LUT
                              select lut).Min(lut => lut.Xpos);
             int maxX = (int)(from lut in LUT
@@ -666,7 +756,7 @@ namespace HUREL.Compton.LACC
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    if (pmtADCValue[i] > max)
+                    if (pmtADCValue[i] * ModuleGain[i] > max)
                     {
                         max = pmtADCValue[i]* ModuleGain[i];
                     }
@@ -678,7 +768,7 @@ namespace HUREL.Compton.LACC
             }
 
             int[] Max1 = new int[2];
-            int GridSize1 = sizeX / 4;
+            int GridSize1 = sizeX / 5;
             for (int x1 = GridSize1; x1 < sizeX; x1 += GridSize1)
             {
                 for (int y1 = GridSize1; y1 < sizeY; y1 += GridSize1)
@@ -690,7 +780,7 @@ namespace HUREL.Compton.LACC
                         if (XYLogMue[x1][y1] != null)
                             val += XYLogMue[x1][y1][j] * normalizePMTValue[j];
                     }
-                    val -= XYSumMu[x1][y1];
+                    //val -= XYSumMu[x1][y1];
                     if (val > valMaxChk)
                     {
                         valMaxChk = val;
@@ -721,7 +811,7 @@ namespace HUREL.Compton.LACC
                                     val += XYLogMue[x2][y2][j] * normalizePMTValue[j];
                             }
                             
-                            val -= XYSumMu[x2][y2];
+                            //val -= XYSumMu[x2][y2];
                             if (val > valMaxChk)
                             {
                                 valMaxChk = val;
@@ -752,11 +842,14 @@ namespace HUREL.Compton.LACC
                                 continue;
                             for (int j = 0; j < PmtCount; j++)
                             {
-                                if (XYLogMue[x2][y2] == null) continue;
+                                if (XYLogMue[x2][y2] == null)
+                                {
+                                    continue;
+                                }                                    
                                 val += XYLogMue[x2][y2][j] * normalizePMTValue[j];
                             }
                             
-                            val -= XYSumMu[x2][y2];
+                            //val -= XYSumMu[x2][y2];
                             if (val > valMaxChk)
                             {
                                 valMaxChk = val;
@@ -782,8 +875,10 @@ namespace HUREL.Compton.LACC
         public double GetEcal(ushort[] pmtADCValue)
         {
             double eCalEnergy = 0;
+            ushort checkZero = 0;
 
             double[] arrangedPMTValue = new double[PmtCount];
+            
 
             if (ModulePMTOrder.IsOrderChange)
             {
@@ -791,13 +886,29 @@ namespace HUREL.Compton.LACC
                 {
                     arrangedPMTValue[i] = (pmtADCValue[ModulePMTOrder.Order[i]]);
                 }
+
+                for (int i = 0; i < PmtCount; i++)
+                {
+                    eCalEnergy += arrangedPMTValue[i] * ModuleGain[i];
+                }
+                eCalEnergy += ModuleGain[^1];
+            }
+            else
+            {
+                for (int i = 0; i < PmtCount; i++)
+                {
+                    eCalEnergy += pmtADCValue[i] * ModuleGain[i];
+                    checkZero += pmtADCValue[i];
+
+                }
+                eCalEnergy += ModuleGain[^1];
+            }
+            if (checkZero == 0)
+            {
+                return 0;
             }
 
-            for (int i = 0; i < PmtCount; i++)
-            {
-                eCalEnergy += arrangedPMTValue[i] * ModuleGain[i];
-            }
-            eCalEnergy += ModuleGain[^1];
+
             eCalEnergy = ModuleEcalData.a * eCalEnergy * eCalEnergy + ModuleEcalData.b * eCalEnergy + ModuleEcalData.c;            
             return eCalEnergy;
         }

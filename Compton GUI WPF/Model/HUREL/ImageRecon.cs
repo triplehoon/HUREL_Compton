@@ -42,7 +42,7 @@ namespace HUREL.Compton
         {
             var frontVector = (Vector3D)transformM.Transform(new Point3D(0, 0, 1));
             Vector3D effectToScatterVector = imgSpacePosition - scatterPhotonPosition;
-            Vector3D scatterToAbsorberVector = absorberPhotonPosition - scatterPhotonPosition;
+            Vector3D scatterToAbsorberVector = scatterPhotonPosition - absorberPhotonPosition;
             if (Vector3D.DotProduct(frontVector, effectToScatterVector) < 0) 
             {
                 return false;

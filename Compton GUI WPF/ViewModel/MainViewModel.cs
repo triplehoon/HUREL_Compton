@@ -69,7 +69,7 @@ namespace Compton_GUI_WPF.ViewModel
 
 
 
-        private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
+        private ModuleInfo selectedModuleInfo = ModuleInfo.QuadSingleHead;
         public ModuleInfo SelecteModuleInfo
         {
             get { return selectedModuleInfo; }
@@ -100,16 +100,29 @@ namespace Compton_GUI_WPF.ViewModel
 
         private void DataUpdate()
         {
+            LACC_Control.debugCountAbsorber = new int[4] { 0, 0, 0, 0 };
+            LACC_Control.debugCountScatter = new int[4] { 0, 0, 0, 0 };
             while (IsSessionStart)
             {
                 DrawSpectrum();
                 if (RecordTimeSpan.TotalSeconds > 10 && IsMLPEOn)
                 {
                     //ResetSpectrumCommand.Execute(null);
-                }
+                }                
                 Thread.Sleep(1000);
             }
             Debug.WriteLine("DataUpdate End");
+
+            Debug.WriteLine($"||| {LACC_Control.debugCountScatter[0]} ||| \n" +
+                $"||| {LACC_Control.debugCountScatter[1]} ||| \n" +
+                $"||| {LACC_Control.debugCountScatter[2]} ||| \n" +
+                $"||| {LACC_Control.debugCountScatter[3]} ||| \n" +
+                $"||| {LACC_Control.debugCountAbsorber[0]} ||| \n" +
+                $"||| {LACC_Control.debugCountAbsorber[1]} ||| \n" +
+                $"||| {LACC_Control.debugCountAbsorber[2]} ||| \n" +
+                $"||| {LACC_Control.debugCountAbsorber[3]} ||| \n" +            
+                $"");
+
         }
         public void DrawMLPEPositions()
         {
@@ -128,7 +141,7 @@ namespace Compton_GUI_WPF.ViewModel
                {
                    continue;
                }
-               temp1.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - ModuleInfoViewModels[0].Offset.x, lmdata.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[0].Offset.y));
+               temp1.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - T265ToLACCOffset.X, lmdata.RelativeInteractionPoint3D.Y - T265ToLACCOffset.Y));
                if (sw.ElapsedMilliseconds > 5000)
                 {
                     break;
@@ -144,7 +157,7 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     continue;
                 }
-                temp2.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - ModuleInfoViewModels[8].Offset.x, lmdata.RelativeInteractionPoint3D.Y - ModuleInfoViewModels[8].Offset.y));      
+                temp2.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - T265ToLACCOffset.X, lmdata.RelativeInteractionPoint3D.Y - T265ToLACCOffset.Y));      
                 
             }
             ScatterPositionData = temp2;
@@ -359,38 +372,43 @@ namespace Compton_GUI_WPF.ViewModel
         {
             IsLACCModuleInitiate = false;
 
-            //var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = true, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 10, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
+            var pmtOrderInfo = new LACC_Module.ModulePMTOrderInfo { IsOrderChange = false, Order = new int[] { 0, 18, 1, 19, 2, 20, 11, 29, 10, 28, 9, 27, 3, 21, 4, 22, 5, 23, 14, 32, 13, 31, 12, 30, 6, 24, 7, 25, 8, 26, 17, 35, 16, 34, 15, 33 } };
 
-            //Debug.WriteLine("Making Scatter Module");
-            //VMStatus = "Making Scatter Module";
-            //for (int i = 0; i < 4; ++i)
-            //{
-            //    ModuleInfoViewModels[i] = new ModuleInfoViewModel(ModuleInfo.QuadSingleHead,
-            //                                new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z },
-            //                                new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
-            //                                scatterGain,
-            //                                pmtOrderInfo,
-            //                                Path.Combine(LUTFolderDirectory, $"LUT9chEXP_447278_{i + 1}_20210329_1mm_step2.csv"));
-            //}
+            double offset = 0.083;
+            double[] xOffset = new double[] { -offset, +offset, -offset, +offset };
+            double[] yOffset = new double[] { -offset, -offset, +offset, +offset };
+            double offsetZ = - (0.251 + (31.5 - 21.5) / 1000);
+            Debug.WriteLine("Making Scatter Module");
+            VMStatus = "Making Scatter Module";
+            for (int i = 0; i < 4; ++i)
+            {
+                var scatterGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"GainCorrectionMatrix_scatter_{i + 1}.csv"));
+                ModuleInfoViewModels[i] = new ModuleInfoViewModel(ModuleInfo.QuadSingleHead,
+                                            new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X + xOffset[i], y = T265ToLACCOffset.Y + yOffset[i], z = T265ToLACCOffset.Z},
+                                            new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                            scatterGain,
+                                            pmtOrderInfo,
+                                            Path.Combine(LUTFolderDirectory, $"LUT9chEXP_447278_{i + 1}_20210329_1mm_step2.csv"));
+            }
 
-            //Debug.WriteLine("Making Abosrober Module");
-            //VMStatus = "Making Absorber Module";
-            //for (int i = 0; i < 4; ++i)
-            //{
+            Debug.WriteLine("Making Abosrober Module");
+            VMStatus = "Making Absorber Module";
+            for (int i = 0; i < 4; ++i)
+            {
+                var absorberGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"GainCorrectionMatrix_absorber_{i + 1}.csv"));
+                ModuleInfoViewModels[i + 8] = new ModuleInfoViewModel(ModuleInfo.QuadSingleHead,
+                                                        new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X + xOffset[i], y = T265ToLACCOffset.Y + yOffset[i], z = T265ToLACCOffset.Z + offsetZ },
+                                                        new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                                        absorberGain,
+                                                        pmtOrderInfo,
+                                                        Path.Combine(LUTFolderDirectory, $"LUT9chEXP_447279_{ i + 1 }_20210329_1mm_step2.csv"));
+            }
+            LACC_Control_Static = new LACC_Control(new LACC_Module[] { ModuleInfoViewModels[0].Module, ModuleInfoViewModels[1].Module, ModuleInfoViewModels[2].Module, ModuleInfoViewModels[3].Module },
+                                                    new LACC_Module[] { ModuleInfoViewModels[8].Module, ModuleInfoViewModels[9].Module, ModuleInfoViewModels[10].Module, ModuleInfoViewModels[11].Module });
+            IsLACCModuleInitiate = true;
+            initiating = false;
 
-            //    ModuleInfoViewModels[i + 8] = new ModuleInfoViewModel(ModuleInfo.QuadSingleHead,
-            //                                            new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z - 0.25 },
-            //                                            new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
-            //                                            absorberGain,
-            //                                            pmtOrderInfo,
-            //                                            Path.Combine(LUTFolderDirectory, "MonoAbsorberLUT.csv"));
-            //}
-            //LACC_Control_Static = new LACC_Control(new LACC_Module[] {ModuleInfoViewModels[0].Module, ModuleInfoViewModels[1].Module, ModuleInfoViewModels[2].Module, ModuleInfoViewModels[3].Module },
-            //                                        new LACC_Module[] { ModuleInfoViewModels[8].Module, ModuleInfoViewModels[9].Module, ModuleInfoViewModels[10].Module, ModuleInfoViewModels[11].Module });
-            //IsLACCModuleInitiate = true;
-            //initiating = false;
-
-            //VMStatus = "Initiate LACC Done";
+            VMStatus = "Initiate LACC Done";
 
 
         }

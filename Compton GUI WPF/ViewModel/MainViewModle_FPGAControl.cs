@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
+using System.IO;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -125,6 +126,7 @@ namespace Compton_GUI_WPF.ViewModel
                     VMStatus = "FPGA setting Start";
 
                     string status = "";
+
                     bool isFPGAStart = await Task.Run(() => FPGAControl.Start_usb(out status)).ConfigureAwait(false);
                     if (isFPGAStart) 
                     {
@@ -151,7 +153,14 @@ namespace Compton_GUI_WPF.ViewModel
                 IsRealTimeImageReconOn = false;
                 await RealTimeImageReconTaskAsync;
                 await Task.Run(() => DrawMLPEPositions()).ConfigureAwait(false);
-                IsRealTimeImageReconOn = true;                
+                IsRealTimeImageReconOn = true;
+                if (IsSavingBinaryFile)
+                {
+                    VMStatus = "Saving CSV file";
+                    LACC_Control_Static.SaveListmodeData(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName + "T265Offset_" + T265ToLACCOffset.X + "_" +T265ToLACCOffset.Y +"_" + T265ToLACCOffset.Z + "_");
+                    VMStatus = "Done saving CSV file";
+                }
+                
             }
             IsSessionAvailable = true;
         }
@@ -176,7 +185,7 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged(nameof(MinMLPE_Energy));
             }
         }
-        private int maxMLPE_Energy = 100;
+        private int maxMLPE_Energy = 1500;
         public int MaxMLPE_Energy
         {
             get { return maxMLPE_Energy; }

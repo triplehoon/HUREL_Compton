@@ -598,10 +598,10 @@
                     </Grid.RowDefinitions>
                     <syncfusion:SfChart Grid.Column="0" Grid.Row="0" Header="Scatter 0" Margin="10">
                         <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-0.150" Maximum="0.150" ShowGridLines="False" IsInversed="True"/>
+                            <syncfusion:NumericalAxis Minimum="-0.20" Maximum="0.20" ShowGridLines="False" IsInversed="True"/>
                         </syncfusion:SfChart.PrimaryAxis>
                         <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-0.150" Maximum="+0.150" ShowGridLines="False"/>
+                            <syncfusion:NumericalAxis Minimum="-0.2" Maximum="+0.20" ShowGridLines="False"/>
                         </syncfusion:SfChart.SecondaryAxis>
                         <syncfusion:FastScatterBitmapSeries ItemsSource="{Binding ScatterPositionData}" XBindingPath="X" YBindingPath="Y" />
                     </syncfusion:SfChart>
@@ -609,10 +609,10 @@
                     </syncfusion:SfChart>
                     <syncfusion:SfChart Grid.Column="0" Grid.Row="1" Header="Absorber 0" Margin="10">
                         <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-0.150" Maximum="+0.150" ShowGridLines="False" IsInversed="True"/>
+                            <syncfusion:NumericalAxis Minimum="-0.20" Maximum="+0.20" ShowGridLines="False" IsInversed="True"/>
                         </syncfusion:SfChart.PrimaryAxis>
                         <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-0.150" Maximum="+0.150" ShowGridLines="False"/>
+                            <syncfusion:NumericalAxis Minimum="-0.20" Maximum="+0.20" ShowGridLines="False"/>
                         </syncfusion:SfChart.SecondaryAxis>
                         <syncfusion:FastScatterBitmapSeries Interior="Orange" ItemsSource="{Binding AbsorberPositionData}" XBindingPath="X" YBindingPath="Y" ScatterHeight="2" ScatterWidth="2"/>
                     </syncfusion:SfChart>
@@ -727,7 +727,7 @@
                         </syncfusion:SfTextInputLayout>
 
                         <syncfusion:SfTextInputLayout Margin="10" Grid.Column="1" Hint="High Bound Energy" HelperTextVisibility="Collapsed">
-                            <syncfusion:IntegerTextBox x:Name="TBMaxE" IsCaretAnimationEnabled="True" IsScrollingOnCircle="True"  Value="{Binding MaxMLPE_Energy,UpdateSourceTrigger=LostFocus}"  Margin="14,0,0,0" Width="100" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+                            <syncfusion:IntegerTextBox x:Name="TBMaxE" IsCaretAnimationEnabled="True" IsScrollingOnCircle="True"  Value="{Binding MaxMLPE_Energy,UpdateSourceTrigger=LostFocus}"  Margin="14,0,0,0" Width="100" HorizontalAlignment="Left" VerticalAlignment="Bottom" Cursor="IBeam">
                             </syncfusion:IntegerTextBox>
                         </syncfusion:SfTextInputLayout>
 
@@ -750,12 +750,12 @@
                             <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
                         </syncfusion:SfChart.Behaviors>
                         <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="0" Maximum="2000" ShowTrackBallInfo="True"/>
+                            <syncfusion:NumericalAxis Minimum="0" Maximum="1500" ShowTrackBallInfo="True"/>
                         </syncfusion:SfChart.PrimaryAxis>
                         <syncfusion:SfChart.SecondaryAxis>
                             <syncfusion:NumericalAxis Minimum="0"/>
                         </syncfusion:SfChart.SecondaryAxis>
-                        <syncfusion:FastColumnBitmapSeries Interior="Black"
+                        <syncfusion:FastLineBitmapSeries Interior="Black"
                                                                      ListenPropertyChange="True"
                                                                      Label="Energy"
                                                                      ItemsSource="{Binding ModuleEnergySpectrums[0]}" 

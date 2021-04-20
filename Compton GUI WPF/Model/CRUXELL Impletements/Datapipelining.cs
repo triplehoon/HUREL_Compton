@@ -80,14 +80,28 @@ namespace HUREL.Compton
                             countflag++;
                             if (countflag == 296 && dataBuffer[294] == 0xFE && dataBuffer[295] == 0xFE)
                             {
-                                //chk1 = dataBuffer;
-                                //if (chk1 == chk2)
-                                //{
-                                //    Debug.WriteLine("item is not changed");
-                                //}
-                                //chk2 = dataBuffer;
-                                ParsedQueue.Add(dataBuffer);
-                                dataInCount++;
+                                dataBuffer.CopyTo(chk1, 0);
+                                bool checkSame = true;
+
+                                for (int i = 0; i < 296; ++i)
+                                {
+                                    if (chk1[i] != chk2[i])
+                                    {
+                                        checkSame = false;
+                                        break;
+                                    }
+                                }
+                                if (checkSame)
+                                {
+                                    Debug.WriteLine("item is not changed");
+                                }
+                                else
+                                {
+                                    ParsedQueue.Add(dataBuffer);
+                                    dataInCount++;
+                                }
+                                dataBuffer.CopyTo(chk2,0);
+
                                 if(dataInCount % 100000 ==0)
                                 {
                                     Debug.WriteLine("Data in count is " + dataInCount);
@@ -153,6 +167,19 @@ namespace HUREL.Compton
                     ushort[] shortArray = new ushort[144];
                     Buffer.BlockCopy(item, 288, shortCheck, 0, 2);
                     Buffer.BlockCopy(item, shortCheck[0] * 18, shortArray, shortCheck[0] * 18, 18);
+                    bool is511Checked = false;
+                    foreach (var check511 in shortArray)
+                    {
+                        if (check511 == 511)
+                        {
+                            is511Checked = true;
+                            continue;
+                        }
+                    }
+                    if (is511Checked)
+                    {
+                        continue;
+                    }
                     ShortArrayQueue.Add(shortArray);
                 }
             }
@@ -173,6 +200,13 @@ namespace HUREL.Compton
                 {
 
                     Buffer.BlockCopy(item, 0, shortArray, 0, 288);
+                    foreach (var check511 in shortArray)
+                    {
+                        if (check511 == 511)
+                        {
+                            continue;
+                        }
+                    }
                     ShortArrayQueue.Add(shortArray);
                 }
             }
@@ -213,12 +247,29 @@ namespace HUREL.Compton
                     {
                         if ((s & shortCheck[0]) > 0)
                         {
-                            Buffer.BlockCopy(item, i * 18, shortArray, i * 18, 18);
-                            
+                            Buffer.BlockCopy(item, i * 18, shortArray, i * 18, 18);                                                        
                         }
+
+                        
                         ++i;
-                    }                    
-                    ShortArrayQueue.Add(shortArray);
+                    }
+                    bool is511Checked = false;
+                    foreach (var check511 in shortArray)
+                    {
+                        if (check511 == 511)
+                        {
+                            is511Checked = true;
+                            break;
+                        }
+                    }
+                    if (is511Checked)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        ShortArrayQueue.Add(shortArray);
+                    }
                 }
             }
         }
@@ -238,6 +289,13 @@ namespace HUREL.Compton
 
                     Buffer.BlockCopy(item, 0, shortArrayTest, 0, 296);
                     Buffer.BlockCopy(item, 0, shortArray, 0, 288);
+                    foreach (var check511 in shortArray)
+                    {
+                        if (check511 == 511)
+                        {
+                            continue;
+                        }
+                    }
                     ShortArrayQueue.Add(shortArray);
                 }
             }
