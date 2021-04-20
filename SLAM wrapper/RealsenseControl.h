@@ -54,6 +54,8 @@ public:
 	rs2::video_frame m_CurrentVideoFrame = rs2::video_frame(nullptr);
 	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> m_RTPointCloud;
 	open3d::geometry::PointCloud m_SLAMEDPointCloud;
+	open3d::geometry::PointCloud m_SLAMEDPointCloudDownSampled;
+
 
 	bool m_IsPipeLineOn;
 	bool m_IsSLAMON;
