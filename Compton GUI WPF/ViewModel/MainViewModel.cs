@@ -487,7 +487,7 @@ namespace Compton_GUI_WPF.ViewModel
                     //Trace.WriteLine("DataInQueue count: " + FPGAControl.DataInQueue.Count);
                     //Trace.WriteLine("ParsedQueue count: " + FPGAControl.ParsedQueue.Count);                    
                     //Trace.WriteLine("ShortArrayQueue count: " + FPGAControl.ShortArrayQueue.Count);
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
                 }
                 
             });

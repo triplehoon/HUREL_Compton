@@ -35,6 +35,7 @@ namespace HUREL {
 
 				RealsenseControlWrapper();
 
+				
 
 				void GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors, List<array<float>^>^% uvs);
 				array<double>^ GetPoseFrame(int% tranckingConf);
@@ -50,6 +51,7 @@ namespace HUREL {
 				void StopSLAM();
 
 				void GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
+				void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
 				// C# 소멸자. Finalize 메서드임
 				~RealsenseControlWrapper();

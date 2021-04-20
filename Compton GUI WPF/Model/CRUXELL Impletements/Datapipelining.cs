@@ -97,7 +97,7 @@ namespace HUREL.Compton
                                 }
                                 else
                                 {
-                                    ParsedQueue.Add(dataBuffer);
+                                    ParsedQueue.TryAdd(dataBuffer);
                                     dataInCount++;
                                 }
                                 dataBuffer.CopyTo(chk2,0);
@@ -154,14 +154,14 @@ namespace HUREL.Compton
         private bool IsGenerateShortArrayBuffer;
         private void GenerateShortArrayBuffer_Single()
         {
-            byte[] item;
-            ushort[] shortCheck = new ushort[1];
 
 
             while (IsGenerateShortArrayBuffer)
             {
+                byte[] item;
+                ushort[] shortCheck = new ushort[1];
 
-                
+
                 while (ParsedQueue.TryTake(out item))
                 {
                     ushort[] shortArray = new ushort[144];
@@ -188,12 +188,12 @@ namespace HUREL.Compton
 
         private void GenerateShortArrayBuffer_Coin()
         {
-            byte[] item;
-            ushort[] shortArray = new ushort[144];
 
 
             while (IsGenerateShortArrayBuffer)
             {
+                byte[] item;
+                ushort[] shortArray = new ushort[144];
 
 
                 while (ParsedQueue.TryTake(out item))
@@ -214,8 +214,6 @@ namespace HUREL.Compton
 
         private void GenerateShortArrayBuffer_SingleCoin1()
         {
-            byte[] item;
-            ushort[] shortCheck = new ushort[1];
             #region BinaryCheck
             ushort[] binaryCheck = new ushort[16];
             binaryCheck[0]  = 0b0000_0000_0000_0001;
@@ -237,6 +235,9 @@ namespace HUREL.Compton
             #endregion
             while (IsGenerateShortArrayBuffer)
             {
+
+                byte[] item;
+                ushort[] shortCheck = new ushort[1];
                 while (ParsedQueue.TryTake(out item))
                 {
                     ushort[] shortArray = new ushort[144];
@@ -275,13 +276,14 @@ namespace HUREL.Compton
         }
         private void GenerateShortArrayBuffer_SingleCoin2()
         {
-            byte[] item;
-            ushort[] shortArray = new ushort[144];
-            ushort[] shortArrayTest = new ushort[148];
+
 
 
             while (IsGenerateShortArrayBuffer)
             {
+                byte[] item;
+                ushort[] shortArray = new ushort[144];
+                ushort[] shortArrayTest = new ushort[148];
 
 
                 while (ParsedQueue.TryTake(out item))

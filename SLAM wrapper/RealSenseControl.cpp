@@ -160,6 +160,7 @@ void RealsenseControl::SLAMPipeline()
 
 	double ptCloud_Voxel = 0.025;
 	double Cominbed_ptCloud_Voxel = 0.05;
+	double reconPtCloudDownSample = 0.1;
 
 	int i = 1;
 	while (m_IsSLAMON)
@@ -177,13 +178,18 @@ void RealsenseControl::SLAMPipeline()
 				if (!(*CombinedCloud_ptr).HasPoints())
 				{
 					*CombinedCloud_ptr = (*TempPCL_T265.VoxelDownSample(ptCloud_Voxel)).Transform(TransMat_init);
-					m_SLAMEDPointCloud = *CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel);
+					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
+					m_SLAMEDPointCloudDownSampled = *(m_SLAMEDPointCloud.VoxelDownSample(reconPtCloudDownSample));
 				}
 				else
 				{
 					*pointcloud_ptr = *TempPCL_T265.VoxelDownSample(ptCloud_Voxel);
 					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr).Transform(TransMat_init);;
-					m_SLAMEDPointCloud = *CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel);
+					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
+					m_SLAMEDPointCloudDownSampled = *(m_SLAMEDPointCloud.VoxelDownSample(reconPtCloudDownSample));
+					if (m_SLAMEDPointCloudDownSampled.points_.size() > 20000) {
+						reconPtCloudDownSample += 0.05;
+					}
 				}
 
 			}

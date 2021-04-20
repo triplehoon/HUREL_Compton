@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
+using HUREL.Compton;
 
 namespace HUREL.Compton.LACC
 {
@@ -19,92 +20,7 @@ namespace HUREL.Compton.LACC
         QuadSingleHead,
         QuadDualHead
     }
-   
-    public class HistoEnergy
-    {
-        public double Energy { get; set; }
-        public int Count { get; set; }
-        public HistoEnergy(double energy)
-        {
-            Energy = energy;
 
-        }
-
-    }
-    public class SpectrumEnergy
-    {        
-        public List<HistoEnergy> HistoEnergies = new List<HistoEnergy>();
-
-        private List<double> EnergyBin = new List<double>();
-
-        public SpectrumEnergy(int binSize, double MaxEnergy)
-        {
-            int binCount = (int)(MaxEnergy / binSize);
-            for (int i = 0; i < binCount; ++i)
-            {
-                double energy = i * binSize;
-
-                EnergyBin.Add(energy);
-                HistoEnergies.Add(new HistoEnergy(energy));
-            }                
-        }
-        //static int check
-        //{
-        //    set
-        //    {
-        //        aftercheck = value;
-        //        if (beforecheck == aftercheck)
-        //        {
-        //            ++checkcount;
-        //        }
-        //        else
-        //        {
-        //            checkcount = 0;
-        //        }
-
-        //        if (checkcount > 100)
-        //        {
-        //            Debug.WriteLine("too many same bins");
-        //        }
-
-
-        //        beforecheck = value;
-
-        //    }
-        //}
-
-        //static int checkcount;
-        //static int beforecheck = 0;
-        //static int aftercheck = 0;
-
-
-        public void AddEnergy(double energy)
-        {
-            for(int i = 0; i < EnergyBin.Count - 1; ++i)
-            {
-                if(energy < EnergyBin[i + 1] && energy > EnergyBin[i])
-                {
-                    ++HistoEnergies[i].Count;
-                    break;
-                }
-            }
-        }
-        public void AddEnergy(List<double> energy)
-        {
-            foreach(double d in energy)
-            {
-                AddEnergy(d);
-            }
-        }
-
-        public void Reset()
-        {
-            foreach(var data in HistoEnergies)
-            {
-                data.Count = 0;
-            }
-        }
-    }
     public class LACC_Control
     {        
         /// <summary>
@@ -335,7 +251,6 @@ namespace HUREL.Compton.LACC
             string csvPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_"+ fileName + "_lmData.csv");
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(csvPath))
             {
-                // 각 필드에 사용될 제목을 먼저 정의해주자 
                 //file.WriteLine("Time[HHMMssFFF],SCposX[m],SCposY,SCposZ,SCEnergy[keV],ABposX,ABposY,ABposZ,ABEnergy");
 
                 foreach (var lmdata in ListedLMData)

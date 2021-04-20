@@ -158,9 +158,9 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     VMStatus = "Saving CSV file";
                     LACC_Control_Static.SaveListmodeData(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName + "T265Offset_" + T265ToLACCOffset.X + "_" +T265ToLACCOffset.Y +"_" + T265ToLACCOffset.Z + "_");
+                    SaveCurrentPointCloud(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName);
                     VMStatus = "Done saving CSV file";
-                }
-                
+                }                
             }
             IsSessionAvailable = true;
         }
@@ -203,7 +203,6 @@ namespace Compton_GUI_WPF.ViewModel
         private void AddListModeData()
         {           
             LACC_Control_Static.ResetLMData();
-            var Identity = Matrix3D.Identity;
             while (IsAddingListModeData)
             {
                 ushort[] item;

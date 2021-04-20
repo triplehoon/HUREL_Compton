@@ -316,7 +316,7 @@ namespace Compton_GUI_WPF.ViewModel
         #endregion
 
 
-        private Matrix3D currentSystemTranformation;
+        private Matrix3D currentSystemTranformation = Matrix3D.Identity;
         private Matrix3D CurrentSystemTranformation
         {
             get { return currentSystemTranformation; }
@@ -428,6 +428,32 @@ namespace Compton_GUI_WPF.ViewModel
                 }
             }
         }
+
+        private void SaveCurrentPointCloud(string path, string fileName)
+        {
+            string csvPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_" + fileName + "_PointCloud.csv");
+            SharpDX.Vector3[] tempVector = RealtimeVector3s.ToArray();
+            float[][] colors = RealtimeUVs.ToArray();
+
+            int length = tempVector.Length;
+
+            if (length > colors.Length)
+            {
+                length = colors.Length;
+            }
+            
+
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(csvPath))
+            {
+                //file.WriteLine("Time[HHMMssFFF],SCposX[m],SCposY,SCposZ,SCEnergy[keV],ABposX,ABposY,ABposZ,ABEnergy");
+
+                for(int i = 0; i < length; ++i)
+                {
+                    file.WriteLine($"{tempVector[i].X},{tempVector[i].Y},{tempVector[i].Z},{colors[i][0]},{colors[i][1]},{colors[i][2]}");
+                }
+            }
+        }
+
 
         /// <summary>
         /// SLAM

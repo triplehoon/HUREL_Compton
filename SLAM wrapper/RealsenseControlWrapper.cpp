@@ -85,7 +85,6 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
-	//Width 640 Heigh 480
 
 	if (!(IsPipelineOn || IsSLAMOn)) 
 	{
@@ -99,6 +98,37 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 		count = pose.colors_.size();
 	}
 	else 
+	{
+		count = pose.points_.size();
+	}
+
+
+	for (int i = 0; i < count - 1; i++) {
+		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
+		vectors->Add(poseVector);
+
+		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
+		colors->Add(colorVector);
+	}
+}
+
+void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
+{
+	vectors = gcnew List< array<double>^>();
+	colors = gcnew List< array<double>^>();
+
+	if (!(IsPipelineOn || IsSLAMOn))
+	{
+		return;
+	}
+
+	open3d::geometry::PointCloud pose = m_RealsenseControlNative->m_SLAMEDPointCloud;
+	int count = 0;
+	if (pose.colors_.size() < pose.points_.size())
+	{
+		count = pose.colors_.size();
+	}
+	else
 	{
 		count = pose.points_.size();
 	}
