@@ -106,7 +106,7 @@ namespace HUREL.Compton
                                 {
                                     Debug.WriteLine("Data in count is " + dataInCount);
                                 }
-                                //dataBuffer = new byte[296];
+                                dataBuffer = new byte[296];
                                 countflag = 0;
                             }
                             else if (countflag == 296)
@@ -237,40 +237,36 @@ namespace HUREL.Compton
             {
 
                 byte[] item;
-                ushort[] shortCheck = new ushort[1];
+                ushort shortCheck;
+                ushort shortCheck2;
+                ushort shortCheck3;
+
+
                 while (ParsedQueue.TryTake(out item))
                 {
-                    ushort[] shortArray = new ushort[144];
-                   
-                    Buffer.BlockCopy(item, 288, shortCheck, 0, 2);
-                    int i = 0;                    
-                    foreach (var s in binaryCheck)
-                    {
-                        if ((s & shortCheck[0]) > 0)
-                        {
-                            Buffer.BlockCopy(item, i * 18, shortArray, i * 18, 18);                                                        
-                        }
+                    ushort[] shortArray = new ushort[148];
+                    ushort[] shortArray2 = new ushort[144];
 
-                        
+
+                    
+                    Buffer.BlockCopy(item, 0, shortArray, 0, 296);
+                    ushort check = shortArray[144];
+                    //ushort[] test = new ushort[8] { shortArray[0], shortArray[9], shortArray[18], shortArray[27], shortArray[72], shortArray[81], shortArray[90], shortArray[99] };
+                    int i = 0;
+                    foreach (var b in binaryCheck)
+                    {
+                        if ((b & check) == 0) {
+                            for (int j = 0; j < 9; ++j)
+                            {
+                                shortArray[j + 9 * (i)] = 0;
+                            }
+                        }
                         ++i;
                     }
-                    bool is511Checked = false;
-                    foreach (var check511 in shortArray)
-                    {
-                        if (check511 == 511)
-                        {
-                            is511Checked = true;
-                            break;
-                        }
-                    }
-                    if (is511Checked)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        ShortArrayQueue.Add(shortArray);
-                    }
+
+
+                    ShortArrayQueue.Add(shortArray[0..144]);
+                    
                 }
             }
         }

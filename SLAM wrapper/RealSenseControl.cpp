@@ -111,7 +111,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 			// Mapping Depth Coordinates
 			// - Depth data stored as XYZ values
 			//===================================
-			if (-Vertex[i].y + D436ToT265Coord[1] > 1)
+			if (-Vertex[i].y + D436ToT265Coord[1] > 0.7)
 				continue;
 			if (Vertex[i].z - D436ToT265Coord[2] < 0.5)
 				continue;
@@ -160,7 +160,7 @@ void RealsenseControl::SLAMPipeline()
 
 	double ptCloud_Voxel = 0.025;
 	double Cominbed_ptCloud_Voxel = 0.05;
-	double reconPtCloudDownSample = 0.1;
+	double reconPtCloudDownSample = 0.05;
 
 	int i = 1;
 	while (m_IsSLAMON)
@@ -179,15 +179,15 @@ void RealsenseControl::SLAMPipeline()
 				{
 					*CombinedCloud_ptr = (*TempPCL_T265.VoxelDownSample(ptCloud_Voxel)).Transform(TransMat_init);
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
-					m_SLAMEDPointCloudDownSampled = *(m_SLAMEDPointCloud.VoxelDownSample(reconPtCloudDownSample));
+					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 				}
 				else
 				{
 					*pointcloud_ptr = *TempPCL_T265.VoxelDownSample(ptCloud_Voxel);
 					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr).Transform(TransMat_init);;
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
-					m_SLAMEDPointCloudDownSampled = *(m_SLAMEDPointCloud.VoxelDownSample(reconPtCloudDownSample));
-					if (m_SLAMEDPointCloudDownSampled.points_.size() > 20000) {
+					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
+					if (m_SLAMEDPointCloudDownSampled.points_.size() > 40000) {
 						reconPtCloudDownSample += 0.05;
 					}
 				}

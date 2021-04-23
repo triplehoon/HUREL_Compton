@@ -208,6 +208,7 @@ namespace Compton_GUI_WPF.ViewModel
         private bool IsAddingListModeData;
         private void AddListModeData()
         {           
+
             LACC_Control_Static.ResetLMData();
             while (IsAddingListModeData)
             {
@@ -216,6 +217,7 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     
                     LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, Echks, IsMLPEOn);
+                    Thread.Sleep(0);
                     
                 }
             }

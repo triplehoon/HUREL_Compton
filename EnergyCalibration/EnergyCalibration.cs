@@ -64,7 +64,7 @@ namespace HUREL.Compton
     {
         static double GetFWHM(List<HistoEnergy> histoEnergies, double minE, double maxE)
         {
-
+            return 0;
         }
     }
 }

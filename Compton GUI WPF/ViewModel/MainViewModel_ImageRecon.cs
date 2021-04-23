@@ -418,6 +418,7 @@ namespace Compton_GUI_WPF.ViewModel
                     AveragePointCloudDepth = RealsenseControl.AverageDepth;
                     RealtimeVector3s = vc;
                     RealtimeUVs = uvVect;
+                    RealtimeCC = cc;
                     //RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
 
                 }
@@ -433,7 +434,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
             string csvPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_" + fileName + "_PointCloud.csv");
             SharpDX.Vector3[] tempVector = RealtimeVector3s.ToArray();
-            float[][] colors = RealtimeUVs.ToArray();
+            var colors = RealtimeCC.ToArray();
 
             int length = tempVector.Length;
 
@@ -449,7 +450,7 @@ namespace Compton_GUI_WPF.ViewModel
 
                 for(int i = 0; i < length; ++i)
                 {
-                    file.WriteLine($"{tempVector[i].X},{tempVector[i].Y},{tempVector[i].Z},{colors[i][0]},{colors[i][1]},{colors[i][2]}");
+                    file.WriteLine($"{tempVector[i].X},{tempVector[i].Y},{tempVector[i].Z},{colors[i].Red},{colors[i].Green},{colors[i].Blue}");
                 }
             }
         }
@@ -697,6 +698,7 @@ namespace Compton_GUI_WPF.ViewModel
 
         private Vector3Collection RealtimeVector3s;
         private List<float[]> RealtimeUVs;
+        private Color4Collection RealtimeCC;
         private PointGeometry3D realtimeReconPointCloud;
         public PointGeometry3D RealtimeReconPointCloud
         {
@@ -839,15 +841,37 @@ namespace Compton_GUI_WPF.ViewModel
             }
             DrawBPPointCloudToSLAMPointCloud();
         }
+        long elapsedTime = 0;
         void DrawBPPointCloudToSLAMPointCloud()
         {
-            VMStatus = "Reconing......SLAM!";
-            if (SLAMVector3s == null || SLAMVector3s.Count() == 0)
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            VMStatus = $"Reconing......SLAM! {elapsedTime} ms";
+
+
+            Thread.Sleep(500);
+            var vc = new Vector3Collection();
+            var cc = new Color4Collection();
+            var tempposeVect = new List<double[]>();
+            var tempColorVect = new List<double[]>();
+
+
+            RealsenseControl.GetReconSLAMPointCloud(ref tempposeVect, ref tempColorVect);
+            for (int i = 0; i < tempposeVect.Count; i++)
+            {
+                vc.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
+                cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
+                //cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
+                //id.Add(i);
+            }
+
+
+            if (tempposeVect == null || tempposeVect.Count() == 0)
             {
                 return;
             }
             List<LMData> tempListModeData = new List<LMData>();
-            if (RealtimeVector3s == null || RealtimeVector3s.Count() == 0)
+            if (tempposeVect == null || tempposeVect.Count() == 0)
             {
                 return;
             }
@@ -860,8 +884,10 @@ namespace Compton_GUI_WPF.ViewModel
                                 where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(6000)
                                 select LM).ToList();
 
-            var (v3, c4) = ImageRecon.BPtoPointCloud2Pi(SLAMVector3s, tempListModeData, 5, 0.5);            
+            var (v3, c4) = ImageRecon.BPtoPointCloud2Pi(vc, tempListModeData, 5, 0.5);            
             SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
+            sw.Stop();
+            elapsedTime = sw.ElapsedMilliseconds;
             VMStatus = "Reconing......SLAM Done!";
 
         }
