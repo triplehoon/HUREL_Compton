@@ -1,8 +1,5 @@
 #include "RealsenseControl.h"
 
-
-
-
 RealsenseControl::RealsenseControl()
 {
 	T265toLACCTransform << -1, 0, 0, 0,
@@ -23,20 +20,20 @@ bool RealsenseControl::InitiateRealsense(std::string* message)
 	try {
 		ctx = rs2::context();
 
-		cfgD435 = rs2::config();
-		//cfgD435.enable_device("935322071433");	
-		cfgD435.enable_stream(RS2_STREAM_COLOR, 1280, 720, RS2_FORMAT_BGR8, 30);
-		cfgD435.enable_stream(RS2_STREAM_DEPTH, 480, 270, RS2_FORMAT_Z16, 5);
-		pipeD435 = rs2::pipeline();
+		cfgD455 = rs2::config();
+		//cfgD455.enable_device("935322071433");	
+		cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 30);
+		cfgD455.enable_stream(RS2_STREAM_DEPTH, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_Z16, 5);
+		pipeD455 = rs2::pipeline();
 
 		cfgT265 = rs2::config();
 		cfgT265.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
 		pipeT265 = rs2::pipeline(ctx);
 		Sleep(1000);
-		pipeD435.start(cfgD435);
+		pipeD455.start(cfgD455);
 		pipeT265.start(cfgT265);
 
-		pipeD435.stop();
+		pipeD455.stop();
 		pipeT265.stop();
 	}
 	catch (const rs2::camera_disconnected_error& e)
@@ -92,8 +89,8 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> tupleCloudTrans;
 	open3d::geometry::PointCloud cloud;
 	std::tuple<double, double, double> RGB_Color;
-	auto Texture_Coord = (*points).get_texture_coordinates();
-	auto Vertex = (*points).get_vertices();
+	auto Texture_Coord = points->get_texture_coordinates();
+	auto Vertex = points->get_vertices();
 
 	Eigen::Vector3d D436ToT265Coord = { -0.035, 0.029, 0 };
 	Eigen::Vector4d Quaternion = { (*pose).rotation.w, (*pose).rotation.x ,(*pose).rotation.y,(*pose).rotation.z };
@@ -103,7 +100,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
 	TransF.block<3, 3>(0, 0) = RMat;
 	TransF.block<3, 1>(0, 3) = TransPoseMat;
-	for (int i = 0; i < (*points).size(); i++)
+	for (int i = 0; i < points->size(); i++)
 	{
 		if (Texture_Coord[i].u > 0 && Texture_Coord[i].v > 0 && Texture_Coord[i].u <1 && Texture_Coord[i].v <1)// && (Vertex[i].x) * (Vertex[i].x) + (Vertex[i].y) * (Vertex[i].y) + (Vertex[i].z) * (Vertex[i].z) < 9)
 		{
@@ -158,9 +155,9 @@ void RealsenseControl::SLAMPipeline()
 	std::shared_ptr<open3d::geometry::PointCloud > CombinedCloud_ptr(new open3d::geometry::PointCloud);
 	std::shared_ptr<open3d::geometry::PointCloud> pointcloud_ptr(new open3d::geometry::PointCloud);
 
-	double ptCloud_Voxel = 0.025;
-	double Cominbed_ptCloud_Voxel = 0.05;
-	double reconPtCloudDownSample = 0.05;
+	double ptCloud_Voxel = 0.1;
+	double Cominbed_ptCloud_Voxel = 0.1;
+	double reconPtCloudDownSample = 0.1;
 
 	int i = 1;
 	while (m_IsSLAMON)
@@ -177,7 +174,7 @@ void RealsenseControl::SLAMPipeline()
 
 				if (!(*CombinedCloud_ptr).HasPoints())
 				{
-					*CombinedCloud_ptr = (*TempPCL_T265.VoxelDownSample(ptCloud_Voxel)).Transform(TransMat_init);
+					*CombinedCloud_ptr = (*std::get<0>(TempPCL_T265.RemoveStatisticalOutliers(20,5))).Transform(TransMat_init);
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
 					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 				}
@@ -206,7 +203,7 @@ void RealsenseControl::RealsensesPipeline()
 	auto timeCheck = std::chrono::high_resolution_clock::now();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
@@ -219,12 +216,12 @@ void RealsenseControl::RealsensesPipeline()
 
 	pipelines.clear();
 	
-	rs2::pipeline_profile pipe_profile_D435 = pipeD435.start(cfgD435);
-	/*auto depth_device = pipe_profile_D435.get_device().query_sensors()[0];
+	rs2::pipeline_profile pipe_profile_D455 = pipeD455.start(cfgD455);
+	/*auto depth_device = pipe_profile_D455.get_device().query_sensors()[0];
 	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_MEDIUM_DENSITY);
 	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);*/
 	pipeT265.start(cfgT265);
-	pipelines.emplace_back(pipeD435);
+	pipelines.emplace_back(pipeD455);
 	pipelines.emplace_back(pipeT265);
 
 	Sleep(1000);
@@ -233,6 +230,8 @@ void RealsenseControl::RealsensesPipeline()
 	{
 		for (auto&& pipe : pipelines) // loop over pipelines
 		{
+			rs2::points points;
+
 			auto frames = pipe.wait_for_frames();
 
 			auto color = frames.get_color_frame();
@@ -267,20 +266,13 @@ void RealsenseControl::RealsensesPipeline()
 				int trackerConfidence = tempPoseData.tracker_confidence;
 
 
+				std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> m_RealTimeCloudPose;
 
-				/*Eigen::Vector4d Quaternion = { tempPoseData.rotation.w, tempPoseData.rotation.x , tempPoseData.rotation.y, tempPoseData.rotation.z };
-				Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
-				Eigen::Vector3d	TransPoseMat = { tempPoseData.translation.x, tempPoseData.translation.y, tempPoseData.translation.z };
-				Eigen::Matrix4d TransF; // Your Transformation Matrix
-				TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
-				TransF.block<3, 3>(0, 0) = RMat;
-				TransF.block<3, 1>(0, 3) = TransPoseMat;*/
-
-
-				//printf("tracker_confidence is %d. iter: %d \n ", tempPoseData.tracker_confidence, i);
 				std::vector<Eigen::Vector2f> uv;
 				m_RealTimeCloudPose = PCL_Conversion(&points, &color, &tempPoseData, &uv);
 				m_RTPointCloud = std::make_tuple(std::get<0>(m_RealTimeCloudPose).Transform(T265toLACCTransform), uv);
+				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(m_RealTimeCloudPose).Transform(T265toLACCTransform).Transform(std::get<1>(m_RealTimeCloudPose)), uv);
+
 				std::chrono::duration<double> duration = std::chrono::high_resolution_clock::now() - timeCheck; //as second
 				
 				if (m_IsSLAMON &&tempPoseData.tracker_confidence > 2 && duration.count() > 1.5)
@@ -297,7 +289,7 @@ void RealsenseControl::RealsensesPipeline()
 
 
 	m_Posedata = rs2_pose();	
-	pipeD435.stop();
+	pipeD455.stop();
 	pipeT265.stop();
 
 	m_CurrentVideoFrame = rs2::video_frame(nullptr);

@@ -38,6 +38,7 @@ namespace HUREL {
 				
 
 				void GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors, List<array<float>^>^% uvs);
+				void GetRealTimePointCloudTransPosed(List<array<double>^>^% vectors, List<array<double>^>^% colors, List<array<float>^>^% uvs);
 				array<double>^ GetPoseFrame(int% tranckingConf);
 
 				void GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data);

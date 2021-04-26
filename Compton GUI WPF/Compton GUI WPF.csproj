@@ -91,6 +91,7 @@
     </Reference>
     <Reference Include="SRE3021 API">
       <HintPath>C:\Users\triplehoon\source\repos\SRE3021 CZT API\SRE3021 API\bin\Release\net5.0\SRE3021 API.dll</HintPath>
+      <Private>true</Private>
     </Reference>
   </ItemGroup>
 

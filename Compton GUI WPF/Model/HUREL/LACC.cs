@@ -402,6 +402,10 @@ namespace HUREL.Compton.LACC
 
         static public double[] LoadGain(string fileName)
         {
+            if (!File.Exists(fileName))
+            {
+                throw new ArgumentException();
+            }
             using (StreamReader IO = new StreamReader(fileName))
             {
                 var line = IO.ReadLine();

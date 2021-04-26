@@ -180,7 +180,7 @@
                             </hx:PointGeometryModel3D>
                             <hx:PointGeometryModel3D Geometry="{Binding SLAMPointCloud}" Color="White" FixedSize="True" Size="1,1">
                             </hx:PointGeometryModel3D>
-                            <hx:LineGeometryModel3D Geometry="{Binding SLAMPoseInfo}" Color="LightGreen" Thickness="1"/>
+                            <hx:LineGeometryModel3D Geometry="{Binding SLAMPoseInfo}" Color="LightGreen" Thickness="4"/>
 
                         </hx:Viewport3DX>
                         <StackPanel Orientation="Horizontal">

@@ -81,6 +81,58 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 	AverageDepth = averageDepth / size;
 }
 
+void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>^>^% vectors, List<array<double>^>^% colors, List<array<float>^>^% uvs)
+{
+	vectors = gcnew List< array<double>^>();
+	colors = gcnew List< array<double>^>();
+	int size;
+	if (!IsPipelineOn) {
+		return;
+	}
+
+
+
+	open3d::geometry::PointCloud points = std::get<0>(m_RealsenseControlNative->m_RTPointCloudTransposed);
+	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->m_RTPointCloudTransposed);
+
+
+	if (points.IsEmpty()) {
+		return;
+	}
+
+	if (points.colors_.size() > points.points_.size())
+	{
+		size = points.points_.size();
+	}
+	else
+	{
+		size = points.colors_.size();
+	}
+	if (uv.size() < size) {
+		size = uv.size();
+	}
+
+	if (uv.size() == 0)
+	{
+		return;
+	}
+	double averageDepth = 0.0;
+	for (int i = 0; i < size; ++i) {
+		array<double, 1>^ poseVector = gcnew array<double>{points.points_[i][0], points.points_[i][1], points.points_[i][2]};
+		vectors->Add(poseVector);
+		averageDepth = averageDepth + System::Double(points.points_[i][2]);
+		array<double, 1>^ colorVector = gcnew array<double>{points.colors_[i][2], points.colors_[i][1], points.colors_[i][0]};
+		colors->Add(colorVector);
+
+		array<float, 1>^ uvVector = gcnew array<float>{uv[i][0], uv[i][1]};
+		uvs->Add(uvVector);
+
+	}
+	AverageDepth = averageDepth / size;
+}
+
+
+
 void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
 {
 	vectors = gcnew List< array<double>^>();

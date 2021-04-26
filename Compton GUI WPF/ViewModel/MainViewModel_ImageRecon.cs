@@ -407,7 +407,7 @@ namespace Compton_GUI_WPF.ViewModel
                 //Debug.WriteLine("Start to get Reatime Data");
                 try
                 {
-                    RealsenseControl.GetRealTimePointCloud(ref poseVect, ref colorVect, ref uvVect);
+                    RealsenseControl.GetRealTimePointCloudTransPosed(ref poseVect, ref colorVect, ref uvVect);
                     for (int i = 0; i < poseVect.Count; i++)
                     {
 
@@ -674,7 +674,7 @@ namespace Compton_GUI_WPF.ViewModel
                 return;
             }
 
-            (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(ReconRGBPixelWidth, ReconRGBPixelHeight, 64, 41, 10);
+            (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(ReconRGBPixelWidth, ReconRGBPixelHeight, 90, 65, 10);
             while (IsRealTimeImageReconOn)
             {
                 //Stopwatch sw = new Stopwatch();
@@ -693,7 +693,7 @@ namespace Compton_GUI_WPF.ViewModel
                 //sw.Stop();
                 //Debug.WriteLine("BP Draw Image tooks " + sw.ElapsedMilliseconds + " ms.");
             }
-            DrawBPPointCloudToRealTimePointCloudRGB();
+            //DrawBPPointCloudToRealTimePointCloudRGB();
         }
 
         private Vector3Collection RealtimeVector3s;
@@ -780,7 +780,7 @@ namespace Compton_GUI_WPF.ViewModel
             //Trace.WriteLine("LM Data count " + tempListModeData.Count());
             var tempVector3s = RealtimeVector3s;
             var tempUVs = RealtimeUVs;
-            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, false, 5, 0.8);
+            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, true, 5, 0.8);
             
             ReconBitmapImage = Bitmap2BitmapImage(bitmap);
             //RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };

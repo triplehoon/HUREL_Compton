@@ -237,9 +237,7 @@ namespace HUREL.Compton
             {
 
                 byte[] item;
-                ushort shortCheck;
-                ushort shortCheck2;
-                ushort shortCheck3;
+
 
 
                 while (ParsedQueue.TryTake(out item))
