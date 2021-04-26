@@ -35,7 +35,29 @@ namespace Compton_GUI_WPF
 
             }
             Debug.WriteLine("Initial Done");
+            ComboboxSelectedSpectrum.ItemsSource = ComboboxSelectedSpectrumItems;
         }
+
+        private string[] ComboboxSelectedSpectrumItems = new string[]
+        {
+            "Channel 0",
+            "Channel 1",
+            "Channel 2",
+            "Channel 3",
+            "Channel 4",
+            "Channel 5",
+            "Channel 6",
+            "Channel 7",
+            "Channel 8",
+            "Channel 9",
+            "Channel 10",
+            "Channel 11",
+            "Channel 12",
+            "Channel 13",
+            "Channel 14",
+            "Channel 15",
+            "CZT"
+        };
       
 
 
@@ -76,6 +98,12 @@ namespace Compton_GUI_WPF
             }
 
             Debug.WriteLine("SfChart_MouseDown");
+        }
+
+        private void ComboboxSelectedSpectrum_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            
+            MainSpectrumView.ItemsSource = ((Compton_GUI_WPF.ViewModel.MainViewModel)(((System.Windows.Controls.ComboBox)sender).DataContext)).ModuleEnergySpectrums[0];
         }
     }
 }

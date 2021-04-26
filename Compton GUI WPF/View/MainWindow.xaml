@@ -716,9 +716,12 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5" Grid.Column="0"/>
                         <CheckBox Content="MLPE On" IsChecked="{Binding IsMLPEOn}" Grid.Column="1" VerticalAlignment="Center" Margin="5"/>
+                        <ComboBox Grid.Column="2" Margin="5" x:Name="ComboboxSelectedSpectrum" SelectionChanged="ComboboxSelectedSpectrum_SelectionChanged" SelectedIndex="0"/>
 
                     </Grid>
                     <Grid Grid.Row="1">
@@ -736,8 +739,8 @@
                         </syncfusion:SfTextInputLayout>
 
                     </Grid>
-
-                    <syncfusion:SfChart  x:Name="SpectrumMain" Margin="5" Grid.Row="2" MouseDown="SfChart_MouseDown">
+                    
+                    <syncfusion:SfChart  x:Name="SpectrumMain" Margin="5" Grid.Row="2" MouseDown="SfChart_MouseDown" >
                         <syncfusion:SfChart.Resources>
 
                             <Style TargetType="Line" x:Key="lineStyle">
@@ -759,7 +762,7 @@
                         <syncfusion:SfChart.SecondaryAxis>
                             <syncfusion:NumericalAxis Minimum="0"/>
                         </syncfusion:SfChart.SecondaryAxis>
-                        <syncfusion:FastLineBitmapSeries Interior="Black"
+                        <syncfusion:FastLineBitmapSeries x:Name="MainSpectrumView" Interior="Black"
                                                                      ListenPropertyChange="True"
                                                                      Label="Energy"
                                                                      ItemsSource="{Binding ModuleEnergySpectrums[0]}" 
