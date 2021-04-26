@@ -155,9 +155,9 @@ void RealsenseControl::SLAMPipeline()
 	std::shared_ptr<open3d::geometry::PointCloud > CombinedCloud_ptr(new open3d::geometry::PointCloud);
 	std::shared_ptr<open3d::geometry::PointCloud> pointcloud_ptr(new open3d::geometry::PointCloud);
 
-	double ptCloud_Voxel = 0.1;
-	double Cominbed_ptCloud_Voxel = 0.1;
-	double reconPtCloudDownSample = 0.1;
+	double ptCloud_Voxel = 0.05;
+	double Cominbed_ptCloud_Voxel = 0.05;
+	double reconPtCloudDownSample = 0.3;
 
 	int i = 1;
 	while (m_IsSLAMON)
@@ -168,25 +168,29 @@ void RealsenseControl::SLAMPipeline()
 			m_QueueRealtimeCloudTrans.pop();
 
 			if (i > 0) {
-				auto TempPCL_T265 = std::get<0>(pointPose).Transform(T265toLACCTransform); //Change alignment from T265 to LACC
+				auto TempPCL_T265 = std::get<0>(pointPose);//.Transform(T265toLACCTransform); //Change alignment from T265 to LACC
 				Eigen::Matrix4d TransMat_init = std::get<1>(pointPose);
 
 
 				if (!(*CombinedCloud_ptr).HasPoints())
 				{
-					*CombinedCloud_ptr = (*std::get<0>(TempPCL_T265.RemoveStatisticalOutliers(20,5))).Transform(TransMat_init);
+					*CombinedCloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(5,1)));//.Transform(TransMat_init);
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
 					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 				}
 				else
 				{
-					*pointcloud_ptr = *TempPCL_T265.VoxelDownSample(ptCloud_Voxel);
-					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr).Transform(TransMat_init);;
+					*pointcloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(5, 1)));
+					//Get Resgiteration pos Mat
+					auto regMat = open3d::pipelines::registration::RegistrationICP(*pointcloud_ptr,*CombinedCloud_ptr,0.2);
+					pointcloud_ptr->Transform(regMat.transformation_);
+					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr);//.Transform(TransMat_init);;
+					CombinedCloud_ptr->EstimateNormals();
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
 					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
-					if (m_SLAMEDPointCloudDownSampled.points_.size() > 40000) {
+					/*if (m_SLAMEDPointCloudDownSampled.points_.size() > 40000) {
 						reconPtCloudDownSample += 0.05;
-					}
+					}*/
 				}
 
 			}
@@ -203,7 +207,7 @@ void RealsenseControl::RealsensesPipeline()
 	auto timeCheck = std::chrono::high_resolution_clock::now();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
@@ -270,8 +274,8 @@ void RealsenseControl::RealsensesPipeline()
 
 				std::vector<Eigen::Vector2f> uv;
 				m_RealTimeCloudPose = PCL_Conversion(&points, &color, &tempPoseData, &uv);
-				m_RTPointCloud = std::make_tuple(std::get<0>(m_RealTimeCloudPose).Transform(T265toLACCTransform), uv);
-				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(m_RealTimeCloudPose).Transform(T265toLACCTransform).Transform(std::get<1>(m_RealTimeCloudPose)), uv);
+				//m_RTPointCloud = std::make_tuple(std::get<0>(m_RealTimeCloudPose).Transform(T265toLACCTransform), uv);
+				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(m_RealTimeCloudPose).Transform(std::get<1>(m_RealTimeCloudPose)), uv);
 
 				std::chrono::duration<double> duration = std::chrono::high_resolution_clock::now() - timeCheck; //as second
 				

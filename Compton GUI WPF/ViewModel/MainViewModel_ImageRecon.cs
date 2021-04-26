@@ -573,7 +573,7 @@ namespace Compton_GUI_WPF.ViewModel
                 previousPose = currentPose;
 
 
-                RealsenseControl.GetSLAMPointCloud(ref poseVect, ref colorVect);
+                RealsenseControl.GetReconSLAMPointCloud(ref poseVect, ref colorVect);
 
                 for (int i = 0; i < poseVect.Count; i++)
                 {

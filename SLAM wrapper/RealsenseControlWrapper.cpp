@@ -143,7 +143,7 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = m_RealsenseControlNative->m_SLAMEDPointCloud;
+	open3d::geometry::PointCloud pose = *(new open3d::geometry::PointCloud(m_RealsenseControlNative->m_SLAMEDPointCloud));
 	int count = 0;
 	if (pose.colors_.size() < pose.points_.size())
 	{
@@ -174,7 +174,7 @@ void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vect
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = m_RealsenseControlNative->m_SLAMEDPointCloudDownSampled;
+	open3d::geometry::PointCloud pose = *(new open3d::geometry::PointCloud(m_RealsenseControlNative->m_SLAMEDPointCloudDownSampled));
 	int count = 0;
 	if (pose.colors_.size() < pose.points_.size())
 	{
