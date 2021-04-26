@@ -780,7 +780,7 @@ namespace Compton_GUI_WPF.ViewModel
             //Trace.WriteLine("LM Data count " + tempListModeData.Count());
             var tempVector3s = RealtimeVector3s;
             var tempUVs = RealtimeUVs;
-            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, true, 5, 0.8);
+            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, true, 3, 0.7);
             
             ReconBitmapImage = Bitmap2BitmapImage(bitmap);
             //RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };

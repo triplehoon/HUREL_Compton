@@ -66,32 +66,6 @@ namespace HUREL.Compton
         }
 
 
-
-        //private static bool IsEffectedBPPoint_KN(Point3D scatterPhotonPosition, double scatterPhotonEnergy,
-        //   Point3D absorberPhotonPosition, double absorberPhotonEnergy, Point3D imgSpacePosition)
-        //{
-        //    double comptonCal = 1 - 511 * scatterPhotonEnergy / absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy);
-        //    if (comptonCal >= 1 || comptonCal <= -1)
-        //        return false;
-        //    double comptonScatteringAngle = Math.Acos(comptonCal) / Math.PI * 180;
-
-        //    double kne = (Math.Pow(absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy), 2)) * ((scatterPhotonEnergy + absorberPhotonEnergy) / absorberPhotonEnergy + absorberPhotonEnergy / (scatterPhotonEnergy + absorberPhotonEnergy) - Math.Pow(Math.Sin(comptonScatteringAngle), 2));
-
-        //    Vector3D effectToScatterVector = (scatterPhotonPosition - imgSpacePosition);
-        //    Vector3D scatterToAbsorberVector = (absorberPhotonPosition - scatterPhotonPosition);
-        //    effectToScatterVector.Normalize();
-        //    scatterToAbsorberVector.Normalize();
-        //    double positionDotPord = Vector3D.DotProduct(effectToScatterVector, scatterToAbsorberVector);
-
-        //    double effectedAngle = Math.Acos(positionDotPord) / Math.PI * 180;
-
-        //    if (Math.Abs(effectedAngle - comptonScatteringAngle) < angleThreshold)
-        //        return true;
-        //    else
-        //        return false;
-        //}
-
-
         /// <summary>
         /// Make Imaginary Image Space. Set voxelSize as dividable number (Recommanded)
         /// </summary>
@@ -166,7 +140,7 @@ namespace HUREL.Compton
                 {
                     if (lmData.Type == LMData.InteractionType.Compton)
                     {
-                        for (int i = 0; i < imageSpace.Count; ++i)
+                        Parallel.For(0, imageSpace.Count, i =>// for (int i = 0; i < imageSpace.Count; ++i)
                         {
                             if (IsEffectedBPPoint(lmData.ScatterLMDataInfo.TransformedInteractionPoint3D, lmData.ScatterLMDataInfo.InteractionEnergy,
                                lmData.AbsorberLMDataInfo.TransformedInteractionPoint3D, lmData.AbsorberLMDataInfo.InteractionEnergy,
@@ -174,7 +148,7 @@ namespace HUREL.Compton
                             {
                                 counts[i]++;
                             }
-                        }
+                        });
                     }
                 }
             }

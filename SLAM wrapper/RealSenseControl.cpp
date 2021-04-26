@@ -157,7 +157,7 @@ void RealsenseControl::SLAMPipeline()
 
 	double ptCloud_Voxel = 0.05;
 	double Cominbed_ptCloud_Voxel = 0.05;
-	double reconPtCloudDownSample = 0.3;
+	double reconPtCloudDownSample = 0.2;
 
 	int i = 1;
 	while (m_IsSLAMON)
@@ -174,15 +174,15 @@ void RealsenseControl::SLAMPipeline()
 
 				if (!(*CombinedCloud_ptr).HasPoints())
 				{
-					*CombinedCloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(5,1)));//.Transform(TransMat_init);
+					*CombinedCloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(20,5)));//.Transform(TransMat_init);
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
 					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 				}
 				else
 				{
-					*pointcloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(5, 1)));
+					*pointcloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(20, 5)));
 					//Get Resgiteration pos Mat
-					auto regMat = open3d::pipelines::registration::RegistrationICP(*pointcloud_ptr,*CombinedCloud_ptr,0.2);
+					auto regMat = open3d::pipelines::registration::RegistrationICP(*pointcloud_ptr,*CombinedCloud_ptr,0.1);
 					pointcloud_ptr->Transform(regMat.transformation_);
 					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr);//.Transform(TransMat_init);;
 					CombinedCloud_ptr->EstimateNormals();
@@ -207,7 +207,7 @@ void RealsenseControl::RealsensesPipeline()
 	auto timeCheck = std::chrono::high_resolution_clock::now();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);

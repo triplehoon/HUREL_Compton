@@ -80,27 +80,22 @@ namespace HUREL.Compton
                             countflag++;
                             if (countflag == 296 && dataBuffer[294] == 0xFE && dataBuffer[295] == 0xFE)
                             {
-                                dataBuffer.CopyTo(chk1, 0);
-                                bool checkSame = true;
+                                //dataBuffer.CopyTo(chk1, 0);
+                                //bool checkSame = true;
 
-                                for (int i = 0; i < 296; ++i)
-                                {
-                                    if (chk1[i] != chk2[i])
-                                    {
-                                        checkSame = false;
-                                        break;
-                                    }
-                                }
-                                if (checkSame)
-                                {
-                                    Debug.WriteLine("item is not changed");
-                                }
-                                else
-                                {
-                                    ParsedQueue.TryAdd(dataBuffer);
-                                    dataInCount++;
-                                }
-                                dataBuffer.CopyTo(chk2,0);
+                                //for (int i = 0; i < 296; ++i)
+                                //{
+                                //    if (chk1[i] != chk2[i])
+                                //    {
+                                //        checkSame = false;
+                                //        break;
+                                //    }
+                                //}
+                                
+                                ParsedQueue.TryAdd(dataBuffer);
+                                dataInCount++;
+                                
+                                //dataBuffer.CopyTo(chk2,0);
 
                                 if(dataInCount % 100000 ==0)
                                 {

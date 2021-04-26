@@ -126,6 +126,10 @@ namespace Compton_GUI_WPF.ViewModel
         }
         public void DrawMLPEPositions()
         {
+            if(IsMLPEOn == false)
+            {
+                return;
+            }
             var absorberLMData = (from LMData in LACC_Control_Static.ListedLMData
                                   select LMData.AbsorberLMDataInfo).ToList();
             var scatterLMData = (from LMData in LACC_Control_Static.ListedLMData
@@ -410,7 +414,7 @@ namespace Compton_GUI_WPF.ViewModel
                 IsLACCModuleInitiate = true;
                 initiating = false;
 
-                VMStatus = "Initiate LAHGI Quad Single head Failed";
+                VMStatus = "Initiate LAHGI Quad Single head Success!";
             }
             catch(ArgumentException e)
             {
