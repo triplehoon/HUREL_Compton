@@ -102,8 +102,17 @@ namespace Compton_GUI_WPF
 
         private void ComboboxSelectedSpectrum_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
-            MainSpectrumView.ItemsSource = ((Compton_GUI_WPF.ViewModel.MainViewModel)(((System.Windows.Controls.ComboBox)sender).DataContext)).ModuleEnergySpectrums[0];
+
+            var channel = ((string)((System.Windows.Controls.ComboBox)sender).SelectedItem).Split(' ');
+            if (channel[0] == "CZT")
+            {
+                return;
+            }
+            Binding myBinding = new Binding();
+            //myBinding.Source = ((Compton_GUI_WPF.ViewModel.MainViewModel)(((System.Windows.Controls.ComboBox)sender).DataContext));
+            myBinding.Path = new PropertyPath($"ModuleEnergySpectrums[{channel[1]}]");
+            myBinding.Mode = BindingMode.TwoWay;
+            MainSpectrumView.SetBinding(Syncfusion.UI.Xaml.Charts.FastLineBitmapSeries.ItemsSourceProperty, myBinding);
         }
     }
 }

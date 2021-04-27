@@ -99,7 +99,7 @@ namespace HUREL.Compton
 
                                 if(dataInCount % 100000 ==0)
                                 {
-                                    Debug.WriteLine("Data in count is " + dataInCount);
+                                    Trace.WriteLine("Data in count is " + dataInCount + " DataQueue Count: " + ParsedQueue.Count + " ShortArrayBuffer Count: " +ShortArrayQueue.Count);
                                 }
                                 dataBuffer = new byte[296];
                                 countflag = 0;

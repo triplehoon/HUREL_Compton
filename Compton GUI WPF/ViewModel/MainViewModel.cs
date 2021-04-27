@@ -166,7 +166,7 @@ namespace Compton_GUI_WPF.ViewModel
             }
             ScatterPositionData = temp2;
             sw.Stop();
-            Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
+           /// Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
         }
 
 
@@ -211,12 +211,14 @@ namespace Compton_GUI_WPF.ViewModel
             foreach (var data in LACC_Control_Static.LACC_Scatter_Modules)
             {
                 ModuleEnergySpectrums[i] = new ObservableCollection<HistoEnergy>(data.SpectrumEnergy.HistoEnergies);
+                OnPropertyChanged($"ModuleEnergySpectrums[{i}]");
                 ++i;
             }
             i = 8;
             foreach (var data in LACC_Control_Static.LACC_Absorber_Modules)
             {
                 ModuleEnergySpectrums[i] = new ObservableCollection<HistoEnergy>(data.SpectrumEnergy.HistoEnergies);
+                OnPropertyChanged($"ModuleEnergySpectrums[{i}]");
                 ++i;
             }
             OnPropertyChanged(nameof(ModuleEnergySpectrums));

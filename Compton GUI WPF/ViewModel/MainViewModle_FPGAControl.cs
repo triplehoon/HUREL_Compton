@@ -217,7 +217,7 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     
                     LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, Echks, IsMLPEOn);
-                    Thread.Sleep(0);
+                    //Thread.Sleep(0);
                     
                 }
             }

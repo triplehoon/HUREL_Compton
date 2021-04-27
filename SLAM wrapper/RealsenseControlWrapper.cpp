@@ -126,7 +126,6 @@ void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>
 
 		array<float, 1>^ uvVector = gcnew array<float>{uv[i][0], uv[i][1]};
 		uvs->Add(uvVector);
-
 	}
 	AverageDepth = averageDepth / size;
 }
@@ -271,7 +270,7 @@ void RealsenseControlWrapper::StopRealsensePipeline()
 	PipelineThread->Join();
 }
 
-array<double> ^ RealsenseControlWrapper::GetPoseFrame(int% tranckingConf)
+array<double>^ RealsenseControlWrapper::GetPoseFrame(int% tranckingConf)
 {
 	tranckingConf = (int) m_RealsenseControlNative->m_Posedata.tracker_confidence;
 	

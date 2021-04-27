@@ -433,7 +433,9 @@ namespace Compton_GUI_WPF.ViewModel
         private void SaveCurrentPointCloud(string path, string fileName)
         {
             string csvPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_" + fileName + "_PointCloud.csv");
+            string bmpPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_" + fileName + "_image.bmp");
             SharpDX.Vector3[] tempVector = RealtimeVector3s.ToArray();
+            var tempUVs = RealtimeUVs.ToArray();
             var colors = RealtimeCC.ToArray();
 
             int length = tempVector.Length;
@@ -442,7 +444,10 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 length = colors.Length;
             }
-            
+
+
+            var rtBitmap = BitmapImage2Bitmap(RealtimeRGB);
+            rtBitmap.Save(bmpPath);
 
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(csvPath))
             {
@@ -450,7 +455,7 @@ namespace Compton_GUI_WPF.ViewModel
 
                 for(int i = 0; i < length; ++i)
                 {
-                    file.WriteLine($"{tempVector[i].X},{tempVector[i].Y},{tempVector[i].Z},{colors[i].Red},{colors[i].Green},{colors[i].Blue}");
+                    file.WriteLine($"{tempVector[i].X},{tempVector[i].Y},{tempVector[i].Z},{colors[i].Red},{colors[i].Green},{colors[i].Blue},{tempUVs[i][0]},{tempUVs[i][1]}");
                 }
             }
         }
