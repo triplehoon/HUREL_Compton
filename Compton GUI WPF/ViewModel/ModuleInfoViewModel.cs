@@ -81,7 +81,8 @@ namespace Compton_GUI_WPF.ViewModel
                 Module = new LACC_Module(Module.SetupModuleInfo,
                                          Module.ModuleOffetData,
                                          Module.ModuleEcalData,
-                                         Module.ModuleGain,
+                                         Module.EnergyGain,
+                                         Module.MLPEGain,
                                          Module.ModulePMTOrder,
                                          LUTCSVFileLink,
                                          ModuleNum);
@@ -93,21 +94,37 @@ namespace Compton_GUI_WPF.ViewModel
         }
         
         
-        protected ObservableCollection<double> moduleGain;
-        public ObservableCollection<double> ModuleGain
+        protected ObservableCollection<double> energyGain;
+        public ObservableCollection<double> EnergyGain
         {
-            get { return moduleGain; }
+            get { return energyGain; }
             set 
             {
-                moduleGain = value;
-                OnPropertyChanged(nameof(ModuleGain));
+                energyGain = value;
+                OnPropertyChanged(nameof(EnergyGain));
             }
         }
-        public void SetGain()
+        public void SetEnergyGain()
         {
-            Module.ModuleGain = ModuleGain.ToArray();
+            Module.EnergyGain = EnergyGain.ToArray();
         }
-      
+
+        protected ObservableCollection<double> mlpeGain;
+        public ObservableCollection<double> MLPEGain
+        {
+            get { return mlpeGain; }
+            set
+            {
+                mlpeGain = value;
+                OnPropertyChanged(nameof(MLPEGain));
+            }
+        }
+        public void SetMLPEGain()
+        {
+            Module.MLPEGain = MLPEGain.ToArray();
+        }
+
+
         public bool IsModuleSet { get; set; }
 
         public ModuleOffset Offset { get; set; }
@@ -117,7 +134,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
 
         }
-        public ModuleInfoViewModel(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int moduleNumber = 0)
+        public ModuleInfoViewModel(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] egain, double[] mlpegain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int moduleNumber = 0)
         {
             Offset = offset;
             this.ModuleNum = moduleNumber;
@@ -132,13 +149,15 @@ namespace Compton_GUI_WPF.ViewModel
             EcalEquationInfoB = ecalData.b;
             EcalEquationInfoC = ecalData.c;
             LUTCSVFileLink = csvFileLUT;
-            ModuleGain = new ObservableCollection<double>(gain);
+            EnergyGain = new ObservableCollection<double>(egain);
+            MLPEGain = new ObservableCollection<double>(mlpegain);
             try
             {
                 Module = new LACC_Module(mode,
                                          offset,
                                          ecalData,
-                                         gain,
+                                         egain,
+                                         mlpegain,
                                          pmtOrder,
                                          csvFileLUT,
                                          moduleNum);

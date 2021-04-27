@@ -340,7 +340,9 @@ namespace HUREL.Compton.LACC
         private double ModuleOffsetZ;
 
 
-        public double[] ModuleGain { get; set; }
+        public double[] EnergyGain { get; set; }
+        public double[] MLPEGain { get; set; }
+
         public ModulePMTOrderInfo ModulePMTOrder { get; init; }
         public class ModulePMTOrderInfo
         {
@@ -381,7 +383,7 @@ namespace HUREL.Compton.LACC
         /// <param name="gain"> Scintilator check. </param>    
         /// <param name="channelNumber"> Channel check. </param>    
         /// <param name="csvFileLUT"> cvsFile link </param>    
-        public LACC_Module(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] gain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int channelNumber = 0, int spectrumBinSize = 5, double spectrumMaxE = 2000)
+        public LACC_Module(ModuleInfo mode, ModuleOffset offset, EcalVar ecalData, double[] eGain, double[] mlpeGain, ModulePMTOrderInfo pmtOrder, string csvFileLUT, int channelNumber = 0, int spectrumBinSize = 5, double spectrumMaxE = 2000)
         {
             SetupModuleInfo = mode;
             ChannelNumber = channelNumber;
@@ -391,7 +393,8 @@ namespace HUREL.Compton.LACC
             ModuleOffsetZ = ModuleOffetData.z;
             ModuleEcalData = ecalData;
 
-            ModuleGain = gain;
+            EnergyGain = eGain;
+            MLPEGain = mlpeGain;
             ModulePMTOrder = pmtOrder;
 
             loadLUT(csvFileLUT);
@@ -506,28 +509,28 @@ namespace HUREL.Compton.LACC
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    if (pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i] > max)
+                    if (pmtADCValue[ModulePMTOrder.Order[i]] * MLPEGain[i] > max)
                     {
-                        max = pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i];
+                        max = pmtADCValue[ModulePMTOrder.Order[i]] * MLPEGain[i];
                     }
                 }
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    normalizePMTValue[i] = ((pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i]) / max);
+                    normalizePMTValue[i] = ((pmtADCValue[ModulePMTOrder.Order[i]] * MLPEGain[i]) / max);
                 }
             }
             else
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    if (pmtADCValue[i] * ModuleGain[i] > max)
+                    if (pmtADCValue[i] * MLPEGain[i] > max)
                     {
-                        max = pmtADCValue[i] * ModuleGain[i];
+                        max = pmtADCValue[i] * MLPEGain[i];
                     }
                 }
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    normalizePMTValue[i] = ((pmtADCValue[i] * ModuleGain[i]) / max);
+                    normalizePMTValue[i] = ((pmtADCValue[i] * MLPEGain[i]) / max);
                 }
             }
 
@@ -648,9 +651,7 @@ namespace HUREL.Compton.LACC
             //sw.Start();
             Point3D point = new Point3D();
 
-            double max = 0;
             double valMaxChk = -50000;
-            double val = 0;
             double[] normalizePMTValue = new double[PmtCount];
 
 
@@ -661,52 +662,44 @@ namespace HUREL.Compton.LACC
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    if (pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i] > max)
-                    {
-                        max = pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i];
-                    }
-                }
-                for (int i = 0; i < PmtCount; i++)
-                {
-                    normalizePMTValue[i] = ((pmtADCValue[ModulePMTOrder.Order[i]] * ModuleGain[i]) / max);
+                    normalizePMTValue[i] = ((pmtADCValue[ModulePMTOrder.Order[i]] * MLPEGain[i]));
                 }
             }
             else
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    if (pmtADCValue[i] * ModuleGain[i] > max)
-                    {
-                        max = pmtADCValue[i]* ModuleGain[i];
-                    }
-                }
-                for (int i = 0; i < PmtCount; i++)
-                {
-                    normalizePMTValue[i] = ( (pmtADCValue[i] * ModuleGain[i]) / max);
+                    normalizePMTValue[i] = ( (pmtADCValue[i] * MLPEGain[i]));
                 }
             }
 
             int[] Max1 = new int[2];
-            int GridSize1 = sizeX / 5;
+            int GridSize1 = sizeX / 10;
             for (int x1 = GridSize1; x1 < sizeX; x1 += GridSize1)
             {
                 for (int y1 = GridSize1; y1 < sizeY; y1 += GridSize1)
                 {
+                    double val = 0;
+
                     if (double.IsNaN(XYLogMue[x1][y1][0]))
                         continue;
                     for (int j = 0; j < PmtCount; j++)
                     {
-                        if (XYLogMue[x1][y1] != null)
-                            val += XYLogMue[x1][y1][j] * normalizePMTValue[j];
+                        if (XYLogMue[x1][y1] == null)
+                        {
+                            continue;
+                        }
+
+                        val += XYLogMue[x1][y1][j] * normalizePMTValue[j];
+
                     }
-                    //val -= XYSumMu[x1][y1];
+                    val -= XYSumMu[x1][y1];
                     if (val > valMaxChk)
                     {
                         valMaxChk = val;
                         Max1[0] = x1;
                         Max1[1] = y1;
                     }
-                    val = 0;
                 }
             }
             valMaxChk = -5000;
@@ -722,22 +715,26 @@ namespace HUREL.Compton.LACC
                     {
                         if (y2 > -1)
                         {
+                            double val = 0;
+
                             if (double.IsNaN(XYLogMue[x2][y2][0]))
                                 continue;
                             for (int j = 0; j < PmtCount; j++)
                             {
-                                if (XYLogMue[x2][y2] != null)
-                                    val += XYLogMue[x2][y2][j] * normalizePMTValue[j];
+                                if (XYLogMue[x2][y2] == null)
+                                {
+                                    continue;
+                                }
+                                 val += XYLogMue[x2][y2][j] * normalizePMTValue[j];
                             }
                             
-                            //val -= XYSumMu[x2][y2];
+                            val -= XYSumMu[x2][y2];
                             if (val > valMaxChk)
                             {
                                 valMaxChk = val;
                                 Max2[0] = x2;
                                 Max2[1] = y2;
                             }
-                            val = 0;
 
                         }
                     }
@@ -757,6 +754,8 @@ namespace HUREL.Compton.LACC
                     {
                         if (y2 > -1)
                         {
+                            double val = 0;
+
                             if (double.IsNaN(XYLogMue[x2][y2][0]))
                                 continue;
                             for (int j = 0; j < PmtCount; j++)
@@ -768,14 +767,13 @@ namespace HUREL.Compton.LACC
                                 val += XYLogMue[x2][y2][j] * normalizePMTValue[j];
                             }
                             
-                            //val -= XYSumMu[x2][y2];
+                            val -= XYSumMu[x2][y2];
                             if (val > valMaxChk)
                             {
                                 valMaxChk = val;
                                 Max3[0] = x2;
                                 Max3[1] = y2;
                             }
-                            val = 0;
                         }
                     }
                 }
@@ -808,19 +806,19 @@ namespace HUREL.Compton.LACC
 
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    eCalEnergy += arrangedPMTValue[i] * ModuleGain[i];
+                    eCalEnergy += arrangedPMTValue[i] * EnergyGain[i];
                 }
-                eCalEnergy += ModuleGain[^1];
+                eCalEnergy += EnergyGain[^1];
             }
             else
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
-                    eCalEnergy += pmtADCValue[i] * ModuleGain[i];
+                    eCalEnergy += pmtADCValue[i] * EnergyGain[i];
                     checkZero += pmtADCValue[i];
 
                 }
-                eCalEnergy += ModuleGain[^1];
+                eCalEnergy += EnergyGain[^1];
             }
             if (checkZero == 0)
             {

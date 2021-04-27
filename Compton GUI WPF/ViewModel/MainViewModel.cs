@@ -343,6 +343,7 @@ namespace Compton_GUI_WPF.ViewModel
                                                         new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z },
                                                         new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                         scatterGain,
+                                                        scatterGain,
                                                         pmtOrderInfo,
                                                         Path.Combine(LUTFolderDirectory, "MonoScatterLUT.csv"));
 
@@ -351,6 +352,7 @@ namespace Compton_GUI_WPF.ViewModel
             ModuleInfoViewModels[8] = new ModuleInfoViewModel(ModuleInfo.Mono,
                                                         new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z - 0.25 },
                                                         new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                                        absorberGain,
                                                         absorberGain,
                                                         pmtOrderInfo,
                                                         Path.Combine(LUTFolderDirectory, "MonoAbsorberLUT.csv"));
@@ -390,23 +392,26 @@ namespace Compton_GUI_WPF.ViewModel
                 VMStatus = "Making Scatter Module";
                 for (int i = 0; i < 4; ++i)
                 {
-                    var scatterGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"GainCorrectionMatrix_scatter_{i + 1}.csv"));
+                    var scatterGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"EnergyGainCorrectionMatrix_scatter_{i + 1}.csv"));
+                    var scatterMlpeGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"MlpeGainCorrectionMatrix_scatter_{i + 1}.csv"));
                     ModuleInfoViewModels[i] = new ModuleInfoViewModel(ModuleInfo.QuadSingleHead,
                                                 new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X + xOffset[i], y = T265ToLACCOffset.Y + yOffset[i], z = T265ToLACCOffset.Z },
                                                 new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                 scatterGain,
+                                                scatterMlpeGain,
                                                 pmtOrderInfo,
-                                                Path.Combine(LUTFolderDirectory, $"LUT9chEXP_447278_{i + 1}_20210329_1mm_step2.csv"));
+                                                Path.Combine(LUTFolderDirectory, $"LUT9chEXP_47277_{i + 1}_20210427_1mm_step2.csv"));
                 }
 
                 Debug.WriteLine("Making Abosrober Module");
                 VMStatus = "Making Absorber Module";
                 for (int i = 0; i < 4; ++i)
                 {
-                    var absorberGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"GainCorrectionMatrix_absorber_{i + 1}.csv"));
+                    var absorberGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"EnergyGainCorrectionMatrix_absorber_{i + 1}.csv"));
                     ModuleInfoViewModels[i + 8] = new ModuleInfoViewModel(ModuleInfo.QuadSingleHead,
                                                             new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X + xOffset[i], y = T265ToLACCOffset.Y + yOffset[i], z = T265ToLACCOffset.Z + offsetZ },
                                                             new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
+                                                            absorberGain,
                                                             absorberGain,
                                                             pmtOrderInfo,
                                                             Path.Combine(LUTFolderDirectory, $"LUT9chEXP_447279_{ i + 1 }_20210329_1mm_step2.csv"));
@@ -420,6 +425,7 @@ namespace Compton_GUI_WPF.ViewModel
             }
             catch(ArgumentException e)
             {
+
                 VMStatus = "Initiate LAHGI Quad Single head Failed";
             }
 

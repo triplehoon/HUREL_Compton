@@ -434,6 +434,10 @@ namespace Compton_GUI_WPF.ViewModel
         {
             string csvPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_" + fileName + "_PointCloud.csv");
             string bmpPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_" + fileName + "_image.bmp");
+            if (RealtimeVector3s == null)
+            {
+                return;
+            }
             SharpDX.Vector3[] tempVector = RealtimeVector3s.ToArray();
             var tempUVs = RealtimeUVs.ToArray();
             var colors = RealtimeCC.ToArray();
