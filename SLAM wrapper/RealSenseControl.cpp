@@ -22,7 +22,7 @@ bool RealsenseControl::InitiateRealsense(std::string* message)
 
 		cfgD455 = rs2::config();
 		//cfgD455.enable_device("935322071433");	
-		cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 30);
+		cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
 		cfgD455.enable_stream(RS2_STREAM_DEPTH, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_Z16, 5);
 		pipeD455 = rs2::pipeline();
 
@@ -157,7 +157,7 @@ void RealsenseControl::SLAMPipeline()
 
 	double ptCloud_Voxel = 0.05;
 	double Cominbed_ptCloud_Voxel = 0.05;
-	double reconPtCloudDownSample = 0.2;
+	double reconPtCloudDownSample = 0.05;
 
 	int i = 1;
 	while (m_IsSLAMON)
@@ -174,18 +174,15 @@ void RealsenseControl::SLAMPipeline()
 
 				if (!(*CombinedCloud_ptr).HasPoints())
 				{
-					*CombinedCloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(20,5)));//.Transform(TransMat_init);
+					*CombinedCloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(100,5)));//.Transform(TransMat_init);
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
 					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 				}
 				else
 				{
-					*pointcloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(20, 5)));
-					//Get Resgiteration pos Mat
-					auto regMat = open3d::pipelines::registration::RegistrationICP(*pointcloud_ptr,*CombinedCloud_ptr,0.1);
-					pointcloud_ptr->Transform(regMat.transformation_);
+					*pointcloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(100, 5)));
+					//Get Resgiteration pos Mat					
 					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr);//.Transform(TransMat_init);;
-					CombinedCloud_ptr->EstimateNormals();
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
 					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 					/*if (m_SLAMEDPointCloudDownSampled.points_.size() > 40000) {
@@ -208,12 +205,12 @@ void RealsenseControl::RealsensesPipeline()
 	rs2::pose_frame pose_frame(nullptr);
 
 	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
-	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
+	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.7);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
-	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
+	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25);
-	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 15);
-	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 1);
+	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.3);
 	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0);
 
 

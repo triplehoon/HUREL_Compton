@@ -21,9 +21,6 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RealsenseControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RealsenseControlWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -33,9 +30,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RealsenseControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RealsenseControlWrapper.cpp">

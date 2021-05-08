@@ -5,7 +5,6 @@
 #define D455_H_DEPTH_SIZE (480)
 #define D455_V_DEPTH_SIZE (270)
 
-
 #include <librealsense2/rs.hpp>
 #include <open3d/geometry/PointCloud.h>
 #include <open3d/pipelines/registration/Registration.h>
@@ -29,7 +28,7 @@ class RealsenseControl
 {
 private:
 	std::queue<std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d>> m_QueueRealtimeCloudTrans;
-	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_Conversion(const rs2::points* points, const rs2::video_frame* color, const rs2_pose* pose, std::vector<Eigen::Vector2f>* uv);
+	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> PCL_Conversion(const rs2::points* points, const rs2::video_frame* color, const rs2_pose* pose, std::vector<Eigen::Vector2f>* uv);
 	std::tuple<double, double, double> RGB_Texture(rs2::video_frame texture, rs2::texture_coordinate Texture_XY);
 	std::queue<std::tuple<open3d::geometry::PointCloud >> m_QueueSLAMedCloudTrans;
 	Eigen::Matrix4d T265toLACCTransform;

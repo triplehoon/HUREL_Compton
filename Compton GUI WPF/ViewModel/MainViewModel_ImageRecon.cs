@@ -587,8 +587,8 @@ namespace Compton_GUI_WPF.ViewModel
                 for (int i = 0; i < poseVect.Count; i++)
                 {
                     vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
-                    cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
-                    //cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
+                    //cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
+                    cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
                     //id.Add(i);
                 }
                 for (int i = 0; i < 10; ++i)
@@ -869,7 +869,7 @@ namespace Compton_GUI_WPF.ViewModel
             for (int i = 0; i < tempposeVect.Count; i++)
             {
                 vc.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
-                cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
+                cc.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][1]), 0.5f));
                 //cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
                 //id.Add(i);
             }
@@ -884,7 +884,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 return;
             }
-            if (LACC_Control_Static.ListedLMData.Count == 0)
+            if (LACC_Control_Static == null || LACC_Control_Static.ListedLMData.Count == 0)
             {
                 return;
             }
@@ -894,7 +894,7 @@ namespace Compton_GUI_WPF.ViewModel
                                 select LM).ToList();
 
             var (v3, c4) = ImageRecon.BPtoPointCloud2Pi(vc, tempListModeData, 5, 0.5);            
-            SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
+            SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = cc };
             sw.Stop();
             elapsedTime = sw.ElapsedMilliseconds;
             VMStatus = "Reconing......SLAM Done!";
