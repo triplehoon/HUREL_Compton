@@ -132,8 +132,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 			cloud.colors_.push_back(colorVector);
 			out_uv.push_back(Eigen::Vector2f(Texture_Coord[i].u, Texture_Coord[i].v));
 		}
-	}	
-	cloud.EstimateNormals();
+	}		
 	return std::make_tuple(cloud, t265toLACCTransform * TransF, out_uv);
 }
 
@@ -174,7 +173,7 @@ void RealsenseControl::SLAMPipeline()
 
 
 	int ptCount = 0;
-	int maxptCout = 5;
+	int maxptCout = 8;
 	
 	std::vector<open3d::geometry::PointCloud> ptClouds;
 	std::vector<Eigen::Matrix4d> poses;
@@ -206,7 +205,7 @@ void RealsenseControl::SLAMPipeline()
 				//printf("start fragment MultiwayRegisteration\n");
 				//std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-				auto ptCloud = SLAMRobustRecon::MultiwayRegisteration(ptClouds);
+				auto ptCloud = SLAMRobustRecon::MultiwayRegisteration(ptClouds, poses);
 				robustRecon->AddRobustReconPoints(std::make_tuple(ptCloud, poses[0]));
 				//m_SLAMEDPointCloudDownSampled += ptCloud.Transform(T265toLACCTransform * poses[0]);
 				//m_SLAMEDPointCloudDownSampled += ptCloud.Transform(poses[0]).Transform(T265toLACCTransform);
@@ -302,10 +301,10 @@ void RealsenseControl::RealsensesPipeline()
 	printf("realsense lib: Start Realsense\n");
 #endif // DEBUG
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
-	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3f);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 5);
+	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.4f);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
-	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 5.0);
+	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 1.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 1);
 	//spat_filter.set_option(RS2_OPTION_HOLES_FILL, 1);
@@ -322,6 +321,7 @@ void RealsenseControl::RealsensesPipeline()
 	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);*/
 	rs2::pipeline_profile pipe_profile_T265 = pipeT265.start(cfgT265);
 	//pipe_profile_T265.get_device().query_sensors()[1].set_option(RS2_OPTION_ENABLE_RELOCALIZATION, 0);
+	pipe_profile_D455.get_device().query_sensors()[0].set_option(RS2_OPTION_EMITTER_ENABLED, 1);
 	pipe_profile_D455.get_device().query_sensors()[0].set_option(RS2_OPTION_LASER_POWER, 360);
 	pipelines.emplace_back(pipeD455);
 	pipelines.emplace_back(pipeT265);

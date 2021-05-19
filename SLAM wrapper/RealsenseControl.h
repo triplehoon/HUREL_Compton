@@ -3,8 +3,8 @@
 
 #define D455_H_COLOR_SIZE (1280)
 #define D455_V_COLOR_SIZE (720)
-#define D455_H_DEPTH_SIZE (480)
-#define D455_V_DEPTH_SIZE (270)
+#define D455_H_DEPTH_SIZE (848)
+#define D455_V_DEPTH_SIZE (480)
 
 #include <librealsense2/rs.hpp>
 #include <open3d/geometry/PointCloud.h>

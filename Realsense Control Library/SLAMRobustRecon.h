@@ -12,8 +12,8 @@
 #define PC_TRANSPOS_TUPLE std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d>
 #define PC_FEATURE_TUPLE std::tuple<open3d::geometry::PointCloud, open3d::pipelines::registration::Feature>
 #define PC_FEATURE_TRANSPOS_TUPLE std::tuple<open3d::geometry::PointCloud, open3d::pipelines::registration::Feature, Eigen::Matrix4d>
-#define MAX_CORRESPONDENCE_DISTANCE_COARSE 0.30
-#define MAX_CORRESPONDENCE_DISTANCE_FINE 0.10
+#define MAX_CORRESPONDENCE_DISTANCE_COARSE 0.10
+#define MAX_CORRESPONDENCE_DISTANCE_FINE 0.05
 #define VOXEL_SIZE 0.1
 
 
@@ -31,7 +31,7 @@ private:
 public:
 	SLAMRobustRecon();
 	
-	static open3d::geometry::PointCloud MultiwayRegisteration(std::vector<open3d::geometry::PointCloud>& ptClouds);
+	static open3d::geometry::PointCloud MultiwayRegisteration(std::vector<open3d::geometry::PointCloud>& pcs, std::vector<Eigen::Matrix4d>& trs);
 	static std::tuple<Eigen::Matrix4d_u, Eigen::Matrix6d> PairwayRegisteration(open3d::geometry::PointCloud& source, open3d::geometry::PointCloud& target, double maxCorrDisCoarse, double maxCorrDisFine, Eigen::Matrix4d initMatirx, bool isPointToPointUsed);
 	void StartRobustRecon(Eigen::Matrix4d initOdementry);
 	void StopRobustRecon();

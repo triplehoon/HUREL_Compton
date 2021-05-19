@@ -11,18 +11,26 @@ SLAMRobustRecon::SLAMRobustRecon()
 {
 }
 
-open3d::geometry::PointCloud SLAMRobustRecon::MultiwayRegisteration(std::vector<open3d::geometry::PointCloud>& ptClouds)
+open3d::geometry::PointCloud SLAMRobustRecon::MultiwayRegisteration(std::vector<open3d::geometry::PointCloud>& pcs, std::vector<Eigen::Matrix4d>& trs)
 {
+	
 	auto poseGraph = new open3d::pipelines::registration::PoseGraph();
 
 	Eigen::Matrix4d odometry = Eigen::Matrix4d::Identity();
 
 	poseGraph->nodes_.push_back(open3d::pipelines::registration::PoseGraphNode(odometry));
-	for (int i = 0; i < ptClouds.size(); ++i) {
-		auto sourcePc = ptClouds[i];
-		for (int j = i + 1; j < ptClouds.size(); ++j) {
-			auto targePc = ptClouds[j];
-			auto pairwiseReg = PairwayRegisteration(sourcePc, targePc, MAX_CORRESPONDENCE_DISTANCE_COARSE, MAX_CORRESPONDENCE_DISTANCE_FINE, Eigen::Matrix4d::Identity(), true);
+	for (int i = 0; i < pcs.size(); ++i) {
+		pcs[i] = *std::get<0>(pcs[i].RemoveStatisticalOutliers(20, 5))->VoxelDownSample(VOXEL_SIZE / 2);
+		pcs[i].EstimateNormals(open3d::geometry::KDTreeSearchParamHybrid(VOXEL_SIZE / 2 * 2, 30));
+	}
+
+	for (int i = 0; i < pcs.size(); ++i) {
+		auto sourcePc = pcs[i];
+		
+		for (int j = i + 1; j < pcs.size(); ++j) {
+			auto targePc = pcs[j];
+			Eigen::Matrix4d initTm = trs[j].inverse() * trs[i];
+			auto pairwiseReg = PairwayRegisteration(sourcePc, targePc, MAX_CORRESPONDENCE_DISTANCE_COARSE, MAX_CORRESPONDENCE_DISTANCE_FINE, initTm, true);
 			if (j == i + 1) {
 				odometry = std::get<0>(pairwiseReg) * odometry;
 				poseGraph->nodes_.push_back(
@@ -51,8 +59,8 @@ open3d::geometry::PointCloud SLAMRobustRecon::MultiwayRegisteration(std::vector<
 	GlobalOptimizationLevenbergMarquardt optimization_method;
 	GlobalOptimization(*poseGraph, optimization_method, criteria, option);
 
-	for (int i = 0; i < ptClouds.size(); ++i) {
-		sumPC += (ptClouds[i]).Transform(poseGraph->nodes_[i].pose_);
+	for (int i = 0; i < pcs.size(); ++i) {
+		sumPC += (pcs[i]).Transform(poseGraph->nodes_[i].pose_);
 		/*cout << "MultiwayRegisteration: index = " << i << endl;
 		cout << poseGraph->nodes_[i].pose_(0, 0) << ", " << poseGraph->nodes_[i].pose_(0, 1) << ", " << poseGraph->nodes_[i].pose_(0, 2) << ", " << poseGraph->nodes_[i].pose_(0, 3) << endl;
 		cout << poseGraph->nodes_[i].pose_(1, 0) << ", " << poseGraph->nodes_[i].pose_(1, 1) << ", " << poseGraph->nodes_[i].pose_(1, 2) << ", " << poseGraph->nodes_[i].pose_(1, 3) << endl;
