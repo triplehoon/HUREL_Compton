@@ -173,7 +173,7 @@ void RealsenseControl::SLAMPipeline()
 
 
 	int ptCount = 0;
-	int maxptCout = 8;
+	int maxptCout = 5;
 	
 	std::vector<open3d::geometry::PointCloud> ptClouds;
 	std::vector<Eigen::Matrix4d> poses;
@@ -380,7 +380,7 @@ void RealsenseControl::RealsensesPipeline()
 					open3d::geometry::PointCloud untransPosedPC = open3d::geometry::PointCloud(std::get<0>(realTimeCloudPoseTransposed));
 					mQueueRealtimePTMutex.lock();
 					m_QueueRealtimeCloudTrans.push(std::make_tuple(untransPosedPC.Transform(std::get<1>(realTimeCloudPoseTransposed).inverse()),
-												t265toLACCTransform.inverse() * std::get<1>(realTimeCloudPoseTransposed)));
+												T265toLACCTransform.inverse() * std::get<1>(realTimeCloudPoseTransposed)));
 					mQueueRealtimePTMutex.unlock();
 				}
 

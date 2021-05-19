@@ -157,11 +157,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\SLAM wrapper\RealsenseControl.h" />
+    <ClInclude Include="RealsenseControl.h" />
     <ClInclude Include="SLAMRobustRecon.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\SLAM wrapper\RealsenseControl.cpp" />
+    <ClCompile Include="RealSenseControl.cpp" />
     <ClCompile Include="SLAMRobustRecon.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
