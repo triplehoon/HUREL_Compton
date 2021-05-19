@@ -17,6 +17,10 @@ namespace HUREL.Compton
         static LaccSerialControl()
         {
             PortsName = new List<string>(SerialPort.GetPortNames());
+            if (PortsName == null)
+            {
+                return;
+            }
             SelectedPortName = PortsName[0];
         }
         

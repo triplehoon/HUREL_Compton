@@ -1,28 +1,29 @@
 #include "RealsenseControl.h"
+#include <mutex>
+static std::mutex mQueueRealtimePTMutex;
 
-RealsenseControl::RealsenseControl()
+RealsenseControl::RealsenseControl():IsPipeLineOn(false), IsSLAMON(false)
 {
 	T265toLACCTransform << -1, 0, 0, 0,
 							0, 1, 0, 0,
 							0, 0, -1, 0,
 							0, 0, 0, 1;
-	m_IsSLAMON = false;
-}
+	auto stream = freopen("CONOUT$", "w", stdout);
 
+}
 RealsenseControl::~RealsenseControl()
 {
-	m_IsSLAMON = false;
-	m_IsPipeLineOn = false;
+	IsSLAMON = false;
+	IsPipeLineOn = false;
 }
-
-bool RealsenseControl::InitiateRealsense(std::string* message)
+bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 {
 	try {
 		ctx = rs2::context();
 
 		cfgD455 = rs2::config();
 		//cfgD455.enable_device("935322071433");	
-		cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 30);
+		cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
 		cfgD455.enable_stream(RS2_STREAM_DEPTH, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_Z16, 5);
 		pipeD455 = rs2::pipeline();
 
@@ -37,28 +38,33 @@ bool RealsenseControl::InitiateRealsense(std::string* message)
 		pipeT265.stop();
 	}
 	catch (const rs2::camera_disconnected_error& e)
-	{
-		*message = "Camera was disconnected! Please connect it back";
+	{		
+		*outMessage = "Camera was disconnected! Please connect it back";
+
+		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
 		return false;
 		// wait for connect event
 	}
 	// continue with more general cases
 	catch (const rs2::recoverable_error& e)
 	{
-		*message = "Operation failed, please try again";
+		*outMessage = "Operation failed, please try again";
+
+		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
 		return false;
 	}
 	// you can also catch "anything else" raised from the library by catching rs2::error
 	catch (const rs2::error& e)
 	{
-		*message = "Some other error occurred!";
+		*outMessage = "Some other error occurred!";
+		
+		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
 		return false;
 	}
 
-	*message = "Success";
+	*outMessage = "Success";
 	return true;
 }
-
 std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose poseData)
 {
 	Eigen::Matrix4d S_T265toLACCTransform; 
@@ -82,25 +88,30 @@ std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose po
 	}
 	return matrix3DOneLine;
 }
-
-std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_Conversion(const rs2::points* points, const rs2::video_frame* color, const rs2_pose* pose, std::vector<Eigen::Vector2f>* uv)
+std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vector2f>> RealsenseControl::PCL_Conversion(const rs2::points& points, const rs2::video_frame& color, const rs2_pose& pose)
 {
 	// Object Declaration (Point Cloud)
 	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> tupleCloudTrans;
 	open3d::geometry::PointCloud cloud;
+	std::vector<Eigen::Vector2f> out_uv;
 	std::tuple<double, double, double> RGB_Color;
-	auto Texture_Coord = points->get_texture_coordinates();
-	auto Vertex = points->get_vertices();
+	auto Texture_Coord = points.get_texture_coordinates();
+	auto Vertex = points.get_vertices();
+	Eigen::Matrix4d t265toLACCTransform;
+	t265toLACCTransform  <<  -1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, -1, 0,
+		0, 0, 0, 1;
 
-	Eigen::Vector3d D436ToT265Coord = { -0.035, 0.029, 0 };
-	Eigen::Vector4d Quaternion = { (*pose).rotation.w, (*pose).rotation.x ,(*pose).rotation.y,(*pose).rotation.z };
+	Eigen::Vector3d D455ToT265Coord = { 0.031, -0.029, 0 };
+	Eigen::Vector4d Quaternion = { pose.rotation.w, pose.rotation.x ,pose.rotation.y,pose.rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
-	Eigen::Vector3d	TransPoseMat = { (*pose).translation.x, (*pose).translation.y, (*pose).translation.z };
+	Eigen::Vector3d	TransPoseMat = { pose.translation.x, pose.translation.y, pose.translation.z };
 	Eigen::Matrix4d TransF; // Your Transformation Matrix
 	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
 	TransF.block<3, 3>(0, 0) = RMat;
 	TransF.block<3, 1>(0, 3) = TransPoseMat;
-	for (int i = 0; i < points->size(); i++)
+	for (int i = 0; i < points.size(); i++)
 	{
 		if (Texture_Coord[i].u > 0 && Texture_Coord[i].v > 0 && Texture_Coord[i].u <1 && Texture_Coord[i].v <1)// && (Vertex[i].x) * (Vertex[i].x) + (Vertex[i].y) * (Vertex[i].y) + (Vertex[i].z) * (Vertex[i].z) < 9)
 		{
@@ -108,23 +119,24 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> RealsenseControl::PCL_
 			// Mapping Depth Coordinates
 			// - Depth data stored as XYZ values
 			//===================================
-			//if (-Vertex[i].y + D436ToT265Coord[1] > 0.7)
-				//continue;
-			if (Vertex[i].z - D436ToT265Coord[2] < 0.5)
+			/*if (-Vertex[i].y + D455ToT265Coord[1] > 0.7)
 				continue;
-			Eigen::Vector3d pointVector = { Vertex[i].x + D436ToT265Coord[0], -Vertex[i].y + D436ToT265Coord[1], -Vertex[i].z + D436ToT265Coord[2] };
+			if (Vertex[i].z - D455ToT265Coord[2] < 0.5)
+				continue;*/
+			Eigen::Vector3d pointVector = { Vertex[i].x + D455ToT265Coord[0], -Vertex[i].y + D455ToT265Coord[1], -Vertex[i].z + D455ToT265Coord[2] };
+			
 			cloud.points_.push_back(pointVector);
 
-			RGB_Color = RGB_Texture(*color, Texture_Coord[i]);
+			RGB_Color = RGB_Texture(color, Texture_Coord[i]);
 			Eigen::Vector3d colorVector = { std::get<0>(RGB_Color), std::get<1>(RGB_Color),  std::get<2>(RGB_Color) }; // RGB vector
 			cloud.colors_.push_back(colorVector);
-			(*uv).push_back(Eigen::Vector2f(Texture_Coord[i].u, Texture_Coord[i].v));
+			out_uv.push_back(Eigen::Vector2f(Texture_Coord[i].u, Texture_Coord[i].v));
 		}
-	}
-	return std::make_tuple(cloud, T265toLACCTransform * TransF);
+	}		
+	return std::make_tuple(cloud, t265toLACCTransform * TransF, out_uv);
 }
 
-std::tuple<double, double, double> RealsenseControl::RGB_Texture(rs2::video_frame texture, rs2::texture_coordinate Texture_XY)
+std::tuple<double, double, double> RealsenseControl::RGB_Texture(const rs2::video_frame& texture, const rs2::texture_coordinate& Texture_XY)
 {
 	// Get Width and coordinates of texture
 	int width = texture.get_width();  // Frame width in pixels
@@ -149,23 +161,101 @@ std::tuple<double, double, double> RealsenseControl::RGB_Texture(rs2::video_fram
 	double NT3 = (double)New_Texture[Text_Index + 2] / 255;
 	return std::tuple<double, double, double>(NT1, NT2, NT3);
 }
-
 void RealsenseControl::SLAMPipeline()
 {
 	std::shared_ptr<open3d::geometry::PointCloud > CombinedCloud_ptr(new open3d::geometry::PointCloud);
 	std::shared_ptr<open3d::geometry::PointCloud> pointcloud_ptr(new open3d::geometry::PointCloud);
 
 	double ptCloud_Voxel = 0.05;
-	double Cominbed_ptCloud_Voxel = 0.1;
-	double reconPtCloudDownSample = 0.1;
+	double Cominbed_ptCloud_Voxel = 0.05;
+	double reconPtCloudDownSample = 0.05;
 
+
+
+	int ptCount = 0;
+	int maxptCout = 8;
+	
+	std::vector<open3d::geometry::PointCloud> ptClouds;
+	std::vector<Eigen::Matrix4d> poses;
+	auto robustRecon = new SLAMRobustRecon();
 	int i = 1;
-	while (m_IsSLAMON)
+
+	bool isRobustReconStart = false;
+	
+	while (IsSLAMON)
 	{
 		if (!m_QueueRealtimeCloudTrans.empty())
 		{
+			mQueueRealtimePTMutex.lock();
+			PC_TRANSPOS_TUPLE ptCloudPose = m_QueueRealtimeCloudTrans.front();
+			m_QueueRealtimeCloudTrans.pop();
+			mQueueRealtimePTMutex.unlock();
+			ptClouds.push_back(std::get<0>(ptCloudPose));
+			poses.push_back(std::get<1>(ptCloudPose));
+			if (!isRobustReconStart) {
+				robustRecon->StartRobustRecon(std::get<1>(ptCloudPose));
+				isRobustReconStart = true;
+			}
+			
+			
+			/// <summary>
+			/// make fragment
+			/// </summary>
+			if (ptClouds.size() >= maxptCout) {
+				//printf("start fragment MultiwayRegisteration\n");
+				//std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+				auto ptCloud = SLAMRobustRecon::MultiwayRegisteration(ptClouds, poses);
+				robustRecon->AddRobustReconPoints(std::make_tuple(ptCloud, poses[0]));
+				//m_SLAMEDPointCloudDownSampled += ptCloud.Transform(T265toLACCTransform * poses[0]);
+				//m_SLAMEDPointCloudDownSampled += ptCloud.Transform(poses[0]).Transform(T265toLACCTransform);
+				ptClouds.clear();
+				poses.clear();
+				mQueueRealtimePTMutex.lock();
+				if (m_QueueRealtimeCloudTrans.size() < maxptCout) {
+					
+				}
+				else {
+					for (int i = 0; i < m_QueueRealtimeCloudTrans.size() - maxptCout; ++i)
+					{
+						m_QueueRealtimeCloudTrans.pop();
+					}
+				}
+				mQueueRealtimePTMutex.unlock();
+
+				printf("done fragment MultiwayRegisteration\n");			
+			}
+			else
+			{
+				continue;
+			}
+			m_SLAMEDPointCloud = robustRecon->GetSLAMEDPointCloud().Transform(T265toLACCTransform);
+			m_SLAMEDPointCloudDownSampled = *m_SLAMEDPointCloud.VoxelDownSample(0.1);
+		}
+	}
+	robustRecon->StopRobustRecon();
+
+	delete(robustRecon);
+}
+
+/*void RealsenseControl::SLAMPipeline_Deprivation()
+{
+	std::shared_ptr<open3d::geometry::PointCloud > CombinedCloud_ptr(new open3d::geometry::PointCloud);
+	std::shared_ptr<open3d::geometry::PointCloud> pointcloud_ptr(new open3d::geometry::PointCloud);
+
+	double ptCloud_Voxel = 0.05;
+	double Cominbed_ptCloud_Voxel = 0.05;
+	double reconPtCloudDownSample = 0.2;
+
+	int i = 1;
+	while (IsSLAMON)
+	{
+		if (!m_QueueRealtimeCloudTrans.empty())
+		{
+			mQueueRealtimePTMutex.lock();
 			auto pointPose = m_QueueRealtimeCloudTrans.front();
 			m_QueueRealtimeCloudTrans.pop();
+			mQueueRealtimePTMutex.unlock();
 
 			if (i > 0) {
 				auto TempPCL_T265 = std::get<0>(pointPose);//.Transform(T265toLACCTransform); //Change alignment from T265 to LACC
@@ -174,23 +264,23 @@ void RealsenseControl::SLAMPipeline()
 
 				if (!(*CombinedCloud_ptr).HasPoints())
 				{
-					CombinedCloud_ptr = std::get<0>((TempPCL_T265).RemoveStatisticalOutliers(20,5));//.Transform(TransMat_init);
+					*CombinedCloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(20,5)));//.Transform(TransMat_init);
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
 					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 				}
 				else
 				{
-					pointcloud_ptr = std::get<0>((TempPCL_T265).RemoveStatisticalOutliers(20, 5));
+					*pointcloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(20, 5)));
 					//Get Resgiteration pos Mat
 					auto regMat = open3d::pipelines::registration::RegistrationICP(*pointcloud_ptr,*CombinedCloud_ptr,0.1);
 					pointcloud_ptr->Transform(regMat.transformation_);
 					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr);//.Transform(TransMat_init);;
 					CombinedCloud_ptr->EstimateNormals();
-					m_SLAMEDPointCloud = *std::get<0>((CombinedCloud_ptr)->VoxelDownSample(Cominbed_ptCloud_Voxel)->RemoveStatisticalOutliers(20, 5));
-					m_SLAMEDPointCloudDownSampled = *std::get<0>((CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel)->RemoveStatisticalOutliers(20, 5)));
+					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
+					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 					/*if (m_SLAMEDPointCloudDownSampled.points_.size() > 40000) {
 						reconPtCloudDownSample += 0.05;
-					}*/
+					}
 				}
 
 			}
@@ -198,22 +288,18 @@ void RealsenseControl::SLAMPipeline()
 		}
 
 	}
-}
-
-
+}*/
 void RealsenseControl::RealsensesPipeline()
 {
 	m_Posedata = rs2_pose();
-	auto timeCheck = std::chrono::high_resolution_clock::now();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 3);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
-	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 5.0);
+	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25);
-	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 1);
-	//spat_filter.set_option(RS2_OPTION_HOLES_FILL, 3);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 15);
 	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4);
 	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0);
 
@@ -226,19 +312,23 @@ void RealsenseControl::RealsensesPipeline()
 	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_MEDIUM_DENSITY);
 	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);*/
 	pipeT265.start(cfgT265);
-	pipe_profile_D455.get_device().query_sensors()[0].set_option(RS2_OPTION_LASER_POWER,360);
 	pipelines.emplace_back(pipeD455);
 	pipelines.emplace_back(pipeT265);
 
 	Sleep(1000);
-
-	while (m_IsPipeLineOn)
+	std::mutex mu;
+	while (IsPipeLineOn)
 	{
 		for (auto&& pipe : pipelines) // loop over pipelines
 		{
+			rs2::frameset frames;
+			if (!pipe.try_wait_for_frames(&frames))
+			{
+				break;
+			}
 			rs2::points points;
-
-			auto frames = pipe.wait_for_frames();
+			
+			
 
 			auto color = frames.get_color_frame();
 			auto depth = frames.get_depth_frame();
@@ -264,7 +354,7 @@ void RealsenseControl::RealsensesPipeline()
 			}
 
 			if (points && pose_frame && color)
-			{
+			{				
 				rs2_pose tempPoseData = pose_frame.get_pose_data();
 				m_Posedata = tempPoseData;
 				rs2::pose_frame null_pose_frame(nullptr);
@@ -272,21 +362,26 @@ void RealsenseControl::RealsensesPipeline()
 				int trackerConfidence = tempPoseData.tracker_confidence;
 
 
-				std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> m_RealTimeCloudPose;
 
 				std::vector<Eigen::Vector2f> uv;
-				m_RealTimeCloudPose = PCL_Conversion(&points, &color, &tempPoseData, &uv);
-				//m_RTPointCloud = std::make_tuple(std::get<0>(m_RealTimeCloudPose).Transform(T265toLACCTransform), uv);
-				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(m_RealTimeCloudPose).Transform(std::get<1>(m_RealTimeCloudPose)), uv);
 
-				std::chrono::duration<double> duration = std::chrono::high_resolution_clock::now() - timeCheck; //as second
+
+				auto realTimeCloudPoseTransposed = PCL_Conversion(points, color, tempPoseData);
+
+
+				// realTimeCloudPoseTransposed transposed from here
+				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), uv);
+
+
+
 				
-				if (m_IsSLAMON &&tempPoseData.tracker_confidence > 2 && duration.count() > 1.5)
+				if (IsSLAMON &&tempPoseData.tracker_confidence >= 2)
 				{
-					timeCheck = std::chrono::high_resolution_clock::now();
-
-					m_QueueRealtimeCloudTrans.push(m_RealTimeCloudPose);
-					printf("Push QUEUE");
+					open3d::geometry::PointCloud untransPosedPC = open3d::geometry::PointCloud(std::get<0>(realTimeCloudPoseTransposed));
+					mQueueRealtimePTMutex.lock();
+					m_QueueRealtimeCloudTrans.push(std::make_tuple(untransPosedPC.Transform(std::get<1>(realTimeCloudPoseTransposed).inverse()),
+												t265toLACCTransform.inverse() * std::get<1>(realTimeCloudPoseTransposed)));
+					mQueueRealtimePTMutex.unlock();
 				}
 
 			}
@@ -297,10 +392,33 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();	
 	pipeD455.stop();
 	pipeT265.stop();
+#ifdef DEBUG
+	printf("realsense lib: Finished\n");
+#endif // DEBUG
+
 
 	m_CurrentVideoFrame = rs2::video_frame(nullptr);
 
 	Sleep(1000);
 	
 }
-
+rs2_pose RealsenseControl::GetPoseData() {
+	return m_Posedata;
+}
+rs2::video_frame RealsenseControl::GetCurrentVideoFrame() {
+	return m_CurrentVideoFrame;
+}
+std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> RealsenseControl::GetRTPointCloud() {
+	return m_RTPointCloud;
+}
+std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> RealsenseControl::GetRTPointCloudTransposed()
+{
+	return m_RTPointCloudTransposed;
+}
+open3d::geometry::PointCloud RealsenseControl::GetSLAMEDPointCloud()
+{
+	return m_SLAMEDPointCloud;
+}
+open3d::geometry::PointCloud RealsenseControl::GetSLAMEDPointCloudDownSampled() {
+	return m_SLAMEDPointCloudDownSampled;
+}

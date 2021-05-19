@@ -168,7 +168,7 @@
                         <hx:Viewport3DX 
                            Background="Silver"                   
                                         Width="480"
-                                        Height="270"      
+                                        Height="270" ChangeFieldOfViewCursor="ScrollNS" PanCursor="Hand" RotateCursor="SizeAll" ZoomCursor="SizeNS" ZoomRectangleCursor="SizeNWSE"      
                           >
                             <hx:Viewport3DX.EffectsManager>
                                 <hx:DefaultEffectsManager/>

@@ -423,7 +423,7 @@ namespace Compton_GUI_WPF.ViewModel
 
                 VMStatus = "Initiate LAHGI Quad Single head Success!";
             }
-            catch(ArgumentException e)
+            catch
             {
 
                 VMStatus = "Initiate LAHGI Quad Single head Failed";
