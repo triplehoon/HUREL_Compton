@@ -11,6 +11,7 @@ SLAMRobustRecon::SLAMRobustRecon()
 {
 }
 
+
 open3d::geometry::PointCloud SLAMRobustRecon::MultiwayRegisteration(std::vector<open3d::geometry::PointCloud>& pcs, std::vector<Eigen::Matrix4d>& trs)
 {
 	
