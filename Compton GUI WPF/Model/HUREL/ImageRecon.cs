@@ -408,7 +408,7 @@ namespace HUREL.Compton
                 b = 0;
             }
 
-            float alpha = 0.5f;
+            float alpha = 0.8f;
            
             var color = new Color4(r, g, b, alpha);
             
