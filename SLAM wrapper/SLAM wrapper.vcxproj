@@ -47,6 +47,7 @@
     <CLRSupport>NetCore</CLRSupport>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
+    <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PlatformToolset>v142</PlatformToolset>
@@ -95,18 +96,24 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files (x86)\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\OneDrive - 한양대학교\01.Hurel\01.현재작업\20201203 Comtpon GUI\Compton GUI Main\HUREL Compton\Realsense Control Library;C:\opencv\build\include;C:\Program Files (x86)\Open3D_MDd\include;C:\Program Files (x86)\Open3D_MDd\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Open3D_MD\lib;C:\Program Files %28x86%29\Intel RealSense SDK 2.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Open3D_MDd\lib;C:\Program Files %28x86%29\Intel RealSense SDK 2.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>realsense2.lib;Open3D.lib;Open3D_3rdparty_assimp_assimp-vc142-mt.lib;Open3D_3rdparty_assimp_IrrXML.lib;Open3D_3rdparty_filament_backend.lib;Open3D_3rdparty_filament_bluegl.lib;Open3D_3rdparty_filament_bluevk.lib;Open3D_3rdparty_filament_filabridge.lib;Open3D_3rdparty_filament_filaflat.lib;Open3D_3rdparty_filament_filamat_lite.lib;Open3D_3rdparty_filament_filament.lib;Open3D_3rdparty_filament_filameshio.lib;Open3D_3rdparty_filament_geometry.lib;Open3D_3rdparty_filament_ibl.lib;Open3D_3rdparty_filament_image.lib;Open3D_3rdparty_filament_meshoptimizer.lib;Open3D_3rdparty_filament_smol-v.lib;Open3D_3rdparty_filament_utils.lib;Open3D_3rdparty_glew.lib;Open3D_3rdparty_glfw3.lib;Open3D_3rdparty_imgui.lib;Open3D_3rdparty_jpeg.lib;Open3D_3rdparty_jsoncpp.lib;Open3D_3rdparty_libpng.lib;Open3D_3rdparty_lzf.lib;Open3D_3rdparty_mkl_mkl_core.lib;Open3D_3rdparty_mkl_mkl_intel_ilp64.lib;Open3D_3rdparty_mkl_mkl_sequential.lib;Open3D_3rdparty_mkl_mkl_tbb_thread.lib;Open3D_3rdparty_mkl_tbb_static.lib;Open3D_3rdparty_qhullcpp.lib;Open3D_3rdparty_qhull_r.lib;Open3D_3rdparty_rply.lib;Open3D_3rdparty_tbb_tbbmalloc_static.lib;Open3D_3rdparty_tbb_tbb_static.lib;Open3D_3rdparty_tinyfiledialogs.lib;Open3D_3rdparty_zlib.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/FORCE:MUlTIPLE %(AdditionalOptions) /ignore:4099 /ignore:4248 /ignore:4088 /ignore:4006</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files %28x86%29\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\OneDrive - 한양대학교\01.Hurel\01.현재작업\20201203 Comtpon GUI\Compton GUI Main\HUREL Compton\Realsense Control Library;C:\opencv\build\include;C:\Program Files %28x86%29\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Open3D_MD\lib;C:\Program Files %28x86%29\Intel RealSense SDK 2.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -121,10 +128,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="pch.cpp" />
     <ClCompile Include="RealsenseControlWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>

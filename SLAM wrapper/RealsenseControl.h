@@ -1,4 +1,5 @@
 #pragma once
+#include <mutex>
 
 #define D455_H_COLOR_SIZE (1280)
 #define D455_V_COLOR_SIZE (720)
@@ -21,19 +22,25 @@
 #include <map>
 #include <queue>
 #include <math.h>
+#include <thread>
 
-
+#include "SLAMRobustRecon.h"
 
 class RealsenseControl
 {
 private:
-	std::queue<std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d>> m_QueueRealtimeCloudTrans;
-	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> PCL_Conversion(const rs2::points* points, const rs2::video_frame* color, const rs2_pose* pose, std::vector<Eigen::Vector2f>* uv);
-	std::tuple<double, double, double> RGB_Texture(rs2::video_frame texture, rs2::texture_coordinate Texture_XY);
-	std::queue<std::tuple<open3d::geometry::PointCloud >> m_QueueSLAMedCloudTrans;
+	std::queue<PC_TRANSPOS_TUPLE> m_QueueRealtimeCloudTrans;
+	static std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vector2f>> PCL_Conversion(const rs2::points& points, const rs2::video_frame& color, const rs2_pose& pose);
+	static std::tuple<double, double, double> RGB_Texture(const rs2::video_frame& texture, const rs2::texture_coordinate& Texture_XY);
+	std::queue<std::tuple<open3d::geometry::PointCloud>> m_QueueSLAMedCloudTrans;
 	Eigen::Matrix4d T265toLACCTransform;
 
-
+	rs2_pose m_Posedata = rs2_pose();
+	rs2::video_frame m_CurrentVideoFrame = rs2::video_frame(nullptr);
+	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> m_RTPointCloud;
+	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> m_RTPointCloudTransposed;
+	open3d::geometry::PointCloud m_SLAMEDPointCloud;
+	open3d::geometry::PointCloud m_SLAMEDPointCloudDownSampled;
 
 	rs2::pointcloud pc;
 	rs2::context ctx;
@@ -51,22 +58,21 @@ private:
 
 
 public:
+	rs2_pose GetPoseData();
+	rs2::video_frame GetCurrentVideoFrame();
+	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> GetRTPointCloud();
+	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> GetRTPointCloudTransposed();
+	open3d::geometry::PointCloud GetSLAMEDPointCloud();
+	open3d::geometry::PointCloud GetSLAMEDPointCloudDownSampled();
 
-	rs2_pose m_Posedata;
-	rs2::video_frame m_CurrentVideoFrame = rs2::video_frame(nullptr);
-	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> m_RTPointCloud;
-	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> m_RTPointCloudTransposed;
-	open3d::geometry::PointCloud m_SLAMEDPointCloud;
-	open3d::geometry::PointCloud m_SLAMEDPointCloudDownSampled;
 
-
-	bool m_IsPipeLineOn;
-	bool m_IsSLAMON;
+	bool IsPipeLineOn;
+	bool IsSLAMON;
 
 	RealsenseControl();
 	~RealsenseControl();
 	
-	bool InitiateRealsense(std::string* message);
+	bool InitiateRealsense(std::string* outMessage);
 
 	void RealsensesPipeline();
 

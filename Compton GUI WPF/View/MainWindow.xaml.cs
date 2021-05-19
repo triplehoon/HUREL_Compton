@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -25,6 +26,8 @@ namespace Compton_GUI_WPF
     {
         public MainWindow()
         {
+            NativeMethods.AllocConsole();
+
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mzc0OTQ4QDMxMzgyZTM0MmUzMFRlU2dMemQrMXRGZW1iQk96NklnOVBWNnhScjVDckxTT2p1M0crRHpXcjA9");
             try
             {
@@ -36,6 +39,14 @@ namespace Compton_GUI_WPF
             }
             Debug.WriteLine("Initial Done");
             ComboboxSelectedSpectrum.ItemsSource = ComboboxSelectedSpectrumItems;
+        }
+
+
+        static class NativeMethods
+        {
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool AllocConsole();
         }
 
         private string[] ComboboxSelectedSpectrumItems = new string[]

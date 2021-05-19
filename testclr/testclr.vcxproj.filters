@@ -15,19 +15,35 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\SLAM wrapper\RealsenseControl.h">
+    <ClInclude Include="testclr.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SLAMRobustRecon.h">
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\SLAM wrapper\RealsenseControl.cpp">
+    <ClCompile Include="testclr.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SLAMRobustRecon.cpp">
+    <ClCompile Include="AssemblyInfo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
   </ItemGroup>
 </Project>

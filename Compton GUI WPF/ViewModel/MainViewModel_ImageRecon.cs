@@ -582,7 +582,7 @@ namespace Compton_GUI_WPF.ViewModel
                 previousPose = currentPose;
 
 
-                RealsenseControl.GetReconSLAMPointCloud(ref poseVect, ref colorVect);
+                RealsenseControl.GetSLAMPointCloud(ref poseVect, ref colorVect);
 
                 for (int i = 0; i < poseVect.Count; i++)
                 {
@@ -619,7 +619,7 @@ namespace Compton_GUI_WPF.ViewModel
                 }
                 
                 SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
-                SLAMPointCloudCount = vc.Count();
+                
                 SLAMVector3s = vc;
 
 
@@ -895,6 +895,7 @@ namespace Compton_GUI_WPF.ViewModel
 
             var (v3, c4) = ImageRecon.BPtoPointCloud2Pi(vc, tempListModeData, 5, 0.5);            
             SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = cc };
+            SLAMPointCloudCount = vc.Count();
             sw.Stop();
             elapsedTime = sw.ElapsedMilliseconds;
             VMStatus = "Reconing......SLAM Done!";

@@ -15,18 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\SLAM wrapper\RealsenseControl.h">
+    <ClInclude Include="framework.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="SLAMRobustRecon.h">
+    <ClInclude Include="pch.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\SLAM wrapper\RealsenseControl.cpp">
+    <ClCompile Include="testlib.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="SLAMRobustRecon.cpp">
+    <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

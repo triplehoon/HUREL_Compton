@@ -42,8 +42,8 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 	
 
 
-	open3d::geometry::PointCloud pose = std::get<0>(m_RealsenseControlNative->m_RTPointCloud);
-	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->m_RTPointCloud);
+	open3d::geometry::PointCloud pose = std::get<0>(m_RealsenseControlNative->GetRTPointCloud());
+	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->GetRTPointCloud());
 
 
 	if (pose.IsEmpty()) {
@@ -92,8 +92,8 @@ void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>
 
 
 
-	open3d::geometry::PointCloud points = std::get<0>(m_RealsenseControlNative->m_RTPointCloudTransposed);
-	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->m_RTPointCloudTransposed);
+	open3d::geometry::PointCloud points = std::get<0>(m_RealsenseControlNative->GetRTPointCloudTransposed());
+	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->GetRTPointCloudTransposed());
 
 
 	if (points.IsEmpty()) {
@@ -142,7 +142,7 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = *(new open3d::geometry::PointCloud(m_RealsenseControlNative->m_SLAMEDPointCloud));
+	open3d::geometry::PointCloud pose = *(new open3d::geometry::PointCloud(m_RealsenseControlNative->GetSLAMEDPointCloud()));
 	int count = 0;
 	if (pose.colors_.size() < pose.points_.size())
 	{
@@ -173,7 +173,7 @@ void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vect
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = *(new open3d::geometry::PointCloud(m_RealsenseControlNative->m_SLAMEDPointCloudDownSampled));
+	open3d::geometry::PointCloud pose = *(new open3d::geometry::PointCloud(m_RealsenseControlNative->GetSLAMEDPointCloudDownSampled()));
 	int count = 0;
 	if (pose.colors_.size() < pose.points_.size())
 	{
@@ -196,7 +196,7 @@ void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vect
 
 void RealsenseControlWrapper::GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data) {
 	
-	if (!m_RealsenseControlNative->m_IsPipeLineOn) {
+	if (!m_RealsenseControlNative->IsPipeLineOn) {
 		data = IntPtr::Zero;
 		return;
 	}
@@ -208,7 +208,7 @@ void RealsenseControlWrapper::GetRealTimeRGB(int% width, int% height, int% strid
 		return;
 	}*/
 
-	rs2::video_frame* color = &m_RealsenseControlNative->m_CurrentVideoFrame;
+	rs2::video_frame* color = &m_RealsenseControlNative->GetCurrentVideoFrame();
 	
 
 
@@ -246,7 +246,7 @@ Boolean RealsenseControlWrapper::ResetPipeline(String^% msg)
 
 void RealsenseControlWrapper::StartRealsensePipelineNative()
 {	
-	m_RealsenseControlNative->m_IsPipeLineOn = true;
+	m_RealsenseControlNative->IsPipeLineOn = true;
 	m_RealsenseControlNative->RealsensesPipeline();
 }
 
@@ -265,18 +265,18 @@ Boolean RealsenseControlWrapper::StartRealsensePipeline(String^% msg)
 
 void RealsenseControlWrapper::StopRealsensePipeline()
 {
-	m_RealsenseControlNative->m_IsPipeLineOn = false;
+	m_RealsenseControlNative->IsPipeLineOn = false;
 	IsPipelineOn = false;
 	PipelineThread->Join();
 }
 
 array<double>^ RealsenseControlWrapper::GetPoseFrame(int% tranckingConf)
 {
-	tranckingConf = (int) m_RealsenseControlNative->m_Posedata.tracker_confidence;
+	tranckingConf = (int) m_RealsenseControlNative->GetPoseData().tracker_confidence;
 	
 	if (tranckingConf  > 0)
 	{
-		auto transform = m_RealsenseControlNative->getMatrix3DOneLineFromPoseData(m_RealsenseControlNative->m_Posedata);
+		auto transform = m_RealsenseControlNative->getMatrix3DOneLineFromPoseData(m_RealsenseControlNative->GetPoseData());
 
 		array<double>^ tempArray = gcnew array<double>(16);
 		for (int i = 0; i < 16; i++) {
@@ -292,16 +292,16 @@ array<double>^ RealsenseControlWrapper::GetPoseFrame(int% tranckingConf)
 
 Boolean RealsenseControlWrapper::StartSLAM(String^% msg)
 {
-	if (!m_RealsenseControlNative->m_IsPipeLineOn) {
+	if (!m_RealsenseControlNative->IsPipeLineOn) {
 		msg = "Realsense is not on.";
 		return false;
-	}
-	m_RealsenseControlNative->m_SLAMEDPointCloud = open3d::geometry::PointCloud();
-	m_RealsenseControlNative->m_IsSLAMON = true;
+	}	
+	m_RealsenseControlNative->IsSLAMON = true;
 	SLAMThread = gcnew Thread(gcnew ThreadStart(this, &RealsenseControlWrapper::StartSLAMNative));
 	SLAMThread->Start();
 	msg = "SLAM has started";
 	IsSLAMOn = true;
+	return true;
 }
 
 void RealsenseControlWrapper::StartSLAMNative()
@@ -311,7 +311,7 @@ void RealsenseControlWrapper::StartSLAMNative()
 
 void RealsenseControlWrapper::StopSLAM()
 {
-	m_RealsenseControlNative->m_IsSLAMON = false;
+	m_RealsenseControlNative->IsSLAMON = false;
 	if (SLAMThread != nullptr)
 	{
 		SLAMThread->Join();
