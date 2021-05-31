@@ -174,7 +174,7 @@ void RealsenseControl::SLAMPipeline()
 
 
 	int ptCount = 0;
-	int maxptCout = 8;
+	int maxptCout = 5;
 	
 	std::vector<open3d::geometry::PointCloud> ptClouds;
 	std::vector<Eigen::Matrix4d> poses;
@@ -246,7 +246,7 @@ void RealsenseControl::SLAMPipeline()
 
 	double ptCloud_Voxel = 0.05;
 	double Cominbed_ptCloud_Voxel = 0.05;
-	double reconPtCloudDownSample = 0.05;
+	double reconPtCloudDownSample = 0.2;
 
 	int i = 1;
 	while (IsSLAMON)
@@ -265,15 +265,18 @@ void RealsenseControl::SLAMPipeline()
 
 				if (!(*CombinedCloud_ptr).HasPoints())
 				{
-					*CombinedCloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(100, 5)));//.Transform(TransMat_init);
+					*CombinedCloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(20,5)));//.Transform(TransMat_init);
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
 					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 				}
 				else
 				{
-					*pointcloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(100, 5)));
-					//Get Resgiteration pos Mat					
+					*pointcloud_ptr = (*std::get<0>((TempPCL_T265.VoxelDownSample(ptCloud_Voxel))->RemoveStatisticalOutliers(20, 5)));
+					//Get Resgiteration pos Mat
+					auto regMat = open3d::pipelines::registration::RegistrationICP(*pointcloud_ptr,*CombinedCloud_ptr,0.1);
+					pointcloud_ptr->Transform(regMat.transformation_);
 					*CombinedCloud_ptr = *CombinedCloud_ptr + (*pointcloud_ptr);//.Transform(TransMat_init);;
+					CombinedCloud_ptr->EstimateNormals();
 					m_SLAMEDPointCloud = *(CombinedCloud_ptr->VoxelDownSample(Cominbed_ptCloud_Voxel));
 					m_SLAMEDPointCloudDownSampled = *(CombinedCloud_ptr->VoxelDownSample(reconPtCloudDownSample));
 					/*if (m_SLAMEDPointCloudDownSampled.points_.size() > 40000) {
@@ -292,24 +295,13 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();
 	rs2::pose_frame pose_frame(nullptr);
 
-	Eigen::Matrix4d t265toLACCTransform;
-	t265toLACCTransform << -1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, -1, 0,
-		0, 0, 0, 1;
-
-#ifdef DEBUG
-	printf("realsense lib: Start Realsense\n");
-#endif // DEBUG
-
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 5);
-	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.4f);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
+	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
-	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 1.0);
+	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25);
-	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 1);
-	//spat_filter.set_option(RS2_OPTION_HOLES_FILL, 1);
-	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.3f);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 15);
+	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4);
 	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0);
 
 
@@ -320,10 +312,7 @@ void RealsenseControl::RealsensesPipeline()
 	/*auto depth_device = pipe_profile_D455.get_device().query_sensors()[0];
 	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_MEDIUM_DENSITY);
 	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);*/
-	rs2::pipeline_profile pipe_profile_T265 = pipeT265.start(cfgT265);
-	//pipe_profile_T265.get_device().query_sensors()[1].set_option(RS2_OPTION_ENABLE_RELOCALIZATION, 0);
-	pipe_profile_D455.get_device().query_sensors()[0].set_option(RS2_OPTION_EMITTER_ENABLED, 1);
-	pipe_profile_D455.get_device().query_sensors()[0].set_option(RS2_OPTION_LASER_POWER, 360);
+	pipeT265.start(cfgT265);
 	pipelines.emplace_back(pipeD455);
 	pipelines.emplace_back(pipeT265);
 
@@ -392,7 +381,7 @@ void RealsenseControl::RealsensesPipeline()
 					open3d::geometry::PointCloud untransPosedPC = open3d::geometry::PointCloud(std::get<0>(realTimeCloudPoseTransposed));
 					mQueueRealtimePTMutex.lock();
 					m_QueueRealtimeCloudTrans.push(std::make_tuple(untransPosedPC.Transform(std::get<1>(realTimeCloudPoseTransposed).inverse()),
-												t265toLACCTransform.inverse() * std::get<1>(realTimeCloudPoseTransposed)));
+												T265toLACCTransform.inverse() * std::get<1>(realTimeCloudPoseTransposed)));
 					mQueueRealtimePTMutex.unlock();
 				}
 

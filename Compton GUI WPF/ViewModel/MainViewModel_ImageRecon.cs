@@ -26,7 +26,7 @@ namespace Compton_GUI_WPF.ViewModel
     {
         private RealsenseControlWrapper RealsenseControl = new RealsenseControlWrapper();
 
-        private Vector3D T265ToLACCOffset = new Vector3D(0, -0.32, -0.05);
+        private Vector3D T265ToLACCOffset = new Vector3D(0, -0.308, -0.05);
         private double t265ToLACCOffsetX;
         public double T265ToLACCOffsetX
         {
@@ -742,7 +742,7 @@ namespace Compton_GUI_WPF.ViewModel
             }
             //Trace.WriteLine("LM Data count " + tempListModeData.Count());
 
-            var (v3, c4) = ImageRecon.BPtoPointCloud(RealtimeVector3s, tempListModeData, false ,5, 0.8);
+            var (v3, c4) = ImageRecon.BPtoPointCloud(RealtimeVector3s, tempListModeData, false ,1, 0.8);
 
            // RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }

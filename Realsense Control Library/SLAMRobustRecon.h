@@ -14,7 +14,7 @@
 #define PC_FEATURE_TRANSPOS_TUPLE std::tuple<open3d::geometry::PointCloud, open3d::pipelines::registration::Feature, Eigen::Matrix4d>
 #define MAX_CORRESPONDENCE_DISTANCE_COARSE 0.10
 #define MAX_CORRESPONDENCE_DISTANCE_FINE 0.05
-#define VOXEL_SIZE 0.1
+#define VOXEL_SIZE 0.2
 
 
 class SLAMRobustRecon

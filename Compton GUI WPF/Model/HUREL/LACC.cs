@@ -257,7 +257,7 @@ namespace HUREL.Compton.LACC
                 {
                     if (lmdata.AbsorberLMDataInfo != null && lmdata.ScatterLMDataInfo != null)
                     {
-                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HHMMssFFF")},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.ScatterLMDataInfo.InteractionEnergy}," +
+                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HHMMssfff")},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.ScatterLMDataInfo.InteractionEnergy}," +
                         $",{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.AbsorberLMDataInfo.InteractionEnergy}");
                     }
                     else if (lmdata.AbsorberLMDataInfo != null && lmdata.ScatterLMDataInfo == null)

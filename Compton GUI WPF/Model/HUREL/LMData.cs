@@ -37,6 +37,7 @@ namespace HUREL.Compton
         {
             MeasurementTime = DateTime.Now;
             Type = InteractionType.CodedApature;
+            DeviceTransformMatrix = Matrix3D.Identity;
             ScatterLMDataInfo = new LMDataInfo(scatterPoint, scatterPoint, scatterEnergy);
             AbsorberLMDataInfo = null;
         }
@@ -45,6 +46,7 @@ namespace HUREL.Compton
         {
             MeasurementTime = DateTime.Now;
             Type = InteractionType.Compton;
+            DeviceTransformMatrix = Matrix3D.Identity;
             ScatterLMDataInfo = new LMDataInfo(scatterPoint, scatterPoint, scatterEnergy);
             AbsorberLMDataInfo = new LMDataInfo(absorberPoint, absorberPoint, absorberEnergy);
         }
@@ -53,6 +55,7 @@ namespace HUREL.Compton
         {
             MeasurementTime = DateTime.Now;
             Type = InteractionType.CodedApature;
+            DeviceTransformMatrix = tranformation;
             ScatterLMDataInfo = new LMDataInfo(scatterPoint, tranformation.Transform(scatterPoint), scatterEnergy);
             AbsorberLMDataInfo = null;
         }
@@ -61,6 +64,7 @@ namespace HUREL.Compton
         {
             MeasurementTime = DateTime.Now;
             Type = InteractionType.Compton;
+            DeviceTransformMatrix = tranformation;
             ScatterLMDataInfo = new LMDataInfo(scatterPoint, tranformation.Transform(scatterPoint), scatterEnergy);
             AbsorberLMDataInfo = new LMDataInfo(absorberPoint, tranformation.Transform(absorberPoint), absorberEnergy);
         }       

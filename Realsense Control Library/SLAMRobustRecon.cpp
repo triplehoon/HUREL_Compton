@@ -70,11 +70,12 @@ open3d::geometry::PointCloud SLAMRobustRecon::MultiwayRegisteration(std::vector<
 		*/
 	}
 	
-	auto outPC = std::get<0>(sumPC.RemoveStatisticalOutliers(20, 5))->VoxelDownSample(VOXEL_SIZE);
-	outPC->EstimateNormals(open3d::geometry::KDTreeSearchParamHybrid(VOXEL_SIZE * 2, 30));
-	outPC->HiddenPointRemoval(Eigen::Vector3d(0, 0, 1), 5);
+	auto outPC = *std::get<0>(sumPC.RemoveStatisticalOutliers(20, 5));
+	outPC = *outPC.VoxelDownSample(VOXEL_SIZE);
+	outPC.EstimateNormals(open3d::geometry::KDTreeSearchParamHybrid(VOXEL_SIZE * 2, 30));
+	//outPC->HiddenPointRemoval(Eigen::Vector3d(0, 0, 1), 5);
 	delete(poseGraph);
-	return *outPC;
+	return outPC;
 }
 
 

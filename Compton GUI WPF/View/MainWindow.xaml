@@ -174,11 +174,11 @@
                                 <hx:DefaultEffectsManager/>
                             </hx:Viewport3DX.EffectsManager>
                             <hx:Viewport3DX.Camera>
-                                <hx:PerspectiveCamera Position="0,2,-4" LookDirection="0,-0.2,0.5" UpDirection="0,1,0"/>
+                                <hx:PerspectiveCamera Position="0,10,3" LookDirection="0,-1,0" UpDirection="0,0,1"/>
                             </hx:Viewport3DX.Camera>
-                            <!--<hx:PointGeometryModel3D Geometry="{Binding SLAMReconPointCloud}" Color="White" FixedSize="True" Size="5,5">
-                            </hx:PointGeometryModel3D>-->
-                            <hx:PointGeometryModel3D Geometry="{Binding SLAMPointCloud}" Color="White" FixedSize="True" Size="3,3">
+                            <hx:PointGeometryModel3D Geometry="{Binding SLAMReconPointCloud}" Color="White" FixedSize="True" Size="10,10">
+                            </hx:PointGeometryModel3D>
+                            <hx:PointGeometryModel3D Geometry="{Binding SLAMPointCloud}" Color="White" FixedSize="True" Size="5,5">
                             </hx:PointGeometryModel3D>
                             <hx:LineGeometryModel3D Geometry="{Binding SLAMPoseInfo}" Color="LightGreen" Thickness="4"/>
 
