@@ -1,5 +1,6 @@
 #include "RealsenseControl.h"
 #include <mutex>
+
 static std::mutex mQueueRealtimePTMutex;
 
 RealsenseControl::RealsenseControl():IsPipeLineOn(false), IsSLAMON(false)
