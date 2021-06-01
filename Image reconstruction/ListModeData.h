@@ -1,7 +1,7 @@
 #pragma once
 
-#include <open3d/geometry/PointCloud.h>
 #include <ctime>
+#include <Eigen/Core>
 
 namespace HUREL {
 	namespace Compton {
@@ -12,14 +12,13 @@ namespace HUREL {
 			CODED			
 		};
 
+		/// <summary>
+		/// meter and MeV
+		/// </summary>
 		struct InteractionData
 		{
-			double RelativeInteractionPointX;
-			double RelativeInteractionPointY;
-			double RelativeInteractionPointZ;
-			double TransformedInteractionPointX;
-			double TransformedInteractionPointY;
-			double TransformedInteractionPointZ;			
+			Eigen::Vector3d RelativeInteractionPoint;
+			Eigen::Vector3d TransformedInteractionPoint; 	
 			double InteractionEnergy;  
 		};
 

@@ -5,7 +5,12 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <cassert>
+#include <sstream>
+#include <limits>
+
+#include <open3d/geometry/PointCloud.h>
 
 #include "EnergySpectrum.h"
 
@@ -24,11 +29,13 @@ namespace HUREL {
 				double mEnergyCalibrationB = 1;
 				double mEnergyCalibrationC = 0;
 
+				unsigned int mLutSize = 0;
 				double*** mXYLogMue = NULL;
 				double** mXYSumMu = NULL;
 
 				double mModuleOffsetX;
 				double mModuleOffsetY;
+				double mModuleOffsetZ;
 
 				double mEnergyGain[9];
 				double mMlpeGain[9];
@@ -36,28 +43,29 @@ namespace HUREL {
 				std::string mLutFileName;
 
 				EnergySpectrum mEnergySpectrum;
-				eMouduleType mMoudleType;
+				eMouduleType mModuleType;
 
 				bool mIsModuleSet;
 
 				bool LoadLUT(std::string FileName);
+				std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
 			
 			public:
 				Module(eMouduleType moduleType, 
 						double (&eGain)[9],
 						double (&mlpeGain)[9],
 						std::string lutFileName,
-						double moduleOffesetX = 0, double moduleOffsetX = 0, 
+						double moduleOffesetX = 0, double moduleOffsetX = 0, double moduleOffsetZ = 0,
 						unsigned int binSize = SPECTRUM_ENERGY_BIN_SIZE, double maxEnergy = SPECTRUM_MAX_ENERGY);
 				~Module();
 
 				const bool IsModuleSet() const;
-
 				
-				static void LoadGain(std::string FileName, eMouduleType moduleType, double* outEGain);
+				static void LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
 
-				const std::tuple<double, double, double> FastMLPosEstimation(unsigned short (&pmtADCValue)[9]) const;
-				const std::tuple<double, double, double> FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const;
+				const Eigen::Vector3d FastMLPosEstimation(unsigned short (&pmtADCValue)[9]) const;
+
+				const Eigen::Vector3d  FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const;
 
 				const double GetEcal(unsigned short(&pmtADCValue)[9]) const;
 				

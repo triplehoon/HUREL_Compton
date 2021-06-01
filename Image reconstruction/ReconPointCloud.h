@@ -11,7 +11,7 @@ namespace HUREL
 		class ReconPointCloud : open3d::geometry::PointCloud
 		{
 		public:
-			/// ReconValue;
+			/// ReconValue;		
 			std::vector<double> reconValues_;
 			void CalculateReconPoint(double(*calcFunc)(ListModeData, Eigen::Vector3d));
 

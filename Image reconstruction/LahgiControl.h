@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-
 #include "Module.h"
 #include "ListModeData.h"
 
