@@ -13,9 +13,9 @@ namespace HUREL
 		public:
 			/// ReconValue;		
 			std::vector<double> reconValues_;
-			void CalculateReconPoint(double(*calcFunc)(ListModeData, Eigen::Vector3d));
+			void CalculateReconPoint(double(*calcFunc)(ListModeData, Eigen::Vector4d));
 
-			double SimpleBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint);
+			double SimpleBackprojection(ListModeData lmData, Eigen::Vector4d imgPoint);
 			
 		};
 

@@ -10,18 +10,20 @@
 #include <sstream>
 #include <limits>
 
-#include <open3d/geometry/PointCloud.h>
+#include <Eigen/Core>
 
 #include "EnergySpectrum.h"
 
 
 namespace HUREL {
 	namespace Compton {
-		enum class eMouduleType {
+		enum class eMouduleType 
+		{
 			MONO, // Not working.
 			QUAD,
 			QUAD_DUAL
-		};
+		};		
+
 		class Module
 		{
 			private:
@@ -42,7 +44,6 @@ namespace HUREL {
 
 				std::string mLutFileName;
 
-				EnergySpectrum mEnergySpectrum;
 				eMouduleType mModuleType;
 
 				bool mIsModuleSet;
@@ -51,6 +52,7 @@ namespace HUREL {
 				std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
 			
 			public:
+				Module();
 				Module(eMouduleType moduleType, 
 						double (&eGain)[9],
 						double (&mlpeGain)[9],
@@ -59,13 +61,14 @@ namespace HUREL {
 						unsigned int binSize = SPECTRUM_ENERGY_BIN_SIZE, double maxEnergy = SPECTRUM_MAX_ENERGY);
 				~Module();
 
+				EnergySpectrum* _EnergySpectrum;
 				const bool IsModuleSet() const;
 				
 				static void LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
 
-				const Eigen::Vector3d FastMLPosEstimation(unsigned short (&pmtADCValue)[9]) const;
+				const Eigen::Vector4d FastMLPosEstimation(unsigned short (&pmtADCValue)[9]) const;
 
-				const Eigen::Vector3d  FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const;
+				const Eigen::Vector4d  FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const;
 
 				const double GetEcal(unsigned short(&pmtADCValue)[9]) const;
 				

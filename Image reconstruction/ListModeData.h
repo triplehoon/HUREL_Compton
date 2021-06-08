@@ -5,7 +5,7 @@
 
 namespace HUREL {
 	namespace Compton {
-		enum eInterationType
+		enum class eInterationType
 		{
 			NONE,
 			COMPTON,
@@ -17,8 +17,8 @@ namespace HUREL {
 		/// </summary>
 		struct InteractionData
 		{
-			Eigen::Vector3d RelativeInteractionPoint;
-			Eigen::Vector3d TransformedInteractionPoint; 	
+			Eigen::Vector4d RelativeInteractionPoint;
+			Eigen::Vector4d TransformedInteractionPoint; 	
 			double InteractionEnergy;  
 		};
 

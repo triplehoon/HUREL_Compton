@@ -150,7 +150,6 @@
   <ItemGroup>
     <ClCompile Include="EnergySpectrum.cpp" />
     <ClCompile Include="LahgiControl.cpp" />
-    <ClCompile Include="ListModeData.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="ReconPointCloud.cpp" />
   </ItemGroup>

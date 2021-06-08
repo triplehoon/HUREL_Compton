@@ -35,6 +35,8 @@ private:
 	std::queue<std::tuple<open3d::geometry::PointCloud>> m_QueueSLAMedCloudTrans;
 	Eigen::Matrix4d T265toLACCTransform;
 
+	Eigen::Matrix4d mRTTransformation;
+
 	rs2_pose m_Posedata = rs2_pose();
 	rs2::video_frame m_CurrentVideoFrame = rs2::video_frame(nullptr);
 	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> m_RTPointCloud;
@@ -55,7 +57,7 @@ private:
 	rs2::spatial_filter spat_filter;
 	rs2::temporal_filter temp_filter;
 	rs2::hole_filling_filter hole_filter;
-
+	RealsenseControl();
 
 public:
 	rs2_pose GetPoseData();
@@ -69,7 +71,11 @@ public:
 	bool IsPipeLineOn;
 	bool IsSLAMON;
 
-	RealsenseControl();
+	static RealsenseControl& instance()
+	{
+		static RealsenseControl* instance = new RealsenseControl();
+		return *instance;
+	}
 	~RealsenseControl();
 	
 	bool InitiateRealsense(std::string* outMessage);
@@ -79,5 +85,7 @@ public:
 	void SLAMPipeline();
 
 	static std::vector<double> getMatrix3DOneLineFromPoseData(rs2_pose poseData);
+
+	Eigen::Matrix4d GetPoseDataEigen();
 };
 

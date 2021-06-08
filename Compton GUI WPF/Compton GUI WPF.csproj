@@ -82,7 +82,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EnergyCalibration\EnergyCalibration.csproj" />
+    <ProjectReference Include="..\Lahgi wrapper\Lahgi wrapper.vcxproj" />
     <ProjectReference Include="..\SLAM wrapper\SLAM wrapper.vcxproj" />
   </ItemGroup>
 

@@ -207,15 +207,20 @@ namespace Compton_GUI_WPF.ViewModel
         private Task AddListModeDataTaskAsync;
         private bool IsAddingListModeData;
         private void AddListModeData()
-        {           
-
+        {
+            List<double[]> UnmanagedEcks = new List<double[]>();
+            foreach(var eck in Echks)
+            {
+                double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
+                UnmanagedEcks.Add(eckUnmanaged);
+            }
             LACC_Control_Static.ResetLMData();
             while (IsAddingListModeData)
             {
                 ushort[] item;
                 while (FPGAControl.ShortArrayQueue.TryTake(out item))
                 {
-                    
+                    LahgiWrapper_Static.AddListModeData(item, UnmanagedEcks);
                     LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, Echks, IsMLPEOn);
                     //Thread.Sleep(0);
                     

@@ -1,12 +1,13 @@
 #include "EnergySpectrum.h"
-
+#include <cassert>
 
 using namespace HUREL::Compton;
 
 
 HUREL::Compton::EnergySpectrum::EnergySpectrum(unsigned int binSize, double maxEnergy)
 {
-    int binCount = static_cast<int>(maxEnergy / binSize);
+    assert(binSize > 0);
+    int binCount = static_cast<unsigned int>(maxEnergy / binSize);
     for (unsigned long long i = 0; i < binCount; ++i)
     {
         double energy = static_cast<double>(i * binSize);
@@ -19,14 +20,6 @@ HUREL::Compton::EnergySpectrum::EnergySpectrum(unsigned int binSize, double maxE
 std::vector<BinningEnergy> HUREL::Compton::EnergySpectrum::GetHistogramEnergy()
 {
     return mHistogramEnergy;
-}
-
-HUREL::Compton::EnergySpectrum::EnergySpectrum(int binSize, double maxEnergy)
-{
-}
-
-HUREL::Compton::EnergySpectrum::EnergySpectrum()
-{
 }
 
 

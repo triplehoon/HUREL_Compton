@@ -77,7 +77,7 @@ std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose po
 	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
 	TransF.block<3, 3>(0, 0) = RMat;
 	TransF.block<3, 1>(0, 3) = TransPoseMat;
-	TransF = TransF;
+	//TransF = TransF;
 	auto Matrix3Dtype = TransF.adjoint();
 	std::vector<double> matrix3DOneLine;
 	int idx = 0;
@@ -88,6 +88,10 @@ std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose po
 		}
 	}
 	return matrix3DOneLine;
+}
+Eigen::Matrix4d RealsenseControl::GetPoseDataEigen()
+{
+	return mRTTransformation;
 }
 std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vector2f>> RealsenseControl::PCL_Conversion(const rs2::points& points, const rs2::video_frame& color, const rs2_pose& pose)
 {
@@ -373,7 +377,7 @@ void RealsenseControl::RealsensesPipeline()
 				// realTimeCloudPoseTransposed transposed from here
 				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), uv);
 
-
+				mRTTransformation = std::get<1>(realTimeCloudPoseTransposed);
 
 				
 				if (IsSLAMON &&tempPoseData.tracker_confidence >= 2)
