@@ -52,7 +52,7 @@ namespace HUREL.Compton
         }
         
         public LMData(Point3D scatterPoint, double scatterEnergy, Matrix3D tranformation)
-        {
+        {            
             MeasurementTime = DateTime.Now;
             Type = InteractionType.CodedApature;
             DeviceTransformMatrix = tranformation;

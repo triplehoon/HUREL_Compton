@@ -25,13 +25,14 @@ using HUREL.Compton.LACC;
 using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
 
+
 namespace Compton_GUI_WPF.ViewModel
 {
     public partial class MainViewModel : INotifyPropertyChanged
     {
 
         public static LACC_Control LACC_Control_Static;
-
+        public static LahgiWrapper LahgiWrapper_Static;
 
         /// <summary>
         /// Contructor
@@ -59,6 +60,9 @@ namespace Compton_GUI_WPF.ViewModel
             }
 
             
+
+
+
             InitiateRealsenseAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));          
             TestFunction("").SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
@@ -447,10 +451,21 @@ namespace Compton_GUI_WPF.ViewModel
         private bool initiating;
         private async Task InitiateLACCAsync()
         {
+
+
             if (initiating == true)
                 return;
+            VMStatus = "Initiating LAHGI";
+            initiating = true;
+            await Task.Run(()=>
+            { 
+                LahgiWrapper_Static = new LahgiWrapper(eModuleManagedType.QUAD); 
+            });
 
+            VMStatus = "Initiate LACC Done";
+            initiating = false;
 
+            return;
             initiating = true;
             IsLACCModuleInitiate = false;
             switch (this.selectedModuleInfo)
@@ -498,11 +513,15 @@ namespace Compton_GUI_WPF.ViewModel
 
         private async Task TestFunction(object t)
         {
+            for (int i = 0; i < 144; ++i)
             await Task.Run(() =>
             {
                 while (false)
                 {
-                    
+                    if (!initiating)
+                    {
+                        //LahgiWrapper_Static.AddListModeData()
+                    }
                     //Trace.WriteLine("DataInQueue count: " + FPGAControl.DataInQueue.Count);
                     //Trace.WriteLine("ParsedQueue count: " + FPGAControl.ParsedQueue.Count);                    
                     //Trace.WriteLine("ShortArrayQueue count: " + FPGAControl.ShortArrayQueue.Count);

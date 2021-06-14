@@ -27,7 +27,7 @@ namespace HUREL {
 				void StartRealsensePipelineNative();
 				void StartSLAMNative();
 
-				static  RealsenseControl* m_RealsenseControlNative = new RealsenseControl();
+				static  RealsenseControl* m_RealsenseControlNative = &RealsenseControl::instance();
 				
 			public:
 				double AverageDepth;
