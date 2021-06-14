@@ -79,7 +79,14 @@ namespace HUREL.Compton
                 Serial.WriteLine("check");
                 if (Serial.IsOpen)
                 {
-                    ReadCheck(Serial.ReadLine());
+                    try
+                    {
+                        ReadCheck(Serial.ReadLine());
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine("Readline Failed:" + e.ToString());
+                    }
                 }                
             }
         }

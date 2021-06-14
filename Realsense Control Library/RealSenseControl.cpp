@@ -1,6 +1,7 @@
 #include "RealsenseControl.h"
 #include <mutex>
 static std::mutex mQueueRealtimePTMutex;
+static std::mutex rtMutex;
 
 RealsenseControl::RealsenseControl():IsPipeLineOn(false), IsSLAMON(false)
 {
@@ -363,15 +364,17 @@ void RealsenseControl::RealsensesPipeline()
 
 
 
-				std::vector<Eigen::Vector2f> uv;
 
 
 				auto realTimeCloudPoseTransposed = PCL_Conversion(points, color, tempPoseData);
 
 
 				// realTimeCloudPoseTransposed transposed from here
-				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), uv);
+				std::vector<Eigen::Vector2f> uv = std::get<2>(realTimeCloudPoseTransposed);
+				rtMutex.lock();
 
+				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), uv);
+				rtMutex.unlock();
 
 
 				
@@ -413,10 +416,15 @@ std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> Realsense
 }
 std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> RealsenseControl::GetRTPointCloudTransposed()
 {
-	return m_RTPointCloudTransposed;
+	rtMutex.lock();
+
+	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> returnValue = m_RTPointCloudTransposed;
+	rtMutex.unlock();
+	return returnValue;
 }
 open3d::geometry::PointCloud RealsenseControl::GetSLAMEDPointCloud()
 {
+
 	return m_SLAMEDPointCloud;
 }
 open3d::geometry::PointCloud RealsenseControl::GetSLAMEDPointCloudDownSampled() {

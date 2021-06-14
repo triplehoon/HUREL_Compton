@@ -85,15 +85,22 @@ void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
+	uvs = gcnew List< array<float>^>();
 	int size;
 	if (!IsPipelineOn) {
 		return;
 	}
 
 
+	auto ptcs = m_RealsenseControlNative->GetRTPointCloudTransposed();
 
-	open3d::geometry::PointCloud points = std::get<0>(m_RealsenseControlNative->GetRTPointCloudTransposed());
-	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->GetRTPointCloudTransposed());
+
+	open3d::geometry::PointCloud points = std::get<0>(ptcs);
+
+
+	std::vector<Eigen::Vector2f> uv = std::get<1>(ptcs);
+
+
 
 
 	if (points.IsEmpty()) {
@@ -108,6 +115,9 @@ void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>
 	{
 		size = points.colors_.size();
 	}
+
+
+
 	if (uv.size() < size) {
 		size = uv.size();
 	}
@@ -117,6 +127,16 @@ void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>
 		return;
 	}
 	double averageDepth = 0.0;
+	vectors->Capacity = size;
+	colors->Capacity = size;
+	uvs->Capacity = size;
+
+	if (uv.size() != size)
+	{
+		printf("Size not same size: %d uv size: %d \n", size, uv.size());
+	}
+
+
 	for (int i = 0; i < size; ++i) {
 		array<double, 1>^ poseVector = gcnew array<double>{points.points_[i][0], points.points_[i][1], points.points_[i][2]};
 		vectors->Add(poseVector);

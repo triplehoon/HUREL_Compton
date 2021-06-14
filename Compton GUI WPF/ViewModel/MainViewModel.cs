@@ -392,15 +392,15 @@ namespace Compton_GUI_WPF.ViewModel
                 VMStatus = "Making Scatter Module";
                 for (int i = 0; i < 4; ++i)
                 {
-                    var scatterGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"EnergyGainCorrectionMatrix_scatter_{i + 1}.csv"));
-                    var scatterMlpeGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"MlpeGainCorrectionMatrix_scatter_{i + 1}.csv"));
+                    var scatterGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"GainCorrectionMatrix_447278_scatter_{i + 1}.csv"));
+                    var scatterMlpeGain = LACC_Module.LoadGain(Path.Combine(LUTFolderDirectory, $"GainCorrectionMatrix_447278_scatter_{i + 1}.csv"));
                     ModuleInfoViewModels[i] = new ModuleInfoViewModel(ModuleInfo.QuadSingleHead,
                                                 new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X + xOffset[i], y = T265ToLACCOffset.Y + yOffset[i], z = T265ToLACCOffset.Z },
                                                 new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                 scatterGain,
                                                 scatterMlpeGain,
                                                 pmtOrderInfo,
-                                                Path.Combine(LUTFolderDirectory, $"LUT9chEXP_47277_{i + 1}_20210427_1mm_step2.csv"));
+                                                Path.Combine(LUTFolderDirectory, $"LUT9chEXP_447278_{i + 1}_20210610_1mm_step2.csv"));
                 }
 
                 Debug.WriteLine("Making Abosrober Module");
