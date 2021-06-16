@@ -53,7 +53,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CLRSupport>NetCore</CLRSupport>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -80,10 +80,10 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions);_WINDLL;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Image reconstruction;$(SolutionDir)\Realsense Control Library;C:\opencv\build\include;C:\Program Files %28x86%29\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Image reconstruction;$(SolutionDir)\SLAM wrapper;$(SolutionDir)\Realsense Control Library;C:\opencv\build\include;C:\Program Files %28x86%29\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>realsense2.lib;Open3D.lib;Open3D_3rdparty_assimp_assimp-vc142-mt.lib;Open3D_3rdparty_assimp_IrrXML.lib;Open3D_3rdparty_filament_backend.lib;Open3D_3rdparty_filament_bluegl.lib;Open3D_3rdparty_filament_bluevk.lib;Open3D_3rdparty_filament_filabridge.lib;Open3D_3rdparty_filament_filaflat.lib;Open3D_3rdparty_filament_filamat_lite.lib;Open3D_3rdparty_filament_filament.lib;Open3D_3rdparty_filament_filameshio.lib;Open3D_3rdparty_filament_geometry.lib;Open3D_3rdparty_filament_ibl.lib;Open3D_3rdparty_filament_image.lib;Open3D_3rdparty_filament_meshoptimizer.lib;Open3D_3rdparty_filament_smol-v.lib;Open3D_3rdparty_filament_utils.lib;Open3D_3rdparty_glew.lib;Open3D_3rdparty_glfw3.lib;Open3D_3rdparty_imgui.lib;Open3D_3rdparty_jpeg.lib;Open3D_3rdparty_jsoncpp.lib;Open3D_3rdparty_libpng.lib;Open3D_3rdparty_lzf.lib;Open3D_3rdparty_mkl_mkl_core.lib;Open3D_3rdparty_mkl_mkl_intel_ilp64.lib;Open3D_3rdparty_mkl_mkl_sequential.lib;Open3D_3rdparty_mkl_mkl_tbb_thread.lib;Open3D_3rdparty_mkl_tbb_static.lib;Open3D_3rdparty_qhullcpp.lib;Open3D_3rdparty_qhull_r.lib;Open3D_3rdparty_rply.lib;Open3D_3rdparty_tbb_tbbmalloc_static.lib;Open3D_3rdparty_tbb_tbb_static.lib;Open3D_3rdparty_tinyfiledialogs.lib;Open3D_3rdparty_zlib.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>realsense2.lib;Open3D.lib;Open3D_3rdparty_assimp_assimp-vc142-mt.lib;Open3D_3rdparty_assimp_IrrXML.lib;Open3D_3rdparty_filament_backend.lib;Open3D_3rdparty_filament_bluegl.lib;Open3D_3rdparty_filament_bluevk.lib;Open3D_3rdparty_filament_filabridge.lib;Open3D_3rdparty_filament_filaflat.lib;Open3D_3rdparty_filament_filamat_lite.lib;Open3D_3rdparty_filament_filament.lib;Open3D_3rdparty_filament_filameshio.lib;Open3D_3rdparty_filament_geometry.lib;Open3D_3rdparty_filament_ibl.lib;Open3D_3rdparty_filament_image.lib;Open3D_3rdparty_filament_meshoptimizer.lib;Open3D_3rdparty_filament_smol-v.lib;Open3D_3rdparty_filament_utils.lib;Open3D_3rdparty_glew.lib;Open3D_3rdparty_glfw3.lib;Open3D_3rdparty_imgui.lib;Open3D_3rdparty_jpeg.lib;Open3D_3rdparty_jsoncpp.lib;Open3D_3rdparty_libpng.lib;Open3D_3rdparty_lzf.lib;Open3D_3rdparty_mkl_mkl_core.lib;Open3D_3rdparty_mkl_mkl_intel_ilp64.lib;Open3D_3rdparty_mkl_mkl_sequential.lib;Open3D_3rdparty_mkl_mkl_tbb_thread.lib;Open3D_3rdparty_mkl_tbb_static.lib;Open3D_3rdparty_qhullcpp.lib;Open3D_3rdparty_qhull_r.lib;Open3D_3rdparty_rply.lib;Open3D_3rdparty_tbb_tbbmalloc_static.lib;Open3D_3rdparty_tbb_tbb_static.lib;Open3D_3rdparty_tinyfiledialogs.lib;Open3D_3rdparty_zlib.lib;opengl32.lib;Realsense Control Library.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Open3D_MD\lib;C:\Program Files %28x86%29\Intel RealSense SDK 2.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -104,7 +104,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Image reconstruction;$(SolutionDir)\Realsense Control Library;C:\Program Files (x86)\Open3D_MDd\include\open3d\3rdparty;C:\opencv\build\include;C:\Program Files %28x86%29\Open3D_MDd\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Image reconstruction;$(SolutionDir)\SLAM wrapper;$(SolutionDir)\Realsense Control Library;C:\Program Files (x86)\Open3D_MDd\include\open3d\3rdparty;C:\opencv\build\include;C:\Program Files %28x86%29\Open3D_MDd\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>realsense2.lib;Open3D.lib;Open3D_3rdparty_assimp_assimp-vc142-mt.lib;Open3D_3rdparty_assimp_IrrXML.lib;Open3D_3rdparty_filament_backend.lib;Open3D_3rdparty_filament_bluegl.lib;Open3D_3rdparty_filament_bluevk.lib;Open3D_3rdparty_filament_filabridge.lib;Open3D_3rdparty_filament_filaflat.lib;Open3D_3rdparty_filament_filamat_lite.lib;Open3D_3rdparty_filament_filament.lib;Open3D_3rdparty_filament_filameshio.lib;Open3D_3rdparty_filament_geometry.lib;Open3D_3rdparty_filament_ibl.lib;Open3D_3rdparty_filament_image.lib;Open3D_3rdparty_filament_meshoptimizer.lib;Open3D_3rdparty_filament_smol-v.lib;Open3D_3rdparty_filament_utils.lib;Open3D_3rdparty_glew.lib;Open3D_3rdparty_glfw3.lib;Open3D_3rdparty_imgui.lib;Open3D_3rdparty_jpeg.lib;Open3D_3rdparty_jsoncpp.lib;Open3D_3rdparty_libpng.lib;Open3D_3rdparty_lzf.lib;Open3D_3rdparty_mkl_mkl_core.lib;Open3D_3rdparty_mkl_mkl_intel_ilp64.lib;Open3D_3rdparty_mkl_mkl_sequential.lib;Open3D_3rdparty_mkl_mkl_tbb_thread.lib;Open3D_3rdparty_mkl_tbb_static.lib;Open3D_3rdparty_qhullcpp.lib;Open3D_3rdparty_qhull_r.lib;Open3D_3rdparty_rply.lib;Open3D_3rdparty_tbb_tbbmalloc_static.lib;Open3D_3rdparty_tbb_tbb_static.lib;Open3D_3rdparty_tinyfiledialogs.lib;Open3D_3rdparty_zlib.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -123,13 +123,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Lahgi wrapper.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="Lahgi wrapper.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -146,9 +144,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Image reconstruction\Image reconstruction.vcxproj">
       <Project>{65c76d11-e19d-4622-b6ac-799ca0b1bf5c}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Realsense Control Library\Realsense Control Library.vcxproj">
-      <Project>{7b5c39fb-826b-4fcc-9b2e-90d025688fae}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -7,9 +7,6 @@ using namespace System;
 
 namespace HUREL {
 	namespace Compton {
-
-		
-
 		public enum class eModuleManagedType
 		{
 			MONO,
@@ -19,24 +16,30 @@ namespace HUREL {
 
 		public ref class LahgiWrapper
 		{
-			// TODO: 여기에 이 클래스에 대한 메서드를 추가합니다.
-
+		private:
 			LahgiControl& lahgiControlInstance = LahgiControl::instance();
 			RealsenseControl& realsenseControlInstance = RealsenseControl::instance();
 
 		public:
 
 			LahgiWrapper(eModuleManagedType type);
-			bool AddListModeData(array<UINT16>^ adcData, List<array<double>^>^ echks);
+			Boolean AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks);
 
 			void GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE);
 
 			void ResetListmodeData();
 
+			void GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount);
+
+			void GetSumSpectrum(List<array<double>^>^% energyCount);
+			void GetAbsorberSumSpectrum(List<array<double>^>^% energyCount);
+			void GetScatterSumSpectrum(List<array<double>^>^% energyCount);
+			void ResetSpectrum(unsigned int channelNumber);
+
 			void GetSLAMReconPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
-			
-			void GetRealTimeReconPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors, List<array<float>^>^% uvs);
+
+			void GetRealTimeReconImage(double time, List<array<double>^>^% colors, List<array<float>^>^% uvs);
 		};
 
 

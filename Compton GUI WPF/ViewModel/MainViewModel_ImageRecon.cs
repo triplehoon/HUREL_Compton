@@ -398,27 +398,11 @@ namespace Compton_GUI_WPF.ViewModel
             Thread.Sleep(2000);
             while (IsRealsensePipelineOn)
             {
-                var vc = new Vector3Collection();               
-                var cc = new Color4Collection();
-
-                var poseVect = new List<double[]>();
-                var colorVect = new List<double[]>();
-                var uvVect = new List<float[]>();
-                //Debug.WriteLine("Start to get Reatime Data");
-                try
+               try
                 {
-                    RealsenseControl.GetRealTimePointCloudTransPosed(ref poseVect, ref colorVect, ref uvVect);
-                    for (int i = 0; i < poseVect.Count; i++)
-                    {
-
-                        vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
-                        cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.8f));
-                        //id.Add(i);
-                    }
                     AveragePointCloudDepth = RealsenseControl.AverageDepth;
-                    RealtimeVector3s = vc;
-                    RealtimeUVs = uvVect;
-                    RealtimeCC = cc;
+                    Thread.Sleep(0);
+
                     //RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
 
                 }
@@ -675,13 +659,15 @@ namespace Compton_GUI_WPF.ViewModel
         {
             if (RealtimeRGB != null)
             {
-                ReconRGBPixelWidth = RealtimeRGB.PixelWidth / 10;
-                ReconRGBPixelHeight = RealtimeRGB.PixelHeight / 10;
+                ReconRGBPixelWidth = RealtimeRGB.PixelWidth  / 10;
+                ReconRGBPixelHeight = RealtimeRGB.PixelHeight / 10 ;
             }
             if (!IsRealsenseOn)
             {
                 return;
             }
+
+
 
             (SurfaceImageVector3, SurfaceImageUVs) = ImageRecon.GetImageSpaceBySurfaceFOV(ReconRGBPixelWidth, ReconRGBPixelHeight, 90, 65, 10);
             while (IsRealTimeImageReconOn)
@@ -762,36 +748,49 @@ namespace Compton_GUI_WPF.ViewModel
         private List<float[]> SurfaceImageUVs;
         private void DrawBPPointCloudToRealTimePointCloudRGB()
         {
-            List<LMData> tempListModeData = new List<LMData>();
-            if (RealtimeVector3s == null || RealtimeVector3s.Count() == 0)
-            {
-                return;
-            }
-            if (LACC_Control_Static.ListedLMData.Count == 0)
-            {
-                return;
-            }
+            List<double[]> color = new List<double[]>();
+            List<float[]> uvs = new List<float[]>();
             try
             {
-                tempListModeData = (from LM in LACC_Control_Static.ListedLMData
-                                    where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(MLPETime)
-                                    select LM).ToList();
+
+
+                LahgiWrapper_Static.GetRealTimeReconImage((double)MLPETime, ref color, ref uvs);
+
             }
             catch (NullReferenceException e)
             {
                 Debug.WriteLine(e.ToString());
                 return;
             }
-            if (tempListModeData.Count == 0)
+
+            Bitmap bitmapOut = new Bitmap(ReconRGBPixelWidth, ReconRGBPixelHeight);
+
+            for (int i = 0; i < uvs.Count; i++)
             {
-                return;
+
+                System.Drawing.Color bitMapColor = System.Drawing.Color.FromArgb(Convert.ToInt32(color[i][3] * 255),
+                    Convert.ToInt32(color[i][0] * 255),
+                    Convert.ToInt32(color[i][1] * 255),
+                    Convert.ToInt32(color[i][2] * 255));
+             
+                int u = (int)(uvs[i][0] * ReconRGBPixelWidth);
+                int v = (int)(uvs[i][1] * ReconRGBPixelHeight);
+                if (u == ReconRGBPixelWidth)
+                {
+                    --u;
+                }
+                if (v == ReconRGBPixelHeight)
+                {
+                    --v;
+                }
+
+                bitmapOut.SetPixel(u, v, bitMapColor);
+
             }
-            //Trace.WriteLine("LM Data count " + tempListModeData.Count());
-            var tempVector3s = RealtimeVector3s;
-            var tempUVs = RealtimeUVs;
-            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, true, 5, 0.7);
-            
-            ReconBitmapImage = Bitmap2BitmapImage(bitmap);
+
+
+
+            ReconBitmapImage = Bitmap2BitmapImage(bitmapOut);
             //RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
         }
 

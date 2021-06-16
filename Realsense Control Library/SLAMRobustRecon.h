@@ -1,4 +1,5 @@
 #pragma once
+
 #include <queue>
 #include <iostream>
 
@@ -19,6 +20,7 @@
 
 class SLAMRobustRecon
 {
+	
 private:
 	std::vector<PC_TRANSPOS_TUPLE> mReconPCs;
 	open3d::geometry::PointCloud mSLAMEDPointCloud;
@@ -29,6 +31,7 @@ private:
 	Eigen::Matrix4d mInitOdementry;
 
 public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	SLAMRobustRecon();
 	
 	static open3d::geometry::PointCloud MultiwayRegisteration(std::vector<open3d::geometry::PointCloud>& pcs, std::vector<Eigen::Matrix4d>& trs);

@@ -4,12 +4,12 @@
 static std::mutex mQueueRealtimePTMutex;
 static std::mutex rtMutex;
 
-RealsenseControl::RealsenseControl():IsPipeLineOn(false), IsSLAMON(false)
+RealsenseControl::RealsenseControl() :IsPipeLineOn(false), IsSLAMON(false)
 {
 	T265toLACCTransform << -1, 0, 0, 0,
-							0, 1, 0, 0,
-							0, 0, -1, 0,
-							0, 0, 0, 1;
+		0, 1, 0, 0,
+		0, 0, -1, 0,
+		0, 0, 0, 1;
 	auto stream = freopen("CONOUT$", "w", stdout);
 
 }
@@ -18,6 +18,16 @@ RealsenseControl::~RealsenseControl()
 	IsSLAMON = false;
 	IsPipeLineOn = false;
 }
+
+RealsenseControl& RealsenseControl::instance()
+{
+
+	static RealsenseControl* instance = new RealsenseControl();
+	//std::cout << "instance: " << instance << std::endl;
+	return *instance;
+
+}
+
 bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 {
 	try {
@@ -40,7 +50,7 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 		pipeT265.stop();
 	}
 	catch (const rs2::camera_disconnected_error& e)
-	{		
+	{
 		*outMessage = "Camera was disconnected! Please connect it back";
 
 		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
@@ -59,7 +69,7 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 	catch (const rs2::error& e)
 	{
 		*outMessage = "Some other error occurred!";
-		
+
 		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
 		return false;
 	}
@@ -69,8 +79,8 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 }
 std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose poseData)
 {
-	Eigen::Matrix4d S_T265toLACCTransform; 
-	
+	Eigen::Matrix4d S_T265toLACCTransform;
+
 	Eigen::Vector4d Quaternion = { poseData.rotation.w, -poseData.rotation.x ,poseData.rotation.y,-poseData.rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
 	Eigen::Vector3d	TransPoseMat = { -poseData.translation.x, poseData.translation.y, -poseData.translation.z };
@@ -92,7 +102,17 @@ std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose po
 }
 Eigen::Matrix4d RealsenseControl::GetPoseDataEigen()
 {
-	return mRTTransformation;
+
+	rs2_pose poseData = GetPoseData();
+	Eigen::Vector4d Quaternion = { poseData.rotation.w, -poseData.rotation.x ,poseData.rotation.y,-poseData.rotation.z };
+	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
+	Eigen::Vector3d	TransPoseMat = { -poseData.translation.x, poseData.translation.y, -poseData.translation.z };
+	Eigen::Matrix4d TransF; // Your Transformation Matrix
+	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
+	TransF.block<3, 3>(0, 0) = RMat;
+	TransF.block<3, 1>(0, 3) = TransPoseMat;
+
+	return TransF;
 }
 std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vector2f>> RealsenseControl::PCL_Conversion(const rs2::points& points, const rs2::video_frame& color, const rs2_pose& pose)
 {
@@ -104,7 +124,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 	auto Texture_Coord = points.get_texture_coordinates();
 	auto Vertex = points.get_vertices();
 	Eigen::Matrix4d t265toLACCTransform;
-	t265toLACCTransform  <<  -1, 0, 0, 0,
+	t265toLACCTransform << -1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, -1, 0,
 		0, 0, 0, 1;
@@ -119,7 +139,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 	TransF.block<3, 1>(0, 3) = TransPoseMat;
 	for (int i = 0; i < points.size(); i++)
 	{
-		if (Texture_Coord[i].u > 0 && Texture_Coord[i].v > 0 && Texture_Coord[i].u <1 && Texture_Coord[i].v <1)// && (Vertex[i].x) * (Vertex[i].x) + (Vertex[i].y) * (Vertex[i].y) + (Vertex[i].z) * (Vertex[i].z) < 9)
+		if (Texture_Coord[i].u > 0 && Texture_Coord[i].v > 0 && Texture_Coord[i].u < 1 && Texture_Coord[i].v < 1)// && (Vertex[i].x) * (Vertex[i].x) + (Vertex[i].y) * (Vertex[i].y) + (Vertex[i].z) * (Vertex[i].z) < 9)
 		{
 			//===================================
 			// Mapping Depth Coordinates
@@ -130,7 +150,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 			if (Vertex[i].z - D455ToT265Coord[2] < 0.5)
 				continue;*/
 			Eigen::Vector3d pointVector = { Vertex[i].x + D455ToT265Coord[0], -Vertex[i].y + D455ToT265Coord[1], -Vertex[i].z + D455ToT265Coord[2] };
-			
+
 			cloud.points_.push_back(pointVector);
 
 			RGB_Color = RGB_Texture(color, Texture_Coord[i]);
@@ -138,7 +158,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 			cloud.colors_.push_back(colorVector);
 			out_uv.push_back(Eigen::Vector2f(Texture_Coord[i].u, Texture_Coord[i].v));
 		}
-	}		
+	}
 	return std::make_tuple(cloud, t265toLACCTransform * TransF, out_uv);
 }
 
@@ -180,14 +200,14 @@ void RealsenseControl::SLAMPipeline()
 
 	int ptCount = 0;
 	int maxptCout = 5;
-	
+
 	std::vector<open3d::geometry::PointCloud> ptClouds;
 	std::vector<Eigen::Matrix4d> poses;
 	auto robustRecon = new SLAMRobustRecon();
 	int i = 1;
 
 	bool isRobustReconStart = false;
-	
+
 	while (IsSLAMON)
 	{
 		if (!m_QueueRealtimeCloudTrans.empty())
@@ -202,8 +222,8 @@ void RealsenseControl::SLAMPipeline()
 				robustRecon->StartRobustRecon(std::get<1>(ptCloudPose));
 				isRobustReconStart = true;
 			}
-			
-			
+
+
 			/// <summary>
 			/// make fragment
 			/// </summary>
@@ -219,7 +239,7 @@ void RealsenseControl::SLAMPipeline()
 				poses.clear();
 				mQueueRealtimePTMutex.lock();
 				if (m_QueueRealtimeCloudTrans.size() < maxptCout) {
-					
+
 				}
 				else {
 					for (int i = 0; i < m_QueueRealtimeCloudTrans.size() - maxptCout; ++i)
@@ -229,7 +249,7 @@ void RealsenseControl::SLAMPipeline()
 				}
 				mQueueRealtimePTMutex.unlock();
 
-				printf("done fragment MultiwayRegisteration\n");			
+				printf("done fragment MultiwayRegisteration\n");
 			}
 			else
 			{
@@ -300,19 +320,19 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
-	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
-	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
-	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
-	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 8);
+	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3f);
+	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0f);
+	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0f);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25f);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 15);
-	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4);
-	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0);
+	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4f);
+	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0f);
 
 
 
 	pipelines.clear();
-	
+
 	rs2::pipeline_profile pipe_profile_D455 = pipeD455.start(cfgD455);
 	/*auto depth_device = pipe_profile_D455.get_device().query_sensors()[0];
 	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_MEDIUM_DENSITY);
@@ -333,22 +353,22 @@ void RealsenseControl::RealsensesPipeline()
 				break;
 			}
 			rs2::points points;
-			
-			
+
+
 
 			auto color = frames.get_color_frame();
 			auto depth = frames.get_depth_frame();
 			auto pose = frames.get_pose_frame();
 
-		
+
 			if (color) {
-				m_CurrentVideoFrame = color;				
+				m_CurrentVideoFrame = color;
 				pc.map_to(color);
 			}
 			if (depth) {
 				//System::Diagnostics::Debug::WriteLine("Frame");			
 				rs2::frame depth2 = depth;
-				
+
 				depth2 = dec_filter.process(depth2);
 				depth2 = thr_filter.process(depth2);
 				depth2 = spat_filter.process(depth2);
@@ -360,7 +380,7 @@ void RealsenseControl::RealsensesPipeline()
 			}
 
 			if (points && pose_frame && color)
-			{				
+			{
 				rs2_pose tempPoseData = pose_frame.get_pose_data();
 				m_Posedata = tempPoseData;
 				rs2::pose_frame null_pose_frame(nullptr);
@@ -375,20 +395,20 @@ void RealsenseControl::RealsensesPipeline()
 
 
 				// realTimeCloudPoseTransposed transposed from here
-				std::vector<Eigen::Vector2f> uv = std::get<2>(realTimeCloudPoseTransposed);
-				rtMutex.lock();
 
-				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), uv);
+				rtMutex.lock();
+				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), std::get<2>(realTimeCloudPoseTransposed));
+				mRTTransformation = std::get<1>(realTimeCloudPoseTransposed);
 				rtMutex.unlock();
 
 
-				
-				if (IsSLAMON &&tempPoseData.tracker_confidence >= 2)
+
+				if (IsSLAMON && tempPoseData.tracker_confidence >= 2)
 				{
 					open3d::geometry::PointCloud untransPosedPC = open3d::geometry::PointCloud(std::get<0>(realTimeCloudPoseTransposed));
 					mQueueRealtimePTMutex.lock();
 					m_QueueRealtimeCloudTrans.push(std::make_tuple(untransPosedPC.Transform(std::get<1>(realTimeCloudPoseTransposed).inverse()),
-												T265toLACCTransform.inverse() * std::get<1>(realTimeCloudPoseTransposed)));
+						T265toLACCTransform.inverse() * std::get<1>(realTimeCloudPoseTransposed)));
 					mQueueRealtimePTMutex.unlock();
 				}
 
@@ -397,7 +417,7 @@ void RealsenseControl::RealsensesPipeline()
 	}
 
 
-	m_Posedata = rs2_pose();	
+	m_Posedata = rs2_pose();
 	pipeD455.stop();
 	pipeT265.stop();
 #ifdef DEBUG
@@ -408,7 +428,7 @@ void RealsenseControl::RealsensesPipeline()
 	m_CurrentVideoFrame = rs2::video_frame(nullptr);
 
 	Sleep(1000);
-	
+
 }
 rs2_pose RealsenseControl::GetPoseData() {
 	return m_Posedata;

@@ -1,6 +1,6 @@
 #pragma once
 #include "RealsenseControl.h"
-
+#include "LahgiControl.h"
 
 using namespace System;
 using namespace System::Diagnostics;
@@ -21,17 +21,20 @@ namespace HUREL {
 				Thread^ PipelineThread;
 				Thread^ SLAMThread;
 				Boolean IsInitiated;
-				Boolean^ IsPipelineOn;
+				
 				Boolean^ IsSLAMOn;
 
 				void StartRealsensePipelineNative();
 				void StartSLAMNative();
 
-				static  RealsenseControl* m_RealsenseControlNative = &RealsenseControl::instance();
+
 				
 			public:
+				static  RealsenseControl* m_RealsenseControlNative = &RealsenseControl::instance();
+
 				double AverageDepth;
 				Boolean InitiateRealsense(String^% message);
+				Boolean^ IsPipelineOn;
 
 				RealsenseControlWrapper();
 

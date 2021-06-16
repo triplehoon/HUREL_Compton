@@ -116,7 +116,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Open3D_MDd\include;C:\Program Files (x86)\Open3D_MDd\include\open3d\3rdparty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Realsense Control Library;C:\Program Files (x86)\Open3D_MDd\include;C:\Program Files (x86)\Open3D_MDd\include\open3d\3rdparty</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,7 +131,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Realsense Control Library;C:\Program Files (x86)\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -152,6 +153,11 @@
     <ClCompile Include="LahgiControl.cpp" />
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="ReconPointCloud.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Realsense Control Library\Realsense Control Library.vcxproj">
+      <Project>{7b5c39fb-826b-4fcc-9b2e-90d025688fae}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

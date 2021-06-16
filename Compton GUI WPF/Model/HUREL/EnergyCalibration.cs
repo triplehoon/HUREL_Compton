@@ -14,6 +14,13 @@ namespace HUREL.Compton
 
         }
 
+        public HistoEnergy(double energy, int count)
+        {
+            Energy = energy;
+            Count = count;
+
+        }
+
     }
     public class SpectrumEnergy
     {

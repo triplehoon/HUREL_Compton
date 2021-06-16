@@ -51,6 +51,9 @@ namespace Compton_GUI_WPF
 
         private string[] ComboboxSelectedSpectrumItems = new string[]
         {
+            "Scatter",
+            "Absorber",
+            "Sum",
             "Channel 0",
             "Channel 1",
             "Channel 2",
@@ -113,13 +116,44 @@ namespace Compton_GUI_WPF
 
         private void ComboboxSelectedSpectrum_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            Binding myBinding = new Binding();
             var channel = ((string)((System.Windows.Controls.ComboBox)sender).SelectedItem).Split(' ');
             if (channel[0] == "CZT")
             {
                 return;
             }
-            Binding myBinding = new Binding();
+
+            
+            if (channel[0] == "Absorber")
+            {
+                myBinding = new Binding();
+                //myBinding.Source = ((Compton_GUI_WPF.ViewModel.MainViewModel)(((System.Windows.Controls.ComboBox)sender).DataContext));
+                myBinding.Path = new PropertyPath($"AbsorberEnergySpectrums");
+                myBinding.Mode = BindingMode.TwoWay;
+                MainSpectrumView.SetBinding(Syncfusion.UI.Xaml.Charts.FastLineBitmapSeries.ItemsSourceProperty, myBinding);
+                return;
+            }
+
+            if (channel[0] == "Sum")
+            {
+                myBinding = new Binding();
+                //myBinding.Source = ((Compton_GUI_WPF.ViewModel.MainViewModel)(((System.Windows.Controls.ComboBox)sender).DataContext));
+                myBinding.Path = new PropertyPath($"SumEnergySpectrums");
+                myBinding.Mode = BindingMode.TwoWay;
+                MainSpectrumView.SetBinding(Syncfusion.UI.Xaml.Charts.FastLineBitmapSeries.ItemsSourceProperty, myBinding);
+                return;
+            }
+
+            if (channel[0] == "Scatter")
+            {
+                myBinding = new Binding();
+                //myBinding.Source = ((Compton_GUI_WPF.ViewModel.MainViewModel)(((System.Windows.Controls.ComboBox)sender).DataContext));
+                myBinding.Path = new PropertyPath($"ScatterEnergySpectrums");
+                myBinding.Mode = BindingMode.TwoWay;
+                MainSpectrumView.SetBinding(Syncfusion.UI.Xaml.Charts.FastLineBitmapSeries.ItemsSourceProperty, myBinding);
+                return;
+            }
+            myBinding = new Binding();
             //myBinding.Source = ((Compton_GUI_WPF.ViewModel.MainViewModel)(((System.Windows.Controls.ComboBox)sender).DataContext));
             myBinding.Path = new PropertyPath($"ModuleEnergySpectrums[{channel[1]}]");
             myBinding.Mode = BindingMode.TwoWay;

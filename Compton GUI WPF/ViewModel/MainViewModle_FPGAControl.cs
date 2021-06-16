@@ -214,14 +214,19 @@ namespace Compton_GUI_WPF.ViewModel
                 double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
                 UnmanagedEcks.Add(eckUnmanaged);
             }
-            LACC_Control_Static.ResetLMData();
+            LahgiWrapper_Static.ResetListmodeData();
+            for (uint i = 0; i < 16; ++i)
+            {
+                LahgiWrapper_Static.ResetSpectrum(i);
+            }
+            //LACC_Control_Static.ResetLMData();
             while (IsAddingListModeData)
             {
                 ushort[] item;
                 while (FPGAControl.ShortArrayQueue.TryTake(out item))
                 {
-                    LahgiWrapper_Static.AddListModeData(item, UnmanagedEcks);
-                    LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, Echks, IsMLPEOn);
+                    LahgiWrapper_Static.AddListModeDataWraper(item, UnmanagedEcks);
+                    //LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, Echks, IsMLPEOn);
                     //Thread.Sleep(0);
                     
                 }

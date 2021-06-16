@@ -1,5 +1,6 @@
 #pragma once
 
+
 #define SPECTRUM_ENERGY_BIN_SIZE 5
 #define SPECTRUM_MAX_ENERGY 3000
 
@@ -26,6 +27,7 @@ namespace HUREL {
 
 		class Module
 		{
+			
 			private:
 				double mEnergyCalibrationA = 0;
 				double mEnergyCalibrationB = 1;
@@ -39,8 +41,8 @@ namespace HUREL {
 				double mModuleOffsetY;
 				double mModuleOffsetZ;
 
-				double mEnergyGain[9];
-				double mMlpeGain[9];
+				double mEnergyGain[10];
+				double mMlpeGain[10];
 
 				std::string mLutFileName;
 
@@ -52,10 +54,11 @@ namespace HUREL {
 				std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
 			
 			public:
+				EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 				Module();
 				Module(eMouduleType moduleType, 
-						double (&eGain)[9],
-						double (&mlpeGain)[9],
+						double (&eGain)[10],
+						double (&mlpeGain)[10],
 						std::string lutFileName,
 						double moduleOffesetX = 0, double moduleOffsetX = 0, double moduleOffsetZ = 0,
 						unsigned int binSize = SPECTRUM_ENERGY_BIN_SIZE, double maxEnergy = SPECTRUM_MAX_ENERGY);

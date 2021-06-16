@@ -134,43 +134,42 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 return;
             }
-            var absorberLMData = (from LMData in LACC_Control_Static.ListedLMData
-                                  select LMData.AbsorberLMDataInfo).ToList();
-            var scatterLMData = (from LMData in LACC_Control_Static.ListedLMData
-                                 select LMData.ScatterLMDataInfo).ToList();
+
+            List<double[]> scatterXYZE = new List<double[]>();
+
+            List<double[]> absorberXYZE = new List<double[]>();
+            LahgiWrapper_Static.GetRelativeListModeData(ref scatterXYZE, ref absorberXYZE);
+
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            //AbsorberPositionData.Clear();
             var temp1 = new List<MlpePositionInfo>();
-            foreach (var lmdata in absorberLMData)
-            {
-               if (lmdata == null)
-               {
-                   continue;
-               }
-               temp1.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - T265ToLACCOffset.X, lmdata.RelativeInteractionPoint3D.Y - T265ToLACCOffset.Y));
-               if (sw.ElapsedMilliseconds > 5000)
-                {
-                    break;
-                }
-            }
-            AbsorberPositionData = temp1;
-            //ScatterPositionData.Clear();
-            var temp2 = new List<MlpePositionInfo>();
-
-            foreach (var lmdata in scatterLMData)
+            foreach (var lmdata in absorberXYZE)
             {
                 if (lmdata == null)
                 {
                     continue;
                 }
-                temp2.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - T265ToLACCOffset.X, lmdata.RelativeInteractionPoint3D.Y - T265ToLACCOffset.Y));      
+                temp1.Add(new MlpePositionInfo(lmdata[0], lmdata[1] + 0.308));
                 
             }
+            AbsorberPositionData = temp1;
+            //ScatterPositionData.Clear();
+            var temp2 = new List<MlpePositionInfo>();
+
+            foreach (var lmdata in scatterXYZE)
+            {
+                if (lmdata == null)
+                {
+                    continue;
+                }
+                temp2.Add(new MlpePositionInfo(lmdata[0], lmdata[1] + 0.308));
+
+            }
+            
             ScatterPositionData = temp2;
             sw.Stop();
-           /// Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
+            Debug.WriteLine("DrawSpectrums elapsed time is " + sw.ElapsedMilliseconds + " ms");
         }
 
 
@@ -197,34 +196,77 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private async Task ResetSpectrum()
         {
-            await Task.Run(()=>LACC_Control_Static.ResetModuleEnergy());
+            for (uint i = 0; i < 16; ++i)
+            {
+                await Task.Run(() => LahgiWrapper_Static.ResetSpectrum(i));
+            }
+            
         }
 
         public List<ObservableCollection<HistoEnergy>> ModuleEnergySpectrums { get; set; }
-        public ObservableCollection<HistoEnergy> TestModuleEnergySpectrums { get; set; } 
+        public ObservableCollection<HistoEnergy> SumEnergySpectrums { get; set; }
+        public ObservableCollection<HistoEnergy> ScatterEnergySpectrums { get; set; }
+        public ObservableCollection<HistoEnergy> AbsorberEnergySpectrums { get; set; }
         public void DrawSpectrum()
         {
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            int i = 0;
+
             if (IsLACCModuleInitiate == false)
             {
                 return;
             }
-            foreach (var data in LACC_Control_Static.LACC_Scatter_Modules)
+            List<double[]> eCounts = new List<double[]>();
+            List<HistoEnergy> histoEnergys = new List<HistoEnergy>();
+
+            for (uint i = 0; i < 16; ++i)
             {
-                ModuleEnergySpectrums[i] = new ObservableCollection<HistoEnergy>(data.SpectrumEnergy.HistoEnergies);
+                eCounts = new List<double[]>();
+                LahgiWrapper_Static.GetSpectrum(i, ref eCounts);
+
+                histoEnergys = new List<HistoEnergy>();
+
+                foreach(var eData in eCounts)
+                {
+                    histoEnergys.Add(new HistoEnergy(eData[0], (int)eData[1]));
+                }    
+
+                ModuleEnergySpectrums[(int)i] = new ObservableCollection<HistoEnergy>(histoEnergys);
                 OnPropertyChanged($"ModuleEnergySpectrums[{i}]");
-                ++i;
             }
-            i = 8;
-            foreach (var data in LACC_Control_Static.LACC_Absorber_Modules)
+
+            eCounts = new List<double[]>();
+            LahgiWrapper_Static.GetSumSpectrum(ref eCounts);
+            histoEnergys = new List<HistoEnergy>();
+            foreach (var eData in eCounts)
             {
-                ModuleEnergySpectrums[i] = new ObservableCollection<HistoEnergy>(data.SpectrumEnergy.HistoEnergies);
-                OnPropertyChanged($"ModuleEnergySpectrums[{i}]");
-                ++i;
+                histoEnergys.Add(new HistoEnergy(eData[0], (int)eData[1]));
             }
+            SumEnergySpectrums = new ObservableCollection<HistoEnergy>(histoEnergys);
+            OnPropertyChanged(nameof(SumEnergySpectrums));
+
+            eCounts = new List<double[]>();
+            LahgiWrapper_Static.GetAbsorberSumSpectrum(ref eCounts);
+            histoEnergys = new List<HistoEnergy>();
+            foreach (var eData in eCounts)
+            {
+                histoEnergys.Add(new HistoEnergy(eData[0], (int)eData[1]));
+            }
+            AbsorberEnergySpectrums = new ObservableCollection<HistoEnergy>(histoEnergys);
+            OnPropertyChanged(nameof(AbsorberEnergySpectrums));
+
+            eCounts = new List<double[]>();
+            LahgiWrapper_Static.GetScatterSumSpectrum(ref eCounts);
+            histoEnergys = new List<HistoEnergy>();
+            foreach (var eData in eCounts)
+            {
+                histoEnergys.Add(new HistoEnergy(eData[0], (int)eData[1]));
+            }
+            ScatterEnergySpectrums = new ObservableCollection<HistoEnergy>(histoEnergys);
+            OnPropertyChanged(nameof(ScatterEnergySpectrums));
+
+
             OnPropertyChanged(nameof(ModuleEnergySpectrums));
             sw.Stop();
         }
@@ -253,6 +295,8 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
         private string LUTFolderDirectory = Path.Combine(Directory.GetCurrentDirectory(), "LUT Files");
+
+        #region Mono
         public void InitiateMonoType()
         {
             if (ModuleInfoViewModels[0].IsModuleSet && ModuleInfoViewModels[8].IsModuleSet)
@@ -379,7 +423,7 @@ namespace Compton_GUI_WPF.ViewModel
 
 
         }
-
+        #endregion
         public void InitiateSingleHeadQuadType()
         {
             try
@@ -435,7 +479,6 @@ namespace Compton_GUI_WPF.ViewModel
 
 
         }
-
         public void InitiateDualHeadQuadType()
         {
             IsLACCModuleInitiate = false;
@@ -464,22 +507,22 @@ namespace Compton_GUI_WPF.ViewModel
 
             VMStatus = "Initiate LACC Done";
             initiating = false;
-
+            IsLACCModuleInitiate = true;
             return;
-            initiating = true;
-            IsLACCModuleInitiate = false;
-            switch (this.selectedModuleInfo)
-            {
-                case ModuleInfo.Mono:
-                    await Task.Run(()=>InitiateMonoType()).ConfigureAwait(false);
-                    break;
-                case ModuleInfo.QuadSingleHead:
-                    await Task.Run(() => InitiateSingleHeadQuadType()).ConfigureAwait(false);
-                    break;
-                case ModuleInfo.QuadDualHead:
-                    await Task.Run(() => InitiateDualHeadQuadType()).ConfigureAwait(false);
-                    break;
-            }
+            //initiating = true;
+            //IsLACCModuleInitiate = false;
+            //switch (this.selectedModuleInfo)
+            //{
+            //    case ModuleInfo.Mono:
+            //        await Task.Run(() => InitiateMonoType()).ConfigureAwait(false);
+            //        break;
+            //    case ModuleInfo.QuadSingleHead:
+            //        await Task.Run(() => InitiateSingleHeadQuadType()).ConfigureAwait(false);
+            //        break;
+            //    case ModuleInfo.QuadDualHead:
+            //        await Task.Run(() => InitiateDualHeadQuadType()).ConfigureAwait(false);
+            //        break;
+            //}
         }
 
         private AsyncCommand<string> ecalInfoChangedCommand;
@@ -518,10 +561,10 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 while (false)
                 {
-                    if (!initiating)
-                    {
-                        //LahgiWrapper_Static.AddListModeData()
-                    }
+                //    if (!initiating)
+                //    {
+                //        //LahgiWrapper_Static.AddListModeData()
+                //    }
                     //Trace.WriteLine("DataInQueue count: " + FPGAControl.DataInQueue.Count);
                     //Trace.WriteLine("ParsedQueue count: " + FPGAControl.ParsedQueue.Count);                    
                     //Trace.WriteLine("ShortArrayQueue count: " + FPGAControl.ShortArrayQueue.Count);

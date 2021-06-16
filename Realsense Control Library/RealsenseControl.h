@@ -1,10 +1,16 @@
 #pragma once
+
+
 #include <mutex>
 
 #define D455_H_COLOR_SIZE (1280)
 #define D455_V_COLOR_SIZE (720)
 #define D455_H_DEPTH_SIZE (848)
 #define D455_V_DEPTH_SIZE (480)
+
+#define T265_TO_LAHGI_OFFSET_X (0)
+#define T265_TO_LAHGI_OFFSET_Y (-0.308)
+#define T265_TO_LAHGI_OFFSET_Z (-0.05)
 
 #include <librealsense2/rs.hpp>
 #include <open3d/geometry/PointCloud.h>
@@ -60,6 +66,7 @@ private:
 	RealsenseControl();
 
 public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	rs2_pose GetPoseData();
 	rs2::video_frame GetCurrentVideoFrame();
 	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> GetRTPointCloud();
@@ -71,13 +78,10 @@ public:
 	bool IsPipeLineOn;
 	bool IsSLAMON;
 
-	static RealsenseControl& instance()
-	{
-		static RealsenseControl* instance = new RealsenseControl();
-		return *instance;
-	}
+
+
 	~RealsenseControl();
-	
+
 	bool InitiateRealsense(std::string* outMessage);
 
 	void RealsensesPipeline();
@@ -87,5 +91,8 @@ public:
 	static std::vector<double> getMatrix3DOneLineFromPoseData(rs2_pose poseData);
 
 	Eigen::Matrix4d GetPoseDataEigen();
+
+public:
+	static RealsenseControl& instance();
 };
 

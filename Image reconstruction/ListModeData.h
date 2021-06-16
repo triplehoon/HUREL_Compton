@@ -17,6 +17,7 @@ namespace HUREL {
 		/// </summary>
 		struct InteractionData
 		{
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			Eigen::Vector4d RelativeInteractionPoint;
 			Eigen::Vector4d TransformedInteractionPoint; 	
 			double InteractionEnergy;  
@@ -24,6 +25,7 @@ namespace HUREL {
 
 		struct ListModeData
 		{
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			eInterationType Type;
 			InteractionData Scatter;
 			InteractionData Absorber;

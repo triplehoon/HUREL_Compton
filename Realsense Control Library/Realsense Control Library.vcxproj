@@ -145,7 +145,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files (x86)\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;E:\OneDrive - 한양대학교\01.Hurel\01.현재작업\20201203 Comtpon GUI\Compton GUI Main\HUREL Compton\Realsense Control Library\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files (x86)\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include</AdditionalIncludeDirectories>
       <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>

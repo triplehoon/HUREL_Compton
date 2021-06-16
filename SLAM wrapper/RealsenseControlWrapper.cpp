@@ -8,8 +8,6 @@ Boolean RealsenseControlWrapper::InitiateRealsense(String^% message)
 {
 	std::string resultMsg;
 
-	
-
 	try 
 	{
 		System::Diagnostics::Debug::WriteLine("Initiating Realsense");
@@ -39,12 +37,9 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 	if (!IsPipelineOn) {
 		return;
 	}
-	
-
 
 	open3d::geometry::PointCloud pose = std::get<0>(m_RealsenseControlNative->GetRTPointCloud());
 	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->GetRTPointCloud());
-
 
 	if (pose.IsEmpty()) {
 		return;		
@@ -162,23 +157,42 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = *(new open3d::geometry::PointCloud(m_RealsenseControlNative->GetSLAMEDPointCloud()));
+	open3d::geometry::PointCloud pose = std::get<0>(m_RealsenseControlNative->GetRTPointCloudTransposed());// *(new open3d::geometry::PointCloud(m_RealsenseControlNative->GetSLAMEDPointCloud()));
+	
+	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->GetRTPointCloudTransposed());
+
+
+	ReconPointCloud rcPC = LahgiControl::instance().GetReconRealtimePointCloud(pose, 10);
+
+	
 	int count = 0;
-	if (pose.colors_.size() < pose.points_.size())
+	if (rcPC.colors_.size() < rcPC.points_.size())
 	{
-		count = pose.colors_.size();
+		count = rcPC.colors_.size();
 	}
 	else 
 	{
-		count = pose.points_.size();
+		count = rcPC.points_.size();
 	}
+
+	double maxValue = -DBL_MAX;
+	for (unsigned int i = 0; i < rcPC.points_.size(); ++i)
+	{
+		if (maxValue < rcPC.reconValues_[i])
+		{
+			maxValue = rcPC.reconValues_[i];
+		}
+	}
+
+	vectors->Capacity = count;
+	colors->Capacity = count;
 
 
 	for (int i = 0; i < count - 1; i++) {
-		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
+		array<double, 1>^ poseVector = gcnew array<double>{rcPC.points_[i][0], rcPC.points_[i][1], rcPC.points_[i][2]};
 		vectors->Add(poseVector);
-
-		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
+		RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.8, maxValue);
+		array<double, 1>^ colorVector = gcnew array<double>{color.R, color.G, color.B};
 		colors->Add(colorVector);
 	}
 }

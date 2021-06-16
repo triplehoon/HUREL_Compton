@@ -16,7 +16,7 @@ HUREL::Compton::Module::Module() :
     *mMlpeGain = { 0, };
 }
 
-HUREL::Compton::Module::Module(eMouduleType moduleType, double(&eGain)[9], double(&mlpeGain)[9], std::string lutFileName, double moduleOffsetX, double moduleOffsetY, double moduleOffsetZ, unsigned int binSize, double maxEnergy):
+HUREL::Compton::Module::Module(eMouduleType moduleType, double(&eGain)[10], double(&mlpeGain)[10], std::string lutFileName, double moduleOffsetX, double moduleOffsetY, double moduleOffsetZ, unsigned int binSize, double maxEnergy):
     mModuleType(moduleType),
     mLutFileName(lutFileName),
 	mModuleOffsetX(moduleOffsetX),
@@ -25,7 +25,7 @@ HUREL::Compton::Module::Module(eMouduleType moduleType, double(&eGain)[9], doubl
 	mIsModuleSet(false),
     _EnergySpectrum(new EnergySpectrum(binSize, maxEnergy))
 {
-	for (int i = 0; i < 9; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		mEnergyGain[i] = eGain[i];
 		mMlpeGain[i] = mlpeGain[i];
@@ -225,7 +225,7 @@ void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
         break;
     }
 
-    while (io.eof())
+    while (!io.eof())
     {
         string line;
 
@@ -238,10 +238,12 @@ void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
         int i = 0;
         while (std::getline(lineStream, val, ','))
         {       
-            assert(i < pmtCounts);
+            assert(i < pmtCounts + 1);
             outEGain[i] = stod(val);
+            ++i;
         }      
     }
+    io.close();
 }
 
 const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(unsigned short(&pmtADCValue)[9]) const
@@ -276,7 +278,8 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(unsigned short
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize5, get<0>(maxPoint) - gridSize4, get<0>(maxPoint) + gridSize4, get<1>(maxPoint) - gridSize4, get<1>(maxPoint) + gridSize4, normalizedPMTValue);
 
     Eigen::Vector4d point;
-    point[0] = (static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize) / 2) / 1000 + mModuleOffsetX;
+
+    point[0] = -(static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize) / 2) / 1000 + mModuleOffsetX;
     point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize) / 2) / 1000 + mModuleOffsetY;
     point[2] = mModuleOffsetZ;
     point[3] = 1;
@@ -302,7 +305,7 @@ const double HUREL::Compton::Module::GetEcal(unsigned short(&pmtADCValue)[9]) co
     {
         return static_cast<double>(NAN);
     }
-
+    sumEnergy += mEnergyGain[9];
     return mEnergyCalibrationA * sumEnergy * sumEnergy + mEnergyCalibrationB * sumEnergy + mEnergyCalibrationC;
 }
 
