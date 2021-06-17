@@ -170,23 +170,17 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 		break;
 	case HUREL::Compton::eMouduleType::QUAD:
 	{
-		unsigned short scatterShorts[4][9];
-		unsigned short absorberShorts[4][9];
+		const unsigned short* scatterShorts[4];
+		const unsigned short* absorberShorts[4];
 
 		for (int i = 0; i < 4; ++i)
 		{
-			for (int j = 0; j < 9; ++j)
-			{
-				scatterShorts[i][j] = byteData[i * 9 + j];
-			}
+			scatterShorts[i] = &byteData[i * 9];
 		}
 
 		for (int i = 8; i < 12; ++i)
 		{
-			for (int j = 0; j < 9; ++j)
-			{
-				absorberShorts[i - 8][j] = byteData[i * 9 + j];
-			}
+			absorberShorts[i - 8] = &byteData[i * 9];
 		}
 
 
