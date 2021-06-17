@@ -42,6 +42,7 @@ private:
 	Eigen::Matrix4d T265toLACCTransform;
 
 	Eigen::Matrix4d mRTTransformation;
+	Eigen::Matrix4d mRTTransformationTrue;
 
 	rs2_pose m_Posedata = rs2_pose();
 	rs2::video_frame m_CurrentVideoFrame = rs2::video_frame(nullptr);

@@ -69,11 +69,11 @@ namespace HUREL {
 				
 				static void LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
 
-				const Eigen::Vector4d FastMLPosEstimation(unsigned short (&pmtADCValue)[9]) const;
+				const Eigen::Vector4d FastMLPosEstimation(const unsigned short pmtADCValue[]) const;
 
 				const Eigen::Vector4d  FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const;
 
-				const double GetEcal(unsigned short(&pmtADCValue)[9]) const;
+				const double GetEcal(const unsigned short pmtADCValue[]) const;
 				
 				/// <summary>
 				/// E = a*x^2 + b*x + c
