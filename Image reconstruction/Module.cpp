@@ -246,7 +246,7 @@ void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
     io.close();
 }
 
-const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(unsigned short(&pmtADCValue)[9]) const
+const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned short pmtADCValue[]) const
 {
 
     std::tuple<unsigned int, unsigned int> maxPoint;
@@ -292,7 +292,7 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(unsigned short
     return Eigen::Vector4d(0,0,0, 1);
 }
 
-const double HUREL::Compton::Module::GetEcal(unsigned short(&pmtADCValue)[9]) const
+const double HUREL::Compton::Module::GetEcal(const unsigned short pmtADCValue[]) const
 {
     double sumEnergy = 0;
     unsigned short checkZero = 0;

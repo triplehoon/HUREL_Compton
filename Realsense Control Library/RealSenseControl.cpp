@@ -103,7 +103,7 @@ std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose po
 Eigen::Matrix4d RealsenseControl::GetPoseDataEigen()
 {	
 	rtMutex.lock();
-	Eigen::Matrix4d TransF = mRTTransformation;
+	Eigen::Matrix4d TransF = mRTTransformationTrue;
 	rtMutex.unlock();
 	return TransF;
 }
@@ -394,8 +394,8 @@ void RealsenseControl::RealsensesPipeline()
 				Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
 				Eigen::Vector3d	TransPoseMat = { -m_Posedata.translation.x, m_Posedata.translation.y, -m_Posedata.translation.z };
 				Eigen::Matrix4d TransF; // Your Transformation Matrix
-				mRTTransformation.block<3, 3>(0, 0) = RMat;
-				mRTTransformation.block<3, 1>(0, 3) = TransPoseMat;
+				mRTTransformationTrue.block<3, 3>(0, 0) = RMat;
+				mRTTransformationTrue.block<3, 1>(0, 3) = TransPoseMat;
 				
 				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), std::get<2>(realTimeCloudPoseTransposed));
 				mRTTransformation = std::get<1>(realTimeCloudPoseTransposed);
