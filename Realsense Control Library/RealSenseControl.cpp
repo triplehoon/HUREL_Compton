@@ -101,17 +101,10 @@ std::vector<double> RealsenseControl::getMatrix3DOneLineFromPoseData(rs2_pose po
 	return matrix3DOneLine;
 }
 Eigen::Matrix4d RealsenseControl::GetPoseDataEigen()
-{
-
-	rs2_pose poseData = GetPoseData();
-	Eigen::Vector4d Quaternion = { poseData.rotation.w, -poseData.rotation.x ,poseData.rotation.y,-poseData.rotation.z };
-	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
-	Eigen::Vector3d	TransPoseMat = { -poseData.translation.x, poseData.translation.y, -poseData.translation.z };
-	Eigen::Matrix4d TransF; // Your Transformation Matrix
-	TransF.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
-	TransF.block<3, 3>(0, 0) = RMat;
-	TransF.block<3, 1>(0, 3) = TransPoseMat;
-
+{	
+	rtMutex.lock();
+	Eigen::Matrix4d TransF = mRTTransformation;
+	rtMutex.unlock();
 	return TransF;
 }
 std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vector2f>> RealsenseControl::PCL_Conversion(const rs2::points& points, const rs2::video_frame& color, const rs2_pose& pose)
@@ -397,6 +390,13 @@ void RealsenseControl::RealsensesPipeline()
 				// realTimeCloudPoseTransposed transposed from here
 
 				rtMutex.lock();
+				Eigen::Vector4d Quaternion = { m_Posedata.rotation.w, -m_Posedata.rotation.x ,m_Posedata.rotation.y,-m_Posedata.rotation.z };
+				Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
+				Eigen::Vector3d	TransPoseMat = { -m_Posedata.translation.x, m_Posedata.translation.y, -m_Posedata.translation.z };
+				Eigen::Matrix4d TransF; // Your Transformation Matrix
+				mRTTransformation.block<3, 3>(0, 0) = RMat;
+				mRTTransformation.block<3, 1>(0, 3) = TransPoseMat;
+				
 				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), std::get<2>(realTimeCloudPoseTransposed));
 				mRTTransformation = std::get<1>(realTimeCloudPoseTransposed);
 				rtMutex.unlock();

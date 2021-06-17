@@ -27,14 +27,12 @@ HUREL::Compton::LahgiWrapper::LahgiWrapper(eModuleManagedType type)
 
 Boolean HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks)
 {
-	unsigned short adcS[144];
-	for (int i = 0; i < 144; ++i)
-	{
-		adcS[i] = adcData[i];
-	}
+	pin_ptr<unsigned short> intParamsPtr = &adcData[0];
+
+	unsigned short* adcS = intParamsPtr;
 
 	std::vector<sEnergyCheck> eChkUnmanagedVector;
-	
+	eChkUnmanagedVector.resize(echks->Count);
 	for each (array<double>^ e in echks)
 	{
 		sEnergyCheck eChkUnmanaged;

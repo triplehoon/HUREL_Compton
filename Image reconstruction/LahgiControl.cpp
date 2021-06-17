@@ -9,7 +9,7 @@ using namespace Compton;
 
 
 
-ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double scatterEnergy, double absorberEnergy, Eigen::Matrix4d& transformation)
+ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation)
 {
 	InteractionData scatter;
 	InteractionData absorber;
@@ -53,6 +53,7 @@ HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
 
 void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 {
+	mListedListModeData.resize(50000);
 	mSumSpectrum = EnergySpectrum(5, 3000);
 	mScatterSumSpectrum = EnergySpectrum(5, 3000);
 	mAbsorberSumSpectrum = EnergySpectrum(5, 3000);
@@ -157,10 +158,12 @@ HUREL::Compton::LahgiControl::~LahgiControl()
 	delete[] mAbsorberModules;
 }
 
-void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsigned short(byteData)[144], std::vector<sEnergyCheck> eChk)
+void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk)
 {
 	Eigen::Matrix4d deviceTransformation = RealsenseControl::instance().GetPoseDataEigen();
 	
+
+
 	switch (mModuleType)
 	{
 	case HUREL::Compton::eMouduleType::MONO:
@@ -246,7 +249,6 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 				{
 					if (sEnergy < eChk[i].maxE && sEnergy> eChk[i].minE)
 					{
-
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
 						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
 						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
@@ -408,6 +410,7 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 void HUREL::Compton::LahgiControl::ResetListedListModeData()
 {
 	mListedListModeData.clear();
+	mListedListModeData.resize(50000);
 }
 
 void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)

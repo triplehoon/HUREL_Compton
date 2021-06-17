@@ -20,6 +20,7 @@ namespace HUREL {
 			LahgiControl& lahgiControlInstance = LahgiControl::instance();
 			RealsenseControl& realsenseControlInstance = RealsenseControl::instance();
 
+
 		public:
 
 			LahgiWrapper(eModuleManagedType type);

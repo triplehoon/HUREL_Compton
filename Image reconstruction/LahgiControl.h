@@ -32,7 +32,7 @@ namespace HUREL {
 			EnergySpectrum mScatterSumSpectrum;
 			EnergySpectrum mAbsorberSumSpectrum;
 			LahgiControl();
-			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double scatterEnergy, double absorberEnergy, Eigen::Matrix4d& transformation);
+			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation);
 
 			public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -43,7 +43,7 @@ namespace HUREL {
 			
 			~LahgiControl();
 			void AddListModeData(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk);
-			void AddListModeDataWithTransformation(const unsigned short(byteData)[144], std::vector<sEnergyCheck> eChk);
+			void AddListModeDataWithTransformation(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk);
 			eMouduleType GetDetectorType();
 
 			const std::vector<ListModeData> GetListedListModeData() const;
