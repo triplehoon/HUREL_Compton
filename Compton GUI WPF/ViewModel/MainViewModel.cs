@@ -21,6 +21,7 @@ using Compton_GUI_WPF.View;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using HUREL.Compton;
+using HUREL.Compton.CZT;
 using HUREL.Compton.LACC;
 using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
@@ -59,10 +60,16 @@ namespace Compton_GUI_WPF.ViewModel
                 ModuleInfoViewModels.Add(new ModuleInfoViewModel());
             }
 
-            
+            if (SRE3021API.IsTCPOpen && SRE3021API.IsUDPOpen)
+            {
+                Trace.WriteLine("SRE3021 Loading Successs");
+            }
 
 
 
+
+
+            InitiateCZTAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             InitiateRealsenseAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));          
             TestFunction("").SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
@@ -198,7 +205,11 @@ namespace Compton_GUI_WPF.ViewModel
         {
             for (uint i = 0; i < 16; ++i)
             {
-                await Task.Run(() => LahgiWrapper_Static.ResetSpectrum(i));
+                await Task.Run(() =>{
+                    LahgiWrapper_Static.ResetSpectrum(i);
+                    CZTSpectrumEnergy.Reset();
+                }) ;
+
             }
             
         }

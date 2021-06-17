@@ -521,7 +521,7 @@ HUREL::Compton::ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePo
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{
 
-		if (t - tempLMData[i].InterationTime < static_cast<UINT64>(seconds))
+		if (t - tempLMData[i].InterationTime < static_cast<__int64>(seconds))
 		{
 			reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleBackprojection);
 		}

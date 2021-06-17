@@ -117,6 +117,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Realsense Control Library;C:\Program Files (x86)\Open3D_MDd\include;C:\Program Files (x86)\Open3D_MDd\include\open3d\3rdparty</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

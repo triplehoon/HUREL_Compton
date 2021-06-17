@@ -165,7 +165,7 @@ bool HUREL::Compton::Module::LoadLUT(std::string fileName)
         mXYSumMu[i] = new double[mLutSize];     
     }
     
-    lutData[lutData.size() - 1][0];
+    
     for (int i = 0; i < lutData.size(); ++i)
     {
         int x = static_cast<int>(lutData[i][0]);

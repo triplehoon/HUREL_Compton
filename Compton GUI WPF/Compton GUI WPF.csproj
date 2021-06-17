@@ -83,11 +83,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SLAM wrapper\SLAM wrapper.vcxproj" />
+    <ProjectReference Include="..\SRE3021 API\SRE3021 API.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="CyUSB">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\application\c_sharp\controlcenter\bin\Release\CyUSB.dll</HintPath>
+      <HintPath>bin\x64\Release\net5.0-windows\CyUSB.dll</HintPath>
     </Reference>
     <Reference Include="SRE3021 API">
       <HintPath>C:\Users\triplehoon\source\repos\SRE3021 CZT API\SRE3021 API\bin\Release\net5.0\SRE3021 API.dll</HintPath>
