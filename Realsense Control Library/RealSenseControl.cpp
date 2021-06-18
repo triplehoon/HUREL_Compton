@@ -330,7 +330,10 @@ void RealsenseControl::RealsensesPipeline()
 	/*auto depth_device = pipe_profile_D455.get_device().query_sensors()[0];
 	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_MEDIUM_DENSITY);
 	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);*/
-	pipeT265.start(cfgT265);
+
+	rs2::pipeline_profile t265Profile = pipeT265.start(cfgT265);
+	rs2::pose_sensor t265 = t265Profile.get_device().first<rs2::pose_sensor>();
+	t265.set_option(RS2_OPTION_ENABLE_RELOCALIZATION, 0);
 	pipelines.emplace_back(pipeD455);
 	pipelines.emplace_back(pipeT265);
 
