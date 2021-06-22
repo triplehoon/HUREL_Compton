@@ -87,7 +87,7 @@ void HUREL::Compton::LahgiWrapper::GetSpectrum(unsigned int channelNumer, List<a
 
 	for (int i = 0; i < eSpect.size(); ++i)
 	{
-		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, eSpect[i].Count};
+		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
 		energyCount->Add(tempECount);
 	}
 }
@@ -101,7 +101,7 @@ void HUREL::Compton::LahgiWrapper::GetSumSpectrum(List<array<double>^>^% energyC
 
 	for (int i = 0; i < eSpect.size(); ++i)
 	{
-		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, eSpect[i].Count};
+		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
 		energyCount->Add(tempECount);
 	}
 }
@@ -115,7 +115,7 @@ void HUREL::Compton::LahgiWrapper::GetAbsorberSumSpectrum(List<array<double>^>^%
 
 	for (int i = 0; i < eSpect.size(); ++i)
 	{
-		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, eSpect[i].Count};
+		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
 		energyCount->Add(tempECount);
 	}
 }
@@ -129,7 +129,7 @@ void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrum(List<array<double>^>^% 
 
 	for (int i = 0; i < eSpect.size(); ++i)
 	{
-		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, eSpect[i].Count};
+		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
 		energyCount->Add(tempECount);
 	}
 }
@@ -144,7 +144,7 @@ void HUREL::Compton::LahgiWrapper::GetSLAMReconPointCloud(List<array<double>^>^%
 	throw gcnew System::NotImplementedException();
 }
 
-void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, List<array<double>^>^% colorAlphas, List<array<float>^>^% uvs)
+void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, List<array<double>^>^% colorAlphas, List<array<float>^>^% uvs, eReconType reconType)
 {
 	colorAlphas = gcnew List< array<double>^>();
 	uvs = gcnew List< array<float>^>();
@@ -160,9 +160,22 @@ void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, List<array
 	auto rtPC =  realsenseControlInstance.GetRTPointCloudTransposed();
 	open3d::geometry::PointCloud pose = std::get<0>(rtPC);
 	std::vector<Eigen::Vector2f> uv = std::get<1>(rtPC);
+	ReconPointCloud rcPC;
+	switch (reconType)
+	{
+	case HUREL::Compton::eReconType::CODED:
+		rcPC = lahgiControlInstance.GetReconRealtimePointCloudCoded(pose, time);
+		break;
+	case HUREL::Compton::eReconType::COMPTON:
+		rcPC = lahgiControlInstance.GetReconRealtimePointCloudCompton(pose, time);
+		break;
+	case HUREL::Compton::eReconType::HYBRID:
+		break;
+	default:
+		break;
+	}
 
-
-	ReconPointCloud rcPC = lahgiControlInstance.GetReconRealtimePointCloud(pose, time);
+	
 
 
 	if (pose.IsEmpty()) {

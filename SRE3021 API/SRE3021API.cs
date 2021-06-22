@@ -1134,6 +1134,7 @@ namespace HUREL.Compton.CZT
     public record SRE3021ImageData(int CathodeValue, int CathodeTiming, int[,] AnodeValue, int[,] AnodeTiming);
     public static class SRE3021API
     {
+        
         public static List<SRE3021SysReg> SRE3021SysRegisters = new List<SRE3021SysReg>();
 
         static SRE3021API()

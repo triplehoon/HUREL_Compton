@@ -128,7 +128,7 @@ void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>
 
 	if (uv.size() != size)
 	{
-		printf("Size not same size: %d uv size: %d \n", size, uv.size());
+		printf("Size not same size: %d uv size: %d \n", static_cast<int>(size), static_cast<int>(uv.size()));
 	}
 
 
@@ -162,7 +162,7 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->GetRTPointCloudTransposed());
 
 
-	ReconPointCloud rcPC = LahgiControl::instance().GetReconRealtimePointCloud(pose, 10);
+	ReconPointCloud rcPC = LahgiControl::instance().GetReconRealtimePointCloudCompton(pose, 10);
 
 	
 	int count = 0;
@@ -275,7 +275,6 @@ Boolean RealsenseControlWrapper::ResetPipeline(String^% msg)
 	this->StopRealsensePipeline();
 	this->StartRealsensePipeline(msg);
 	return true;
-	// TODO: insert return statement here
 }
 
 void RealsenseControlWrapper::StartRealsensePipelineNative()

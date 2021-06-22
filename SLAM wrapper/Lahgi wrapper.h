@@ -14,6 +14,13 @@ namespace HUREL {
 			QUAD_DUAL
 		};
 
+		public enum class eReconType
+		{
+			CODED,
+			COMPTON,
+			HYBRID
+		};
+
 		public ref class LahgiWrapper
 		{
 		private:
@@ -40,7 +47,7 @@ namespace HUREL {
 			void GetSLAMReconPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
 
-			void GetRealTimeReconImage(double time, List<array<double>^>^% colors, List<array<float>^>^% uvs);
+			void GetRealTimeReconImage(double time, List<array<double>^>^% colors, List<array<float>^>^% uvs, eReconType reconType);
 		};
 
 

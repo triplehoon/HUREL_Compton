@@ -20,7 +20,12 @@ namespace Compton_GUI_WPF.ViewModel
 
         private async Task InitiateCZTAsync()
         {
-            SRE3021API.IMGDataEventRecieved += ProcessImgData;
+            if (!SRE3021API.IsTCPOpen || !SRE3021API.IsUDPOpen)
+            {
+                return;
+            }
+
+                SRE3021API.IMGDataEventRecieved += ProcessImgData;
 
             await Task.Run(() =>
             {

@@ -19,6 +19,7 @@ using AsyncAwaitBestPractices.MVVM;
 using System.Windows;
 using System.Windows.Threading;
 using System.Windows.Interop;
+using System.Collections.ObjectModel;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -743,7 +744,33 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged(nameof(ReconBitmapImage));
             }
         }
+        private eReconType selectReconType = eReconType.COMPTON;
+        public eReconType SelectReconType
+        {
+            get
+            {
+                return selectReconType;
+            }
+            set
+            {
+                selectReconType = value;
+                OnPropertyChanged(nameof(SelectReconType));
+            }
+        }
 
+        private ObservableCollection<eReconType> selectReconTypes = new ObservableCollection<eReconType>(new eReconType[] { eReconType.COMPTON, eReconType.CODED, eReconType.HYBRID });
+        public ObservableCollection<eReconType> SelectReconTypes
+        {
+            get
+            {
+                return selectReconTypes;
+            }
+            set
+            {
+                selectReconTypes = value;
+                OnPropertyChanged(nameof(SelectReconTypes));
+            }
+        }
         private Vector3Collection SurfaceImageVector3;
         private List<float[]> SurfaceImageUVs;
         private void DrawBPPointCloudToRealTimePointCloudRGB()
@@ -754,7 +781,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
 
 
-                LahgiWrapper_Static.GetRealTimeReconImage((double)MLPETime, ref color, ref uvs);
+                LahgiWrapper_Static.GetRealTimeReconImage((double)MLPETime, ref color, ref uvs, selectReconType);
 
             }
             catch (NullReferenceException e)

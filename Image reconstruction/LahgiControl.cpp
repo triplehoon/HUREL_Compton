@@ -37,18 +37,18 @@ ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationTyp
 	return listmodeData;
 }
 
-HUREL::Compton::LahgiControl::LahgiControl():
-mAbsorberModules(NULL),
-mScatterModules(NULL),
-mModuleType(HUREL::Compton::eMouduleType::MONO)
+HUREL::Compton::LahgiControl::LahgiControl() :
+	mAbsorberModules(NULL),
+	mScatterModules(NULL),
+	mModuleType(HUREL::Compton::eMouduleType::MONO)
 {
 
 }
 
 HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
 {
-		static LahgiControl* instance = new LahgiControl();
-		return *instance;
+	static LahgiControl* instance = new LahgiControl();
+	return *instance;
 }
 
 void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
@@ -65,32 +65,32 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		break;
 	case HUREL::Compton::eMouduleType::QUAD:
 	{	mScatterModules = new Module * [4];
-		mAbsorberModules = new Module * [4];
-		double offset = 0.083;
+	mAbsorberModules = new Module * [4];
+	double offset = 0.083;
 
-		double xOffset[4]{ -offset, +offset, -offset, +offset };
-		double yOffset[4]{ -offset, -offset, +offset, +offset };
-		for (int i = 0; i < 4; ++i)
-		{
-			string slutFileDirectory = string("config\\QUAD\\Scatter\\LUT\\") + to_string(i) + string(".csv");
-			string sgainFileDirectory = string("config\\QUAD\\Scatter\\Gain\\") + to_string(i) + string(".csv");
+	double xOffset[4]{ -offset, +offset, -offset, +offset };
+	double yOffset[4]{ -offset, -offset, +offset, +offset };
+	for (int i = 0; i < 4; ++i)
+	{
+		string slutFileDirectory = string("config\\QUAD\\Scatter\\LUT\\") + to_string(i) + string(".csv");
+		string sgainFileDirectory = string("config\\QUAD\\Scatter\\Gain\\") + to_string(i) + string(".csv");
 
-			string alutFileDirectory = string("config\\QUAD\\Absorber\\LUT\\") + to_string(i) + string(".csv");
-			string againFileDirectory = string("config\\QUAD\\Absorber\\Gain\\") + to_string(i) + string(".csv");
-
-
-			double gain[10];
-			Module::LoadGain(sgainFileDirectory, type, gain);
+		string alutFileDirectory = string("config\\QUAD\\Absorber\\LUT\\") + to_string(i) + string(".csv");
+		string againFileDirectory = string("config\\QUAD\\Absorber\\Gain\\") + to_string(i) + string(".csv");
 
 
-			double offsetZ = -(0.235);
-			mScatterModules[i] = new Module(eMouduleType::QUAD, gain, gain, slutFileDirectory, xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, T265_TO_LAHGI_OFFSET_Z);
+		double gain[10];
+		Module::LoadGain(sgainFileDirectory, type, gain);
 
-			Module::LoadGain(againFileDirectory, type, gain);
-			mAbsorberModules[i] = new Module(eMouduleType::QUAD, gain, gain, alutFileDirectory, xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, offsetZ + T265_TO_LAHGI_OFFSET_Z);
-		}
-		break;
-		}
+
+		double offsetZ = -(0.235);
+		mScatterModules[i] = new Module(eMouduleType::QUAD, gain, gain, slutFileDirectory, xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, T265_TO_LAHGI_OFFSET_Z);
+
+		Module::LoadGain(againFileDirectory, type, gain);
+		mAbsorberModules[i] = new Module(eMouduleType::QUAD, gain, gain, alutFileDirectory, xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, offsetZ + T265_TO_LAHGI_OFFSET_Z);
+	}
+	break;
+	}
 	case HUREL::Compton::eMouduleType::QUAD_DUAL:
 	{
 		//double offset = 0.083;
@@ -120,7 +120,7 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 
 		//}
 		break;
-		}
+	}
 	default:
 		assert(false);
 		break;
@@ -161,7 +161,7 @@ HUREL::Compton::LahgiControl::~LahgiControl()
 void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk)
 {
 	Eigen::Matrix4d deviceTransformation = RealsenseControl::instance().GetPoseDataEigen();
-	
+
 
 
 	switch (mModuleType)
@@ -272,7 +272,6 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 	}
 }
 
-
 void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk)
 {
 	switch (mModuleType)
@@ -377,19 +376,18 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 
 
 		break;
-		}
+	}
 	case HUREL::Compton::eMouduleType::QUAD_DUAL:
 	{
 		break;
-		}
+	}
 	default:
 	{
 		//Do nothing
 		break;
-		}
+	}
 	}
 }
-
 
 HUREL::Compton::eMouduleType HUREL::Compton::LahgiControl::GetDetectorType()
 {
@@ -508,7 +506,7 @@ void HUREL::Compton::LahgiControl::ResetEnergySpectrum(int fpgaChannelNumber)
 	}
 	return;
 }
-HUREL::Compton::ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloud(open3d::geometry::PointCloud& outPC, double seconds)
+ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCoded(open3d::geometry::PointCloud& outPC, double seconds)
 {
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
 
@@ -517,18 +515,133 @@ HUREL::Compton::ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePo
 	std::cout << "Start Recon: " << tempLMData.size() << std::endl;
 	std::cout << "Start Recon: " << reconPC.points_.size() << std::endl;
 
-	#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{
 
 		if (t - tempLMData[i].InterationTime < static_cast<__int64>(seconds))
 		{
-			reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleBackprojection);
+			reconPC.CalculateReconPoint(tempLMData[i], SimpleCodedBackprojection);
 		}
-		
+
 	}
 	std::cout << "End Recon: " << tempLMData.size() << std::endl;
 
 
 	return reconPC;
+}
+HUREL::Compton::ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(open3d::geometry::PointCloud& outPC, double seconds)
+{
+	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
+
+	time_t t = time(NULL);
+	std::vector<ListModeData> tempLMData = mListedListModeData;
+	std::cout << "Start Recon: " << tempLMData.size() << std::endl;
+	std::cout << "Start Recon: " << reconPC.points_.size() << std::endl;
+
+#pragma omp parallel for
+	for (int i = 0; i < tempLMData.size(); ++i)
+	{
+
+		if (t - tempLMData[i].InterationTime < static_cast<__int64>(seconds))
+		{
+			reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleComptonBackprojection);
+		}
+
+	}
+	std::cout << "End Recon: " << tempLMData.size() << std::endl;
+
+
+	return reconPC;
+}
+
+double HUREL::Compton::LahgiControl::mCalcMuOnCodedMask(double x, double y)
+{
+	assert(false);
+	double pixelSize = 0.01;
+	unsigned int indexX = UINT_MAX;
+	unsigned int indexY = UINT_MAX;
+	if (pow(x, 2) + pow(y, 2) < pow(0.58, 2))
+	{
+		//inside Circle
+		if (abs(x) < 0.135 && abs(y) < 0.135)
+		{
+			indexX = static_cast<unsigned int>(x / pixelSize + 13.5 + 0.5);
+			indexY = static_cast<unsigned int>(y / pixelSize + 13.5 + 0.5);
+			assert(indexX < 37);
+			assert(indexY < 37);
+
+			return mCodeMask[indexX][indexY];
+		}
+		else
+		{
+			//But outside CM
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+
+}
+
+double HUREL::Compton::LahgiControl::mCalcIsPassOnCodedMask(double x, double y)
+{
+	double pixelSize = 0.01;
+	unsigned int indexX = UINT_MAX;
+	unsigned int indexY = UINT_MAX;
+	if (pow(x, 2) + pow(y, 2) < pow(0.58, 2))
+	{
+		//inside Circle
+		if (abs(x) < 0.135 && abs(y) < 0.135)
+		{
+			//inside CM
+			indexX = static_cast<unsigned int>(x / pixelSize + 13.5 + 0.5);
+			indexY = static_cast<unsigned int>(y / pixelSize + 13.5 + 0.5);
+			assert(indexX < 37);
+			assert(indexY < 37);
+			if (mCodeMask[indexX][indexY])
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else
+		{
+			//But outside CM
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+double HUREL::Compton::LahgiControl::SimpleCodedBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint)
+{
+	if (lmData.Type != eInterationType::CODED)
+	{
+		return 0;
+	}
+	
+	Eigen::Vector4d detectorVector(0, 0, 1, 0);
+	detectorVector = lmData.DetectorTransformation * detectorVector;
+
+	if (imgPoint.dot(detectorVector.head<3>()) < 0)
+	{
+		return 0;
+	}
+
+	double m = T265_To_Mask_OFFSET_Z - T265_TO_LAHGI_OFFSET_Z;
+	double n = imgPoint.z() - lmData.Scatter.TransformedInteractionPoint.z() - m;
+
+	Eigen::Vector3d internalDivPoint = (m * imgPoint + n * lmData.Scatter.TransformedInteractionPoint.head<3>()) / (m + n);
+
+
+	return mCalcIsPassOnCodedMask(internalDivPoint.x(), internalDivPoint.y());
 }
