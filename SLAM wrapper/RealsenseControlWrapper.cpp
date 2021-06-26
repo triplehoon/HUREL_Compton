@@ -162,7 +162,7 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->GetRTPointCloudTransposed());
 
 
-	ReconPointCloud rcPC = LahgiControl::instance().GetReconRealtimePointCloudCompton(pose, 10);
+	ReconPointCloud rcPC = LahgiControl::instance().GetReconRealtimePointCloudCoded(pose, 10);
 
 	
 	int count = 0;

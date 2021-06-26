@@ -28,6 +28,8 @@ namespace HUREL
 			ReconPointCloud() : PointCloud() {};
 			ReconPointCloud(open3d::geometry::PointCloud& pc);
 			std::vector<double> reconValues_;
+			double maxReoconValue = 0;
+
 			void CalculateReconPoint(ListModeData lmData, double(*calcFunc)(ListModeData, Eigen::Vector3d));
 
 			static double SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint);

@@ -72,13 +72,13 @@ void HUREL::Compton::ReconPointCloud::CalculateReconPoint(ListModeData lmData, d
 {
 
 	size_t size = points_.size();
-	double maxReconValv = -DBL_MAX;
+	maxReoconValue = -DBL_MAX;
 	for (size_t i = 0; i < size; ++i)
 	{
 		reconValues_[i] += calcFunc(lmData, points_[i]);
-		if (reconValues_[i] > maxReconValv)
+		if (reconValues_[i] > maxReoconValue)
 		{
-			maxReconValv = reconValues_[i];
+			maxReoconValue = reconValues_[i];
 		}
 	}
 }

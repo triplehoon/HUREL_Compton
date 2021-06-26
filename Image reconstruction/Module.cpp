@@ -271,16 +271,16 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
     int gridSize3 = mLutSize / 27;
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize3, get<0>(maxPoint) - gridSize2, get<0>(maxPoint) + gridSize2 , get<1>(maxPoint) - gridSize2, get<1>(maxPoint) + gridSize2, normalizedPMTValue);
     
-    int gridSize4 = mLutSize / 81;
+    int gridSize4 = 1;
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize4, get<0>(maxPoint) - gridSize3, get<0>(maxPoint) + gridSize3, get<1>(maxPoint) - gridSize3,  get<1>(maxPoint) + gridSize3, normalizedPMTValue);
 
-    int gridSize5 = 1;
-    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize5, get<0>(maxPoint) - gridSize4, get<0>(maxPoint) + gridSize4, get<1>(maxPoint) - gridSize4, get<1>(maxPoint) + gridSize4, normalizedPMTValue);
+    /*int gridSize5 = 1;
+    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize5, get<0>(maxPoint) - gridSize4, get<0>(maxPoint) + gridSize4, get<1>(maxPoint) - gridSize4, get<1>(maxPoint) + gridSize4, normalizedPMTValue);*/
 
     Eigen::Vector4d point;
 
-    point[0] = -(static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize) / 2) / 1000 + mModuleOffsetX;
-    point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize) / 2) / 1000 + mModuleOffsetY;
+    point[0] = -(static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX;
+    point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetY;
     point[2] = mModuleOffsetZ;
     point[3] = 1;
     return point;   

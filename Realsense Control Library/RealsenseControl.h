@@ -11,9 +11,9 @@
 #define T265_TO_LAHGI_OFFSET_X (0)
 #define T265_TO_LAHGI_OFFSET_Y (-0.308)
 #define T265_TO_LAHGI_OFFSET_Z (-0.05)
-#define T265_To_Mask_OFFSET_X (0.25)
-#define T265_To_Mask_OFFSET_Y (0.25)
-#define T265_To_Mask_OFFSET_Z (0.25)
+#define T265_To_Mask_OFFSET_X (T265_TO_LAHGI_OFFSET_X)
+#define T265_To_Mask_OFFSET_Y (T265_TO_LAHGI_OFFSET_Y)
+#define T265_To_Mask_OFFSET_Z (0.025)
 
 
 

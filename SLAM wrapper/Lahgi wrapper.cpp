@@ -76,6 +76,10 @@ void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^
 void HUREL::Compton::LahgiWrapper::ResetListmodeData()
 {
 	lahgiControlInstance.ResetListedListModeData();
+	for (int i = 0; i < 16; ++i)
+	{
+		lahgiControlInstance.ResetEnergySpectrum(i);
+	}
 }
 
 void HUREL::Compton::LahgiWrapper::GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount)
@@ -199,14 +203,7 @@ void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, List<array
 		return;
 	}
 
-	double maxValue = -DBL_MAX;
-	for (unsigned int i = 0; i < rcPC.points_.size(); ++i)
-	{
-		if (maxValue < rcPC.reconValues_[i])
-		{
-			maxValue = rcPC.reconValues_[i];
-		}
-	}
+	double maxValue = rcPC.maxReoconValue;
 
 	colorAlphas->Capacity = size;
 	uvs->Capacity = size;

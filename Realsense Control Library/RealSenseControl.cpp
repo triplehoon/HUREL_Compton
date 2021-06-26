@@ -313,9 +313,9 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 8);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 7);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3f);
-	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0f);
+	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 10.0f);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0f);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25f);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 15);
@@ -332,8 +332,8 @@ void RealsenseControl::RealsensesPipeline()
 	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);*/
 
 	rs2::pipeline_profile t265Profile = pipeT265.start(cfgT265);
-	rs2::pose_sensor t265 = t265Profile.get_device().first<rs2::pose_sensor>();
-	t265.set_option(RS2_OPTION_ENABLE_RELOCALIZATION, 0);
+	rs2::pose_sensor t265 = t265Profile.get_device().query_sensors().front();
+	//t265.set_option(RS2_OPTION_ENABLE_RELOCALIZATION, 0);
 	pipelines.emplace_back(pipeD455);
 	pipelines.emplace_back(pipeT265);
 

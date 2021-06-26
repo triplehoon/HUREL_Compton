@@ -37,9 +37,7 @@ namespace HUREL {
 				double*** mXYLogMue = NULL;
 				double** mXYSumMu = NULL;
 
-				double mModuleOffsetX;
-				double mModuleOffsetY;
-				double mModuleOffsetZ;
+				
 
 				double mEnergyGain[10];
 				double mMlpeGain[10];
@@ -54,6 +52,10 @@ namespace HUREL {
 				std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
 			
 			public:
+				double mModuleOffsetX;
+				double mModuleOffsetY;
+				double mModuleOffsetZ;
+
 				EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 				Module();
 				Module(eMouduleType moduleType, 
@@ -71,7 +73,7 @@ namespace HUREL {
 
 				const Eigen::Vector4d FastMLPosEstimation(const unsigned short pmtADCValue[]) const;
 
-				const Eigen::Vector4d  FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const;
+				const Eigen::Vector4d FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const;
 
 				const double GetEcal(const unsigned short pmtADCValue[]) const;
 				

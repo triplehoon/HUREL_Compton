@@ -1,6 +1,8 @@
 #include "LahgiControl.h"
 #include <future>
+#include <mutex>
 
+static std::mutex mListModeDataMutex;
 
 using namespace std;
 
@@ -53,7 +55,11 @@ HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
 
 void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 {
-	mListedListModeData.resize(50000);
+	mListModeDataMutex.lock();
+
+	mListedListModeData.reserve(50000);	
+	mListModeDataMutex.unlock();
+
 	mSumSpectrum = EnergySpectrum(5, 3000);
 	mScatterSumSpectrum = EnergySpectrum(5, 3000);
 	mAbsorberSumSpectrum = EnergySpectrum(5, 3000);
@@ -230,8 +236,11 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
 						Eigen::Vector4d absorberPoint = mAbsorberModules[absorberInteractModuleNum]->FastMLPosEstimation(absorberShorts[absorberInteractModuleNum]);
+						mListModeDataMutex.lock();
 
 						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
+						mListModeDataMutex.unlock();
+
 					}
 				}
 			}
@@ -245,7 +254,14 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 					{
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
 						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
-						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
+
+						if (IsOnActiveArea(scatterPoint[0], scatterPoint[1], *mScatterModules[scatterInteractModuleNum]))
+						{
+							mListModeDataMutex.lock();
+							mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
+							mListModeDataMutex.unlock();
+						}
+
 					}
 				}
 
@@ -345,9 +361,12 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 					{
 
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
-						Eigen::Vector4d absorberPoint = mScatterModules[absorberInteractModuleNum]->FastMLPosEstimation(scatterShorts[absorberInteractModuleNum]);
+						Eigen::Vector4d absorberPoint = mAbsorberModules[absorberInteractModuleNum]->FastMLPosEstimation(scatterShorts[absorberInteractModuleNum]);
+						mListModeDataMutex.lock();
 
 						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
+						mListModeDataMutex.unlock();
+
 					}
 				}
 			}
@@ -362,7 +381,11 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
 						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
+						mListModeDataMutex.lock();
+
 						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
+						mListModeDataMutex.unlock();
+
 					}
 				}
 
@@ -396,13 +419,21 @@ HUREL::Compton::eMouduleType HUREL::Compton::LahgiControl::GetDetectorType()
 
 const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData() const
 {
+	mListModeDataMutex.lock();
+	std::vector<ListModeData> lmData = mListedListModeData;
+	mListModeDataMutex.unlock();
+
 	return mListedListModeData;
 }
 
 void HUREL::Compton::LahgiControl::ResetListedListModeData()
 {
+	mListModeDataMutex.lock();
+
 	mListedListModeData.clear();
-	mListedListModeData.resize(50000);
+	mListedListModeData.reserve(50000);
+	mListModeDataMutex.unlock();
+
 }
 
 void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
@@ -468,6 +499,9 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetScatterSumEnergySpectrum()
 
 void HUREL::Compton::LahgiControl::ResetEnergySpectrum(int fpgaChannelNumber)
 {
+	mSumSpectrum.Reset();
+	mScatterSumSpectrum.Reset();
+	mAbsorberSumSpectrum.Reset();
 	switch (mModuleType)
 	{
 	case eMouduleType::MONO:
@@ -511,9 +545,12 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCoded(op
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
 
 	time_t t = time(NULL);
+	mListModeDataMutex.lock();
 	std::vector<ListModeData> tempLMData = mListedListModeData;
-	std::cout << "Start Recon: " << tempLMData.size() << std::endl;
-	std::cout << "Start Recon: " << reconPC.points_.size() << std::endl;
+	mListModeDataMutex.unlock();
+
+	std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
+	std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
 
 #pragma omp parallel for
 	for (int i = 0; i < tempLMData.size(); ++i)
@@ -535,19 +572,29 @@ HUREL::Compton::ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePo
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
 
 	time_t t = time(NULL);
-	std::vector<ListModeData> tempLMData = mListedListModeData;
-	std::cout << "Start Recon: " << tempLMData.size() << std::endl;
-	std::cout << "Start Recon: " << reconPC.points_.size() << std::endl;
+	mListModeDataMutex.lock();
 
-#pragma omp parallel for
+	std::vector<ListModeData> tempLMData = mListedListModeData;
+	mListModeDataMutex.unlock();
+
+	std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
+	std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
+	int reconStartIndex = 0;
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{
 
 		if (t - tempLMData[i].InterationTime < static_cast<__int64>(seconds))
 		{
-			reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleComptonBackprojection);
+			reconStartIndex = i;
+			break;
 		}
 
+	}
+
+#pragma omp parallel for
+	for (int i = reconStartIndex; i < tempLMData.size(); ++i)
+	{
+		reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleComptonBackprojection);
 	}
 	std::cout << "End Recon: " << tempLMData.size() << std::endl;
 
@@ -594,11 +641,13 @@ double HUREL::Compton::LahgiControl::mCalcIsPassOnCodedMask(double x, double y)
 	if (pow(x, 2) + pow(y, 2) < pow(0.58, 2))
 	{
 		//inside Circle
-		if (abs(x) < 0.135 && abs(y) < 0.135)
+		if (abs(x) < 0.185 && abs(y) < 0.185)
 		{
 			//inside CM
-			indexX = static_cast<unsigned int>(x / pixelSize + 13.5 + 0.5);
-			indexY = static_cast<unsigned int>(y / pixelSize + 13.5 + 0.5);
+			//printf("%lf, %lf\n", x, y);
+
+			indexX = static_cast<unsigned int>(x / pixelSize + 18 + 0.5);
+			indexY = static_cast<unsigned int>(-y / pixelSize + 18 + 0.5);
 			assert(indexX < 37);
 			assert(indexY < 37);
 			if (mCodeMask[indexX][indexY])
@@ -622,6 +671,21 @@ double HUREL::Compton::LahgiControl::mCalcIsPassOnCodedMask(double x, double y)
 	}
 }
 
+bool HUREL::Compton::LahgiControl::IsOnActiveArea(double x, double y, Module& module)
+{
+	double realPosX = x - module.mModuleOffsetX;
+	double realPosY = y - module.mModuleOffsetY;
+
+	if ((abs(realPosX) < ACTIVE_AREA_LENGTH / 2) && (abs(realPosY) < ACTIVE_AREA_LENGTH / 2))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 double HUREL::Compton::LahgiControl::SimpleCodedBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint)
 {
 	if (lmData.Type != eInterationType::CODED)
@@ -629,19 +693,23 @@ double HUREL::Compton::LahgiControl::SimpleCodedBackprojection(ListModeData lmDa
 		return 0;
 	}
 	
-	Eigen::Vector4d detectorVector(0, 0, 1, 0);
+	Eigen::Vector4d detectorVector(0, 0, 1, 1);
 	detectorVector = lmData.DetectorTransformation * detectorVector;
 
-	if (imgPoint.dot(detectorVector.head<3>()) < 0)
+	double zLength = (imgPoint - lmData.Scatter.TransformedInteractionPoint.head<3>()).dot(detectorVector.head<3>());
+	if (zLength < 0)
 	{
 		return 0;
 	}
 
 	double m = T265_To_Mask_OFFSET_Z - T265_TO_LAHGI_OFFSET_Z;
-	double n = imgPoint.z() - lmData.Scatter.TransformedInteractionPoint.z() - m;
+	double n = zLength - m;
 
 	Eigen::Vector3d internalDivPoint = (m * imgPoint + n * lmData.Scatter.TransformedInteractionPoint.head<3>()) / (m + n);
 
 
-	return mCalcIsPassOnCodedMask(internalDivPoint.x(), internalDivPoint.y());
+
+	double reconValue = mCalcIsPassOnCodedMask(internalDivPoint[0] - T265_To_Mask_OFFSET_X, internalDivPoint[1] - T265_To_Mask_OFFSET_Y);
+
+	return reconValue;
 }

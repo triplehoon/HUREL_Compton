@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <numeric>
 
+#define ACTIVE_AREA_LENGTH 0.14
+
 //false = block, true = not block 
 //Lahgi axis coordiante	
 const static bool mCodeMask[37][37] = {
@@ -84,6 +86,8 @@ namespace HUREL {
 			static double SimpleCodedBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint);
 			static double mCalcMuOnCodedMask(double x, double y);
 			static double mCalcIsPassOnCodedMask(double x, double y);
+
+			bool IsOnActiveArea(double x, double y, Module& module);
 
 
 			public:

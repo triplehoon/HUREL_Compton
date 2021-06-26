@@ -1432,11 +1432,11 @@ namespace HUREL.Compton.CZT
 
 
 
-            for (int j = 1; j <= 650; ++j)
-            {
-                bool result = GetASICConfigtBitValue((SRE3021ASICRegisterADDR)j);
-                Debug.WriteLine("{0} is {1}", ((SRE3021ASICRegisterADDR)j).ToString(), result);
-            }
+            //for (int j = 1; j <= 650; ++j)
+            //{
+            //    bool result = GetASICConfigtBitValue((SRE3021ASICRegisterADDR)j);
+            //    Debug.WriteLine("{0} is {1}", ((SRE3021ASICRegisterADDR)j).ToString(), result);
+            //}
         }
         public static void ReadWriteASICReg(SRE3021ASICRegisterADDR addr, bool value)
         {
