@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CodeMaskCalc.h" />
     <ClInclude Include="EnergySpectrum.h" />
     <ClInclude Include="LahgiControl.h" />
     <ClInclude Include="ListModeData.h" />
@@ -150,6 +151,7 @@
     <ClInclude Include="ReconPointCloud.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CodeMaskCalc.cpp" />
     <ClCompile Include="EnergySpectrum.cpp" />
     <ClCompile Include="LahgiControl.cpp" />
     <ClCompile Include="Module.cpp" />
