@@ -229,8 +229,7 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     LahgiWrapper_Static.AddListModeDataWraper(item, UnmanagedEcks);
                     //LACC_Control_Static.AddListModeData(item, CurrentSystemTranformation, Echks, IsMLPEOn);
-                    //Thread.Sleep(0);
-                    
+                    //Thread.Sleep(0);                    
                 }
             }
         }

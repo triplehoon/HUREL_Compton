@@ -884,7 +884,6 @@ namespace Compton_GUI_WPF.ViewModel
             VMStatus = $"Reconing......SLAM! {elapsedTime} ms";
 
 
-            Thread.Sleep(500);
             var vc = new Vector3Collection();
             var cc = new Color4Collection();
             var tempposeVect = new List<double[]>();
@@ -895,33 +894,10 @@ namespace Compton_GUI_WPF.ViewModel
             for (int i = 0; i < tempposeVect.Count; i++)
             {
                 vc.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
-                cc.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][1]), 0.5f));
-                //cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
-                //id.Add(i);
+                cc.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][2]), 0.5f));
             }
 
-
-            if (tempposeVect == null || tempposeVect.Count() == 0)
-            {
-                return;
-            }
-            List<LMData> tempListModeData = new List<LMData>();
-            if (tempposeVect == null || tempposeVect.Count() == 0)
-            {
-                return;
-            }
-            if (LACC_Control_Static == null || LACC_Control_Static.ListedLMData.Count == 0)
-            {
-                return;
-            }
-            
-            tempListModeData = (from LM in LACC_Control_Static.ListedLMData
-                                where LM != null && LM.MeasurementTime > DateTime.Now - TimeSpan.FromSeconds(6000)
-                                select LM).ToList();
-
-            var (v3, c4) = ImageRecon.BPtoPointCloud2Pi(vc, tempListModeData, 5, 0.8);            
-            SLAMReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
-            SLAMPointCloudCount = vc.Count();
+            SLAMReconPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
             sw.Stop();
             elapsedTime = sw.ElapsedMilliseconds;
             VMStatus = "Reconing......SLAM Done!";
