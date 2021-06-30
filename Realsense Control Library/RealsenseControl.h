@@ -21,6 +21,7 @@
 #include <librealsense2/rs.hpp>
 #include <open3d/geometry/PointCloud.h>
 #include <open3d/pipelines/registration/Registration.h>
+#include <open3d/io/PointCloudIO.h>
 #include <librealsense2/hpp/rs_frame.hpp>
 
 #define NOMINMAX
@@ -85,7 +86,9 @@ public:
 	bool IsPipeLineOn;
 	bool IsSLAMON;
 
-
+	bool SaveRTPointCloud(std::string& fileName);
+	bool SaveSLAMEDPointCloud(std::string& fileName);
+	bool SaveDownSampledSLAMEDPointCloud(std::string& fileName);
 
 	~RealsenseControl();
 

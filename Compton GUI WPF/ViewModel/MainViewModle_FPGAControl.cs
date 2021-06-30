@@ -156,9 +156,11 @@ namespace Compton_GUI_WPF.ViewModel
                 IsRealTimeImageReconOn = true;
                 if (IsSavingBinaryFile)
                 {
-                    VMStatus = "Saving CSV file";
-                    LACC_Control_Static.SaveListmodeData(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName + "T265Offset_" + T265ToLACCOffset.X + "_" +T265ToLACCOffset.Y +"_" + T265ToLACCOffset.Z + "_");
-                    SaveCurrentPointCloud(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName);
+                    VMStatus = "Saving CSV file";                    
+                    string saveFileName = Path.GetDirectoryName(FPGAControl.FileMainPath) + "\\"+ fileName;
+                    LahgiWrapper_Static.SaveListModeData(saveFileName + "_LMData.csv");
+                    RealsenseControl.SaveRTPointCloud(saveFileName + "RTPointCloud");
+                    RealsenseControl.SaveSLAMEDPointCloud(saveFileName + "RTPointCloud");
                     VMStatus = "Done saving CSV file";
                 }                
             }

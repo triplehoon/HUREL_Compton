@@ -438,7 +438,35 @@ void HUREL::Compton::LahgiControl::ResetListedListModeData()
 
 void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 {
-	// Not Yet Impletemented -> do nothing
+	std::ofstream saveFile;
+	saveFile.open(fileName);
+	if (!saveFile.is_open()) 
+	{
+		std::cout << "File is not opened" << endl;
+		saveFile.close();
+		return;
+	}
+	for (unsigned int i = 0; mListedListModeData.size(); ++i)
+	{
+		ListModeData& d = mListedListModeData[i];
+		switch (d.Type)
+		{
+		case eInterationType::NONE:
+			break;
+		case eInterationType::CODED:
+			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << std::endl;
+			break;
+		case eInterationType::COMPTON:
+			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy;
+			saveFile << d.Absorber.RelativeInteractionPoint[0] << "," << d.Absorber.RelativeInteractionPoint[1] << "," << d.Absorber.RelativeInteractionPoint[2] << "," << d.Absorber.InteractionEnergy << std::endl;
+			break;
+		default:
+			break;
+		}
+		continue;
+	}
+	saveFile.close();
+	return;
 }
 
 EnergySpectrum HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelNumber)

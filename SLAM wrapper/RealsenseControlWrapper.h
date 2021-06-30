@@ -9,6 +9,7 @@ using namespace System::Windows;
 using namespace System::Threading;
 using namespace System::Collections;
 using namespace System::Collections::Generic;
+using namespace System::Runtime::InteropServices;
 
 
 namespace HUREL {
@@ -56,6 +57,9 @@ namespace HUREL {
 
 				void GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 				void GetReconSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
+
+				bool SaveRTPointCloud(String^ fileName);
+				bool SaveSLAMEDPointCloud(String^ fileName);
 
 				// C# 소멸자. Finalize 메서드임
 				~RealsenseControlWrapper();

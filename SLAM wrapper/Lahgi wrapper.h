@@ -2,8 +2,10 @@
 #include "LahgiControl.h"
 #include "RealsenseControl.h"
 
-using namespace System::Collections::Generic;
 using namespace System;
+using namespace System::Collections::Generic;
+using namespace System::Runtime::InteropServices;
+
 
 namespace HUREL {
 	namespace Compton {
@@ -36,6 +38,8 @@ namespace HUREL {
 			void GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE);
 
 			void ResetListmodeData();
+
+			void SaveListModeData(String^ fileName);
 
 			void GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount);
 

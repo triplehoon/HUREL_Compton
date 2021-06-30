@@ -13,6 +13,26 @@ RealsenseControl::RealsenseControl() :IsPipeLineOn(false), IsSLAMON(false)
 	auto stream = freopen("CONOUT$", "w", stdout);
 
 }
+bool RealsenseControl::SaveRTPointCloud(std::string& fileName)
+{
+	open3d::geometry::PointCloud savePointCloud = std::get<0>(this->GetRTPointCloud());
+	open3d::io::WritePointCloudOption option;
+	return open3d::io::WritePointCloudToPCD(fileName, savePointCloud, option);
+}
+bool RealsenseControl::SaveSLAMEDPointCloud(std::string& fileName)
+{
+	open3d::geometry::PointCloud savePointCloud = this->GetSLAMEDPointCloud();
+	open3d::io::WritePointCloudOption option;
+	return open3d::io::WritePointCloudToPCD(fileName, savePointCloud, option);
+}
+
+bool RealsenseControl::SaveDownSampledSLAMEDPointCloud(std::string& fileName)
+{
+	open3d::geometry::PointCloud savePointCloud = this->GetSLAMEDPointCloudDownSampled();
+	open3d::io::WritePointCloudOption option;
+	return open3d::io::WritePointCloudToPCD(fileName, savePointCloud, option);
+}
+
 RealsenseControl::~RealsenseControl()
 {
 	IsSLAMON = false;

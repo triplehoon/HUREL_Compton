@@ -11,7 +11,6 @@ SLAMRobustRecon::SLAMRobustRecon()
 {
 }
 
-
 open3d::geometry::PointCloud SLAMRobustRecon::MultiwayRegisteration(std::vector<open3d::geometry::PointCloud>& pcs, std::vector<Eigen::Matrix4d>& trs)
 {
 	
@@ -78,7 +77,6 @@ open3d::geometry::PointCloud SLAMRobustRecon::MultiwayRegisteration(std::vector<
 	return outPC;
 }
 
-
 std::tuple<Eigen::Matrix4d_u, Eigen::Matrix6d> SLAMRobustRecon::PairwayRegisteration(open3d::geometry::PointCloud& source, open3d::geometry::PointCloud& target, double maxCorrDisCoarse, double maxCorrDisFine, Eigen::Matrix4d initMatirx, bool isPointToPointUsed)
 {
 	//Apply point-to-plane ICP
@@ -98,6 +96,7 @@ std::tuple<Eigen::Matrix4d_u, Eigen::Matrix6d> SLAMRobustRecon::PairwayRegistera
 }
 
 static std::future<void> t1;
+
 void SLAMRobustRecon::StartRobustRecon(Eigen::Matrix4d initOdementry)
 {
 	mIsSLAMOn = true;
@@ -114,7 +113,6 @@ void SLAMRobustRecon::StopRobustRecon()
 
 	printf("Robust Recon Pipe is end\n");
 }
-
 
 void SLAMRobustRecon::RobustReconPipe()
 {
@@ -164,7 +162,7 @@ void SLAMRobustRecon::RobustReconPipe()
 			//cout << "RobustReconPipe source: " << s << endl;
 			auto& sourcePC = get<0>(reconPCs[s]);
 			auto& sourceTM = get<1>(reconPCs[s]);
-
+			
 			for (int t = s + 1; t < reconPCs.size(); ++t)
 			{
 				auto& targetPC = get<0>(reconPCs[t]);
@@ -201,8 +199,7 @@ void SLAMRobustRecon::RobustReconPipe()
 					////loop closure case
 					//auto sourceFeture = open3d::pipelines::registration::ComputeFPFHFeature(std::get<0>(reconPCs[s]), open3d::geometry::KDTreeSearchParamHybrid(VOXEL_SIZE * 5, 100));
 					//auto targetFeture = open3d::pipelines::registration::ComputeFPFHFeature(std::get<0>(reconPCs[t]), open3d::geometry::KDTreeSearchParamHybrid(VOXEL_SIZE * 5, 100));
-
-					//auto result = RobustReconPairwayRegisteration(sourcePC, targetPC, *sourceFeture, *targetFeture);
+					/*auto result = RobustReconPairwayRegisteration(sourcePC, targetPC, *sourceFeture, *targetFeture);
 					/*auto& isSuccess = get<0>(result);					
 					auto& resultTM = get<1>(result);
 					auto& resultIM = get<2>(result);*/
@@ -270,6 +267,7 @@ const std::tuple<bool, Eigen::Matrix4d_u, Eigen::Matrix6d> SLAMRobustRecon::Robu
 		return std::make_tuple(true, result.transformation_, information);
 	}
 }
+
 void SLAMRobustRecon::AddRobustReconPoints(PC_TRANSPOS_TUPLE pcTr)
 {
 	
@@ -278,8 +276,6 @@ void SLAMRobustRecon::AddRobustReconPoints(PC_TRANSPOS_TUPLE pcTr)
 	mReconPCs.push_back(pcTr);
 	mReconPCsMutex.unlock();
 }
-
-
 
 open3d::geometry::PointCloud SLAMRobustRecon::GetSLAMEDPointCloud()
 {
