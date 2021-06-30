@@ -124,6 +124,13 @@ void HUREL::Compton::LahgiWrapper::GetAbsorberSumSpectrum(List<array<double>^>^%
 	}
 }
 
+void HUREL::Compton::LahgiWrapper::SaveListModeData(String^ fileName)
+{
+	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(fileName);
+	lahgiControlInstance.SaveListedListModeData(static_cast<char*>(ptrToNativeString.ToPointer()));
+}
+
+
 void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrum(List<array<double>^>^% energyCount)
 {
 	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetScatterSumEnergySpectrum().GetHistogramEnergy();

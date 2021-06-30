@@ -157,31 +157,17 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = std::get<0>(m_RealsenseControlNative->GetRTPointCloudTransposed());// *(new open3d::geometry::PointCloud(m_RealsenseControlNative->GetSLAMEDPointCloud()));
+	open3d::geometry::PointCloud pose = m_RealsenseControlNative->GetSLAMEDPointCloud();
 	
-	std::vector<Eigen::Vector2f> uv = std::get<1>(m_RealsenseControlNative->GetRTPointCloudTransposed());
-
-
-	ReconPointCloud rcPC = LahgiControl::instance().GetReconRealtimePointCloudCoded(pose, 10);
-
 	
 	int count = 0;
-	if (rcPC.colors_.size() < rcPC.points_.size())
+	if (pose.colors_.size() < pose.points_.size())
 	{
-		count = rcPC.colors_.size();
+		count = pose.colors_.size();
 	}
 	else 
 	{
-		count = rcPC.points_.size();
-	}
-
-	double maxValue = -DBL_MAX;
-	for (unsigned int i = 0; i < rcPC.points_.size(); ++i)
-	{
-		if (maxValue < rcPC.reconValues_[i])
-		{
-			maxValue = rcPC.reconValues_[i];
-		}
+		count = pose.points_.size();
 	}
 
 	vectors->Capacity = count;
@@ -189,10 +175,9 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 
 
 	for (int i = 0; i < count - 1; i++) {
-		array<double, 1>^ poseVector = gcnew array<double>{rcPC.points_[i][0], rcPC.points_[i][1], rcPC.points_[i][2]};
+		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
 		vectors->Add(poseVector);
-		RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.8, maxValue);
-		array<double, 1>^ colorVector = gcnew array<double>{color.R, color.G, color.B};
+		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
 		colors->Add(colorVector);
 	}
 }
@@ -207,25 +192,50 @@ void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vect
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = *(new open3d::geometry::PointCloud(m_RealsenseControlNative->GetSLAMEDPointCloudDownSampled()));
+	open3d::geometry::PointCloud pose = m_RealsenseControlNative->GetSLAMEDPointCloudDownSampled();
+
+	ReconPointCloud rcPC = LahgiControl::instance().GetReconRealtimePointCloudCompton(pose, 50000);
+
+
 	int count = 0;
-	if (pose.colors_.size() < pose.points_.size())
+	if (rcPC.colors_.size() < rcPC.points_.size())
 	{
-		count = pose.colors_.size();
+		count = rcPC.colors_.size();
 	}
 	else
 	{
-		count = pose.points_.size();
+		count = rcPC.points_.size();
 	}
+
+	double maxValue = rcPC.maxReoconValue;
+
+	vectors->Capacity = count;
+	colors->Capacity = count;
 
 
 	for (int i = 0; i < count - 1; i++) {
-		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
+		array<double, 1>^ poseVector = gcnew array<double>{rcPC.points_[i][0], rcPC.points_[i][1], rcPC.points_[i][2]};
 		vectors->Add(poseVector);
-
-		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
+		RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.8, maxValue);
+		array<double, 1>^ colorVector = gcnew array<double>{color.R, color.G, color.B};
 		colors->Add(colorVector);
-	}
+		}
+}
+
+bool HUREL::Compton::LACC::RealsenseControlWrapper::SaveRTPointCloud(String^ fileName)
+{
+	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(fileName);
+	std::string fileNameString = std::string(static_cast<char*>(ptrToNativeString.ToPointer()));
+	
+	return m_RealsenseControlNative->SaveRTPointCloud(fileNameString);
+}
+
+bool HUREL::Compton::LACC::RealsenseControlWrapper::SaveSLAMEDPointCloud(String^ fileName)
+{
+	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(fileName);
+	std::string fileNameString = std::string(static_cast<char*>(ptrToNativeString.ToPointer()));
+
+	return m_RealsenseControlNative->SaveSLAMEDPointCloud(fileNameString);
 }
 
 void RealsenseControlWrapper::GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data) {
