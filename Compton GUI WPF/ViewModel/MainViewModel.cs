@@ -100,10 +100,12 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private async Task CloseMainWindow()
         {
+          
             await StopRealsensePipeline().ConfigureAwait(false);
             await StopSLAM().ConfigureAwait(false);
             FPGAControl.SetVaribles(FPGAVariable);
             await FPGAControl.Dispose().ConfigureAwait(false);
+            SRE3021API.Close();
             // rsControl.Dispose();
         }
 

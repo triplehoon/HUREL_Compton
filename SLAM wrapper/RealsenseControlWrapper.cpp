@@ -260,11 +260,17 @@ void RealsenseControlWrapper::GetRealTimeRGB(int% width, int% height, int% strid
 
 		void* ptr = (void*)color->get_data();
 
+		if (ptr == NULL)
+		{
+			return;
+		}
 
 		data = IntPtr(ptr);
 
 	}
 }
+
+
 
 Boolean RealsenseControlWrapper::ResetPipeline(String^% msg)
 {

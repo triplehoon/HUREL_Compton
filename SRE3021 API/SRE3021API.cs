@@ -1146,7 +1146,7 @@ namespace HUREL.Compton.CZT
             }
             catch
             {
-                Trace.WriteLine("SRE3021API initializing failed");
+                Console.WriteLine("SRE3021API initializing failed");
             }
             InitASICConfigBits();
         }
@@ -1218,6 +1218,7 @@ namespace HUREL.Compton.CZT
             }
             catch (Exception e)
             {
+                TCPSocket.Close();
                 Trace.WriteLine(e.ToString());
                 Trace.WriteLine("TCP Connection Fail");
                 TCPSocket = null;
@@ -1656,7 +1657,7 @@ namespace HUREL.Compton.CZT
                 if (sw.ElapsedMilliseconds > 15000)
                 {
                     Trace.WriteLine($"BaseLineImageEvents Count is {BaseLineImageEvents.Count}");
-                    if (BaseLineImageEvents.Count > numPulses * 0.99)
+                    if (BaseLineImageEvents.Count > numPulses * 0.8)
                     {
                         break;
                     }
@@ -1813,7 +1814,7 @@ namespace HUREL.Compton.CZT
             }
         }
 
-        private static void CheckAPI()
+        public static void CheckAPI()
         {
             if (TCPSocket == null)
             {

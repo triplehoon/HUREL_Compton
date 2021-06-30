@@ -311,7 +311,31 @@
                             <Button Content="Reset RS" Grid.Column="4" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Margin="1" Command="{Binding ResetRealsensePipelineCommand}"/>
 
                         </Grid>
+                        <TextBlock Text="SRE3021(CZT) Status" Margin="5" Style="{StaticResource TextBlockTitle2}"/>
+                        <Grid Margin="10,0,10,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.3*"/>
+                                <ColumnDefinition Width="0.3*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="0.3*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="On/Off" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <mah:ToggleSwitch Grid.Column="1" Grid.Row="0"                                               
+                                              OnContent="On"
+                                              OffCommand="{Binding StartCZTCommmand}"
+                                              OnCommand="{Binding StopCZTCommmand}"                                                                                            
+                                              IsOn="{Binding Path=IsCZTRunning, Mode=OneWay}"                                              
+                                              />
+                            <TextBlock Text="{Binding CZTMessage}" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Button Content="Initiate CZT" Grid.Column="3" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Margin="1"
+                                    Command="{Binding InitiateCZTCommand}"/>
+
+                        </Grid>
                         <TextBlock Text="{Binding RealsenseState}" Margin="5"/>
+
                         <Button Content="Test Buton" Command="{Binding TestCommand}"/>
                     </StackPanel>
                 </Grid>
