@@ -83,6 +83,22 @@ void HUREL::Compton::ReconPointCloud::CalculateReconPoint(ListModeData lmData, d
 	}
 }
 
+void HUREL::Compton::ReconPointCloud::CalculateSimpleBackProjctionCompton(ListModeData& lmData)
+{
+
+	size_t size = points_.size();
+	maxReoconValue = -DBL_MAX;
+	for (size_t i = 0; i < size; ++i)
+	{
+		reconValues_[i] += SimpleComptonBackprojection(lmData, points_[i]);
+		if (reconValues_[i] > maxReoconValue)
+		{
+			maxReoconValue = reconValues_[i];
+		}
+	}
+}
+
+
 double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint)
 {
 	if (lmData.Type != eInterationType::COMPTON)

@@ -38,7 +38,7 @@ HUREL::Compton::Module::Module(eMouduleType moduleType, double(&eGain)[10], doub
 	else
 	{
 		cout << "FAIL to load a lut file" << endl;
-		assert(false);
+		//assert(false);
 	}	
 
     assert(mModuleType != eMouduleType::MONO);
@@ -193,7 +193,7 @@ const bool HUREL::Compton::Module::IsModuleSet() const
     return mIsModuleSet;
 }
 
-void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain)
+bool HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain)
 {
     std::ifstream io;
     io.open(fileName);
@@ -204,7 +204,8 @@ void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
     {
         cout << "Cannot open a file" << endl;
 
-        io.close();        
+        io.close();
+        return false;
     }
 
     unsigned int pmtCounts = 0;
@@ -244,6 +245,7 @@ void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
         }      
     }
     io.close();
+    return true;
 }
 
 const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned short pmtADCValue[]) const
@@ -278,9 +280,29 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize5, get<0>(maxPoint) - gridSize4, get<0>(maxPoint) + gridSize4, get<1>(maxPoint) - gridSize4, get<1>(maxPoint) + gridSize4, normalizedPMTValue);*/
 
     Eigen::Vector4d point;
+    /* Origin (Quad MONO)
+    
+    point[0] = -(static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX; 
+    point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000+ mModuleOffsetY;
+    */
+    switch (mModuleType)
+    {
+    case HUREL::Compton::eMouduleType::MONO:
+        assert(false);
+        break;
+    case HUREL::Compton::eMouduleType::QUAD:
+        point[0] = -(static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX;
+        point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetY;
+        break;
+    case HUREL::Compton::eMouduleType::QUAD_DUAL:
+        point[0] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX;
+        point[1] = (static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetY;
+        break;
+    default:
+        assert(false);
+        break;
+    }
 
-    point[0] = -(static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX;
-    point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetY;
     point[2] = mModuleOffsetZ;
     point[3] = 1;
     return point;   

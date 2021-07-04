@@ -9,12 +9,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using static Compton_GUI_WPF.ViewModel.MainViewModel;
 
 namespace Compton_GUI_WPF.View
 {
 
 
-    public class RTReconModeToBooleanConverter : IValueConverter
+    public class EnumToBooleanConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo cultureInfo)
         {
@@ -45,7 +46,170 @@ namespace Compton_GUI_WPF.View
 
             return Enum.Parse(targetType, parameterString);
         }
-   }
+    }
+
+    public class EReconProjectionToRangeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo cultureInfo)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+
+            if (Enum.IsDefined(value.GetType(), value) == false)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+            EReconProjection projection = (EReconProjection)value;
+            
+            if (parameterString == "minusX")
+            {
+                switch (projection)
+                {
+                    case EReconProjection.XY:
+                        return -0.50;
+                    case EReconProjection.XZ:
+                        return -0.50;
+                    case EReconProjection.ZY:
+                        return 0;
+                }
+            }
+            if (parameterString == "plusX")
+            {
+                switch (projection)
+                {
+                    case EReconProjection.XY:
+                        return 0.50;
+                    case EReconProjection.XZ:
+                        return 0.50;
+                    case EReconProjection.ZY:
+                        return 1.00;
+                }
+            }
+            if (parameterString == "minusY")
+            {
+                switch (projection)
+                {
+                    case EReconProjection.XY:
+                        return -0.50;
+                    case EReconProjection.XZ:
+                        return 0;
+                    case EReconProjection.ZY:
+                        return -0.50;
+                }
+            }
+            if (parameterString == "plusY")
+            {
+                switch (projection)
+                {
+                    case EReconProjection.XY:
+                        return 0.50;
+                    case EReconProjection.XZ:
+                        return 1.00;
+                    case EReconProjection.ZY:
+                        return 0.50;
+                }
+            }
+
+            return new NotImplementedException();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo cultureInfo)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
+    public class EReconProjectionToAxisNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo cultureInfo)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+
+            if (Enum.IsDefined(value.GetType(), value) == false)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+            EReconProjection projection = (EReconProjection)value;
+
+            if (parameterString == "X")
+            {
+                switch (projection)
+                {
+                    case EReconProjection.XY:
+                        return "X [m]";
+                    case EReconProjection.XZ:
+                        return "X [m]";
+                    case EReconProjection.ZY:
+                        return "Z [m]";
+                }
+            }
+            if (parameterString == "Y")
+            {
+                switch (projection)
+                {
+                    case EReconProjection.XY:
+                        return "Y [m]";
+                    case EReconProjection.XZ:
+                        return "Z [m]";
+                    case EReconProjection.ZY:
+                        return "Y [m]";
+                }
+            }        
+
+            return new NotImplementedException();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo cultureInfo)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class EReconProjectionToInverseXConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo cultureInfo)
+        {
+            string parameterString = parameter as string;
+            if (parameterString == null)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+
+            if (Enum.IsDefined(value.GetType(), value) == false)
+            {
+                return DependencyProperty.UnsetValue;
+            }
+            EReconProjection projection = (EReconProjection)value;
+
+
+            switch (projection)
+            {
+                case EReconProjection.XY:
+                    return true;
+                case EReconProjection.XZ:
+                    return true;
+                case EReconProjection.ZY:
+                    return false;
+            }
+
+
+            return new NotImplementedException();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo cultureInfo)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class TimespaneToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -65,7 +229,7 @@ namespace Compton_GUI_WPF.View
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if(value == null)
+            if (value == null)
             {
                 List<string> non = new List<string>();
                 non.Add("PMT CorrMat");
@@ -77,7 +241,7 @@ namespace Compton_GUI_WPF.View
             CorrMatNameAndGain.Add("PMT CorrMat");
             foreach (double d in channelGain)
             {
-                CorrMatNameAndGain.Add("CorrMat["+ i + "]: " + d.ToString("F2"));
+                CorrMatNameAndGain.Add("CorrMat[" + i + "]: " + d.ToString("F2"));
                 i++;
             }
             return CorrMatNameAndGain;
@@ -133,5 +297,5 @@ namespace Compton_GUI_WPF.View
         }
     }
 
-    
+
 }

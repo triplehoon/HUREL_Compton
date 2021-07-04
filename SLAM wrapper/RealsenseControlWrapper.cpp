@@ -33,7 +33,7 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
-	int size;
+	size_t size;
 	if (!IsPipelineOn) {
 		return;
 	}
@@ -81,7 +81,7 @@ void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
 	uvs = gcnew List< array<float>^>();
-	int size;
+	size_t size;
 	if (!IsPipelineOn) {
 		return;
 	}
@@ -122,9 +122,9 @@ void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>
 		return;
 	}
 	double averageDepth = 0.0;
-	vectors->Capacity = size;
-	colors->Capacity = size;
-	uvs->Capacity = size;
+	vectors->Capacity = static_cast<int>(size);
+	colors->Capacity = static_cast<int>(size);
+	uvs->Capacity = static_cast<int>(size);
 
 	if (uv.size() != size)
 	{
@@ -165,7 +165,7 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 	ReconPointCloud rcPC = LahgiControl::instance().GetReconRealtimePointCloudCoded(pose, 10);
 
 	
-	int count = 0;
+	size_t count = 0;
 	if (rcPC.colors_.size() < rcPC.points_.size())
 	{
 		count = rcPC.colors_.size();
@@ -184,8 +184,8 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 		}
 	}
 
-	vectors->Capacity = count;
-	colors->Capacity = count;
+	vectors->Capacity = static_cast<int>(count);
+	colors->Capacity = static_cast<int>(count);
 
 
 	for (int i = 0; i < count - 1; i++) {
@@ -208,7 +208,7 @@ void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vect
 	}
 
 	open3d::geometry::PointCloud pose = *(new open3d::geometry::PointCloud(m_RealsenseControlNative->GetSLAMEDPointCloudDownSampled()));
-	int count = 0;
+	size_t count = 0;
 	if (pose.colors_.size() < pose.points_.size())
 	{
 		count = pose.colors_.size();

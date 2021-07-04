@@ -4,7 +4,7 @@
 
 HUREL::Compton::LahgiWrapper::LahgiWrapper(eModuleManagedType type)
 {
-	HUREL::Compton::eMouduleType moduleType = HUREL::Compton::eMouduleType::MONO;
+	HUREL::Compton::eMouduleType moduleType;
 	switch (type)
 	{
 	case HUREL::Compton::eModuleManagedType::MONO:
@@ -22,6 +22,14 @@ HUREL::Compton::LahgiWrapper::LahgiWrapper(eModuleManagedType type)
 		break;
 	}
 	lahgiControlInstance.SetType(moduleType);
+}
+
+HUREL::Compton::LahgiWrapper::~LahgiWrapper()
+{
+	if (mReconPointCloud != NULL)
+	{
+		delete mReconPointCloud;
+	}
 }
 
 
@@ -42,11 +50,11 @@ Boolean HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short
 		eChkUnmanagedVector.push_back(eChkUnmanaged);
 	}
 
-	lahgiControlInstance.AddListModeDataWithTransformation(adcS, eChkUnmanagedVector);
+	lahgiControlInstance.AddListModeData(adcS, eChkUnmanagedVector);
 	return true;
 }
 
-void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE)
+void HUREL::Compton::LahgiWrapper::GetAbsoluteListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE)
 {
 	std::vector<ListModeData> lists = lahgiControlInstance.GetListedListModeData();
 	scatterXYZE->Clear();
@@ -76,6 +84,9 @@ void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^
 void HUREL::Compton::LahgiWrapper::ResetListmodeData()
 {
 	lahgiControlInstance.ResetListedListModeData();
+	mReconPointsCount = 0;
+	delete mReconPointCloud;
+	mReconPointCloud = NULL;	
 	for (int i = 0; i < 16; ++i)
 	{
 		lahgiControlInstance.ResetEnergySpectrum(i);
@@ -87,9 +98,9 @@ void HUREL::Compton::LahgiWrapper::GetSpectrum(unsigned int channelNumer, List<a
 	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetEnergySpectrum(channelNumer).GetHistogramEnergy();
 
 	energyCount = gcnew List<array<double>^>();
-	energyCount->Capacity = eSpect.size();
+	energyCount->Capacity = static_cast<int>(eSpect.size());
 
-	for (int i = 0; i < eSpect.size(); ++i)
+	for (int i = 0; i < static_cast<int>(eSpect.size()); ++i)
 	{
 		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
 		energyCount->Add(tempECount);
@@ -101,9 +112,9 @@ void HUREL::Compton::LahgiWrapper::GetSumSpectrum(List<array<double>^>^% energyC
 	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetSumEnergySpectrum().GetHistogramEnergy();
 
 	energyCount = gcnew List<array<double>^>();
-	energyCount->Capacity = eSpect.size();
+	energyCount->Capacity = static_cast<int>(eSpect.size());
 
-	for (int i = 0; i < eSpect.size(); ++i)
+	for (int i = 0; i < static_cast<int>(eSpect.size()); ++i)
 	{
 		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
 		energyCount->Add(tempECount);
@@ -115,9 +126,9 @@ void HUREL::Compton::LahgiWrapper::GetAbsorberSumSpectrum(List<array<double>^>^%
 	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetAbsorberSumEnergySpectrum().GetHistogramEnergy();
 
 	energyCount = gcnew List<array<double>^>();
-	energyCount->Capacity = eSpect.size();
+	energyCount->Capacity = static_cast<int>(eSpect.size());
 
-	for (int i = 0; i < eSpect.size(); ++i)
+	for (int i = 0; i < static_cast<int>(eSpect.size()); ++i)
 	{
 		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
 		energyCount->Add(tempECount);
@@ -129,9 +140,9 @@ void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrum(List<array<double>^>^% 
 	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetScatterSumEnergySpectrum().GetHistogramEnergy();
 
 	energyCount = gcnew List<array<double>^>();
-	energyCount->Capacity = eSpect.size();
+	energyCount->Capacity = static_cast<int>(eSpect.size());
 
-	for (int i = 0; i < eSpect.size(); ++i)
+	for (int i = 0; i < static_cast<int>(eSpect.size()); ++i)
 	{
 		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
 		energyCount->Add(tempECount);
@@ -143,79 +154,58 @@ void HUREL::Compton::LahgiWrapper::ResetSpectrum(unsigned int channelNumber)
 	lahgiControlInstance.ResetEnergySpectrum(channelNumber);	
 }
 
-void HUREL::Compton::LahgiWrapper::GetSLAMReconPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
+void HUREL::Compton::LahgiWrapper::ContinueReconPointFor1m1m1m(List<array<double>^>^% vectors, List<double>^% values, double% maxValue)
 {
-	throw gcnew System::NotImplementedException();
+	vectors = gcnew List< array<double>^>();
+	values = gcnew List<double>();
+	maxValue = 0;
+	if (mReconPointCloud == NULL)
+	{
+		open3d::geometry::PointCloud newPC;
+		newPC.points_.reserve(101 * 101 * 101);
+		newPC.colors_.reserve(101 * 101 * 101);
+
+		for (int x = -50; x <= 50; ++x)
+		{
+			for (int y = -50; y <= 50; ++y)
+			{
+				for (int z = 0; z <= 100; ++z)
+				{
+					Eigen::Vector3d point(x / 100, y / 100, z / 100);
+					Eigen::Vector3d color(0,0,0);
+					newPC.points_.push_back(point);
+					newPC.colors_.push_back(color);
+				}
+			}
+		}
+		mReconPointCloud = new ReconPointCloud(newPC);
+		
+	}
+
+	int count = 101 * 101 * 101;
+	std::vector<ListModeData> lmData = lahgiControlInstance.GetListedListModeData();
+
+	for (size_t i = mReconPointsCount; i < lmData.size(); ++i)
+	{
+		mReconPointCloud->CalculateSimpleBackProjctionCompton(lmData[i]);
+	}
+
+	mReconPointsCount = lmData.size();
+
+	vectors->Capacity = count;
+	
+	maxValue = mReconPointCloud->maxReoconValue;
+
+	for (int i = 0; i < count; ++i) {
+		array<double, 1>^ poseVector = gcnew array<double>{mReconPointCloud->points_[i][0], mReconPointCloud->points_[i][1], mReconPointCloud->points_[i][2]};
+		vectors->Add(poseVector);
+		values->Add(mReconPointCloud->reconValues_[i]);
+	}
 }
 
-void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, List<array<double>^>^% colorAlphas, List<array<float>^>^% uvs, eReconType reconType)
+
+void HUREL::Compton::LahgiWrapper::SaveListModeData(String^ fileName)
 {
-	colorAlphas = gcnew List< array<double>^>();
-	uvs = gcnew List< array<float>^>();
-	
-//	realsenseControlInstance = RealsenseControl::instance();
-
-	int size;
-	
-	if (!realsenseControlInstance.IsPipeLineOn) {
-		return;
-	}
-
-	auto rtPC =  realsenseControlInstance.GetRTPointCloudTransposed();
-	open3d::geometry::PointCloud pose = std::get<0>(rtPC);
-	std::vector<Eigen::Vector2f> uv = std::get<1>(rtPC);
-	ReconPointCloud rcPC;
-	switch (reconType)
-	{
-	case HUREL::Compton::eReconType::CODED:
-		rcPC = lahgiControlInstance.GetReconRealtimePointCloudCoded(pose, time);
-		break;
-	case HUREL::Compton::eReconType::COMPTON:
-		rcPC = lahgiControlInstance.GetReconRealtimePointCloudCompton(pose, time);
-		break;
-	case HUREL::Compton::eReconType::HYBRID:
-		break;
-	default:
-		break;
-	}
-
-	
-
-
-	if (pose.IsEmpty()) {
-		return;
-	}
-
-	if (pose.colors_.size() > pose.points_.size())
-	{
-		size = pose.points_.size();
-	}
-	else
-	{
-		size = pose.colors_.size();
-	}
-	if (uv.size() < size) {
-		size = uv.size();
-	}
-
-	if (uv.size() == 0)
-	{
-		return;
-	}
-
-	double maxValue = rcPC.maxReoconValue;
-
-	colorAlphas->Capacity = size;
-	uvs->Capacity = size;
-	
-	for (int i = 0; i < size; i++) 
-	{
-		RGBA_t color =  ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.8, maxValue);
-
-		array<double, 1>^ colorAlphaVector = gcnew array<double>{color.R, color.G, color.B, color.A};
-		colorAlphas->Add(colorAlphaVector);
-
-		array<float, 1>^ uvVector = gcnew array<float>{uv[i][0], uv[i][1]};
-		uvs->Add(uvVector);
-	}
+	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(fileName);
+	lahgiControlInstance.SaveListedListModeData(static_cast<char*>(ptrToNativeString.ToPointer()));
 }

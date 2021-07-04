@@ -29,7 +29,7 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
-        private double batteryVoltage;
+        private double batteryVoltage = 0;
         public double BatteryVoltage
         {
             get
@@ -39,7 +39,28 @@ namespace Compton_GUI_WPF.ViewModel
             set
             {
                 batteryVoltage = value;
+                if (batteryVoltage > 12)
+                {
+                    BatteryVoltageDiv100 = (int)Math.Round((batteryVoltage - 12) / (13.7 - 12) * 100);
+                }
+                else
+                {
+                    BatteryVoltageDiv100 = 0;
+                }
                 OnPropertyChanged(nameof(BatteryVoltage));
+            }
+        }
+        private int batteryVoltageDiv100;
+        public int BatteryVoltageDiv100
+        {
+            get
+            {
+                return batteryVoltageDiv100;
+            }
+            set
+            {
+                batteryVoltageDiv100 = value;
+                OnPropertyChanged(nameof(BatteryVoltageDiv100));
             }
         }
 

@@ -31,6 +31,8 @@ namespace HUREL
 			double maxReoconValue = 0;
 
 			void CalculateReconPoint(ListModeData lmData, double(*calcFunc)(ListModeData, Eigen::Vector3d));
+			
+			void CalculateSimpleBackProjctionCompton(ListModeData& lmData);
 
 			static double SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint);
 

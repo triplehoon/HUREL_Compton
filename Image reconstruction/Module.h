@@ -69,7 +69,7 @@ namespace HUREL {
 				EnergySpectrum* _EnergySpectrum;
 				const bool IsModuleSet() const;
 				
-				static void LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
+				static bool LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
 
 				const Eigen::Vector4d FastMLPosEstimation(const unsigned short pmtADCValue[]) const;
 

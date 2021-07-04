@@ -373,7 +373,7 @@ namespace HUREL.Compton
         /// <param name="minimum"></param>
         /// <param name="maximum"></param>
         /// <returns></returns>
-        private static Color4 ColorScaleJet(float v, float vmin, float vmax)
+        public static Color4 ColorScaleJet(float v, float vmin, float vmax)
         {
             float dv;
 
@@ -414,6 +414,8 @@ namespace HUREL.Compton
             
             return color;
         }
+
+      
 
     } 
 }

@@ -65,6 +65,7 @@
     <PackageReference Include="Syncfusion.SfBusyIndicator.WPF" Version="18.4.0.35" />
     <PackageReference Include="Syncfusion.SfChart.WPF" Version="18.4.0.35" />
     <PackageReference Include="Syncfusion.SfGrid.WPF" Version="18.4.0.35" />
+    <PackageReference Include="Syncfusion.SfHeatMap.WPF" Version="19.2.0.44" />
     <PackageReference Include="Syncfusion.SfInput.WPF" Version="18.4.0.35" />
     <PackageReference Include="Syncfusion.SfRichTextBoxAdv.WPF" Version="18.4.0.35" />
     <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="18.4.0.35" />
@@ -83,12 +84,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SLAM wrapper\SLAM wrapper.vcxproj" />
-    <ProjectReference Include="..\SRE3021 API\SRE3021 API.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="CyUSB">
-      <HintPath>bin\x64\Release\net5.0-windows\CyUSB.dll</HintPath>
+      <HintPath>E:\OneDrive - 한양대학교\01.Hurel\01.현재작업\20201203 Comtpon GUI\Compton GUI Main\HUREL Compton\Compton GUI WPF\bin\Debug\net5.0-windows\CyUSB.dll</HintPath>
     </Reference>
     <Reference Include="SRE3021 API">
       <HintPath>C:\Users\triplehoon\source\repos\SRE3021 CZT API\SRE3021 API\bin\Release\net5.0\SRE3021 API.dll</HintPath>

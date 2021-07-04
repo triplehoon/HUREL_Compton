@@ -157,8 +157,7 @@ namespace Compton_GUI_WPF.ViewModel
                 if (IsSavingBinaryFile)
                 {
                     VMStatus = "Saving CSV file";
-                    LACC_Control_Static.SaveListmodeData(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName + "T265Offset_" + T265ToLACCOffset.X + "_" +T265ToLACCOffset.Y +"_" + T265ToLACCOffset.Z + "_");
-                    SaveCurrentPointCloud(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName);
+                    LahgiWrapper_Static.SaveListModeData(Path.GetDirectoryName(FPGAControl.FileMainPath) + "\\" + fileName);                                
                     VMStatus = "Done saving CSV file";
                 }                
             }

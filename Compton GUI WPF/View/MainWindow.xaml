@@ -11,7 +11,7 @@
         xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
         xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
          xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
-
+        xmlns:globalization="clr-namespace:System.Globalization;assembly=mscorlib" 
         mc:Ignorable="d"
         Title="HUREL Compton GUI" Height="900" Width="1600"
         syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"        
@@ -36,15 +36,24 @@
                 <!-- Theme setting -->
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <syncfusion:ColorMappingCollection x:Key="colorMapping">
+                <syncfusion:ColorMapping Value="0" Color="#005ba2 " Label="Excellent"/>
+                <syncfusion:ColorMapping Value="0.3" Color="#13ab11" Label="Good"/>
 
+                <syncfusion:ColorMapping Value= "0.6" Color="#ffff01" Label="Average"/>
+                <syncfusion:ColorMapping Value="1" Color="#fe0002" Label="Poor"/>
+
+            </syncfusion:ColorMappingCollection>
 
             <localView:BoolToStringConverter x:Key="ConvStartOrStop" FalseValue="Start Session" TrueValue="Stop Session"/>
             <localView:BoolToBrushConverter x:Key="ConvBoolToGreenOrRed" TrueValue="Green" FalseValue="Red"/>
             <localView:TimespaneToStringConverter x:Key="ConvTimeSpanToStr"/>
             <localView:ObservalbeDoubleToChannelNameConverter x:Key="ConvObservalbeDoubleToChannelName"/>
             <localView:InverseBooleanConverter x:Key="ConvInverseBoolean"/>
-            <localView:RTReconModeToBooleanConverter x:Key="ConvRTReconModeToBoolean"/>
-
+            <localView:EnumToBooleanConverter x:Key="ConvEnumToBoolean"/>
+            <localView:EReconProjectionToRangeConverter x:Key="ConvEReconToRange"/>
+            <localView:EReconProjectionToInverseXConverter x:Key="ConvEReconToInerverX"/>
+            <localView:EReconProjectionToAxisNameConverter x:Key="ConvEReconToAxisName"/>
             <Style TargetType="TextBlock" x:Key="TextBlockTitle">
                 <Setter Property="FontSize" Value="20"/>
                 <Setter Property="FontWeight" Value="Bold"/>
@@ -112,59 +121,230 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Grid.Column="0">
-                        <TextBlock Style="{StaticResource TextBlockTitle}" Margin="5"><Run Text="Real Time"/><Run Language="ko-kr" Text=" 2-D Image Reconstruction"/></TextBlock>
+                        <TextBlock Style="{StaticResource TextBlockTitle}" Margin="5" Text="Projection View"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="351*"/>
-                                <ColumnDefinition Width="233*"/>
+                                <ColumnDefinition Width="1*"/>
+
+                                <ColumnDefinition Width="5*"/>
+                                <ColumnDefinition Width="2*"/>
+
                             </Grid.ColumnDefinitions>
-                            <Image Source="{Binding RealtimeRGB}" Width="576" Height="324" Stretch="Uniform" Grid.ColumnSpan="2" Margin="0,0,52,0"/>
-                            <Image Source="{Binding ReconBitmapImage}" Width="576" Height="324" Stretch="Uniform" Grid.ColumnSpan="2" Margin="0,0,52,0"/>
+                            <syncfusion:SfChart Grid.Column="1" Grid.Row="0" Height="350" Width="350">
+                                <syncfusion:SfChart.PrimaryAxis>
+                                    <syncfusion:NumericalAxis 
+                                    Header="{Binding Path=ReconProjection, Converter={StaticResource ConvEReconToAxisName}, ConverterParameter=X}"
+                                    Minimum="{Binding Path=ReconProjection, Converter={StaticResource ConvEReconToRange}, ConverterParameter=minusX}" 
+                                                          Maximum="{Binding Path=ReconProjection, Converter={StaticResource ConvEReconToRange}, ConverterParameter=plusX}" ShowGridLines="False" 
+                                                          IsInversed="{Binding Path=ReconProjection, Converter={StaticResource ConvEReconToInerverX}}"/>
+                                </syncfusion:SfChart.PrimaryAxis>
+                                <syncfusion:SfChart.SecondaryAxis>
+                                    <syncfusion:NumericalAxis 
+                                    Header="{Binding Path=ReconProjection, Converter={StaticResource ConvEReconToAxisName}, ConverterParameter=Y}"
+                                    Minimum="{Binding Path=ReconProjection, Converter={StaticResource ConvEReconToRange}, ConverterParameter=minusY}" 
+                                                          Maximum="{Binding Path=ReconProjection, Converter={StaticResource ConvEReconToRange}, ConverterParameter=plusY}" ShowGridLines="False"/>
+                                </syncfusion:SfChart.SecondaryAxis>
+                                <syncfusion:FastScatterBitmapSeries ItemsSource="{Binding ProjectionPositions}" XBindingPath="X" YBindingPath="Y" SegmentColorPath="Color" ScatterHeight="6" ScatterWidth="6"/>
+                            </syncfusion:SfChart>
+                            <syncfusion:SfRangeSlider Grid.Column="2" Orientation="Vertical"
+                                                      Maximum="{Binding TrueReconMaxValue}"
+                                                      Minimum="0"
+                                                      RangeStart="{Binding Path=ProjectionMinValue, Mode=TwoWay}"
+                                                      RangeEnd="{Binding Path=ProjectionMaxValue, Mode=TwoWay}"
+                                                      ShowRange="True"
+                                                      TickFrequency="{Binding Path=ProjectionTickValue, Mode=TwoWay}"
+                                                      TickPlacement="Outside"
+                                                      ThumbToolTipPlacement="TopLeft"
+                                                      Height="300"
+                                                     
+                                                      AllowRangeDrag="True"
+                                                      ShowValueLabels="True"
+                                                      
+                                                      ValuePlacement="BottomRight"
+                                                      Foreground="Black"
+                                                    
+                                                      HorizontalAlignment="Left"
+                                >
+                                <syncfusion:SfRangeSlider.ActiveTrackStyle>
+                                    <Style TargetType="Rectangle">
+                                        <Setter Property="Fill">
+                                            <Setter.Value>
+                                                <LinearGradientBrush>
+                                                    <GradientStop Color="Blue" Offset="1"/>
+                                                    <GradientStop Color="Green" Offset="0.6"/>
+                                                    <GradientStop Color="Yellow" Offset="0.3"/>
+                                                    <GradientStop Color="Red" Offset="0"/>
+
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+
+                                        </Setter>
+                                    </Style>
+
+                                </syncfusion:SfRangeSlider.ActiveTrackStyle>
+                                <syncfusion:SfRangeSlider.InactiveTrackStyle>
+                                    <Style TargetType="Rectangle">
+                                        <Setter Property="Height" Value="2" />
+                                        <Setter Property="Fill" Value="#B5D0FF" />
+                                        <Setter Property="RadiusX" Value="2" />
+                                        <Setter Property="RadiusY" Value="2" />
+                                    </Style>
+                                </syncfusion:SfRangeSlider.InactiveTrackStyle>
+
+
+                            </syncfusion:SfRangeSlider>
+                          
                         </Grid>
+
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="0">
-                        <TextBlock Text="Real-time Reconstruction Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
+                        <TextBlock Text="Projection Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
                         <StackPanel Orientation="Horizontal" >
-
-                            <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_NEAR}" 
-                                         Content="Near-field mode" 
+                            <RadioButton IsChecked="{Binding Path=ReconProjection, Converter={StaticResource ConvEnumToBoolean}, ConverterParameter=XY}" 
+                                         Content="XY Prjection" 
                                          FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
-                            <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_FAR}" 
-                                Content="Far-field mode" FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
-                        </StackPanel>
-                        <Grid >
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <syncfusion:SfTextInputLayout Grid.Column="0" Margin="10" Hint="Data Aquire Time" HelperText="In seconds" Width="200" HorizontalAlignment="Left">
-                                <syncfusion:IntegerTextBox IsScrollingOnCircle="True" Margin="5" Width="100" HorizontalAlignment="Left" Value="{Binding Path =MLPETime, UpdateSourceTrigger=PropertyChanged}"/>
-                            </syncfusion:SfTextInputLayout>
-                            <StackPanel Grid.Column="1">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Select acquisition mode" Margin="5" Style="{StaticResource TextBlockTitle2 }"/>
-                                    <mah:ToggleSwitch 
-                                              OffContent="Off"
-                                              OnContent="On"                                              
-                                              IsOn="{Binding IsRealTimeImageReconOn}"
-                                             />
-                                </StackPanel>
-                                <ComboBox Margin="5,5,20,5" Grid.Column="1" SelectedIndex="0"
+                            <RadioButton IsChecked="{Binding Path=ReconProjection, Converter={StaticResource ConvEnumToBoolean}, ConverterParameter=XZ}" 
+                                         Content="XZ Projection" 
+                                         FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
+                            <RadioButton IsChecked="{Binding Path=ReconProjection, Converter={StaticResource ConvEnumToBoolean}, ConverterParameter=ZY}" 
+                                         Content="YZ Projection" 
+                                         FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
+                            <ComboBox Margin="5,5,5,5" Grid.Column="1" SelectedIndex="0" Width="120"
                                           ItemsSource="{Binding SelectReconTypes}"
                                           SelectedItem="{Binding SelectReconType}"
                                           >
-                                </ComboBox>
+                            </ComboBox>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="5*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="X position" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center" Margin="1"></TextBlock>
+                                <syncfusion:UpDown Grid.Column="0" Grid.Row="1"
+                                               Value="{Binding Path=ProjectionX}"
+                                               Step="0.01"
+                                               MaxValue="0.50001"
+                                               MinValue="-0.50001"                                               
+                                               IsScrollingOnCircle="True"
+                                               TextAlignment="Center"
+                                               ZeroColor="Black"
+                                               NegativeForeground="Black"
+                                               Foreground ="Black"
+                                               >
+                                    <syncfusion:UpDown.NumberFormatInfo>
+                                        <globalization:NumberFormatInfo NumberDecimalDigits="2"/>
+                                    </syncfusion:UpDown.NumberFormatInfo>
+                                </syncfusion:UpDown>
+                                <Border Grid.Column="0" Grid.Row="2">
+                                    <Slider                         
+                                    HorizontalAlignment="Center"
+                                Orientation="Vertical"
+                                Maximum="0.50"
+                                Minimum="-0.50"
+                                Value="{Binding Path=ProjectionX}"                                         
+                                TickFrequency="0.01"                                
+                                IsSnapToTickEnabled="True"
+                                TickPlacement="BottomRight"
+                                Height="250"
+                                Margin="10"
+                                Padding="10"
+                                >
+                                    </Slider>
+                                </Border>
+
+                                <TextBlock Text="Y position" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Margin="1"></TextBlock>
+                                <syncfusion:UpDown Grid.Column="1" Grid.Row="1"
+                                               Value="{Binding Path=ProjectionY}"
+                                               Step="0.01"
+                                               MaxValue="0.50001"
+                                               MinValue="-0.50001"                                               
+                                               IsScrollingOnCircle="True"
+                                               TextAlignment="Center"
+                                               ZeroColor="Black"
+                                               NegativeForeground="Black"
+                                               Foreground ="Black"
+                                               >
+                                    <syncfusion:UpDown.NumberFormatInfo>
+                                        <globalization:NumberFormatInfo NumberDecimalDigits="2"/>
+                                    </syncfusion:UpDown.NumberFormatInfo>
+                                </syncfusion:UpDown>
+                                <Border Grid.Column="1" Grid.Row="2">
+                                    <Slider                         
+                                    HorizontalAlignment="Center"
+                                Orientation="Vertical"
+                                Maximum="0.50"
+                                Minimum="-0.50"
+                                Value="{Binding Path=ProjectionY}"                                         
+                                TickFrequency="0.01"                                
+                                IsSnapToTickEnabled="True"
+                                TickPlacement="BottomRight"
+                                Height="250"
+                                Margin="10"
+                                Padding="10"
+                                >
+                                    </Slider>
+                                </Border>
+
+                                <TextBlock Text="Z position" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" Margin="1"></TextBlock>
+                                <syncfusion:UpDown Grid.Column="2" Grid.Row="1"
+                                               Value="{Binding Path=ProjectionZ}"
+                                               Step="0.01"
+                                               MaxValue="1.0001"
+                                               MinValue="-0.0001"                                               
+                                               IsScrollingOnCircle="True"
+                                               TextAlignment="Center"
+                                               ZeroColor="Black"
+                                               NegativeForeground="Black"
+                                               Foreground ="Black"
+                                               >
+                                    <syncfusion:UpDown.NumberFormatInfo>
+                                        <globalization:NumberFormatInfo NumberDecimalDigits="2"/>
+                                    </syncfusion:UpDown.NumberFormatInfo>
+                                </syncfusion:UpDown>
+                                <Border Grid.Column="2" Grid.Row="2">
+                                    <Slider                         
+                                    HorizontalAlignment="Center"
+                                Orientation="Vertical"
+                                Maximum="1"
+                                Minimum="0"
+                                Value="{Binding Path=ProjectionZ}" 
+                                TickFrequency="0.01"                                
+                                IsSnapToTickEnabled="True"
+                                TickPlacement="BottomRight"
+                                Height="250"
+                                Margin="10"
+                                Padding="10"
+                                >
+                                    </Slider>
+                                </Border>
+
+                            </Grid>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Post Processing" Style="{StaticResource TextBlockTitle}" Margin="5" />
+                                <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding PostProcessingCommnd}" 
+                                        Content="Load List Mode csv" Grid.Column="1" Margin="50,0,50,0"/>
+                                <TextBlock Text="File Name: " Margin="2"/>
+                                <TextBlock Text="{Binding PostProcessingFileName}"></TextBlock>
+
                             </StackPanel>
                         </Grid>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Average Depth of Points in Point Cloud :" Margin="5"/>
-                            <TextBlock Text="{Binding AveragePointCloudDepth, StringFormat=f2}" Margin="0,5,0,5"/>
-                            <TextBlock Text=" m " Margin="0,5,0,5"/>
-                        </StackPanel>
 
                     </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="1">
-                        <TextBlock Text="SLAM Pointcloud" Style="{StaticResource TextBlockTitle}" Margin="5" />
+                        <TextBlock Text="3D Recon View" Style="{StaticResource TextBlockTitle}" Margin="5" />
                         <hx:Viewport3DX 
                            Background="Silver"                   
                                         Width="480"
@@ -174,14 +354,13 @@
                                 <hx:DefaultEffectsManager/>
                             </hx:Viewport3DX.EffectsManager>
                             <hx:Viewport3DX.Camera>
-                                <hx:PerspectiveCamera Position="0,0,0" LookDirection="0,0,1" UpDirection="0,1,0"/>
+                                <hx:PerspectiveCamera Position="-2,1.5,-1" LookDirection="1,-1,1" UpDirection="0,1,0"/>
                             </hx:Viewport3DX.Camera>
-                            <hx:PointGeometryModel3D Geometry="{Binding SLAMReconPointCloud}" Color="White" FixedSize="True" Size="10,10">
+                            <hx:PointGeometryModel3D Geometry="{Binding RTPointCloud}" Color="White" FixedSize="True" Size="10,10">
                             </hx:PointGeometryModel3D>
-                            <hx:PointGeometryModel3D Geometry="{Binding SLAMPointCloud}" Color="White" FixedSize="True" Size="3,3">
-                            </hx:PointGeometryModel3D>
-                            <hx:LineGeometryModel3D Geometry="{Binding SLAMPoseInfo}" Color="LightGreen" Thickness="4"/>
-
+                            <hx:LineGeometryModel3D Geometry="{Binding XAxisLine}" Color="Red" Thickness="4"/>
+                            <hx:LineGeometryModel3D Geometry="{Binding YAxisLine}" Color="Green" Thickness="4"/>
+                            <hx:LineGeometryModel3D Geometry="{Binding ZAxisLine}" Color="Blue" Thickness="4"/>
                         </hx:Viewport3DX>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Tracking Confidence" Margin="5"/>
@@ -189,14 +368,6 @@
                             <TextBlock Text= "Pointcloud Count: " Margin="5"/>
                             <TextBlock Text= "{Binding SLAMPointCloudCount}" Margin="5"/>
                         </StackPanel>
-                        <Grid Margin="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding StartSLAMCommand}" Content="Start SLAM" Grid.Column="0" Margin="50,0,50,0"/>
-                            <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding StopSLAMCommand}" Content="Stop SLAM" Grid.Column="1" Margin="50,0,50,0"/>
-                        </Grid>
 
 
                     </StackPanel>
@@ -247,71 +418,24 @@
                                               IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
                                               IsOn="{Binding IsHvModuleOn}"/>
                             <TextBlock Text="Temperature" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBlock Text="15 ºC" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="N/A ºC" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBlock Text="Battery" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <StackPanel Orientation="Horizontal"  Grid.Column="3" Grid.Row="1">
-                                <mah:MetroProgressBar Width="60" Value="50" BorderBrush="Gray" BorderThickness="1" Foreground="Green" Margin="0,7,0,7"/>
+                                <mah:MetroProgressBar Width="60" Value="{Binding BatteryVoltageDiv100}" BorderBrush="Gray" BorderThickness="1" Foreground="Green" Margin="0,7,0,7"/>
                                 <TextBlock Margin="5,0,0,0" Text="{Binding BatteryVoltage}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
 
 
                             </StackPanel>
 
-                            <TextBlock Text = "COM" Grid.Column="4" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text = "Bluetooth" Grid.Column="4" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <ComboBox ItemsSource="{Binding ComPorts}" SelectedItem="{Binding SelectedComport}" Grid.Column="5" Grid.Row="1" SelectedIndex="1"/>
 
 
 
                         </Grid>
 
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Position [m]" Margin="5" Style="{StaticResource TextBlockTitle2}"/>
-                            <Ellipse Width="18" Height="18" Fill="{Binding IsT265TrackingConfidence3, Converter={StaticResource ConvBoolToGreenOrRed}}" Margin="5"/>
-                        </StackPanel>
-                        <Grid Margin="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="X Position" Grid.Column="0"/>
-                            <TextBlock Text="{Binding SystemPoseX, StringFormat=f2}" d:Text="3.15752" Grid.Column="1"/>
-                            <TextBlock Text="Y Position" Grid.Column="2"/>
-                            <TextBlock Text="{Binding SystemPoseY , StringFormat=f2}" Grid.Column="3"/>
-                            <TextBlock Text="Z Position" Grid.Column="4"/>
-                            <TextBlock Text="{Binding SystemPoseZ , StringFormat=f2}" Grid.Column="5"/>
-
-                        </Grid>
-                        <TextBlock Text="Realsense Status" Margin="5" Style="{StaticResource TextBlockTitle2}"/>
-                        <Grid Margin="10,0,10,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="0.8*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="1.5*"/>
-                                <ColumnDefinition Width="*"/>
-
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="30"/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Text="Initiate" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <mah:ToggleSwitch Grid.Column="1" Grid.Row="0"                                               
-                                              OnContent="On"
-                                              OffCommand="{Binding StopRealsensePipelineCommand}"
-                                              OnCommand="{Binding InitiateRealsenseCommand}"                                                                                            
-                                              IsOn="{Binding Path=IsRealsenseOn, Mode=OneWay}"                                              
-                                              />
-                            <TextBlock Text="Tracking Confidence" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding T265TrackingConfidence}" Grid.Column="3" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <Button Content="Reset RS" Grid.Column="4" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Margin="1" Command="{Binding ResetRealsensePipelineCommand}"/>
-
-                        </Grid>
-                        <TextBlock Text="{Binding RealsenseState}" Margin="5"/>
                         <Button Content="Test Buton" Command="{Binding TestCommand}"/>
                     </StackPanel>
                 </Grid>
@@ -625,9 +749,6 @@
                 </Grid>
 
             </syncfusion:TabItemExt>
-            <syncfusion:TabItemExt Header="Realsense Configuration" Background="White" BorderBrush="#FFEAEAEA"/>
-            <syncfusion:TabItemExt Header="Internal Contemination" Background="White" BorderBrush="#FFEAEAEA"/>
-            <syncfusion:TabItemExt Header="System Status" Background="White" BorderBrush="#FFEAEAEA"/>
         </syncfusion:TabControlExt>
 
         <Grid Grid.Column="1">
@@ -739,7 +860,7 @@
                         </syncfusion:SfTextInputLayout>
 
                     </Grid>
-                    
+
                     <syncfusion:SfChart  x:Name="SpectrumMain" Margin="5" Grid.Row="2" MouseDown="SfChart_MouseDown" >
                         <syncfusion:SfChart.Resources>
 

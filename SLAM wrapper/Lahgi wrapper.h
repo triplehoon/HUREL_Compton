@@ -4,6 +4,7 @@
 
 using namespace System::Collections::Generic;
 using namespace System;
+using namespace System::Runtime::InteropServices;
 
 namespace HUREL {
 	namespace Compton {
@@ -25,17 +26,19 @@ namespace HUREL {
 		{
 		private:
 			LahgiControl& lahgiControlInstance = LahgiControl::instance();
-			RealsenseControl& realsenseControlInstance = RealsenseControl::instance();
-
+		/*	RealsenseControl& realsenseControlInstance = RealsenseControl::instance();*/
+			size_t mReconPointsCount = 0;
+			ReconPointCloud* mReconPointCloud = NULL;
 
 		public:
-
 			LahgiWrapper(eModuleManagedType type);
+			~LahgiWrapper();
 			Boolean AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks);
 
-			void GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE);
+			void GetAbsoluteListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE);
 
 			void ResetListmodeData();
+			void SaveListModeData(String^ fileName);			
 
 			void GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount);
 
@@ -44,10 +47,9 @@ namespace HUREL {
 			void GetScatterSumSpectrum(List<array<double>^>^% energyCount);
 			void ResetSpectrum(unsigned int channelNumber);
 
-			void GetSLAMReconPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
+			void ContinueReconPointFor1m1m1m(List<array<double>^>^% vectors, List<double>^% values, double% maxValue);
 
 
-			void GetRealTimeReconImage(double time, List<array<double>^>^% colors, List<array<float>^>^% uvs, eReconType reconType);
 		};
 
 
