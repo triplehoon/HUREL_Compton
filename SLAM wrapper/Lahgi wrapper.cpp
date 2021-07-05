@@ -162,16 +162,16 @@ void HUREL::Compton::LahgiWrapper::ContinueReconPointFor1m1m1m(List<array<double
 	if (mReconPointCloud == NULL)
 	{
 		open3d::geometry::PointCloud newPC;
-		newPC.points_.reserve(101 * 101 * 101);
-		newPC.colors_.reserve(101 * 101 * 101);
+		newPC.points_.reserve(21 * 21 * 21);
+		newPC.colors_.reserve(21 * 21 * 21);
 
-		for (int x = -50; x <= 50; ++x)
+		for (int x = -50; x <= 50; x+=5)
 		{
-			for (int y = -50; y <= 50; ++y)
+			for (int y = -50; y <= 50; y+=5)
 			{
-				for (int z = 0; z <= 100; ++z)
+				for (int z = 0; z <= 100; z+=5)
 				{
-					Eigen::Vector3d point(x / 100, y / 100, z / 100);
+					Eigen::Vector3d point((double)x / 100, (double)y / 100, (double)z / 100);
 					Eigen::Vector3d color(0,0,0);
 					newPC.points_.push_back(point);
 					newPC.colors_.push_back(color);
@@ -182,10 +182,11 @@ void HUREL::Compton::LahgiWrapper::ContinueReconPointFor1m1m1m(List<array<double
 		
 	}
 
-	int count = 101 * 101 * 101;
+	int count = 21 * 21 * 21;
 	std::vector<ListModeData> lmData = lahgiControlInstance.GetListedListModeData();
 
-	for (size_t i = mReconPointsCount; i < lmData.size(); ++i)
+	#pragma omp parallel for
+	for (int i = static_cast<int>(mReconPointsCount); i < lmData.size(); ++i)
 	{
 		mReconPointCloud->CalculateSimpleBackProjctionCompton(lmData[i]);
 	}

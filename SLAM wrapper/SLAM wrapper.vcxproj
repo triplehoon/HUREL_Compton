@@ -102,6 +102,7 @@
       <Optimization>Disabled</Optimization>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <WarningLevel>Level3</WarningLevel>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Open3D_MDd\lib;C:\Program Files %28x86%29\Intel RealSense SDK 2.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -114,6 +115,7 @@
       <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files %28x86%29\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Image reconstruction;$(SolutionDir)\Realsense Control Library</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>Default</LanguageStandard>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Open3D_MD\lib;C:\Program Files %28x86%29\Intel RealSense SDK 2.0\lib\x64;$(SolutionDir)\Image reconstruction;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

@@ -188,19 +188,25 @@ namespace HUREL.Compton
             while (IsGenerateShortArrayBuffer)
             {
                 byte[] item;
-                ushort[] shortArray = new ushort[144];
-
 
                 while (ParsedQueue.TryTake(out item))
                 {
+                    ushort[] shortArray = new ushort[144];
+                    bool Is511Appear = false;
 
                     Buffer.BlockCopy(item, 0, shortArray, 0, 288);
                     foreach (var check511 in shortArray)
                     {
                         if (check511 == 511)
                         {
+                            Is511Appear = true;
                             continue;
                         }
+                    }
+                    if (Is511Appear)
+                    {
+                        Is511Appear = false;
+                        continue;
                     }
                     ShortArrayQueue.Add(shortArray);
                 }

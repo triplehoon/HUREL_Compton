@@ -88,11 +88,7 @@
 
   <ItemGroup>
     <Reference Include="CyUSB">
-      <HintPath>E:\OneDrive - 한양대학교\01.Hurel\01.현재작업\20201203 Comtpon GUI\Compton GUI Main\HUREL Compton\Compton GUI WPF\bin\Debug\net5.0-windows\CyUSB.dll</HintPath>
-    </Reference>
-    <Reference Include="SRE3021 API">
-      <HintPath>C:\Users\triplehoon\source\repos\SRE3021 CZT API\SRE3021 API\bin\Release\net5.0\SRE3021 API.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\application\c_sharp\controlcenter\bin\Release\CyUSB.dll</HintPath>
     </Reference>
   </ItemGroup>
 

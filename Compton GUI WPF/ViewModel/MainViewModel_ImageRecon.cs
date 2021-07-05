@@ -263,9 +263,7 @@ namespace Compton_GUI_WPF.ViewModel
                 double maxValue = 0;
 
                 LahgiWrapper_Static.ContinueReconPointFor1m1m1m(ref poseVect, ref values, ref maxValue);
-
-                TrueReconMaxValue = maxValue;
-
+              
                 var vc = new Vector3Collection();
                 var cc = new Color4Collection();
                 for (int i = 0; i < poseVect.Count; i++)
@@ -274,8 +272,15 @@ namespace Compton_GUI_WPF.ViewModel
                     cc.Add(ImageRecon.ColorScaleJet((float)values[i], (float)projectionMinValue, (float)projectionMaxValue));
                 }
                 RealtimePositionInfo = new PositionInfos(vc, cc, values);
+                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                {
+                    TrueReconMaxValue = maxValue;
+                    ProjectionMaxValue = maxValue;
+                    UpdatePointCloudProjection();
+                }));
 
-                UpdatePointCloudProjection();
+                //
+                Thread.Sleep(100);
             }
         }
         
@@ -328,7 +333,7 @@ namespace Compton_GUI_WPF.ViewModel
                         if (x == projectionXRounded || y == projectionYRounded || z == projectionZRounded)
                         {
                             vc.Add(RealtimePositionInfo.V3[i]);
-                            cc.Add(RealtimePositionInfo.C4[i]);
+                            cc.Add(ImageRecon.ColorScaleJet((float)value, (float)projectionMinValue, (float)projectionMaxValue));
                             switch (ReconProjection)
                             {
                                 case EReconProjection.XY:

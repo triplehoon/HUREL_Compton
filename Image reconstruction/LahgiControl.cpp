@@ -106,7 +106,7 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		mScatterModules = new Module*[8];
 		mAbsorberModules = new Module*[8];
 		double offset = 0.083;
-		double xoffest = 0.3;
+		double xoffest = 0.374/2;
 		// from back    <- x ^ y
 		//  6 4 2 0
 		//  7 5 3 1 
@@ -590,7 +590,7 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 {
 	std::ofstream saveFile;
 	saveFile.open(fileName + ".csv");
-	for (unsigned int i = 0; mListedListModeData.size(); ++i)
+	for (unsigned int i = 0; i < mListedListModeData.size(); ++i)
 	{
 		ListModeData& d = mListedListModeData[i];
 		switch (d.Type) 
@@ -601,7 +601,7 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << std::endl;
 			break;
 		case eInterationType::COMPTON:
-			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy;
+			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << ",";
 				saveFile << d.Absorber.RelativeInteractionPoint[0] << "," << d.Absorber.RelativeInteractionPoint[1] << "," << d.Absorber.RelativeInteractionPoint[2] << "," << d.Absorber.InteractionEnergy << std::endl;
 			break;
 		default:

@@ -130,6 +130,11 @@ namespace Compton_GUI_WPF.ViewModel
                     bool isFPGAStart = await Task.Run(() => FPGAControl.Start_usb(out status)).ConfigureAwait(false);
                     if (isFPGAStart) 
                     {
+                        LahgiWrapper_Static.ResetListmodeData();
+                        for (uint i = 0; i < 16; ++i)
+                        {
+                            LahgiWrapper_Static.ResetSpectrum(i);
+                        }
                         IsSessionStart = true;
                         IsRealTimeImageReconOn = true;
                         await Task.Run(()=>StartTimer());
@@ -213,11 +218,7 @@ namespace Compton_GUI_WPF.ViewModel
                 double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
                 UnmanagedEcks.Add(eckUnmanaged);
             }
-            LahgiWrapper_Static.ResetListmodeData();
-            for (uint i = 0; i < 16; ++i)
-            {
-                LahgiWrapper_Static.ResetSpectrum(i);
-            }
+
             //LACC_Control_Static.ResetLMData();
             while (IsAddingListModeData)
             {

@@ -21,7 +21,6 @@ using Compton_GUI_WPF.View;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using HUREL.Compton;
-using HUREL.Compton.CZT;
 using HUREL.Compton.LACC;
 using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
@@ -46,10 +45,9 @@ namespace Compton_GUI_WPF.ViewModel
             IsSessionAvailable = false;
 
             FPGAControl.USBChangeHandler += UpdateDeviceList;
-            FPGAControl.USBChange();            
-           
+            FPGAControl.USBChange();
 
-            //RTPointCloudTask =Task.Run(() => GetRealTimePointCloud());
+
 
             ModuleEnergySpectrums = new List<ObservableCollection<HistoEnergy>>();
 
@@ -60,8 +58,8 @@ namespace Compton_GUI_WPF.ViewModel
 
             InitiateAxis();
 
-                  
-            InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));          
+
+            InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             TestFunction("").SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             
         }
@@ -321,11 +319,11 @@ namespace Compton_GUI_WPF.ViewModel
             ProjectionMaxValue = TrueReconMaxValue;
 
             await Task.Run(() => {
-                for (int x = -50; x <= 50; x++)
+                for (int x = -50; x <= 50; x+=5)
                 {
-                    for (int y = -50; y <= 50; y++)
+                    for (int y = -50; y <= 50; y+=5)
                     {
-                        for (int z = 0; z <= 100; z++)
+                        for (int z = 0; z <= 100; z+=5)
                         {
                             vc.Add(new SharpDX.Vector3(Convert.ToSingle(x) / 100, Convert.ToSingle(y) / 100, Convert.ToSingle(z) / 100));
                             double value = x * x + y * y + z * z;
