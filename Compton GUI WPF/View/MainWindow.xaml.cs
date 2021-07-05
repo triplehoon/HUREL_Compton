@@ -51,9 +51,9 @@ namespace Compton_GUI_WPF
 
         private string[] ComboboxSelectedSpectrumItems = new string[]
         {
+             "Sum",
             "Scatter",
             "Absorber",
-            "Sum",
             "Channel 0",
             "Channel 1",
             "Channel 2",
@@ -70,16 +70,11 @@ namespace Compton_GUI_WPF
             "Channel 13",
             "Channel 14",
             "Channel 15",
-            "CZT"
         };
       
 
 
-        private void SfDataGrid_PreviewMouseWheel_ScrollViewer1(object sender, MouseWheelEventArgs e)
-        {
-            ScrollViewer1.ScrollToVerticalOffset(ScrollViewer1.VerticalOffset - e.Delta);
-        }
-
+       
         private void ComboBox_TargetUpdated(object sender, DataTransferEventArgs e)
         {
             ((ComboBox)sender).SelectedIndex = 0;

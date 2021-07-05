@@ -290,6 +290,21 @@ namespace Compton_GUI_WPF.ViewModel
             set { projectionPositions = value; OnPropertyChanged(nameof(ProjectionPositions)); }
         }
 
+        public record ProjectionLineInfo(double X, double Y);
+        private List<ProjectionLineInfo> projectionYLine = new List<ProjectionLineInfo>();
+        public List<ProjectionLineInfo> ProjectionYLine
+        {
+            get { return projectionYLine; }
+            set { projectionYLine = value; OnPropertyChanged(nameof(ProjectionYLine)); }
+        }
+
+        private List<ProjectionLineInfo> projectionXLine = new List<ProjectionLineInfo>();
+        public List<ProjectionLineInfo> ProjectionXLine
+        {
+            get { return projectionXLine; }
+            set { projectionXLine = value; OnPropertyChanged(nameof(ProjectionXLine)); }
+        }
+
         private void UpdatePointCloudProjection()
         {
             var vc = new Vector3Collection();
@@ -349,36 +364,40 @@ namespace Compton_GUI_WPF.ViewModel
             switch (ReconProjection)
             {
                 case EReconProjection.XY:
-                    for(int i = -50; i <= 50; ++i)
                     {
-                        double x = projectionXRounded;
-                        double y = projectionYRounded;
-                        var projectInfo = new ProjectionInfo(x, (double)i / 100, 0, new SolidColorBrush(System.Windows.Media.Color.FromScRgb(1.0f, 0.0f, 0.0f, 0.0f)));
-                        tempProjection.Add(projectInfo);
-                        projectInfo = new ProjectionInfo((double)i / 100, y, 0, new SolidColorBrush(System.Windows.Media.Color.FromScRgb(1.0f, 0.0f, 0.0f, 0.0f)));
-                        tempProjection.Add(projectInfo);
-                    }                  
+                        ProjectionLineInfo xLine1 = new ProjectionLineInfo(projectionXRounded, -50);
+                        ProjectionLineInfo xLine2 = new ProjectionLineInfo(projectionXRounded, +50);
+                        ProjectionLineInfo yLine1 = new ProjectionLineInfo(-50, projectionYRounded);
+                        ProjectionLineInfo yLine2 = new ProjectionLineInfo(+50, projectionYRounded);
+                        List<ProjectionLineInfo> tmpX = new List<ProjectionLineInfo>() { xLine1, xLine2 };
+                        List<ProjectionLineInfo> tmpY = new List<ProjectionLineInfo>() { yLine1, yLine2 };
+                        ProjectionXLine = tmpX;
+                        ProjectionYLine = tmpY;
+
+                    }
                     break;
                 case EReconProjection.XZ:
-                    for (int i = -50; i <= 50; ++i)
                     {
-                        double x = projectionXRounded;
-                        double z = projectionZRounded;
-                        var projectInfo = new ProjectionInfo(x, ((double)i + 50) / 100, 0, new SolidColorBrush(System.Windows.Media.Color.FromScRgb(1.0f, 0.0f, 0.0f, 0.0f)));
-                        tempProjection.Add(projectInfo);
-                        projectInfo = new ProjectionInfo((double)i / 100, z, 0, new SolidColorBrush(System.Windows.Media.Color.FromScRgb(1.0f, 0.0f, 0.0f, 0.0f)));
-                        tempProjection.Add(projectInfo);
+                        ProjectionLineInfo xLine1 = new ProjectionLineInfo(projectionXRounded, 0);
+                        ProjectionLineInfo xLine2 = new ProjectionLineInfo(projectionXRounded, +100);
+                        ProjectionLineInfo yLine1 = new ProjectionLineInfo(-50, projectionZRounded);
+                        ProjectionLineInfo yLine2 = new ProjectionLineInfo(+50, projectionZRounded);
+                        List<ProjectionLineInfo> tmpX = new List<ProjectionLineInfo>() { xLine1, xLine2 };
+                        List<ProjectionLineInfo> tmpY = new List<ProjectionLineInfo>() { yLine1, yLine2 };
+                        ProjectionXLine = tmpX;
+                        ProjectionYLine = tmpY;
                     }
                     break;
                 case EReconProjection.ZY:
-                    for (int i = -50; i <= 50; ++i)
                     {
-                        double z = projectionZRounded;
-                        double y = projectionYRounded;
-                        var projectInfo = new ProjectionInfo(z, (double)i / 100, 0, new SolidColorBrush(System.Windows.Media.Color.FromScRgb(1.0f, 0.0f, 0.0f, 0.0f)));
-                        tempProjection.Add(projectInfo);
-                        projectInfo = new ProjectionInfo(((double)i + 50) / 100, y, 0, new SolidColorBrush(System.Windows.Media.Color.FromScRgb(1.0f, 0.0f, 0.0f, 0.0f)));
-                        tempProjection.Add(projectInfo);
+                        ProjectionLineInfo xLine1 = new ProjectionLineInfo(projectionZRounded, -50);
+                        ProjectionLineInfo xLine2 = new ProjectionLineInfo(projectionZRounded, +50);
+                        ProjectionLineInfo yLine1 = new ProjectionLineInfo(0, projectionYRounded);
+                        ProjectionLineInfo yLine2 = new ProjectionLineInfo(+100, projectionYRounded);
+                        List<ProjectionLineInfo> tmpX = new List<ProjectionLineInfo>() { xLine1, xLine2 };
+                        List<ProjectionLineInfo> tmpY = new List<ProjectionLineInfo>() { yLine1, yLine2 };
+                        ProjectionXLine = tmpX;
+                        ProjectionYLine = tmpY;
                     }
                     break;
             }
@@ -436,7 +455,7 @@ namespace Compton_GUI_WPF.ViewModel
                 List<ReconImagePoint> reconPoints = new List<ReconImagePoint>();
 
             });
-
+             
             IsPostProcessingDone = true;
         }
         private bool isPostProcessingDone = true;
