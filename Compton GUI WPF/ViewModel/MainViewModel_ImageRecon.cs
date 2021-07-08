@@ -422,6 +422,20 @@ namespace Compton_GUI_WPF.ViewModel
 
             ProjectionPositions = tempProjection;
 
+           
+            if(maxPointX == double.MinValue)
+            {
+                maxPointX = double.NaN;
+            }
+            if (maxPointY == double.MinValue)
+            {
+                maxPointY = double.NaN;
+            }
+            if (maxPointZ == double.MinValue)
+            {
+                maxPointZ = double.NaN;
+            }
+
             MaxReconPointX = maxPointX;
             MaxReconPointY = maxPointY;
             MaxReconPointZ = maxPointZ;

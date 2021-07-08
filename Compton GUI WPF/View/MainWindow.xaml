@@ -435,8 +435,6 @@
                                               OffCommand="{Binding StopHvModuleCommand}"
                                               IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
                                               IsOn="{Binding IsHvModuleOn}"/>
-                            <TextBlock Text="Temperature" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBlock Text="N/A ºC" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <TextBlock Text="Battery" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <StackPanel Orientation="Horizontal"  Grid.Column="3" Grid.Row="1">
                                 <mah:MetroProgressBar Width="60" Value="{Binding BatteryVoltageDiv100}" BorderBrush="Gray" BorderThickness="1" Foreground="Green" Margin="0,7,0,7"/>
@@ -622,7 +620,7 @@
 
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5" Grid.Column="0"/>
-                        <CheckBox Content="MLPE On" IsChecked="{Binding IsMLPEOn}" Grid.Column="1" VerticalAlignment="Center" Margin="5" Visibility="Collapsed"/>
+                        <CheckBox Content="MLPE On" IsChecked="{Binding IsMLPEOn}" Grid.Column="1" VerticalAlignment="Center" Margin="5" Visibility="Hidden"/>
                         <ComboBox Grid.Column="2" Margin="5" x:Name="ComboboxSelectedSpectrum" SelectionChanged="ComboboxSelectedSpectrum_SelectionChanged" SelectedIndex="0"/>
 
                     </Grid>
@@ -659,7 +657,7 @@
                             <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
                         </syncfusion:SfChart.Behaviors>
                         <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="0" Maximum="1500" ShowTrackBallInfo="True"/>
+                            <syncfusion:NumericalAxis Minimum="0" Maximum="2500" ShowTrackBallInfo="True"/>
                         </syncfusion:SfChart.PrimaryAxis>
                         <syncfusion:SfChart.SecondaryAxis>
                             <syncfusion:NumericalAxis Minimum="0"/>
