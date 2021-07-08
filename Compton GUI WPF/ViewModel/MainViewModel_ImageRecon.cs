@@ -320,6 +320,10 @@ namespace Compton_GUI_WPF.ViewModel
 
             List<ProjectionInfo> tempProjection = new List<ProjectionInfo>();
 
+            double maxPointX = double.MinValue;
+            double maxPointY = double.MinValue;
+            double maxPointZ = double.MinValue;
+            double maxValue = double.MinValue;
             switch (SelectReconType)
             {
                 case eProcessingType.SimpleBP:
@@ -360,6 +364,15 @@ namespace Compton_GUI_WPF.ViewModel
                                     break;
                             }
                         }
+                        
+                        if (maxValue > value)
+                        {
+                            maxValue = value;
+                            maxPointX = x;
+                            maxPointY = y;
+                            maxPointZ = z;
+                        }
+                    
                     }
 
                     break;
@@ -409,10 +422,56 @@ namespace Compton_GUI_WPF.ViewModel
 
             ProjectionPositions = tempProjection;
 
+            MaxReconPointX = maxPointX;
+            MaxReconPointY = maxPointY;
+            MaxReconPointZ = maxPointZ;
+
             RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };            
         
         }
 
+
+        private double maxReconPointX = 0;
+        public double MaxReconPointX
+        {
+            get
+            {
+                return maxReconPointX;
+            }
+            set
+            {
+                maxReconPointX = value;
+                OnPropertyChanged(nameof(MaxReconPointX));
+            }
+        }
+
+        private double maxReconPointY = 0;
+        public double MaxReconPointY
+        {
+            get
+            {
+                return maxReconPointY;
+            }
+            set
+            {
+                maxReconPointY = value;
+                OnPropertyChanged(nameof(MaxReconPointY));
+            }
+        }
+
+        private double maxReconPointZ = 0.5;
+        public double MaxReconPointZ
+        {
+            get
+            {
+                return maxReconPointZ;
+            }
+            set
+            {
+                maxReconPointZ = value;
+                OnPropertyChanged(nameof(MaxReconPointZ));
+            }
+        }
         #endregion
 
         private string postProcessingFileName;

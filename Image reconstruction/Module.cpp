@@ -87,7 +87,7 @@ std::tuple<unsigned int, unsigned int> HUREL::Compton::Module::FastMLPosEstimati
                 val += mXYLogMue[x][y][i] * normalizePMTValue[i];
 
             }
-            val -= mXYSumMu[x][y];
+            //val -= mXYSumMu[x][y];
 
             if (val > valMaxChk)
             {
@@ -253,7 +253,7 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
 
     std::tuple<unsigned int, unsigned int> maxPoint;
 
-    const double normalizedPMTValue[9] { 
+     double normalizedPMTValue[9] { 
     static_cast<double>(pmtADCValue[0]) * mEnergyGain[0],
     static_cast<double>(pmtADCValue[1]) * mEnergyGain[1],
     static_cast<double>(pmtADCValue[2]) * mEnergyGain[2],
@@ -263,14 +263,27 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
     static_cast<double>(pmtADCValue[6]) * mEnergyGain[6],
     static_cast<double>(pmtADCValue[7]) * mEnergyGain[7],
     static_cast<double>(pmtADCValue[8]) * mEnergyGain[8]};
+    double maxValue = -DBL_MAX;
+    for (size_t i = 0; i < 9; ++i)
+    {
+        if (normalizedPMTValue[i] > maxValue)
+        {
+            maxValue = normalizedPMTValue[i];
+        }
+    }
+    for (size_t i = 0; i < 9; ++i)
+    {
 
-    int gridSize = mLutSize / 3;
+        normalizedPMTValue[i] = normalizedPMTValue[i] / maxValue;
+        
+    }
+    int gridSize = mLutSize / 10;
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize, gridSize, mLutSize - 1, gridSize, mLutSize - 1, normalizedPMTValue);
     
-    int gridSize2 = mLutSize / 9;
+    int gridSize2 = mLutSize / 20;
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize2, get<0>(maxPoint) - gridSize, get<0>(maxPoint) + gridSize, get<1>(maxPoint) - gridSize, get<1>(maxPoint) + gridSize, normalizedPMTValue);
     
-    int gridSize3 = mLutSize / 27;
+    int gridSize3 = mLutSize / 30;
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize3, get<0>(maxPoint) - gridSize2, get<0>(maxPoint) + gridSize2 , get<1>(maxPoint) - gridSize2, get<1>(maxPoint) + gridSize2, normalizedPMTValue);
     
     int gridSize4 = 1;

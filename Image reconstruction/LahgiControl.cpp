@@ -44,7 +44,7 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 	mScatterModules(NULL),
 	mModuleType(HUREL::Compton::eMouduleType::MONO)
 {
-
+	auto stream = freopen("CONOUT$", "w", stdout);
 }
 
 HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
@@ -110,6 +110,7 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		// from back    <- x ^ y
 		//  6 4 2 0
 		//  7 5 3 1 
+		printf("QAUD_DUAL_START\n");
 		double xOffset[8]{ -offset - xoffest, -offset - xoffest, +offset - xoffest, +offset - xoffest, -offset + xoffest, -offset + xoffest, +offset + xoffest, +offset + xoffest };
 		double yOffset[8]{ +offset, -offset, +offset, -offset, +offset, -offset, +offset, -offset };
 		for (int i = 0; i < 8; ++i)
@@ -610,6 +611,52 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 		continue;
 	}
 	saveFile.close();
+	
+	//Save Spectrum
+	saveFile.open(fileName + "_EnergySpectrum_Sum" + ".csv");
+
+	auto spectrum = this->GetSumEnergySpectrum().GetHistogramEnergy();
+
+	for (int j = 0; j < spectrum.size(); ++j)
+	{
+		saveFile << spectrum[j].Energy << "," << spectrum[j].Count;
+	}
+	saveFile.close();
+
+	saveFile.open(fileName + "_EnergySpectrum_Scatter" + ".csv");
+
+	spectrum = this->GetScatterSumEnergySpectrum().GetHistogramEnergy();
+
+	for (int j = 0; j < spectrum.size(); ++j)
+	{
+		saveFile << spectrum[j].Energy << "," << spectrum[j].Count;
+	}
+	saveFile.close();
+
+	saveFile.open(fileName + "_EnergySpectrum_Absorber" + ".csv");
+
+	spectrum = this->GetAbsorberSumEnergySpectrum().GetHistogramEnergy();
+
+	for (int j = 0; j < spectrum.size(); ++j)
+	{
+		saveFile << spectrum[j].Energy << "," << spectrum[j].Count;
+	}
+	saveFile.close();
+
+
+	for (int i = 0; i < 16; ++i)
+	{
+		saveFile.open(fileName + "_EnergySpectrum_Channel" + to_string(i) + ".csv");
+
+		spectrum = this->GetEnergySpectrum(i).GetHistogramEnergy();
+
+		for (int j = 0; j < spectrum.size(); ++j)
+		{
+			saveFile << spectrum[j].Energy << "," << spectrum[j].Count;
+		}
+		saveFile.close();
+	}
+
 	return;
 }
 

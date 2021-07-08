@@ -348,13 +348,13 @@
                                 <TextBlock Text="Source position" Style="{StaticResource TextBlockTitle2}"/>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="X: "/>
-                                    <TextBlock Text="?"/>
+                                    <TextBlock Text="{Binding MaxReconPointX}"/>
                                     <TextBlock Text=" m  "/>
                                     <TextBlock Text="Y: "/>
-                                    <TextBlock Text="?"/>
+                                    <TextBlock Text="{Binding MaxReconPointY}"/>
                                     <TextBlock Text=" m  "/>
                                     <TextBlock Text="Z: "/>
-                                    <TextBlock Text="?"/>
+                                    <TextBlock Text="{Binding MaxReconPointZ}"/>
                                     <TextBlock Text=" m  "/>
                                 </StackPanel>
                             </StackPanel>
@@ -497,7 +497,7 @@
                 </Grid>
 
             </syncfusion:TabItemExt>
-            <syncfusion:TabItemExt Header="MLPE Data" Background="White" BorderBrush="#FFEAEAEA">
+            <syncfusion:TabItemExt Header="MLPE Data" Background="White" BorderBrush="#FFEAEAEA" Visibility="Collapsed">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -622,7 +622,7 @@
 
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5" Grid.Column="0"/>
-                        <CheckBox Content="MLPE On" IsChecked="{Binding IsMLPEOn}" Grid.Column="1" VerticalAlignment="Center" Margin="5"/>
+                        <CheckBox Content="MLPE On" IsChecked="{Binding IsMLPEOn}" Grid.Column="1" VerticalAlignment="Center" Margin="5" Visibility="Collapsed"/>
                         <ComboBox Grid.Column="2" Margin="5" x:Name="ComboboxSelectedSpectrum" SelectionChanged="ComboboxSelectedSpectrum_SelectionChanged" SelectedIndex="0"/>
 
                     </Grid>

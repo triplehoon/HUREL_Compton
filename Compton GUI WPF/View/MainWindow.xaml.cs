@@ -27,7 +27,7 @@ namespace Compton_GUI_WPF
         public MainWindow()
         {
             NativeMethods.AllocConsole();
-
+            Console.WriteLine("test");
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mzc0OTQ4QDMxMzgyZTM0MmUzMFRlU2dMemQrMXRGZW1iQk96NklnOVBWNnhScjVDckxTT2p1M0crRHpXcjA9");
             try
             {

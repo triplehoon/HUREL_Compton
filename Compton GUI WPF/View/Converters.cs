@@ -81,9 +81,9 @@ namespace Compton_GUI_WPF.View
                 switch (projection)
                 {
                     case EReconProjection.XY:
-                        return 0.50;
+                        return +0.50;
                     case EReconProjection.XZ:
-                        return 0.50;
+                        return +0.50;
                     case EReconProjection.ZY:
                         return 1.00;
                 }
@@ -105,7 +105,7 @@ namespace Compton_GUI_WPF.View
                 switch (projection)
                 {
                     case EReconProjection.XY:
-                        return 0.50;
+                        return +0.50;
                     case EReconProjection.XZ:
                         return 1.00;
                     case EReconProjection.ZY:
@@ -121,7 +121,6 @@ namespace Compton_GUI_WPF.View
             throw new NotImplementedException();
         }
     }
-
 
     public class EReconProjectionToAxisNameConverter : IValueConverter
     {
@@ -177,16 +176,7 @@ namespace Compton_GUI_WPF.View
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo cultureInfo)
         {
-            string parameterString = parameter as string;
-            if (parameterString == null)
-            {
-                return DependencyProperty.UnsetValue;
-            }
-
-            if (Enum.IsDefined(value.GetType(), value) == false)
-            {
-                return DependencyProperty.UnsetValue;
-            }
+       
             EReconProjection projection = (EReconProjection)value;
 
 
