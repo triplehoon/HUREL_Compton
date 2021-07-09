@@ -4,7 +4,8 @@
 using namespace HUREL::Compton;
 
 
-HUREL::Compton::EnergySpectrum::EnergySpectrum(unsigned int binSize, double maxEnergy)
+HUREL::Compton::EnergySpectrum::EnergySpectrum(unsigned int binSize, double maxEnergy):
+mMaxEnergy(maxEnergy), mBinSize(binSize)
 {
     assert(binSize > 0);
     int binCount = static_cast<unsigned int>(maxEnergy / binSize);
@@ -20,6 +21,22 @@ HUREL::Compton::EnergySpectrum::EnergySpectrum(unsigned int binSize, double maxE
 std::vector<BinningEnergy> HUREL::Compton::EnergySpectrum::GetHistogramEnergy()
 {
     return mHistogramEnergy;
+}
+
+std::vector<double> HUREL::Compton::EnergySpectrum::CalcPeakEnergys()
+{
+    //differentails
+
+    size_t size = mHistogramEnergy.size();
+    std::vector<double> diffVector;
+    diffVector.reserve(size);
+    for (size_t i = 0; i < size; ++i)
+    {
+
+    }
+
+
+    return std::vector<double>();
 }
 
 

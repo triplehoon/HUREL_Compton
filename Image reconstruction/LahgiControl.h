@@ -66,7 +66,7 @@ namespace HUREL {
 		
 		class LahgiControl
 		{
-			private:		
+		private:		
 			Module** mScatterModules;  //./Module information/MONOScatter1/Gain.csv, LUT.csv ...
 			Module** mAbsorberModules;	//./Module information/QUADScatter1/Gain.csv, LUT.csv ...
 			eMouduleType mModuleType;
@@ -90,7 +90,7 @@ namespace HUREL {
 			bool IsOnActiveArea(double x, double y, Module& module);
 
 
-			public:
+		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			static LahgiControl& instance();
 

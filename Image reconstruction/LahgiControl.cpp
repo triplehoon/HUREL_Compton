@@ -590,7 +590,7 @@ void HUREL::Compton::LahgiControl::ResetListedListModeData()
 void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 {
 	std::ofstream saveFile;
-	saveFile.open(fileName + ".csv");
+	saveFile.open(fileName + "_ListModeData.csv");
 	for (unsigned int i = 0; i < mListedListModeData.size(); ++i)
 	{
 		ListModeData& d = mListedListModeData[i];
@@ -619,7 +619,7 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 
 	for (int j = 0; j < spectrum.size(); ++j)
 	{
-		saveFile << spectrum[j].Energy << "," << spectrum[j].Count;
+		saveFile << spectrum[j].Energy << "," << spectrum[j].Count << std::endl;
 	}
 	saveFile.close();
 
@@ -629,7 +629,7 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 
 	for (int j = 0; j < spectrum.size(); ++j)
 	{
-		saveFile << spectrum[j].Energy << "," << spectrum[j].Count;
+		saveFile << spectrum[j].Energy << "," << spectrum[j].Count << std::endl;
 	}
 	saveFile.close();
 
@@ -639,7 +639,7 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 
 	for (int j = 0; j < spectrum.size(); ++j)
 	{
-		saveFile << spectrum[j].Energy << "," << spectrum[j].Count;
+		saveFile << spectrum[j].Energy << "," << spectrum[j].Count << std::endl;
 	}
 	saveFile.close();
 
@@ -652,7 +652,7 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 
 		for (int j = 0; j < spectrum.size(); ++j)
 		{
-			saveFile << spectrum[j].Energy << "," << spectrum[j].Count;
+			saveFile << spectrum[j].Energy << "," << spectrum[j].Count << std::endl;
 		}
 		saveFile.close();
 	}
