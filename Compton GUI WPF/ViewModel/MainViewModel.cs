@@ -69,7 +69,7 @@ namespace Compton_GUI_WPF.ViewModel
 
 
 
-        private ModuleInfo selectedModuleInfo = ModuleInfo.QuadSingleHead;
+        private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
         public ModuleInfo SelecteModuleInfo
         {
             get { return selectedModuleInfo; }
@@ -340,7 +340,7 @@ namespace Compton_GUI_WPF.ViewModel
             Debug.WriteLine("Making Scatter Module");
             VMStatus = "Making Scatter Module";
             ModuleInfoViewModels[0] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                        new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z },
+                                                        new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X, y = T265ToLACCOffset.Y, z = T265ToLACCOffset.Z },
                                                         new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                         scatterGain,
                                                         scatterGain,
@@ -350,7 +350,7 @@ namespace Compton_GUI_WPF.ViewModel
             Debug.WriteLine("Making Abosrober Module");
             VMStatus = "Making Absorber Module";
             ModuleInfoViewModels[8] = new ModuleInfoViewModel(ModuleInfo.Mono,
-                                                        new LACC_Module.ModuleOffset { x = -T265ToLACCOffset.X, y = -T265ToLACCOffset.Y, z = -T265ToLACCOffset.Z - 0.25 },
+                                                        new LACC_Module.ModuleOffset { x = T265ToLACCOffset.X, y = T265ToLACCOffset.Y, z = T265ToLACCOffset.Z - 0.25 },
                                                         new LACC_Module.EcalVar { a = 0, b = 1, c = 0 },
                                                         absorberGain,
                                                         absorberGain,

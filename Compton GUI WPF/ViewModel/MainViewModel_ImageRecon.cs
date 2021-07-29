@@ -26,7 +26,7 @@ namespace Compton_GUI_WPF.ViewModel
     {
         private RealsenseControlWrapper RealsenseControl = new RealsenseControlWrapper();
 
-        private Vector3D T265ToLACCOffset = new Vector3D(0, -0.308, -0.05);
+        private Vector3D T265ToLACCOffset = new Vector3D(0, -0.240, -0.05);
         private double t265ToLACCOffsetX;
         public double T265ToLACCOffsetX
         {

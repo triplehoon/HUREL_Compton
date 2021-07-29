@@ -23,9 +23,9 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 		ctx = rs2::context();
 
 		cfgD455 = rs2::config();
-		//cfgD455.enable_device("935322071433");	
-		cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
-		cfgD455.enable_stream(RS2_STREAM_DEPTH, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_Z16, 5);
+		cfgD455.enable_device("935322071433");	
+		//cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
+		//cfgD455.enable_stream(RS2_STREAM_DEPTH, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_Z16, 5);
 		pipeD455 = rs2::pipeline();
 
 		cfgT265 = rs2::config();

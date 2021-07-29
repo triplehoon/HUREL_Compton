@@ -271,14 +271,14 @@ namespace HUREL.Compton
             while (IsGenerateShortArrayBuffer)
             {
                 byte[] item;
-                ushort[] shortArray = new ushort[144];
-                ushort[] shortArrayTest = new ushort[148];
+
 
 
                 while (ParsedQueue.TryTake(out item))
                 {
-
-                    Buffer.BlockCopy(item, 0, shortArrayTest, 0, 296);
+                    ushort[] shortArray = new ushort[144];
+                    //ushort[] shortArrayTest = new ushort[148];
+                    //Buffer.BlockCopy(item, 0, shortArrayTest, 0, 296);
                     Buffer.BlockCopy(item, 0, shortArray, 0, 288);
                     foreach (var check511 in shortArray)
                     {

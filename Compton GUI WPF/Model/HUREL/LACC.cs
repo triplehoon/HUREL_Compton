@@ -693,7 +693,7 @@ namespace HUREL.Compton.LACC
                         val += XYLogMue[x1][y1][j] * normalizePMTValue[j];
 
                     }
-                    val -= XYSumMu[x1][y1];
+                    //val -= XYSumMu[x1][y1];
                     if (val > valMaxChk)
                     {
                         valMaxChk = val;
@@ -728,7 +728,7 @@ namespace HUREL.Compton.LACC
                                  val += XYLogMue[x2][y2][j] * normalizePMTValue[j];
                             }
                             
-                            val -= XYSumMu[x2][y2];
+                            //val -= XYSumMu[x2][y2];
                             if (val > valMaxChk)
                             {
                                 valMaxChk = val;
@@ -767,7 +767,7 @@ namespace HUREL.Compton.LACC
                                 val += XYLogMue[x2][y2][j] * normalizePMTValue[j];
                             }
                             
-                            val -= XYSumMu[x2][y2];
+                           // val -= XYSumMu[x2][y2];
                             if (val > valMaxChk)
                             {
                                 valMaxChk = val;
@@ -779,8 +779,8 @@ namespace HUREL.Compton.LACC
                 }
             }
 
-            point.X = -(Convert.ToDouble(Max3[0]) - sizeY / 2) / 1000 + ModuleOffsetX; //mm to meter
-            point.Y = -(Convert.ToDouble(Max3[1]) - sizeX / 2) / 1000 + ModuleOffsetY;
+            point.X = (Convert.ToDouble(Max3[0]) - sizeY / 2) / 1000 + ModuleOffsetX; //mm to meter
+            point.Y = (Convert.ToDouble(Max3[1]) - sizeX / 2) / 1000 + ModuleOffsetY;
             point.Z = ModuleOffsetZ;
 
 
@@ -801,6 +801,7 @@ namespace HUREL.Compton.LACC
             {
                 for (int i = 0; i < PmtCount; i++)
                 {
+                    checkZero += pmtADCValue[i]; 
                     arrangedPMTValue[i] = (pmtADCValue[ModulePMTOrder.Order[i]]);
                 }
 
