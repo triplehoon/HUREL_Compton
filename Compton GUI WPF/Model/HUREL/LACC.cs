@@ -779,8 +779,8 @@ namespace HUREL.Compton.LACC
                 }
             }
 
-            point.X = (Convert.ToDouble(Max3[0]) - sizeY / 2) / 1000 + ModuleOffsetX; //mm to meter
-            point.Y = (Convert.ToDouble(Max3[1]) - sizeX / 2) / 1000 + ModuleOffsetY;
+            point.X = (Convert.ToDouble(Max3[1]) - sizeY / 2) / 1000 + ModuleOffsetX; //mm to meter
+            point.Y = (Convert.ToDouble(Max3[0]) - sizeX / 2) / 1000 + ModuleOffsetY;
             point.Z = ModuleOffsetZ;
 
 
