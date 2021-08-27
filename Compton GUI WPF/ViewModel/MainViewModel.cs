@@ -213,6 +213,12 @@ namespace Compton_GUI_WPF.ViewModel
                 ModuleEnergySpectrums[i] = new ObservableCollection<HistoEnergy>(data.SpectrumEnergy.HistoEnergies);
                 OnPropertyChanged($"ModuleEnergySpectrums[{i}]");
                 ++i;
+                var peaks = data.SpectrumEnergy.FindPeaks();
+                int k= 0;
+                foreach(var peak in peaks)
+                {
+                    Debug.WriteLine($"Peak{k}: {peak}");
+                }
             }
             i = 8;
             foreach (var data in LACC_Control_Static.LACC_Absorber_Modules)

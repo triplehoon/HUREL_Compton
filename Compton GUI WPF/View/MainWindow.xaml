@@ -78,6 +78,32 @@
                     </Style>
                 </Style.Resources>
             </Style>
+
+            <Style TargetType="{x:Type Button}" x:Key="ButtonDesignHYURed" BasedOn="{StaticResource defaultButtonStyle}">
+                <Setter Property="Background" Value="#FFFF1D1D"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Padding" Value="5"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Style.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="5"/>
+                    </Style>
+                </Style.Resources>
+            </Style>
+
+            <Style TargetType="{x:Type Button}" x:Key="ButtonDesignHYUGreen" BasedOn="{StaticResource defaultButtonStyle}">
+                <Setter Property="Background" Value="#FF0FA000"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Padding" Value="5"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Style.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="5"/>
+                    </Style>
+                </Style.Resources>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -123,8 +149,8 @@
                         </Grid>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="0">
-                        <TextBlock Text="Real-time Reconstruction Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
-                        <StackPanel Orientation="Horizontal" >
+                        <TextBlock Text="Image Reconstruction Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
+                        <StackPanel Orientation="Horizontal" Visibility="Collapsed">
 
                             <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_NEAR}" 
                                          Content="Near-field mode" 
@@ -143,177 +169,114 @@
                             <StackPanel Grid.Column="1">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Select acquisition mode" Margin="5" Style="{StaticResource TextBlockTitle2 }"/>
-                                    <mah:ToggleSwitch 
-                                              OffContent="Off"
-                                              OnContent="On"                                              
-                                              IsOn="{Binding IsRealTimeImageReconOn}"
-                                             />
                                 </StackPanel>
                                 <ComboBox Margin="5,5,20,5" Grid.Column="1" SelectedIndex="0">
                                     <ComboBoxItem Content="Simple Back Projetion"/>
                                     <ComboBoxItem Content="Maximum Likelihood Estimation"/>
-                                    <ComboBoxItem Content="Stochastic Origin Ensembles"/>
                                 </ComboBox>
                             </StackPanel>
                         </Grid>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Average Depth of Points in Point Cloud :" Margin="5"/>
-                            <TextBlock Text="{Binding AveragePointCloudDepth, StringFormat=f2}" Margin="0,5,0,5"/>
-                            <TextBlock Text=" m " Margin="0,5,0,5"/>
-                        </StackPanel>
-
-                    </StackPanel>
-                    <StackPanel Grid.Column="0" Grid.Row="1">
-                        <TextBlock Text="SLAM Pointcloud" Style="{StaticResource TextBlockTitle}" Margin="5" />
-                        <hx:Viewport3DX 
-                           Background="Silver"                   
-                                        Width="480"
-                                        Height="270" ChangeFieldOfViewCursor="ScrollNS" PanCursor="Hand" RotateCursor="SizeAll" ZoomCursor="SizeNS" ZoomRectangleCursor="SizeNWSE"      
-                          >
-                            <hx:Viewport3DX.EffectsManager>
-                                <hx:DefaultEffectsManager/>
-                            </hx:Viewport3DX.EffectsManager>
-                            <hx:Viewport3DX.Camera>
-                                <hx:PerspectiveCamera Position="0,0,0" LookDirection="0,0,1" UpDirection="0,1,0"/>
-                            </hx:Viewport3DX.Camera>
-                            <hx:PointGeometryModel3D Geometry="{Binding SLAMReconPointCloud}" Color="White" FixedSize="True" Size="10,10">
-                            </hx:PointGeometryModel3D>
-                            <hx:PointGeometryModel3D Geometry="{Binding SLAMPointCloud}" Color="White" FixedSize="True" Size="3,3">
-                            </hx:PointGeometryModel3D>
-                            <hx:LineGeometryModel3D Geometry="{Binding SLAMPoseInfo}" Color="LightGreen" Thickness="4"/>
-
-                        </hx:Viewport3DX>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Tracking Confidence" Margin="5"/>
-                            <Ellipse Width="18" Height="18" Fill="{Binding IsT265TrackingConfidence3, Converter={StaticResource ConvBoolToGreenOrRed}}" Margin="5"/>
-                            <TextBlock Text= "Pointcloud Count: " Margin="5"/>
-                            <TextBlock Text= "{Binding SLAMPointCloudCount}" Margin="5"/>
-                        </StackPanel>
-                        <Grid Margin="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding StartSLAMCommand}" Content="Start SLAM" Grid.Column="0" Margin="50,0,50,0"/>
-                            <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding StopSLAMCommand}" Content="Stop SLAM" Grid.Column="1" Margin="50,0,50,0"/>
-                        </Grid>
-
-
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Grid.Row="1">
                         <TextBlock Text="System Status" Style="{StaticResource TextBlockTitle}" Margin="5"/>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="LAHGI Status" Margin="5" Style="{StaticResource TextBlockTitle2}"/>
-
-                        </StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="0.8*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="0.8*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="0.8*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="30"/>
-                                <RowDefinition Height="30"/>
-
-                            </Grid.RowDefinitions>
-                            <TextBlock Text="Controller" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <mah:ToggleSwitch Grid.Column="1" Grid.Row="0" 
-                                              OffContent="Off"
-                                              OnContent="On"
-                                              OnCommand="{Binding StartCommunicationAsyncCommand}"
-                                              OffCommand="{Binding StopCommunicationCommand}"
-                                              IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
-                                              IsOn="{Binding IsSerialOpen}"
-                                              />
-                            <TextBlock Text="FPGA Power" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <mah:ToggleSwitch Grid.Column="3" Grid.Row="0" 
-                                              OffContent="Off"
-                                              OnContent="On"
-                                              OnCommand="{Binding StartFpgaCommand}"
-                                              OffCommand="{Binding StopFpgaCommand}"
-                                              IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
-                                              IsOn="{Binding IsFPGAOn}"
-                                             />
-                            <TextBlock Text="High Voltage" Grid.Column="4" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <mah:ToggleSwitch Grid.Column="5" Grid.Row="0" 
-                                              OffContent="{Binding HvModuleVoltage}"
-                                              OnContent="{Binding HvModuleVoltage}"
-                                              OnCommand="{Binding StartHvModuleCommand}"
-                                              OffCommand="{Binding StopHvModuleCommand}"
-                                              IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
-                                              IsOn="{Binding IsHvModuleOn}"/>
-                            <TextBlock Text="Temperature" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBlock Text="15 ºC" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBlock Text="Battery" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <StackPanel Orientation="Horizontal"  Grid.Column="3" Grid.Row="1">
-                                <mah:MetroProgressBar Width="60" Value="50" BorderBrush="Gray" BorderThickness="1" Foreground="Green" Margin="0,7,0,7"/>
-                                <TextBlock Margin="5,0,0,0" Text="{Binding BatteryVoltage}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-
-
-
-                            </StackPanel>
-
-                            <TextBlock Text = "COM" Grid.Column="4" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <ComboBox ItemsSource="{Binding ComPorts}" SelectedItem="{Binding SelectedComport}" Grid.Column="5" Grid.Row="1" SelectedIndex="1"/>
-
-
-
-                        </Grid>
-
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Position [m]" Margin="5" Style="{StaticResource TextBlockTitle2}"/>
-                            <Ellipse Width="18" Height="18" Fill="{Binding IsT265TrackingConfidence3, Converter={StaticResource ConvBoolToGreenOrRed}}" Margin="5"/>
-                        </StackPanel>
-                        <Grid Margin="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Text="X Position" Grid.Column="0"/>
-                            <TextBlock Text="{Binding SystemPoseX, StringFormat=f2}" d:Text="3.15752" Grid.Column="1"/>
-                            <TextBlock Text="Y Position" Grid.Column="2"/>
-                            <TextBlock Text="{Binding SystemPoseY , StringFormat=f2}" Grid.Column="3"/>
-                            <TextBlock Text="Z Position" Grid.Column="4"/>
-                            <TextBlock Text="{Binding SystemPoseZ , StringFormat=f2}" Grid.Column="5"/>
-
-                        </Grid>
-                        <TextBlock Text="Realsense Status" Margin="5" Style="{StaticResource TextBlockTitle2}"/>
+                        <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="3D Camera"/><Run Text=" Status"/></TextBlock>
                         <Grid Margin="10,0,10,0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="0.8*"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="1.5*"/>
                                 <ColumnDefinition Width="*"/>
-
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Text="Initiate" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <mah:ToggleSwitch Grid.Column="1" Grid.Row="0"                                               
-                                              OnContent="On"
-                                              OffCommand="{Binding StopRealsensePipelineCommand}"
-                                              OnCommand="{Binding InitiateRealsenseCommand}"                                                                                            
-                                              IsOn="{Binding Path=IsRealsenseOn, Mode=OneWay}"                                              
-                                              />
-                            <TextBlock Text="Tracking Confidence" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding T265TrackingConfidence}" Grid.Column="3" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <Button Content="Reset RS" Grid.Column="4" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Margin="1" Command="{Binding ResetRealsensePipelineCommand}"/>
+                            <Button Content="Initiate" Grid.Column="0" Grid.Row="0" Command="{Binding InitiateRealsenseCommand}" Style="{StaticResource ButtonDesignHYU}"/>
+                            <Button Content="Stop" Grid.Column="4" Grid.Row="0" Command="{Binding StopRealsensePipelineCommand}" Style="{StaticResource ButtonDesignHYURed}"/>
+                            <Button Content="Reset RS" Grid.Column="2" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Margin="1" Command="{Binding ResetRealsensePipelineCommand}"/>
 
                         </Grid>
                         <TextBlock Text="{Binding RealsenseState}" Margin="5"/>
                         <Button Content="Test Buton" Command="{Binding TestCommand}"/>
+
                     </StackPanel>
+                    <StackPanel Grid.Column="1" Grid.Row="1" Margin="15">
+                        <TextBlock Text="Nuclide Info" Style="{StaticResource TextBlockTitle}" Height="27" Width="412" HorizontalAlignment="Left"/>
+
+                        <syncfusion:SfDataGrid Margin="5" 
+                                                               PreviewMouseWheel="SfDataGrid_PreviewMouseWheel_ScrollViewer1"
+                                                               CanMaintainScrollPosition="True"
+                                                               ColumnSizer="Star"                                                                    
+                                                               AutoGenerateColumns="False" 
+                                                               
+                                                               EditTrigger="OnDoubleTap"                                                         
+                                                               AddNewRowPosition="None"
+                                                               AllowRowHoverHighlighting="False"
+                                                               >                            
+                            <syncfusion:SfDataGrid.Columns>
+                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="Energy [keV]" NumberDecimalDigits="0" />
+                                <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Isotope"/>
+                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="Peak area" NumberDecimalDigits="0" />
+                            </syncfusion:SfDataGrid.Columns>
+                        </syncfusion:SfDataGrid>
+                                              
+                    </StackPanel>
+                    <Grid Grid.Row="1" Grid.Column="0" Margin="15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150*"/>
+                                <ColumnDefinition Width="61*"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5,5,5,5" Grid.Column="0" Grid.ColumnSpan="2"/>
+                            <CheckBox Content="MLPE On" IsChecked="{Binding IsMLPEOn}" Grid.Column="2" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                            <ComboBox Grid.Column="3" Margin="5,5,5,5" x:Name="ComboboxSelectedSpectrum" SelectionChanged="ComboboxSelectedSpectrum_SelectionChanged" SelectedIndex="0"/>
+
+                        </Grid>
+
+
+                        <syncfusion:SfChart  x:Name="SpectrumMain" Margin="5" Grid.Row="2" MouseDown="SfChart_MouseDown" >
+                            <syncfusion:SfChart.Resources>
+
+                                <Style TargetType="Line" x:Key="lineStyle">
+
+                                    <Setter Property="StrokeDashArray" Value="10,5"/>
+
+                                    <Setter Property="Stroke" Value="Red"/>
+
+                                    <Setter Property="StrokeThickness" Value="1"/>
+
+                                </Style>
+                            </syncfusion:SfChart.Resources>
+                            <syncfusion:SfChart.Behaviors>
+                                <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
+                            </syncfusion:SfChart.Behaviors>
+                            <syncfusion:SfChart.PrimaryAxis>
+                                <syncfusion:NumericalAxis Minimum="0" Maximum="1500" ShowTrackBallInfo="True"/>
+                            </syncfusion:SfChart.PrimaryAxis>
+                            <syncfusion:SfChart.SecondaryAxis>
+                                <syncfusion:NumericalAxis Minimum="0"/>
+                            </syncfusion:SfChart.SecondaryAxis>
+                            <syncfusion:FastLineBitmapSeries x:Name="MainSpectrumView" Interior="Black"
+                                                                     ListenPropertyChange="True"
+                                                                     Label="Energy"
+                                                                     ItemsSource="{Binding ModuleEnergySpectrums[0]}" 
+                                                                     XBindingPath="Energy" 
+                                                                     YBindingPath="Count"
+                                                                     syncfusion:ChartSeriesBase.Spacing="0" Height="209" VerticalAlignment="Bottom" />
+                        </syncfusion:SfChart>
+
+
+                    </Grid>
                 </Grid>
             </syncfusion:TabItemExt>
             <syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA">
@@ -340,23 +303,6 @@
                         <TextBlock Style="{StaticResource TextBlockTitle}" Text="System Configuration" Grid.Row="0"/>
 
                         <syncfusion:TabControlExt Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="10" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
-                            <syncfusion:TabItemExt TabIndex="0" Header="LAHGI [Single Head]">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ScrollViewer2">
-                                    <StackPanel>
-                                        <Grid Margin="5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="LAHGI Configuration" Style="{StaticResource TextBlockTitle}"/>
-                                            <Button Style="{StaticResource ButtonDesignHYU}" IsEnabled="{Binding IsLACCModuleInitiate}" 
-                                                    Command="{Binding InitiateLACCommand}"
-                                                    Grid.Column="1" Content="Apply Changes"/>
-                                        </Grid>
-                                    </StackPanel>
-                                </ScrollViewer>
-
-                            </syncfusion:TabItemExt>
                             <syncfusion:TabItemExt TabIndex="1" Header="LACC" >
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ScrollViewer1">
                                     <StackPanel>
@@ -389,7 +335,7 @@
                                                       Grid.Column="1"
                                                       SelectedIndex="0"
                                                       Binding.TargetUpdated="ComboBox_TargetUpdated"
-                                                      ItemsSource="{Binding ModuleInfoViewModels[0].ModuleGain, Converter={StaticResource ConvObservalbeDoubleToChannelName}, NotifyOnTargetUpdated=True}"/>
+                                                      ItemsSource="{Binding ModuleInfoViewModels[0].Module.MLPEGain, Converter={StaticResource ConvObservalbeDoubleToChannelName}, NotifyOnTargetUpdated=True}"/>
                                             <Button  Content="Load Gain (*.txt)" 
                                                      HorizontalContentAlignment="Center"
                                                      FontSize="10"
@@ -401,7 +347,7 @@
                                                       Grid.Column="4"
                                                       SelectedIndex="0"
                                                       Binding.TargetUpdated="ComboBox_TargetUpdated"
-                                                      ItemsSource="{Binding ModuleInfoViewModels[8].ModuleGain, Converter={StaticResource ConvObservalbeDoubleToChannelName}, NotifyOnTargetUpdated=True}"/>
+                                                      ItemsSource="{Binding ModuleInfoViewModels[8].Module.MLPEGain, Converter={StaticResource ConvObservalbeDoubleToChannelName}, NotifyOnTargetUpdated=True}"/>
                                             <Button  Content="Load Gain (*.txt)" 
                                                      HorizontalContentAlignment="Center"
                                                      FontSize="10"
@@ -577,12 +523,6 @@
                                 </ScrollViewer>
                             </syncfusion:TabItemExt>
 
-                            <syncfusion:TabItemExt TabIndex="2" Header="LAHGI [Dual Head]">
-                                <StackPanel>
-                                    <TextBlock Text="NOT IMPLEMENTED" FontSize="80" TextWrapping="Wrap"/>
-                                </StackPanel>
-
-                            </syncfusion:TabItemExt>
 
                         </syncfusion:TabControlExt>
 
@@ -609,8 +549,6 @@
                         </syncfusion:SfChart.SecondaryAxis>
                         <syncfusion:FastScatterBitmapSeries ItemsSource="{Binding ScatterPositionData}" XBindingPath="X" YBindingPath="Y" />
                     </syncfusion:SfChart>
-                    <syncfusion:SfChart Grid.Column="1" Grid.Row="0" Header="Scatter 1" Margin="10">
-                    </syncfusion:SfChart>
                     <syncfusion:SfChart Grid.Column="0" Grid.Row="1" Header="Absorber 0" Margin="10">
                         <syncfusion:SfChart.PrimaryAxis>
                             <syncfusion:NumericalAxis Minimum="-0.20" Maximum="+0.20" ShowGridLines="False" IsInversed="True"/>
@@ -620,14 +558,9 @@
                         </syncfusion:SfChart.SecondaryAxis>
                         <syncfusion:FastScatterBitmapSeries Interior="Orange" ItemsSource="{Binding AbsorberPositionData}" XBindingPath="X" YBindingPath="Y" ScatterHeight="2" ScatterWidth="2"/>
                     </syncfusion:SfChart>
-                    <syncfusion:SfChart Grid.Column="1" Grid.Row="1" Header="Absorber 1" Margin="10">
-                    </syncfusion:SfChart>
                 </Grid>
 
             </syncfusion:TabItemExt>
-            <syncfusion:TabItemExt Header="Realsense Configuration" Background="White" BorderBrush="#FFEAEAEA"/>
-            <syncfusion:TabItemExt Header="Internal Contemination" Background="White" BorderBrush="#FFEAEAEA"/>
-            <syncfusion:TabItemExt Header="System Status" Background="White" BorderBrush="#FFEAEAEA"/>
         </syncfusion:TabControlExt>
 
         <Grid Grid.Column="1">
@@ -700,30 +633,6 @@
                                                           ContainerType="Filled" HelperText="*.bin" Margin="0,10,0,10" >
                         <TextBox FontSize="15" Text="{Binding FileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </syncfusion:SfTextInputLayout>
-
-
-
-                </StackPanel>
-            </Border>
-            <Border Grid.Row="2" Margin="20,20,20,10" Background="White" CornerRadius="10,10,10,10" >
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5" Grid.Column="0"/>
-                        <CheckBox Content="MLPE On" IsChecked="{Binding IsMLPEOn}" Grid.Column="1" VerticalAlignment="Center" Margin="5"/>
-                        <ComboBox Grid.Column="2" Margin="5" x:Name="ComboboxSelectedSpectrum" SelectionChanged="ComboboxSelectedSpectrum_SelectionChanged" SelectedIndex="0"/>
-
-                    </Grid>
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -739,41 +648,11 @@
                         </syncfusion:SfTextInputLayout>
 
                     </Grid>
-                    
-                    <syncfusion:SfChart  x:Name="SpectrumMain" Margin="5" Grid.Row="2" MouseDown="SfChart_MouseDown" >
-                        <syncfusion:SfChart.Resources>
-
-                            <Style TargetType="Line" x:Key="lineStyle">
-
-                                <Setter Property="StrokeDashArray" Value="10,5"/>
-
-                                <Setter Property="Stroke" Value="Red"/>
-
-                                <Setter Property="StrokeThickness" Value="1"/>
-
-                            </Style>
-                        </syncfusion:SfChart.Resources>
-                        <syncfusion:SfChart.Behaviors>
-                            <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
-                        </syncfusion:SfChart.Behaviors>
-                        <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="0" Maximum="1500" ShowTrackBallInfo="True"/>
-                        </syncfusion:SfChart.PrimaryAxis>
-                        <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="0"/>
-                        </syncfusion:SfChart.SecondaryAxis>
-                        <syncfusion:FastLineBitmapSeries x:Name="MainSpectrumView" Interior="Black"
-                                                                     ListenPropertyChange="True"
-                                                                     Label="Energy"
-                                                                     ItemsSource="{Binding ModuleEnergySpectrums[0]}" 
-                                                                     XBindingPath="Energy" 
-                                                                     YBindingPath="Count"
-                                                                     syncfusion:ChartSeriesBase.Spacing="0" Height="209" VerticalAlignment="Bottom" />
-                    </syncfusion:SfChart>
 
 
-                </Grid>
+                </StackPanel>
             </Border>
+
         </Grid>
 
 
