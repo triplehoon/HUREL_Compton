@@ -80,9 +80,10 @@ namespace HUREL.Compton
             numericSecondDiff.Capacity = EnergyBin.Count;
 
             numericDiff.Add(HistoEnergies[1].Count - HistoEnergies[0].Count);
-
+            numericDiff.Add(HistoEnergies[2].Count - HistoEnergies[1].Count);
+            numericSecondDiff.Add(numericDiff[1] - numericDiff[0]);
             //Find min
-            double diffLimit = -50;
+            double diffLimit = -20;
             bool flagIsDecending = true;
             for (int i = 1; i < EnergyBin.Count - 2; ++i)
             {

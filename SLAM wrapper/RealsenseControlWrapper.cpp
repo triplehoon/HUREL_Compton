@@ -8,21 +8,12 @@ Boolean RealsenseControlWrapper::InitiateRealsense(String^% message)
 {
 	std::string resultMsg;
 
-	
 
-	try 
-	{
-		System::Diagnostics::Debug::WriteLine("Initiating Realsense");
-		IsInitiated = m_RealsenseControlNative->InitiateRealsense(&resultMsg);
-		message = gcnew String(resultMsg.c_str());
-		System::Diagnostics::Debug::WriteLine("PipeLine Setting Compelete");
-	}
-	catch(...)
-	{
-		IsInitiated = false;
-		System::Diagnostics::Trace::WriteLine("Initiating Realsense Failed. Unkown Error");
-		message = "Initiating Realsense Failed. Unkown Error";
-	}
+
+	
+	IsInitiated = m_RealsenseControlNative->InitiateRealsense(&resultMsg);
+	message = gcnew String(resultMsg.c_str());
+
 
 	return IsInitiated;
 }
@@ -71,7 +62,7 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
 		vectors->Add(poseVector);
 		averageDepth = averageDepth + System::Double( pose.points_[i][2]);
-		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
+		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][0], pose.colors_[i][1]};
 		colors->Add(colorVector);
 	
 		array<float, 1>^ uvVector = gcnew array<float>{uv[i][0], uv[i][1]};

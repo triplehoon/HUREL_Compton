@@ -19,19 +19,37 @@ RealsenseControl::~RealsenseControl()
 }
 bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 {
+	ctx = rs2::context();
+
+	std::vector<std::string> serials;
+
+	for (auto&& dev : ctx.query_devices())
+	{
+		serials.push_back(dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
+	}
+
+	if (serials.size() != 2)
+	{
+		*outMessage = "No camera connected";
+		std::cout << outMessage->c_str() << "\n";
+
+		return false;
+	}
+
+
 	try {
-		ctx = rs2::context();
+		
 
 		cfgD455 = rs2::config();
-		cfgD455.enable_device("935322071433");	
-		//cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
-		//cfgD455.enable_stream(RS2_STREAM_DEPTH, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_Z16, 5);
+		cfgD455.enable_stream(RS2_STREAM_COLOR, D435_H_COLOR_SIZE, D435_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
+		cfgD455.enable_stream(RS2_STREAM_DEPTH, D435_H_DEPTH_SIZE, D435_V_DEPTH_SIZE, RS2_FORMAT_Z16, 15);
 		pipeD455 = rs2::pipeline();
 
 		cfgT265 = rs2::config();
 		cfgT265.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
 		pipeT265 = rs2::pipeline(ctx);
 		Sleep(1000);
+		
 		pipeD455.start(cfgD455);
 		pipeT265.start(cfgT265);
 
@@ -104,7 +122,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 		0, 0, -1, 0,
 		0, 0, 0, 1;
 
-	Eigen::Vector3d D455ToT265Coord = { 0.031, -0.029, 0 };
+	Eigen::Vector3d D455ToT265Coord = { 0.035, -0.03, 0 };
 	Eigen::Vector4d Quaternion = { pose.rotation.w, pose.rotation.x ,pose.rotation.y,pose.rotation.z };
 	Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
 	Eigen::Vector3d	TransPoseMat = { pose.translation.x, pose.translation.y, pose.translation.z };

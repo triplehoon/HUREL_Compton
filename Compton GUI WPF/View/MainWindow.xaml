@@ -41,7 +41,6 @@
             <localView:BoolToStringConverter x:Key="ConvStartOrStop" FalseValue="Start Session" TrueValue="Stop Session"/>
             <localView:BoolToBrushConverter x:Key="ConvBoolToGreenOrRed" TrueValue="Green" FalseValue="Red"/>
             <localView:TimespaneToStringConverter x:Key="ConvTimeSpanToStr"/>
-            <localView:ObservalbeDoubleToChannelNameConverter x:Key="ConvObservalbeDoubleToChannelName"/>
             <localView:InverseBooleanConverter x:Key="ConvInverseBoolean"/>
             <localView:RTReconModeToBooleanConverter x:Key="ConvRTReconModeToBoolean"/>
 
@@ -331,11 +330,7 @@
                                                 <ColumnDefinition Width="2*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="Scatter: " Style="{StaticResource TextBlockContentBold}" Grid.Column="0" VerticalAlignment="Center" />
-                                            <ComboBox                                                 
-                                                      Grid.Column="1"
-                                                      SelectedIndex="0"
-                                                      Binding.TargetUpdated="ComboBox_TargetUpdated"
-                                                      ItemsSource="{Binding ModuleInfoViewModels[0].Module.MLPEGain, Converter={StaticResource ConvObservalbeDoubleToChannelName}, NotifyOnTargetUpdated=True}"/>
+                                            
                                             <Button  Content="Load Gain (*.txt)" 
                                                      HorizontalContentAlignment="Center"
                                                      FontSize="10"
@@ -343,11 +338,7 @@
                                                      Margin="10,0,10,0"
                                                      Style="{StaticResource ButtonDesignHYU}"/>
                                             <TextBlock Text="Absorber: " Style="{StaticResource TextBlockContentBold}" Grid.Column="3" VerticalAlignment="Center" />
-                                            <ComboBox                                                 
-                                                      Grid.Column="4"
-                                                      SelectedIndex="0"
-                                                      Binding.TargetUpdated="ComboBox_TargetUpdated"
-                                                      ItemsSource="{Binding ModuleInfoViewModels[8].Module.MLPEGain, Converter={StaticResource ConvObservalbeDoubleToChannelName}, NotifyOnTargetUpdated=True}"/>
+                                            
                                             <Button  Content="Load Gain (*.txt)" 
                                                      HorizontalContentAlignment="Center"
                                                      FontSize="10"

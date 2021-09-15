@@ -219,6 +219,11 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     Debug.WriteLine($"Peak{k}: {peak}");
                 }
+                var isotopes = SpectrumEnergy.GetIsotopesFromPeaks(peaks);
+                foreach(var iso in isotopes)
+                {
+                    Debug.WriteLine(iso.IsotopeName.ToString());
+                }
             }
             i = 8;
             foreach (var data in LACC_Control_Static.LACC_Absorber_Modules)
