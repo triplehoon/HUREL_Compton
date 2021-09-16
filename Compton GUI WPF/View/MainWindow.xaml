@@ -115,13 +115,13 @@
         </Grid.RowDefinitions>
 
         <syncfusion:TabControlExt Grid.Row="1"
-            FontWeight="Bold" 
+                                FontWeight="Bold" 
                                   Background="White" 
                                   Margin="5" 
                                   BorderBrush="#FFEAEAEA"
                                   CloseButtonType="Hide" 
-                                  TabStripPlacement="Top"                                   
-                                  TabListContextMenuOptions="None"                                  
+                                  TabStripPlacement="Left"                                  
+                                  TabListContextMenuOptions="None"
                                   TabItemSelectedBackground="#FF00457E" 
                                   TabItemHoverBorderBrush="#FF00457E" 
                                   TabItemLayout="SingleLineStar" 
@@ -129,7 +129,7 @@
                                   EnableLabelEdit="False"
                                   syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"
                                   >
-            <syncfusion:TabItemExt Header="Main" Background="White" BorderBrush="#FFEAEAEA">
+            <syncfusion:TabItemExt Header="Main" Background="White" BorderBrush="#FFEAEAEA" Width="100">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*"/>
@@ -276,7 +276,7 @@
 
                 </Grid>
             </syncfusion:TabItemExt>
-            <syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA">
+            <syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA" Width="100">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition MaxWidth="500" Width="*"/>
@@ -505,6 +505,24 @@
                                                                      YBindingPath="Count"
                                                                      syncfusion:ChartSeriesBase.Spacing="0" />
                                         </syncfusion:SfChart>
+                                        <syncfusion:SfChart Grid.Column="0" Grid.Row="0" Header="Scatter 0" Margin="10">
+                                            <syncfusion:SfChart.PrimaryAxis>
+                                                <syncfusion:NumericalAxis Minimum="-0.20" Maximum="0.20" ShowGridLines="False" IsInversed="True"/>
+                                            </syncfusion:SfChart.PrimaryAxis>
+                                            <syncfusion:SfChart.SecondaryAxis>
+                                                <syncfusion:NumericalAxis Minimum="-0.2" Maximum="+0.20" ShowGridLines="False"/>
+                                            </syncfusion:SfChart.SecondaryAxis>
+                                            <syncfusion:FastScatterBitmapSeries ItemsSource="{Binding ScatterPositionData}" XBindingPath="X" YBindingPath="Y" />
+                                        </syncfusion:SfChart>
+                                        <syncfusion:SfChart Grid.Column="0" Grid.Row="1" Header="Absorber 0" Margin="10">
+                                            <syncfusion:SfChart.PrimaryAxis>
+                                                <syncfusion:NumericalAxis Minimum="-0.20" Maximum="+0.20" ShowGridLines="False" IsInversed="True"/>
+                                            </syncfusion:SfChart.PrimaryAxis>
+                                            <syncfusion:SfChart.SecondaryAxis>
+                                                <syncfusion:NumericalAxis Minimum="-0.20" Maximum="+0.20" ShowGridLines="False"/>
+                                            </syncfusion:SfChart.SecondaryAxis>
+                                            <syncfusion:FastScatterBitmapSeries Interior="Orange" ItemsSource="{Binding AbsorberPositionData}" XBindingPath="X" YBindingPath="Y" ScatterHeight="2" ScatterWidth="2"/>
+                                        </syncfusion:SfChart>
 
 
 
@@ -519,37 +537,6 @@
                 </Grid>
 
             </syncfusion:TabItemExt>
-            <syncfusion:TabItemExt Header="MLPE Data" Background="White" BorderBrush="#FFEAEAEA">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <syncfusion:SfChart Grid.Column="0" Grid.Row="0" Header="Scatter 0" Margin="10">
-                        <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-0.20" Maximum="0.20" ShowGridLines="False" IsInversed="True"/>
-                        </syncfusion:SfChart.PrimaryAxis>
-                        <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-0.2" Maximum="+0.20" ShowGridLines="False"/>
-                        </syncfusion:SfChart.SecondaryAxis>
-                        <syncfusion:FastScatterBitmapSeries ItemsSource="{Binding ScatterPositionData}" XBindingPath="X" YBindingPath="Y" />
-                    </syncfusion:SfChart>
-                    <syncfusion:SfChart Grid.Column="0" Grid.Row="1" Header="Absorber 0" Margin="10">
-                        <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-0.20" Maximum="+0.20" ShowGridLines="False" IsInversed="True"/>
-                        </syncfusion:SfChart.PrimaryAxis>
-                        <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-0.20" Maximum="+0.20" ShowGridLines="False"/>
-                        </syncfusion:SfChart.SecondaryAxis>
-                        <syncfusion:FastScatterBitmapSeries Interior="Orange" ItemsSource="{Binding AbsorberPositionData}" XBindingPath="X" YBindingPath="Y" ScatterHeight="2" ScatterWidth="2"/>
-                    </syncfusion:SfChart>
-                </Grid>
-
-            </syncfusion:TabItemExt>
         </syncfusion:TabControlExt>
 
         <Grid Grid.Row="0">
@@ -557,8 +544,8 @@
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="8*"/>
             </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Margin="10" Background="White" CornerRadius="10,10,10,10" >
-                <Image Stretch="Fill" Source="pack://siteoforigin:,,,/symbol_hurel.png"/>
+            <Border Grid.Column="0" Margin="10" Background="White" CornerRadius="10,10,10,10"  Padding="20">
+                <Image Margin="0,0,0,0" Stretch="Uniform" Source="/PNGs/LACC_gui_logo3.png"/>
             </Border>
             <Border Grid.Column="1" Margin="10" Background="White" CornerRadius="5,5,5,0" >
                 <Grid>
