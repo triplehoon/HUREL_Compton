@@ -113,6 +113,16 @@ namespace Compton_GUI_WPF.ViewModel
             if (MeasurementTime == "")
                 return;
             IsSessionAvailable = false;
+
+            if (fileName != "")
+            {
+                IsSavingBinaryFile = true;
+            }
+            else
+            {
+                IsSavingBinaryFile = false;
+            }
+
             if (!IsSessionStart)
             {
                 if (!FPGAControl.SetVaribles(FPGAVariable))
@@ -136,9 +146,6 @@ namespace Compton_GUI_WPF.ViewModel
                         IsAddingListModeData = true;
                         AddListModeDataTaskAsync = Task.Run(() => AddListModeData());
                         RealTimeImageReconTaskAsync = Task.Run(() => RealTimeImageRecon());
-                       
-                       
-
                     }
                     VMStatus = status;
                 }
@@ -165,7 +172,7 @@ namespace Compton_GUI_WPF.ViewModel
             IsSessionAvailable = true;
         }
 
-        private bool isMLPEOn = true;
+        private bool isMLPEOn = false;
         public bool IsMLPEOn
         {
             get { return isMLPEOn; }

@@ -67,7 +67,7 @@ namespace HUREL.Compton
             }
         }
 
-        public List<double> FindPeaks()
+        public List<double> FindPeaks(double diffLimit = -20)
         {
             //derevate energys
             List<double> numericDiff = new List<double>();
@@ -83,7 +83,6 @@ namespace HUREL.Compton
             numericDiff.Add(HistoEnergies[2].Count - HistoEnergies[1].Count);
             numericSecondDiff.Add(numericDiff[1] - numericDiff[0]);
             //Find min
-            double diffLimit = -20;
             bool flagIsDecending = true;
             for (int i = 1; i < EnergyBin.Count - 2; ++i)
             {
@@ -183,6 +182,7 @@ namespace HUREL.Compton
 
             return isotopes;
         }
+        
         private static bool IsEnergyInPeakEnergy(double energy, double peak)
         {
             if (peak < energy + 50 && peak > energy - 50)

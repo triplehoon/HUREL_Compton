@@ -91,9 +91,12 @@ namespace Compton_GUI_WPF.ViewModel
                 string s = "";
                 IsRealsenseOn = RealsenseControl.InitiateRealsense(ref s);
                 RealsenseState = s;
-                
+                Console.WriteLine(s);                              
             });
-            await StartRealsensePipeline();
+            if (IsRealsenseOn)
+            {
+                await StartRealsensePipeline();
+            }
         }
 
         #region Realsense Pipeline Setup

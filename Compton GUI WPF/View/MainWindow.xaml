@@ -38,7 +38,7 @@
             </ResourceDictionary.MergedDictionaries>
 
 
-            <localView:BoolToStringConverter x:Key="ConvStartOrStop" FalseValue="Start Session" TrueValue="Stop Session"/>
+            <localView:BoolToStringConverter x:Key="ConvStartOrStop" FalseValue="Start" TrueValue="Stop"/>
             <localView:BoolToBrushConverter x:Key="ConvBoolToGreenOrRed" TrueValue="Green" FalseValue="Red"/>
             <localView:TimespaneToStringConverter x:Key="ConvTimeSpanToStr"/>
             <localView:InverseBooleanConverter x:Key="ConvInverseBoolean"/>
@@ -78,6 +78,7 @@
                 </Style.Resources>
             </Style>
 
+
             <Style TargetType="{x:Type Button}" x:Key="ButtonDesignHYURed" BasedOn="{StaticResource defaultButtonStyle}">
                 <Setter Property="Background" Value="#FFFF1D1D"/>
                 <Setter Property="Foreground" Value="White"/>
@@ -108,13 +109,15 @@
 
     <Grid Background="#FFEAEAEA">
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="1*"/>
-        </Grid.ColumnDefinitions>
-        <syncfusion:TabControlExt FontWeight="Bold" 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1.2*"/>
+            <RowDefinition Height="4*"/>
+        </Grid.RowDefinitions>
+
+        <syncfusion:TabControlExt Grid.Row="1"
+            FontWeight="Bold" 
                                   Background="White" 
-                                  Margin="10" 
+                                  Margin="5" 
                                   BorderBrush="#FFEAEAEA"
                                   CloseButtonType="Hide" 
                                   TabStripPlacement="Top"                                   
@@ -129,103 +132,16 @@
             <syncfusion:TabItemExt Header="Main" Background="White" BorderBrush="#FFEAEAEA">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1.9*"/>
                     </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Grid.Column="0">
-                        <TextBlock Style="{StaticResource TextBlockTitle}" Margin="5"><Run Text="Real Time"/><Run Language="ko-kr" Text=" 2-D Image Reconstruction"/></TextBlock>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="351*"/>
-                                <ColumnDefinition Width="233*"/>
-                            </Grid.ColumnDefinitions>
-                            <Image Source="{Binding RealtimeRGB}" Width="576" Height="324" Stretch="Uniform" Grid.ColumnSpan="2" Margin="0,0,52,0"/>
-                            <Image Source="{Binding ReconBitmapImage}" Width="576" Height="324" Stretch="Uniform" Grid.ColumnSpan="2" Margin="0,0,52,0"/>
-                        </Grid>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Grid.Row="0">
-                        <TextBlock Text="Image Reconstruction Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
-                        <StackPanel Orientation="Horizontal" Visibility="Collapsed">
-
-                            <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_NEAR}" 
-                                         Content="Near-field mode" 
-                                         FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
-                            <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_FAR}" 
-                                Content="Far-field mode" FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
-                        </StackPanel>
-                        <Grid >
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <syncfusion:SfTextInputLayout Grid.Column="0" Margin="10" Hint="Data Aquire Time" HelperText="In seconds" Width="200" HorizontalAlignment="Left">
-                                <syncfusion:IntegerTextBox IsScrollingOnCircle="True" Margin="5" Width="100" HorizontalAlignment="Left" Value="{Binding Path =MLPETime, UpdateSourceTrigger=PropertyChanged}"/>
-                            </syncfusion:SfTextInputLayout>
-                            <StackPanel Grid.Column="1">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Select acquisition mode" Margin="5" Style="{StaticResource TextBlockTitle2 }"/>
-                                </StackPanel>
-                                <ComboBox Margin="5,5,20,5" Grid.Column="1" SelectedIndex="0">
-                                    <ComboBoxItem Content="Simple Back Projetion"/>
-                                    <ComboBoxItem Content="Maximum Likelihood Estimation"/>
-                                </ComboBox>
-                            </StackPanel>
-                        </Grid>
-                        <TextBlock Text="System Status" Style="{StaticResource TextBlockTitle}" Margin="5"/>
-                        <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="3D Camera"/><Run Text=" Status"/></TextBlock>
-                        <Grid Margin="10,0,10,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="30"/>
-                            </Grid.RowDefinitions>
-                            <Button Content="Initiate" Grid.Column="0" Grid.Row="0" Command="{Binding InitiateRealsenseCommand}" Style="{StaticResource ButtonDesignHYU}"/>
-                            <Button Content="Stop" Grid.Column="4" Grid.Row="0" Command="{Binding StopRealsensePipelineCommand}" Style="{StaticResource ButtonDesignHYURed}"/>
-                            <Button Content="Reset RS" Grid.Column="2" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Margin="1" Command="{Binding ResetRealsensePipelineCommand}"/>
-
-                        </Grid>
-                        <TextBlock Text="{Binding RealsenseState}" Margin="5"/>
-                        <Button Content="Test Buton" Command="{Binding TestCommand}"/>
-
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Grid.Row="1" Margin="15">
-                        <TextBlock Text="Nuclide Info" Style="{StaticResource TextBlockTitle}" Height="27" Width="412" HorizontalAlignment="Left"/>
-
-                        <syncfusion:SfDataGrid Margin="5" 
-                                                               PreviewMouseWheel="SfDataGrid_PreviewMouseWheel_ScrollViewer1"
-                                                               CanMaintainScrollPosition="True"
-                                                               ColumnSizer="Star"                                                                    
-                                                               AutoGenerateColumns="False" 
-                                                               
-                                                               EditTrigger="OnDoubleTap"                                                         
-                                                               AddNewRowPosition="None"
-                                                               AllowRowHoverHighlighting="False"
-                                                               >                            
-                            <syncfusion:SfDataGrid.Columns>
-                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="Energy [keV]" NumberDecimalDigits="0" />
-                                <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Isotope"/>
-                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="Peak area" NumberDecimalDigits="0" />
-                            </syncfusion:SfDataGrid.Columns>
-                        </syncfusion:SfDataGrid>
-                                              
-                    </StackPanel>
-                    <Grid Grid.Row="1" Grid.Column="0" Margin="15">
+                    <Grid Grid.Column="0" Margin="15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="3*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Grid Grid.Row="0">
@@ -241,9 +157,10 @@
                             <ComboBox Grid.Column="3" Margin="5,5,5,5" x:Name="ComboboxSelectedSpectrum" SelectionChanged="ComboboxSelectedSpectrum_SelectionChanged" SelectedIndex="0"/>
 
                         </Grid>
+                        
 
-
-                        <syncfusion:SfChart  x:Name="SpectrumMain" Margin="5" Grid.Row="2" MouseDown="SfChart_MouseDown" >
+                        <syncfusion:SfChart  x:Name="SpectrumMain" Margin="5" Grid.Row="1" MouseDown="SfChart_MouseDown"
+                                             >
                             <syncfusion:SfChart.Resources>
 
                                 <Style TargetType="Line" x:Key="lineStyle">
@@ -260,7 +177,7 @@
                                 <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
                             </syncfusion:SfChart.Behaviors>
                             <syncfusion:SfChart.PrimaryAxis>
-                                <syncfusion:NumericalAxis Minimum="0" Maximum="1500" ShowTrackBallInfo="True"/>
+                                <syncfusion:NumericalAxis Minimum="0" Maximum="3000" ShowTrackBallInfo="True"/>
                             </syncfusion:SfChart.PrimaryAxis>
                             <syncfusion:SfChart.SecondaryAxis>
                                 <syncfusion:NumericalAxis Minimum="0"/>
@@ -275,7 +192,88 @@
                         </syncfusion:SfChart>
 
 
+                        <syncfusion:SfDataGrid Margin="5"  Grid.Row="2"
+                                                               PreviewMouseWheel="SfDataGrid_PreviewMouseWheel_ScrollViewer1"
+                                                               CanMaintainScrollPosition="True"
+                                                               ColumnSizer="Star"                                                                    
+                                                               AutoGenerateColumns="False" 
+                                                               
+                                                               EditTrigger="OnDoubleTap"                                                         
+                                                               AddNewRowPosition="None"
+                                                               AllowRowHoverHighlighting="False"
+                                                               >
+                            <syncfusion:SfDataGrid.Columns>
+                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="Energy [keV]" NumberDecimalDigits="0" />
+                                <syncfusion:GridTextColumn MappingName="SourceName" HeaderText="Isotope"/>
+                                <syncfusion:GridNumericColumn MappingName="TrueEnergy" HeaderText="Peak area" NumberDecimalDigits="0" />
+                            </syncfusion:SfDataGrid.Columns>
+                        </syncfusion:SfDataGrid>
+
                     </Grid>
+                    
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Style="{StaticResource TextBlockTitle}" Margin="5" Text="Compton Image Reconstruction"></TextBlock>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.9*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Image Source="{Binding RealtimeRGB}" Width="640" Height="480" Stretch="Uniform" Grid.Column="0" HorizontalAlignment="Left"/>
+                            <Image Source="{Binding ReconBitmapImage}" Width="640" Height="480" Stretch="Uniform" Grid.Column="0" HorizontalAlignment="Left"/>
+                            <StackPanel Grid.Column="1">
+
+                                <TextBlock Text="Image Reconstruction Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
+                                <StackPanel Orientation="Horizontal" Visibility="Collapsed">
+
+                                    <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_NEAR}" 
+                                         Content="Near-field mode" 
+                                         FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
+                                    <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_FAR}" 
+                                Content="Far-field mode" FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
+                                </StackPanel>
+                                <Grid >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <syncfusion:SfTextInputLayout Grid.Column="0" Margin="10" Hint="Data Aquire Time" HelperText="In seconds" Width="200" HorizontalAlignment="Left">
+                                        <syncfusion:IntegerTextBox IsScrollingOnCircle="True" Margin="5" Width="100" HorizontalAlignment="Left" Value="{Binding Path =MLPETime, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </syncfusion:SfTextInputLayout>
+                                </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <syncfusion:SfTextInputLayout Margin="10" Grid.Column="0" Hint="Low Bound Energy" HelperTextVisibility="Collapsed">
+                                        <syncfusion:IntegerTextBox x:Name="TBMinE" IsScrollingOnCircle="True" Margin="5" Width="100" HorizontalAlignment="Left" Value="{Binding MinMLPE_Energy,UpdateSourceTrigger=LostFocus}" Cursor="IBeam" />
+                                    </syncfusion:SfTextInputLayout>
+
+                                    <syncfusion:SfTextInputLayout Margin="10" Grid.Column="1" Hint="High Bound Energy" HelperTextVisibility="Collapsed">
+                                        <syncfusion:IntegerTextBox x:Name="TBMaxE" IsCaretAnimationEnabled="True" IsScrollingOnCircle="True"  Value="{Binding MaxMLPE_Energy,UpdateSourceTrigger=LostFocus}"  Margin="14,0,0,0" Width="100" HorizontalAlignment="Left" VerticalAlignment="Bottom" Cursor="IBeam">
+                                        </syncfusion:IntegerTextBox>
+                                    </syncfusion:SfTextInputLayout>
+
+                                </Grid>
+                                <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="3D Camera"/><Run Text=" Status"/></TextBlock>
+                                <Grid Margin="10,0,10,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+                                    <Button Content="Initiate" Grid.Column="0" Grid.Row="0" Command="{Binding InitiateRealsenseCommand}" Style="{StaticResource ButtonDesignHYU}" Margin="10,0"/>
+                                    <Button Content="Stop" Grid.Column="1" Grid.Row="0" Command="{Binding StopRealsensePipelineCommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
+                                    <Button Content="Reset RS" Grid.Column="2" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Command="{Binding ResetRealsensePipelineCommand}" Margin="10,0"/>
+
+                                </Grid>
+                                <Button Content="Test Buton" Command="{Binding TestCommand}" Margin="10"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
                 </Grid>
             </syncfusion:TabItemExt>
             <syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA">
@@ -330,7 +328,7 @@
                                                 <ColumnDefinition Width="2*"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="Scatter: " Style="{StaticResource TextBlockContentBold}" Grid.Column="0" VerticalAlignment="Center" />
-                                            
+
                                             <Button  Content="Load Gain (*.txt)" 
                                                      HorizontalContentAlignment="Center"
                                                      FontSize="10"
@@ -338,7 +336,7 @@
                                                      Margin="10,0,10,0"
                                                      Style="{StaticResource ButtonDesignHYU}"/>
                                             <TextBlock Text="Absorber: " Style="{StaticResource TextBlockContentBold}" Grid.Column="3" VerticalAlignment="Center" />
-                                            
+
                                             <Button  Content="Load Gain (*.txt)" 
                                                      HorizontalContentAlignment="Center"
                                                      FontSize="10"
@@ -554,94 +552,125 @@
             </syncfusion:TabItemExt>
         </syncfusion:TabControlExt>
 
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Border Grid.Row="0" Margin="20,20,20,0" Background="White" CornerRadius="10,10,10,10" >
-                <StackPanel Margin="15,10,10,10">
-                    <TextBlock Text="Connect" Style="{StaticResource TextBlockTitle}"/>
-                    <TextBlock Text="USB Devices" Style="{StaticResource TextBlockTitle2}"/>
-                    <ComboBox Margin="0,5,5,5" 
-                                            SelectedValue="{Binding SelectDevice}"
-                                            ItemsSource="{Binding DeviceInfos}"
-                                            DisplayMemberPath="DeviceName">
-                    </ComboBox>
-                    <TextBlock Text="Status:" Style="{StaticResource TextBlockTitle2}"/>
-                    <TextBlock Text="{Binding VMStatus}"/>
-                    <Button Command="{Binding StartorStopSessionCommand}"
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="8*"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Margin="10" Background="White" CornerRadius="10,10,10,10" >
+                <Image Stretch="Fill" Source="pack://siteoforigin:,,,/symbol_hurel.png"/>
+            </Border>
+            <Border Grid.Column="1" Margin="10" Background="White" CornerRadius="5,5,5,0" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="2">
+
+
+                        <TextBlock Text="Save File Folder Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
+
+                        <syncfusion:SfTextInputLayout Hint="Folder Name" Grid.Row="2"
+                                                      HelperText="Binary file, CZT spectrum file, Image reconstruction file, ... (*.bin, *.csv, *.png, ...)" Margin="5" 
+                                                      ContainerType="Filled" >
+
+                            <TextBox FontSize="15" Text="{Binding FileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        </syncfusion:SfTextInputLayout>
+                        <TextBlock Text="Status:" Style="{StaticResource TextBlockTitle}" Margin="5,0,0,0"/>
+                        <TextBlock Text="{Binding VMStatus}" Margin="5,0,0,0"/>
+                        <TextBlock Text="{Binding RealsenseState}" Margin="5,0,0,0"/>
+
+
+
+                    </StackPanel>
+
+
+
+                    <Grid Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2.3*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="CZT Nuclide Search" Style="{StaticResource TextBlockTitle}" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <mah:ToggleSwitch Grid.Row="0" Grid.Column="1" Command="{Binding StartOrStopCZTCommand}" IsOn="{Binding Path=IsCZTRunning}"/>
+                        <!--<Button Margin="20,5"
+                        Command="{Binding StartOrStopCZTCommand}"
                         Style="{StaticResource ButtonDesignHYU}">
-                        <Button.Content>
-                            <StackPanel Orientation="Horizontal">
-                                <syncfusion:SfBusyIndicator  IsBusy="{Binding IsSessionStart}" 
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <syncfusion:SfBusyIndicator  IsBusy="{Binding IsCZTRunning}" 
+                                        ViewboxHeight="15"
+                                        AnimationType="DoubleRing" Foreground="White" ViewboxWidth="20">
+                                        <syncfusion:SfBusyIndicator.Background>
+                                            <SolidColorBrush Color="#FF00457E" Opacity="0.0"/>
+                                        </syncfusion:SfBusyIndicator.Background>
+                                    </syncfusion:SfBusyIndicator>
+                                    <TextBlock Text="{Binding Path=IsCZTRunning, Converter={StaticResource ConvStartOrStop}}" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" FontSize="25"/>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>-->
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="LACC Image Recon" Style="{StaticResource TextBlockTitle}" Margin="5" HorizontalAlignment="Center"  VerticalAlignment="Center"/>
+                        <mah:ToggleSwitch Grid.Row="1" Grid.Column="1" Command="{Binding StartorStopSessionCommand}" IsOn="{Binding Path=IsSessionStart}"/>
+                        <!--<Button Margin="20,5"
+                                Grid.Row="1"
+                                Command="{Binding StartorStopSessionCommand}"
+                                Style="{StaticResource ButtonDesignHYU}">
+                            <Button.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <syncfusion:SfBusyIndicator  IsBusy="{Binding IsSessionStart}" 
                                 ViewboxHeight="15"
                                 AnimationType="DoubleRing" Foreground="White" ViewboxWidth="20">
-                                    <syncfusion:SfBusyIndicator.Background>
-                                        <SolidColorBrush Color="#FF00457E" Opacity="0.0"/>
-                                    </syncfusion:SfBusyIndicator.Background>
-                                </syncfusion:SfBusyIndicator>
-                                <TextBlock Text="{Binding Path=IsSessionStart, Converter={StaticResource ConvStartOrStop}}" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button.Content>
-                    </Button>
-                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <TextBlock Text="Record Time: " Style="{StaticResource TextBlockTitle}" />
-                        <TextBlock Text="{Binding Path=RecordTimeSpan, Converter={StaticResource ConvTimeSpanToStr}}" 
-                               Style="{StaticResource TextBlockTitle}"/>
-
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <TextBlock Text="Setting Time: " Style="{StaticResource TextBlockTitle}" />
-                        <TextBlock Text="{Binding Path=MeasurementTimeSpan, Converter={StaticResource ConvTimeSpanToStr}}"
-                                   Style="{StaticResource TextBlockTitle}"/>
-
-                    </StackPanel>
-
-
-
-                </StackPanel>
-            </Border>
-            <Border Grid.Row="1" Margin="20,20,20,0" Background="White" CornerRadius="10,10,10,10" >
-                <StackPanel Margin="15,10,10,10">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Acquisition Setting" Style="{StaticResource TextBlockTitle}"/>
-                        <TextBlock Text="Save Data" Foreground="Gray" VerticalAlignment="Bottom" Margin="30,0,10,0"/>
-                        <CheckBox IsChecked="{Binding IsSavingBinaryFile}" VerticalAlignment="Bottom" />
-                    </StackPanel>
-                    <syncfusion:SfTextInputLayout Margin="0,10,0,0"
-                        Hint="Mesurement Time" HelperText="In Seconds" ContainerType="Filled" IsEnabled="{Binding IsSesstionStop}">
-                        <TextBox FontSize="15" Text="{Binding MeasurementTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="PreviewTextInput">
-                                    <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </TextBox>
-                    </syncfusion:SfTextInputLayout>
-                    <syncfusion:SfTextInputLayout Hint="File Name"
-                                                          ContainerType="Filled" HelperText="*.bin" Margin="0,10,0,10" >
-                        <TextBox FontSize="15" Text="{Binding FileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                    </syncfusion:SfTextInputLayout>
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <syncfusion:SfTextInputLayout Margin="10" Grid.Column="0" Hint="Low Bound Energy" HelperTextVisibility="Collapsed">
-                            <syncfusion:IntegerTextBox x:Name="TBMinE" IsScrollingOnCircle="True" Margin="5" Width="100" HorizontalAlignment="Left" Value="{Binding MinMLPE_Energy,UpdateSourceTrigger=LostFocus}" Cursor="IBeam" />
-                        </syncfusion:SfTextInputLayout>
-
-                        <syncfusion:SfTextInputLayout Margin="10" Grid.Column="1" Hint="High Bound Energy" HelperTextVisibility="Collapsed">
-                            <syncfusion:IntegerTextBox x:Name="TBMaxE" IsCaretAnimationEnabled="True" IsScrollingOnCircle="True"  Value="{Binding MaxMLPE_Energy,UpdateSourceTrigger=LostFocus}"  Margin="14,0,0,0" Width="100" HorizontalAlignment="Left" VerticalAlignment="Bottom" Cursor="IBeam">
-                            </syncfusion:IntegerTextBox>
-                        </syncfusion:SfTextInputLayout>
-
+                                        <syncfusion:SfBusyIndicator.Background>
+                                            <SolidColorBrush Color="#FF00457E" Opacity="0.0"/>
+                                        </syncfusion:SfBusyIndicator.Background>
+                                    </syncfusion:SfBusyIndicator>
+                                    <TextBlock Text="{Binding Path=IsSessionStart, Converter={StaticResource ConvStartOrStop}}" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" FontSize="25"/>
+                                </StackPanel>
+                            </Button.Content>
+                        </Button>-->
                     </Grid>
 
 
-                </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Acquisition Time Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
+
+                        <syncfusion:SfTextInputLayout Grid.Row="1" Margin="5"
+                        Hint="Mesurement Time" HelperText="In Seconds" ContainerType="Filled" IsEnabled="{Binding IsSesstionStop}">
+                            <TextBox FontSize="15" Text="{Binding MeasurementTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="PreviewTextInput">
+                                        <mvvm:EventToCommand Command="{Binding TBPrivewTextInputOnlyNumericCommand}" PassEventArgsToCommand="True" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </TextBox>
+                        </syncfusion:SfTextInputLayout>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBlock Text="Record Time: " Style="{StaticResource TextBlockTitle}" />
+                            <TextBlock Text="{Binding Path=RecordTimeSpan, Converter={StaticResource ConvTimeSpanToStr}}" 
+                               Style="{StaticResource TextBlockTitle}"/>
+
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBlock Text="Setting Time: " Style="{StaticResource TextBlockTitle}" />
+                            <TextBlock Text="{Binding Path=MeasurementTimeSpan, Converter={StaticResource ConvTimeSpanToStr}}"
+                                   Style="{StaticResource TextBlockTitle}"/>
+
+                        </StackPanel>
+                    </StackPanel>
+
+
+
+
+
+                </Grid>
+
             </Border>
 
         </Grid>

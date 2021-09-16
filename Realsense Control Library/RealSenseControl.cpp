@@ -31,7 +31,7 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 	if (serials.size() != 2)
 	{
 		*outMessage = "No camera connected";
-		std::cout << outMessage->c_str() << "\n";
+		//std::cout << outMessage->c_str() << "\n";
 
 		return false;
 	}
@@ -60,7 +60,7 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 	{		
 		*outMessage = "Camera was disconnected! Please connect it back";
 
-		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
+		//printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
 		return false;
 		// wait for connect event
 	}
@@ -69,7 +69,7 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 	{
 		*outMessage = "Operation failed, please try again";
 
-		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
+		//printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
 		return false;
 	}
 	// you can also catch "anything else" raised from the library by catching rs2::error
@@ -77,7 +77,7 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 	{
 		*outMessage = "Some other error occurred!";
 		
-		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
+		//printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
 		return false;
 	}
 
