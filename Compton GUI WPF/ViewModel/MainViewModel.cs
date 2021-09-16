@@ -47,7 +47,6 @@ namespace Compton_GUI_WPF.ViewModel
             FPGAControl.USBChangeHandler += UpdateDeviceList;
             FPGAControl.USBChange();
 
-            SRE3021API.InitiateSRE3021API();
 
             //RTPointCloudTask =Task.Run(() => GetRealTimePointCloud());
 
@@ -61,12 +60,19 @@ namespace Compton_GUI_WPF.ViewModel
             }
 
             
-            InitiateRealsenseAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
-            InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
+            InitiateRealsenseAsync().SafeFireAndForget(onException: ex => Console.WriteLine(ex));
+            InitiateLACCAsync().SafeFireAndForget(onException: ex => Console.WriteLine(ex));
+            SRE3021API.InitiateSRE3021API();
+            System.Windows.Application.Current.Dispatcher.Invoke(
+                DispatcherPriority.ApplicationIdle,
+                new Action(() => {
+                    StartCZTCommmand.RaiseCanExecuteChanged();
+                    StopCZTCommmand.RaiseCanExecuteChanged();
+                    StartOrStopCZTCommand.RaiseCanExecuteChanged();
+                }));
 
 
-
-            TestFunction("").SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
+            TestFunction("").SafeFireAndForget(onException: ex => Console.WriteLine(ex));
             
         }
 

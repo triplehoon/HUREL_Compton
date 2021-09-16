@@ -94,7 +94,7 @@
 
   <ItemGroup>
     <Reference Include="CyUSB">
-      <HintPath>E:\OneDrive - 한양대학교\01.Hurel\01.현재작업\20201203 Comtpon GUI\Compton GUI Main\HUREL Compton\Compton GUI WPF\bin\x64\Release\net5.0-windows\CyUSB.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\library\c_sharp\lib\CyUSB.dll</HintPath>
     </Reference>
   </ItemGroup>
 

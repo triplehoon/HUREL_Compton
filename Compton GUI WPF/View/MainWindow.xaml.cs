@@ -51,6 +51,7 @@ namespace Compton_GUI_WPF
 
         private string[] ComboboxSelectedSpectrumItems = new string[]
         {
+            "CZT",
             "Channel 0",
             "Channel 1",
             "Channel 2",
@@ -66,10 +67,9 @@ namespace Compton_GUI_WPF
             "Channel 12",
             "Channel 13",
             "Channel 14",
-            "Channel 15",
-            "CZT"
+            "Channel 15"
         };
-      
+
 
 
         private void SfDataGrid_PreviewMouseWheel_ScrollViewer1(object sender, MouseWheelEventArgs e)

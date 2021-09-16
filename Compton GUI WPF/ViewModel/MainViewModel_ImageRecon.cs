@@ -91,7 +91,14 @@ namespace Compton_GUI_WPF.ViewModel
                 string s = "";
                 IsRealsenseOn = RealsenseControl.InitiateRealsense(ref s);
                 RealsenseState = s;
-                Console.WriteLine(s);                              
+                try
+                {
+                    Console.WriteLine(s);
+                }
+                catch
+                {
+                    //do notghing
+                }
             });
             if (IsRealsenseOn)
             {

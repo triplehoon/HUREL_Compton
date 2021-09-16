@@ -1159,7 +1159,8 @@ namespace HUREL.Compton.CZT
             ReadAllSysRegs();
 
             InitASICConfigBits();
-
+            CheckBaseline();
+            Console.WriteLine("Initiate CZT Done"); 
             mIsInitiate = true;
             return true;
         }
@@ -1233,6 +1234,7 @@ namespace HUREL.Compton.CZT
                 {
                     return false;
                 }
+                CloseTCPPort();
                 return true;
             }
         }
@@ -1286,7 +1288,10 @@ namespace HUREL.Compton.CZT
             {
                 return;
             }
-            TCPNetworkStream.Close();
+            if (TCPNetworkStream != null)
+            {
+                TCPNetworkStream.Close();
+            }
             TCPSocket.Close();
             TCPSocket = null;
         }
