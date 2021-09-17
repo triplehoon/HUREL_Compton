@@ -52,6 +52,8 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
 
+        private TimeSpan cztRunTime = new TimeSpan();
+
         private AsyncCommand startCZTCommmand;
         public IAsyncCommand StartCZTCommmand
         {
@@ -92,15 +94,49 @@ namespace Compton_GUI_WPF.ViewModel
                     StartOrStopCZTCommand.RaiseCanExecuteChanged();
                 }));
 
-
+                DateTime startTime = DateTime.Now;
                 while (IsCZTRunning)
-                {                    
-                    SpectrumHistoCZT = new ObservableCollection<HistoEnergy>(SRE3021API.GetSpectrumEnergy.HistoEnergies);
+                {
+                    List<HistoEnergy> cztESpectrum = SRE3021API.GetSpectrumEnergy.HistoEnergies;
+                    SpectrumHistoCZT = new ObservableCollection<HistoEnergy>(cztESpectrum);
+                    List<double> peaks = SRE3021API.GetSpectrumEnergy.FindPeaks(-40);
+                    List<Isotope> Isotopes = SpectrumEnergy.GetIsotopesFromPeaks(peaks);
+                    List<HistoEnergy> peakArea = new List<HistoEnergy>();
+                    foreach(Isotope iso in Isotopes)
+                    {
+                        foreach (HistoEnergy e in cztESpectrum)
+                        {
+                            if (e.Energy > iso.PeakEnergy - 50 && e.Energy < iso.PeakEnergy + 50)
+                            {
+                                peakArea.Add(e);
+                            }
+                        }
+                    }
+                    CZTFindIsotopes = new ObservableCollection<Isotope>(Isotopes);
+                    SpectrumCZTPeak = new ObservableCollection<HistoEnergy>(peakArea);
                     Thread.Sleep(100);
                 }
+                cztRunTime = DateTime.Now - startTime;
             });
-
         }
+
+
+
+        private ObservableCollection<Isotope> cztFindIsotopes = new ObservableCollection<Isotope>();
+        public ObservableCollection<Isotope> CZTFindIsotopes
+        {
+            get
+            {
+                return cztFindIsotopes;
+            }
+            set
+            {
+                cztFindIsotopes = value;
+                OnPropertyChanged(nameof(CZTFindIsotopes));
+            }
+        }
+
+
         public bool isCZTRunning = false;
         public bool IsCZTRunning
         {
@@ -164,6 +200,9 @@ namespace Compton_GUI_WPF.ViewModel
             await Task.Run(() =>
             {
                 SRE3021API.ResetSpectrumEnergy();
+                SpectrumHistoCZT = new ObservableCollection<HistoEnergy>();
+                SpectrumCZTPeak = new ObservableCollection<HistoEnergy>();
+                CZTFindIsotopes = new ObservableCollection<Isotope>();
             });
         }
 
@@ -190,6 +229,21 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 hvValue = value;
                 OnPropertyChanged(nameof(HVValue));
+            }
+        }
+
+
+        private ObservableCollection<HistoEnergy> spectrumCZTPeak = new ObservableCollection<HistoEnergy>();
+        public ObservableCollection<HistoEnergy> SpectrumCZTPeak
+        {
+            get
+            {
+                return spectrumCZTPeak;
+            }
+            set
+            {
+                spectrumCZTPeak = value;
+                OnPropertyChanged(nameof(SpectrumCZTPeak));
             }
         }
 

@@ -3,7 +3,7 @@ using MathNet.Numerics.Distributions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.IO;
 
 namespace HUREL.Compton
 {
@@ -15,7 +15,11 @@ namespace HUREL.Compton
         public HistoEnergy(double energy)
         {
             Energy = energy;
-
+        }
+        public HistoEnergy(double energy, int count)
+        {
+            Energy = energy;
+            Count = count;
         }
 
     }
@@ -26,10 +30,11 @@ namespace HUREL.Compton
         private List<double> EnergyBin = new List<double>();
 
         public double BinSize = 0;
-
-        public SpectrumEnergy(double binSize, double MaxEnergy)
+        public double MaxEnergy = 0;
+        public SpectrumEnergy(double binSize, double maxEnergy)
         {
             BinSize = binSize;
+            MaxEnergy = maxEnergy;
             int binCount = (int)(MaxEnergy / binSize);
             for (int i = 0; i < binCount; ++i)
             {
@@ -38,6 +43,13 @@ namespace HUREL.Compton
                 EnergyBin.Add(energy);
                 HistoEnergies.Add(new HistoEnergy(energy));
             }
+        }
+        public SpectrumEnergy(SpectrumEnergy spectrum)
+        {
+            BinSize = spectrum.BinSize;
+            MaxEnergy = spectrum.MaxEnergy;
+            EnergyBin = spectrum.EnergyBin;
+            HistoEnergies = spectrum.HistoEnergies;
         }
 
         public void AddEnergy(double energy)
@@ -125,7 +137,7 @@ namespace HUREL.Compton
                 //Cs137
                 if (IsEnergyInPeakEnergy(energy, 662))
                 {
-                    isotopes.Add(new Isotope(ISOTOPE.Cs137, new List<double> { 662 }));
+                    isotopes.Add(new Isotope(ISOTOPE.Cs137, 662 ));
                 }
 
                 //Co60
@@ -137,7 +149,8 @@ namespace HUREL.Compton
                 {
                     if (bCo60Find[0])
                     {
-                        isotopes.Add(new Isotope(ISOTOPE.Co60, new List<double> { 1173, 1332 }));
+                        isotopes.Add(new Isotope(ISOTOPE.Co60, 1173));
+                        isotopes.Add(new Isotope(ISOTOPE.Co60, 1332));
                     }
                 }
 
@@ -150,39 +163,34 @@ namespace HUREL.Compton
                 {
                     if (bNa22Find[0])
                     {
-                        isotopes.Add(new Isotope(ISOTOPE.Na22, new List<double> { 511, 1275 }));
+                        isotopes.Add(new Isotope(ISOTOPE.Na22, 1275));
+                        isotopes.Add(new Isotope(ISOTOPE.Na22, 511));
                     }
                 }
 
                 //Am241
-                if (IsEnergyInPeakEnergy(energy, 60))
-                {
-                    isotopes.Add(new Isotope(ISOTOPE.Am241, new List<double> { 59.5 }));
-                }
+                //if (IsEnergyInPeakEnergy(energy, 60))
+                //{
+                //    isotopes.Add(new Isotope(ISOTOPE.Am241, new List<double> { 59.5 }));
+                //}
 
                 //Ba133
-                if (IsEnergyInPeakEnergy(energy, 81))
-                {
-                    bBa133Find[0] = true;
-                }
                 if (IsEnergyInPeakEnergy(energy, 276))
                 {
-                    bBa133Find[1] = true;
+                    bBa133Find[0] = true;
                     
                 }
                 if (IsEnergyInPeakEnergy(energy, 356))
                 {
-                    if (bBa133Find[0] && bBa133Find[1])
+                    if (bBa133Find[0])
                     {
-                        isotopes.Add(new Isotope(ISOTOPE.Ba133, new List<double> { 81, 276, 356 }));
+                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 356 ));
+                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 276 ));                        
                     }
                 }
-
             }
-
             return isotopes;
-        }
-        
+        }        
         private static bool IsEnergyInPeakEnergy(double energy, double peak)
         {
             if (peak < energy + 50 && peak > energy - 50)
@@ -194,6 +202,57 @@ namespace HUREL.Compton
                 return false;
             }
         }
+
+        public void SaveSpectrumData(string path, string fileName)
+        {
+
+            string csvPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_" + fileName + "_Spectrum.csv");
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(csvPath))
+            {
+                //file.WriteLine("Time[HHMMssFFF],SCposX[m],SCposY,SCposZ,SCEnergy[keV],ABposX,ABposY,ABposZ,ABEnergy");
+                file.WriteLine("Energy,Count");
+                foreach(HistoEnergy hist in HistoEnergies)
+                {
+                    file.WriteLine($"{hist.Energy},{hist.Count}");
+                }
+            }
+        }
+
+        public bool IsEmpty()
+        {
+            foreach(HistoEnergy hist in HistoEnergies)
+            {
+                if (hist.Count > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool LoadSpectrumData(string path)
+        {
+            using (StreamReader file = new StreamReader(path))
+            {
+                string firstLine = file.ReadLine();
+                if (firstLine != "Energy,Count")
+                {
+                    return false;
+                }
+                else
+                {
+                    HistoEnergies.Clear();
+                    while(!file.EndOfStream)
+                    {
+                        string line = file.ReadLine();
+                        string[] value = line.Split(',');
+                        HistoEnergies.Add(new HistoEnergy(Convert.ToDouble(value[0]), Convert.ToInt32(value[1])));
+                    }
+                }
+            }
+            return true;
+        }
+
     }
 
     public enum ISOTOPE
@@ -205,7 +264,7 @@ namespace HUREL.Compton
         Ba133
     }
 
-    public record Isotope(ISOTOPE IsotopeName, List<double> Peaks);
+    public record Isotope(ISOTOPE IsotopeName, double PeakEnergy);
 
     public class EnergyCalibration
     {
@@ -232,7 +291,7 @@ namespace HUREL.Compton
             var fit = Fit.Curve(x, y, gaussian, 1, range[(maxEIdx - minEIdx) / 2].Energy);
 
             var FWHM = fit.Item1 * 2.35;
-            return 0;
+            return FWHM;
         }
     }
 }

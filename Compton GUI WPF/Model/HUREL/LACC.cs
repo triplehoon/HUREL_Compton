@@ -248,26 +248,25 @@ namespace HUREL.Compton.LACC
 
         public void SaveListmodeData(string path, string fileName)
         {
-            string csvPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_"+ fileName + "_lmData.csv");
+            string csvPath = Path.Combine(path.ToString(), fileName + "_lmData.csv");
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(csvPath))
             {
                 //file.WriteLine("Time[HHMMssFFF],SCposX[m],SCposY,SCposZ,SCEnergy[keV],ABposX,ABposY,ABposZ,ABEnergy");
-
                 foreach (var lmdata in ListedLMData)
                 {
                     if (lmdata.AbsorberLMDataInfo != null && lmdata.ScatterLMDataInfo != null)
                     {
-                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HH.mm.ss.fff")},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.ScatterLMDataInfo.InteractionEnergy}," +
+                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HH-mm-ss-fff")},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.ScatterLMDataInfo.InteractionEnergy}," +
                         $",{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.AbsorberLMDataInfo.InteractionEnergy}");
                     }
                     else if (lmdata.AbsorberLMDataInfo != null && lmdata.ScatterLMDataInfo == null)
                     {
-                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HH.mm.ss.fff")},NaN,NaN,NaN,NaN," +
+                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HH-mm-ss-fff")},NaN,NaN,NaN,NaN," +
                         $",{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.AbsorberLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.AbsorberLMDataInfo.InteractionEnergy}");
                     }
                     else if (lmdata.AbsorberLMDataInfo == null && lmdata.ScatterLMDataInfo != null)
                     {
-                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HH.mm.ss.fff")},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.ScatterLMDataInfo.InteractionEnergy}," +
+                        file.WriteLine($"{lmdata.MeasurementTime.ToString("HH-mm-ss-fff")},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.X},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Y},{lmdata.ScatterLMDataInfo.RelativeInteractionPoint3D.Z},{lmdata.ScatterLMDataInfo.InteractionEnergy}," +
                       ",NaN,NaN,NaN,NaN");
                     }
                 }

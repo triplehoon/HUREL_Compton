@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using System.IO;
+using HUREL.Compton.CZT;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -76,7 +77,7 @@ namespace Compton_GUI_WPF.ViewModel
 
 
 
-        private string fileName;
+        private string fileName = "";
         public string FileName
         {
             get
@@ -166,13 +167,21 @@ namespace Compton_GUI_WPF.ViewModel
                     VMStatus = "Saving CSV file";
                     LACC_Control_Static.SaveListmodeData(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName + "T265Offset_" + T265ToLACCOffset.X + "_" +T265ToLACCOffset.Y +"_" + T265ToLACCOffset.Z + "_");
                     SaveCurrentPointCloud(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName);
+
+                    SpectrumEnergy cztSPE = SRE3021API.GetSpectrumEnergy;
+
+                    if (!cztSPE.IsEmpty())
+                    {
+                        cztSPE.SaveSpectrumData(Path.GetDirectoryName(FPGAControl.FileMainPath), fileName + "CZT");
+                    }
+
                     VMStatus = "Done saving CSV file";
                 }                
             }
             IsSessionAvailable = true;
         }
 
-        private bool isMLPEOn = false;
+        private bool isMLPEOn = true;
         public bool IsMLPEOn
         {
             get { return isMLPEOn; }

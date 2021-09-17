@@ -515,6 +515,25 @@ namespace Compton_GUI_WPF.ViewModel
 
         private async Task TestFunction(object t)
         {
+            List<Isotope> isotopes = new List<Isotope>();
+            isotopes.Add(new Isotope(ISOTOPE.Cs137, 662));
+            isotopes.Add(new Isotope(ISOTOPE.Co60, 1332));
+            CZTFindIsotopes = new ObservableCollection<Isotope>(isotopes);
+            SpectrumEnergy testSpecturm1 = new SpectrumEnergy(5, 2000);
+            SpectrumEnergy testSpecturm2 = new SpectrumEnergy(5, 2000);
+            Random rand = new Random();
+            for (int i = 0; i < 1000; ++i)
+            {               
+                double randE = 1500 * rand.NextDouble();
+                testSpecturm1.AddEnergy(randE);
+                if (randE < 700 && randE >600)
+                {
+                    testSpecturm2.AddEnergy(randE);
+                }
+            }
+            SpectrumHistoCZT = new ObservableCollection<HistoEnergy>(testSpecturm1.HistoEnergies);
+            SpectrumCZTPeak = new ObservableCollection<HistoEnergy>(testSpecturm2.HistoEnergies);
+
             await Task.Run(() =>
             {
                 while (false)

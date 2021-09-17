@@ -119,15 +119,22 @@ namespace Compton_GUI_WPF
 
             if (channel[0] == "CZT")
             {                
-                myBinding.Path = new PropertyPath($"SpectrumHistoCZT");                
+                myBinding.Path = new PropertyPath($"SpectrumHistoCZT");
+                Binding peakBinding = new Binding();
+                peakBinding.Path = new PropertyPath("SpectrumCZTPeak");
+                PeakSpectrumView.SetBinding(Syncfusion.UI.Xaml.Charts.FastLineBitmapSeries.ItemsSourceProperty, peakBinding);
             }
             else
             {
                 myBinding.Path = new PropertyPath($"ModuleEnergySpectrums[{channel[1]}]");
+                Binding peakBinding = new Binding();
+                peakBinding.Path = new PropertyPath("");
+                PeakSpectrumView.SetBinding(Syncfusion.UI.Xaml.Charts.FastLineBitmapSeries.ItemsSourceProperty, peakBinding);
             }
             //myBinding.Source = ((Compton_GUI_WPF.ViewModel.MainViewModel)(((System.Windows.Controls.ComboBox)sender).DataContext));
             myBinding.Mode = BindingMode.TwoWay;
             MainSpectrumView.SetBinding(Syncfusion.UI.Xaml.Charts.FastLineBitmapSeries.ItemsSourceProperty, myBinding);
+            
         }
     }
 }
