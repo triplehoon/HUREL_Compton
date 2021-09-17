@@ -1160,7 +1160,14 @@ namespace HUREL.Compton.CZT
 
             InitASICConfigBits();
             CheckBaseline();
-            Console.WriteLine("Initiate CZT Done"); 
+            try
+            {
+                Console.WriteLine("Initiate CZT Done");
+            }
+            catch
+            {
+
+            }
             mIsInitiate = true;
             return true;
         }
@@ -1212,7 +1219,14 @@ namespace HUREL.Compton.CZT
 
                 if (reply.Status == IPStatus.Success)
                 {
-                    Console.WriteLine("CZT Ping Succeess");
+                    try
+                    {
+                        Console.WriteLine("CZT Ping Succeess");
+                    }
+                    catch
+                    {
+
+                    }
                 }
                 else
 
@@ -1628,7 +1642,6 @@ namespace HUREL.Compton.CZT
             IMGDataEventRecieved.Invoke(imageData);
         }
 
-        static private SpectrumEnergy SpectrumEnergy = new SpectrumEnergy(3, 1500);
 
         private static bool IsPorcessImagDataSubscribed = false;
         public static void UnhandleDefaultProcessImagData()
@@ -1678,6 +1691,7 @@ namespace HUREL.Compton.CZT
                 backgroundNoise = backgroundNoise / 120;
 
                 SpectrumEnergy.AddEnergy((Convert.ToDouble(imgData.AnodeValue[interactionX[0], interactionY[0]]) - backgroundNoise) * p1 + p2);
+                SpectrumEnergyIsoFind.AddEnergy((Convert.ToDouble(imgData.AnodeValue[interactionX[0], interactionY[0]]) - backgroundNoise) * p1 + p2);
             }
         }
 
@@ -1818,12 +1832,18 @@ namespace HUREL.Compton.CZT
         #endregion
 
         #region Acquire Data
+        static private SpectrumEnergy SpectrumEnergy = new SpectrumEnergy(10, 2000);
+        static private SpectrumEnergy SpectrumEnergyIsoFind = new SpectrumEnergy(10, 2000);
+
+
+
         private static bool mIsInitiate = false;
         public static bool IsAPIAvailable => mIsInitiate && IsTCPOpen;
 
         public static void ResetSpectrumEnergy()
         {
-            SpectrumEnergy = new SpectrumEnergy(3, 1500);
+            SpectrumEnergy = new SpectrumEnergy(10, 2000);
+            SpectrumEnergyIsoFind = new SpectrumEnergy(10, 2000);
         }
 
         public static SpectrumEnergy GetSpectrumEnergy
@@ -1833,6 +1853,15 @@ namespace HUREL.Compton.CZT
                 return SpectrumEnergy;
             }
         }
+
+        public static SpectrumEnergy GetSpectrumEnergyIsoFind
+        {
+            get
+            {
+                return SpectrumEnergyIsoFind;
+            }
+        }
+
 
         public static int SetHighVoltage(int voltage, int step, int sleepTimeInMillisecond)
         {

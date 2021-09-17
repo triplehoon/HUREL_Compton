@@ -99,7 +99,7 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     List<HistoEnergy> cztESpectrum = SRE3021API.GetSpectrumEnergy.HistoEnergies;
                     SpectrumHistoCZT = new ObservableCollection<HistoEnergy>(cztESpectrum);
-                    List<double> peaks = SRE3021API.GetSpectrumEnergy.FindPeaks(-40);
+                    List<double> peaks = SRE3021API.GetSpectrumEnergyIsoFind.FindPeaks(-20);
                     List<Isotope> Isotopes = SpectrumEnergy.GetIsotopesFromPeaks(peaks);
                     List<HistoEnergy> peakArea = new List<HistoEnergy>();
                     foreach(Isotope iso in Isotopes)

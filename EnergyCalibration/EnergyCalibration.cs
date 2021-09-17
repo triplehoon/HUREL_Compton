@@ -94,6 +94,7 @@ namespace HUREL.Compton
             numericDiff.Add(HistoEnergies[1].Count - HistoEnergies[0].Count);
             numericDiff.Add(HistoEnergies[2].Count - HistoEnergies[1].Count);
             numericSecondDiff.Add(numericDiff[1] - numericDiff[0]);
+            double dataMin = 500000;
             //Find min
             bool flagIsDecending = true;
             for (int i = 1; i < EnergyBin.Count - 2; ++i)
@@ -108,7 +109,12 @@ namespace HUREL.Compton
                     if (flagIsDecending && (data - dataFoward) > 0)
                     {
                         peaks.Add(HistoEnergies[i - 1].Energy);
+                        Debug.WriteLine($"Spectrum diff min: {data}, E: {HistoEnergies[i - 1].Energy}");
                     }
+                }
+                if (data < dataMin)
+                {
+                    dataMin = data;
                 }
 
                 flagIsDecending = dataFoward - data > 0;
@@ -193,7 +199,7 @@ namespace HUREL.Compton
         }        
         private static bool IsEnergyInPeakEnergy(double energy, double peak)
         {
-            if (peak < energy + 50 && peak > energy - 50)
+            if (peak < energy + 100 && peak > energy - 100)
             {
                 return true;
             }
