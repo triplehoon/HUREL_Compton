@@ -1,5 +1,6 @@
 ﻿using MathNet.Numerics;
 using MathNet.Numerics.Distributions;
+using Python.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,7 +28,8 @@ namespace HUREL.Compton
     {
         public List<HistoEnergy> HistoEnergies = new List<HistoEnergy>();
 
-        private List<double> EnergyBin = new List<double>();
+        protected List<double> EnergyBin = new List<double>();
+        public List<double> EnergyList = new List<double>();
 
         public double BinSize = 0;
         public double MaxEnergy = 0;
@@ -54,9 +56,10 @@ namespace HUREL.Compton
 
         public void AddEnergy(double energy)
         {
+            EnergyList.Add(energy);
             for (int i = 0; i < EnergyBin.Count - 1; ++i)
             {
-                if (energy < EnergyBin[i + 1] && energy > EnergyBin[i])
+                if (energy > EnergyBin[i] && energy < EnergyBin[i + 1])
                 {
                     ++HistoEnergies[i].Count;
                     break;
@@ -77,6 +80,7 @@ namespace HUREL.Compton
             {
                 data.Count = 0;
             }
+            EnergyList.Clear();
         }
 
         public List<double> FindPeaks(double diffLimit = -20)
@@ -143,7 +147,7 @@ namespace HUREL.Compton
                 //Cs137
                 if (IsEnergyInPeakEnergy(energy, 662))
                 {
-                    isotopes.Add(new Isotope(ISOTOPE.Cs137, 662 ));
+                    isotopes.Add(new Isotope(ISOTOPE.Cs137, 662));
                 }
 
                 //Co60
@@ -163,7 +167,7 @@ namespace HUREL.Compton
                 //Na22
                 if (IsEnergyInPeakEnergy(energy, 511))
                 {
-                    bNa22Find[0] = true;    
+                    bNa22Find[0] = true;
                 }
                 if (IsEnergyInPeakEnergy(energy, 1275))
                 {
@@ -184,19 +188,19 @@ namespace HUREL.Compton
                 if (IsEnergyInPeakEnergy(energy, 276))
                 {
                     bBa133Find[0] = true;
-                    
+
                 }
                 if (IsEnergyInPeakEnergy(energy, 356))
                 {
                     if (bBa133Find[0])
                     {
-                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 356 ));
-                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 276 ));                        
+                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 356));
+                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 276));
                     }
                 }
             }
             return isotopes;
-        }        
+        }
         private static bool IsEnergyInPeakEnergy(double energy, double peak)
         {
             if (peak < energy + 100 && peak > energy - 100)
@@ -217,7 +221,7 @@ namespace HUREL.Compton
             {
                 //file.WriteLine("Time[HHMMssFFF],SCposX[m],SCposY,SCposZ,SCEnergy[keV],ABposX,ABposY,ABposZ,ABEnergy");
                 file.WriteLine("Energy,Count");
-                foreach(HistoEnergy hist in HistoEnergies)
+                foreach (HistoEnergy hist in HistoEnergies)
                 {
                     file.WriteLine($"{hist.Energy},{hist.Count}");
                 }
@@ -226,7 +230,7 @@ namespace HUREL.Compton
 
         public bool IsEmpty()
         {
-            foreach(HistoEnergy hist in HistoEnergies)
+            foreach (HistoEnergy hist in HistoEnergies)
             {
                 if (hist.Count > 0)
                 {
@@ -248,7 +252,7 @@ namespace HUREL.Compton
                 else
                 {
                     HistoEnergies.Clear();
-                    while(!file.EndOfStream)
+                    while (!file.EndOfStream)
                     {
                         string line = file.ReadLine();
                         string[] value = line.Split(',');
@@ -258,6 +262,191 @@ namespace HUREL.Compton
             }
             return true;
         }
+
+    }
+
+    public class SpectrumEnergyNasa : SpectrumEnergy
+    {
+        public SpectrumEnergyNasa(double binSize, double maxEnergy) : base(binSize, maxEnergy)
+        {
+            try
+            {
+                using (Py.GIL())
+                {
+                    dynamic np = Py.Import("numpy");
+                    dynamic nasagamma = Py.Import("nasagamma");
+                }
+            }
+            catch
+            {
+                Debug.Assert(false, "Spectrum NASA not available");
+            }
+            BinSize = binSize;
+            MaxEnergy = maxEnergy;
+            int binCount = (int)(MaxEnergy / binSize);
+            for (int i = 0; i < binCount; ++i)
+            {
+                double energy = i * binSize;
+
+                EnergyBin.Add(energy);
+                HistoEnergies.Add(new HistoEnergy(energy));
+            }
+        }
+        public SpectrumEnergyNasa(SpectrumEnergyNasa spectrum) : base(spectrum)
+        {
+            BinSize = spectrum.BinSize;
+            MaxEnergy = spectrum.MaxEnergy;
+            EnergyBin = spectrum.EnergyBin;
+            HistoEnergies = spectrum.HistoEnergies;
+        }
+
+        public List<double> FindPeaks(float ref_x, float ref_fwhm, float fwhm_at_0, float min_snr)
+        {
+
+            List<double> PeakE = new List<double>();
+
+
+            using (Py.GIL())
+            {           
+                dynamic np = Py.Import("numpy");
+                dynamic nasagamma = Py.Import("nasagamma");
+                dynamic sp = nasagamma.spectrum;
+                dynamic ps = nasagamma.peaksearch;
+
+                dynamic eData = np.array(EnergyList);
+                dynamic bin = np.arange(0, 3000, 5);
+                dynamic hist = np.histogram(eData, bin);
+                dynamic cts_np = hist[0];
+                bin = hist[1];
+                dynamic erg = np.resize(bin, (np.size(bin) - 1));
+
+                dynamic spect = sp.Spectrum(cts_np, null, erg, "keV");
+
+                // instantiate a peaksearch object
+                dynamic search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr);
+                dynamic peakIdx = search.peaks_idx;
+
+                for (int i = 0; i < (int)np.size(peakIdx); ++i)
+                {
+                    PeakE.Add((double)erg[peakIdx[i]]);
+                }
+            }
+
+            return PeakE;
+        }
+
+        static public List<Isotope> GetIsotopesFromPeaks(List<double> peaks, float ref_x, float ref_fwhm, float fwhm_at_0)
+        {
+            List<Isotope> isotopes = new();
+
+#if DEBUG
+            double tempPeak = 0;
+            foreach (double peak in peaks)
+            {
+                Debug.Assert(peak > tempPeak);
+                tempPeak = peak;
+            }
+#endif
+            bool[] bCo60Find = new bool[2] { false, false };
+            bool[] bNa22Find = new bool[2] { false, false };
+            bool[] bBa133Find = new bool[3] { false, false, false };
+
+            foreach (var energy in peaks)
+            {
+                //Cs137
+                if (IsEnergyInPeakEnergy(energy, 662, ref_x, ref_fwhm, fwhm_at_0))
+                {
+                    isotopes.Add(new Isotope(ISOTOPE.Cs137, 662));
+                }
+
+                //Co60
+                if (IsEnergyInPeakEnergy(energy, 1173, ref_x, ref_fwhm, fwhm_at_0))
+                {
+                    bCo60Find[0] = true;
+                }
+                if (IsEnergyInPeakEnergy(energy, 1332, ref_x, ref_fwhm, fwhm_at_0))
+                {
+                    if (bCo60Find[0])
+                    {
+                        isotopes.Add(new Isotope(ISOTOPE.Co60, 1173));
+                        isotopes.Add(new Isotope(ISOTOPE.Co60, 1332));
+                    }
+                }
+
+                //Na22
+                if (IsEnergyInPeakEnergy(energy, 511, ref_x, ref_fwhm, fwhm_at_0))
+                {
+                    bNa22Find[0] = true;
+                }
+                if (IsEnergyInPeakEnergy(energy, 1275, ref_x, ref_fwhm, fwhm_at_0))
+                {
+                    if (bNa22Find[0])
+                    {
+                        isotopes.Add(new Isotope(ISOTOPE.Na22, 1275));
+                        isotopes.Add(new Isotope(ISOTOPE.Na22, 511));
+                    }
+                }
+
+                //Am241
+                //if (IsEnergyInPeakEnergy(energy, 60))
+                //{
+                //    isotopes.Add(new Isotope(ISOTOPE.Am241, new List<double> { 59.5 }));
+                //}
+
+                //Ba133
+                if (IsEnergyInPeakEnergy(energy, 276, ref_x, ref_fwhm, fwhm_at_0))
+                {
+                    bBa133Find[0] = true;
+
+                }
+                if (IsEnergyInPeakEnergy(energy, 356, ref_x, ref_fwhm, fwhm_at_0))
+                {
+                    if (bBa133Find[0])
+                    {
+                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 356));
+                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 276));
+                    }
+                }
+            }
+            return isotopes;
+        }
+        private static bool IsEnergyInPeakEnergy(double energy, double refPeak, float ref_x, float ref_fwhm, float fwhm_at_0)
+        {
+            List<double> EnergyList = new List<double>();
+            double calcedFWHM = 0;
+            using (Py.GIL())
+            {
+
+                dynamic np = Py.Import("numpy");
+                dynamic nasagamma = Py.Import("nasagamma");
+                dynamic sp = nasagamma.spectrum;
+                dynamic ps = nasagamma.peaksearch;
+
+                dynamic eData = np.array(EnergyList);
+                dynamic bin = np.arange(0, 3000, 5);
+                dynamic hist = np.histogram(eData, bin);
+                dynamic cts_np = hist[0];
+                bin = hist[1];
+                dynamic erg = np.resize(bin, (np.size(bin) - 1));
+                dynamic spect = sp.Spectrum(cts_np, null, erg, "keV");
+
+                // instantiate a peaksearch object
+                dynamic search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, 0);
+                dynamic fwhm = search.fwhm(refPeak);
+                calcedFWHM = (double)fwhm;
+            }
+
+            if (energy < refPeak + 2 * calcedFWHM && energy > refPeak - 2 * calcedFWHM)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+
 
     }
 
@@ -274,7 +463,7 @@ namespace HUREL.Compton
 
     public class EnergyCalibration
     {
-        public static double GetFWHM(List<HistoEnergy> histoEnergies,  int minEIdx, int maxEIdx)
+        public static double GetFWHM(List<HistoEnergy> histoEnergies, int minEIdx, int maxEIdx)
         {
             //fitting gaussian
             List<HistoEnergy> range = histoEnergies.GetRange(minEIdx, maxEIdx - minEIdx);
@@ -286,7 +475,7 @@ namespace HUREL.Compton
 
 
             double[] x = new double[range.Count];
-            double[] y = new double[range.Count];   
+            double[] y = new double[range.Count];
             for (int i = 0; i < range.Count; i++)
             {
                 x[i] = range[i].Energy;

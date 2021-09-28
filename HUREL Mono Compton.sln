@@ -26,6 +26,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Realsense Control Library",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testclr", "testclr\testclr.vcxproj", "{BF7578F6-BB4A-4C09-A3EF-0BBD27EF3050}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tes pythonnet", "Tes pythonnet\Tes pythonnet.csproj", "{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -138,6 +140,18 @@ Global
 		{BF7578F6-BB4A-4C09-A3EF-0BBD27EF3050}.Release|x64.Build.0 = Release|x64
 		{BF7578F6-BB4A-4C09-A3EF-0BBD27EF3050}.Release|x86.ActiveCfg = Release|Win32
 		{BF7578F6-BB4A-4C09-A3EF-0BBD27EF3050}.Release|x86.Build.0 = Release|Win32
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Debug|x64.Build.0 = Debug|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Debug|x86.Build.0 = Debug|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Release|x64.ActiveCfg = Release|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Release|x64.Build.0 = Release|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Release|x86.ActiveCfg = Release|Any CPU
+		{DC6E9A0D-59CD-4090-A889-0D08B87EF49F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

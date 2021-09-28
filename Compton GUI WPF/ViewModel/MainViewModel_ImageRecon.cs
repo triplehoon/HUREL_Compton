@@ -63,7 +63,6 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
-
         private string realsenseState;
         public string RealsenseState
         {
@@ -83,6 +82,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
             get { return (this.initiateRealsenseCommand) ?? (this.initiateRealsenseCommand = new AsyncCommand(InitiateRealsenseAsync)); }
         }
+        
         private async Task InitiateRealsenseAsync()
         {
             RealsenseState = "Initiating Realsense";
@@ -179,6 +179,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
             get { return (this.stopRealsensePipelineCommand) ?? (this.stopRealsensePipelineCommand = new AsyncCommand(StopRealsensePipeline)); }
         }
+        
         private async Task StopRealsensePipeline()
         {
             if (!IsRealsensePipelineOn)
@@ -270,6 +271,7 @@ namespace Compton_GUI_WPF.ViewModel
 
             }
         }
+        #region Bitmap converter
 
         private Bitmap MergedBitmaps(Bitmap bmp1Large, Bitmap bmp2Small)
         {
@@ -287,7 +289,6 @@ namespace Compton_GUI_WPF.ViewModel
             }
             return result;
         }
-        #region Bitmap converter
         private Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
         {
             // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
@@ -367,7 +368,6 @@ namespace Compton_GUI_WPF.ViewModel
             set { t265TrackingConfidence = value; OnPropertyChanged(nameof(T265TrackingConfidence)); }
         }
 
-
         private bool isT265TrackingConfidence3;
         public bool IsT265TrackingConfidence3
         {
@@ -377,9 +377,6 @@ namespace Compton_GUI_WPF.ViewModel
         #endregion
 
         #region Pointcloud
-        private List<Vector3> bpVectors = new List<Vector3>();
-        private List<Color4> bpColor4s = new List<Color4>();
-
         private PointGeometry3D rtPointCloud;
         public PointGeometry3D RTPointCloud
         {
@@ -661,7 +658,7 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged(nameof(MLPETime)); 
             }
         }
-        private int ReconRGBPixelWidth = 848;
+        private int ReconRGBPixelWidth = 640;
         private int ReconRGBPixelHeight = 480;
 
         public enum RTReconMode
@@ -673,10 +670,10 @@ namespace Compton_GUI_WPF.ViewModel
         public RTReconMode RealtimeReconMode
         {
             get { return realtimeReconMode; }
-            set 
-            { 
-                realtimeReconMode = value; 
-                OnPropertyChanged(nameof(RealtimeReconMode)); 
+            set
+            {
+                realtimeReconMode = value;
+                OnPropertyChanged(nameof(RealtimeReconMode));
             }
         }
 

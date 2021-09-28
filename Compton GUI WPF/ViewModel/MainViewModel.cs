@@ -120,7 +120,7 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     //ResetSpectrumCommand.Execute(null);
                 }                
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
             }
             Debug.WriteLine("DataUpdate End");
 

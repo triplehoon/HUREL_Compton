@@ -1832,8 +1832,8 @@ namespace HUREL.Compton.CZT
         #endregion
 
         #region Acquire Data
-        static private SpectrumEnergy SpectrumEnergy = new SpectrumEnergy(10, 2000);
-        static private SpectrumEnergy SpectrumEnergyIsoFind = new SpectrumEnergy(10, 2000);
+        static private SpectrumEnergyNasa SpectrumEnergy = new SpectrumEnergyNasa(5, 2000);
+        static private SpectrumEnergyNasa SpectrumEnergyIsoFind = new SpectrumEnergyNasa(5, 2000);
 
 
 
@@ -1842,11 +1842,11 @@ namespace HUREL.Compton.CZT
 
         public static void ResetSpectrumEnergy()
         {
-            SpectrumEnergy = new SpectrumEnergy(10, 2000);
-            SpectrumEnergyIsoFind = new SpectrumEnergy(10, 2000);
+            SpectrumEnergy = new SpectrumEnergyNasa(5, 2000);
+            SpectrumEnergyIsoFind = new SpectrumEnergyNasa(5, 2000);
         }
 
-        public static SpectrumEnergy GetSpectrumEnergy
+        public static SpectrumEnergyNasa GetSpectrumEnergy
         {
             get
             {
@@ -1854,7 +1854,7 @@ namespace HUREL.Compton.CZT
             }
         }
 
-        public static SpectrumEnergy GetSpectrumEnergyIsoFind
+        public static SpectrumEnergyNasa GetSpectrumEnergyIsoFind
         {
             get
             {
