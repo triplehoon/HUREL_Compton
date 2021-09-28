@@ -99,7 +99,21 @@ namespace Compton_GUI_WPF.ViewModel
                             }
                         }
                     }
-                    CZTFindIsotopes = new ObservableCollection<Isotope>(Isotopes);
+                    if (Isotopes.Count != CZTFindIsotopes.Count)
+                    {
+                        CZTFindIsotopes = new ObservableCollection<Isotope>(Isotopes);
+                    }                    
+                    else
+                    {
+                        for (int i = 0; i < Isotopes.Count; ++i)
+                        {
+                            if (CZTFindIsotopes[i] != Isotopes[i])
+                            {
+                                CZTFindIsotopes = new ObservableCollection<Isotope>(Isotopes);
+                                break;
+                            }
+                        }
+                    }
                     SpectrumCZTPeak = new ObservableCollection<HistoEnergy>(peakArea);
                     Thread.Sleep(100);
                 }
