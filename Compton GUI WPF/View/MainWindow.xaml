@@ -283,6 +283,21 @@
                                     <Button Content="Reset RS" Grid.Column="2" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Command="{Binding ResetRealsensePipelineCommand}" Margin="10,0"/>
 
                                 </Grid>
+                                <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="CZT Setting"/></TextBlock>
+                                <Grid Margin="10,0,10,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+                                    <Button Content="HV On" Grid.Column="0" Grid.Row="0" Command="{Binding SetHighVoltageOnCZTCommand}" Style="{StaticResource ButtonDesignHYU}" Margin="10,0"/>
+                                    <Button Content="HV Off" Grid.Column="1" Grid.Row="0" Command="{Binding SetHighVoltageOffCZTCommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
+                                    
+
+                                </Grid>
                                 <Button Content="Test Buton" Command="{Binding TestCommand}" Margin="10"/>
                             </StackPanel>
                         </Grid>

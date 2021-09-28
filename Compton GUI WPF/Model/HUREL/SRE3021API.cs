@@ -1882,7 +1882,7 @@ namespace HUREL.Compton.CZT
                     }
 
                     CurrentVoltage = (int)WriteSysReg(SRE3021SysRegisterADDR.HV_DAC, setVoltage).Value;
-                    Debug.WriteLine($"Voltage drop to {CurrentVoltage}");
+                    Debug.WriteLine($"SRE3021API: Voltage drop to {CurrentVoltage}");
                     Thread.Sleep(sleepTimeInMillisecond);
                 }
             }
@@ -1901,7 +1901,7 @@ namespace HUREL.Compton.CZT
                     }
 
                     CurrentVoltage = (int)WriteSysReg(SRE3021SysRegisterADDR.HV_DAC, setVoltage).Value;
-                    Debug.WriteLine($"Voltage rise to {CurrentVoltage}");
+                    Debug.WriteLine($"SRE3021API: Voltage rise to {CurrentVoltage}");
                     Thread.Sleep(sleepTimeInMillisecond);
                 }
             }

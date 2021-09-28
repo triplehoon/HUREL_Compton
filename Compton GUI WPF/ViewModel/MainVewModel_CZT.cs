@@ -73,26 +73,13 @@ namespace Compton_GUI_WPF.ViewModel
                 SRE3021API.ResetSpectrumEnergy();
                 VMStatus = "Starting CZT";
                 isStartingCZT = true;             
-                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle,
-                new Action(() =>
-                {
-                    StopCZTCommmand.RaiseCanExecuteChanged();
-                    StartCZTCommmand.RaiseCanExecuteChanged();
-                    StartOrStopCZTCommand.RaiseCanExecuteChanged();
-                }));
-
+            
                 SRE3021API.StartAcqusition();
-
+                RaiseCanExecuteChangedCZT();
                 VMStatus = "CZT is Started";
                 isStartingCZT = false;
                 IsCZTRunning = true;
-                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle,
-                new Action(() =>
-                {
-                    StopCZTCommmand.RaiseCanExecuteChanged();
-                    StartCZTCommmand.RaiseCanExecuteChanged();
-                    StartOrStopCZTCommand.RaiseCanExecuteChanged();
-                }));
+                RaiseCanExecuteChangedCZT();
 
                 DateTime startTime = DateTime.Now;
                 while (IsCZTRunning)
@@ -118,24 +105,8 @@ namespace Compton_GUI_WPF.ViewModel
                 }
                 cztRunTime = DateTime.Now - startTime;
             });
+            RaiseCanExecuteChangedCZT();
         }
-
-
-
-        private ObservableCollection<Isotope> cztFindIsotopes = new ObservableCollection<Isotope>();
-        public ObservableCollection<Isotope> CZTFindIsotopes
-        {
-            get
-            {
-                return cztFindIsotopes;
-            }
-            set
-            {
-                cztFindIsotopes = value;
-                OnPropertyChanged(nameof(CZTFindIsotopes));
-            }
-        }
-
 
         public bool isCZTRunning = false;
         public bool IsCZTRunning
@@ -167,23 +138,12 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 IsCZTRunning = false;
                 isStartingCZT = true;
-                System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(() =>
-                {
-                    StopCZTCommmand.RaiseCanExecuteChanged();
-                    StartCZTCommmand.RaiseCanExecuteChanged();
-                    StartOrStopCZTCommand.RaiseCanExecuteChanged();
-                }));
+                RaiseCanExecuteChangedCZT();
                 SRE3021API.StopAcqusition();
             });
             VMStatus = "CZT is stop";
             isStartingCZT = false;
-            System.Windows.Application.Current.Dispatcher.Invoke(
-                    DispatcherPriority.ApplicationIdle,
-                    new Action(() => {
-                        StartCZTCommmand.RaiseCanExecuteChanged();
-                        StopCZTCommmand.RaiseCanExecuteChanged();
-                        StartOrStopCZTCommand.RaiseCanExecuteChanged();
-                    }));
+            RaiseCanExecuteChangedCZT();
 
         }
 
@@ -204,6 +164,52 @@ namespace Compton_GUI_WPF.ViewModel
                 SpectrumCZTPeak = new ObservableCollection<HistoEnergy>();
                 CZTFindIsotopes = new ObservableCollection<Isotope>();
             });
+        }
+
+
+        private AsyncCommand setHighVoltageOnCZTCommand;
+        public IAsyncCommand SetHighVoltageOnCZTCommand
+        {
+            get { return setHighVoltageOnCZTCommand ?? (setHighVoltageOnCZTCommand = new AsyncCommand(SetHighVoltageOnCZT, CanExecuteStartorStopCZT)); }
+        }
+        private async Task SetHighVoltageOnCZT()
+        {
+            await Task.Run(() =>
+            {
+                RaiseCanExecuteChangedCZT();
+                SRE3021API.SetHighVoltage(1500, 10, 100);
+                RaiseCanExecuteChangedCZT();
+            });
+        }
+
+
+        private AsyncCommand setHighVoltageOffCZTCommand;
+        public IAsyncCommand SetHighVoltageOffCZTCommand
+        {
+            get { return setHighVoltageOffCZTCommand ?? (setHighVoltageOffCZTCommand = new AsyncCommand(SetHighVoltageOffCZT, CanExecuteStartorStopCZT)); }
+        }
+        private async Task SetHighVoltageOffCZT()
+        {
+            await Task.Run(() =>
+            {
+                RaiseCanExecuteChangedCZT();
+                SRE3021API.SetHighVoltage(0, 10, 100);
+                RaiseCanExecuteChangedCZT();
+            });
+        }
+
+        private void RaiseCanExecuteChangedCZT()
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle,
+            new Action(() =>
+            {
+                StopCZTCommmand.RaiseCanExecuteChanged();
+                StartCZTCommmand.RaiseCanExecuteChanged();
+                StartOrStopCZTCommand.RaiseCanExecuteChanged();
+                SetHighVoltageOnCZTCommand.RaiseCanExecuteChanged();
+                SetHighVoltageOffCZTCommand.RaiseCanExecuteChanged();
+            }));
+
         }
 
         private AsyncCommand setHVCommand;
@@ -261,6 +267,21 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged(nameof(SpectrumHistoCZT));
             }
         }
+
+        private ObservableCollection<Isotope> cztFindIsotopes = new ObservableCollection<Isotope>();
+        public ObservableCollection<Isotope> CZTFindIsotopes
+        {
+            get
+            {
+                return cztFindIsotopes;
+            }
+            set
+            {
+                cztFindIsotopes = value;
+                OnPropertyChanged(nameof(CZTFindIsotopes));
+            }
+        }
+
 
 
     }
