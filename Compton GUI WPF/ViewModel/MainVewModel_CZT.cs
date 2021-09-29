@@ -70,12 +70,12 @@ namespace Compton_GUI_WPF.ViewModel
         {
             await Task.Run(() =>
             {
-                SRE3021API.ResetSpectrumEnergy();
+                Console.WriteLine("MainViewModel_CZT: Starting CZT");
                 VMStatus = "Starting CZT";
-                isStartingCZT = true;             
-            
-                SRE3021API.StartAcqusition();
+                isStartingCZT = true;
+                SRE3021API.ResetSpectrumEnergy();
                 RaiseCanExecuteChangedCZT();
+                SRE3021API.StartAcqusition();
                 VMStatus = "CZT is Started";
                 isStartingCZT = false;
                 IsCZTRunning = true;
@@ -87,13 +87,14 @@ namespace Compton_GUI_WPF.ViewModel
                     List<HistoEnergy> cztESpectrum = SRE3021API.GetSpectrumEnergy.HistoEnergies;
                     SpectrumHistoCZT = new ObservableCollection<HistoEnergy>(cztESpectrum);
                     List<double> peaks = SRE3021API.GetSpectrumEnergyIsoFind.FindPeaks(662, 16.5f, 0.1f, 3.0f);
+                 
                     List<Isotope> Isotopes = SpectrumEnergyNasa.GetIsotopesFromPeaks(peaks, 16.5f, 0.1f, 3.0f);
                     List<HistoEnergy> peakArea = new List<HistoEnergy>();
-                    foreach(Isotope iso in Isotopes)
+                    foreach (Isotope iso in Isotopes)
                     {
                         foreach (HistoEnergy e in cztESpectrum)
                         {
-                            if (e.Energy > iso.PeakEnergy - 50 && e.Energy < iso.PeakEnergy + 50)
+                            if (e.Energy > iso.PeakEnergy - 15 && e.Energy < iso.PeakEnergy + 15)
                             {
                                 peakArea.Add(e);
                             }
@@ -212,6 +213,33 @@ namespace Compton_GUI_WPF.ViewModel
             });
         }
 
+        private AsyncCommand initiateCZTAPICommand;
+        public IAsyncCommand InitiateCZTAPICommand
+        {
+            get { return initiateCZTAPICommand ?? (initiateCZTAPICommand = new AsyncCommand(InitiateCZTAPI, CanExecuteInitiateCZTAPI)); }
+        }
+
+        private bool CanExecuteInitiateCZTAPI(object arg)
+        {
+            if (!SRE3021API.IsAPIAvailable)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private async Task InitiateCZTAPI()
+        {
+            await Task.Run(() =>
+            {
+                SRE3021API.InitiateSRE3021API();
+                RaiseCanExecuteChangedCZT();
+            });
+        }
+
         private void RaiseCanExecuteChangedCZT()
         {
             System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle,
@@ -222,6 +250,7 @@ namespace Compton_GUI_WPF.ViewModel
                 StartOrStopCZTCommand.RaiseCanExecuteChanged();
                 SetHighVoltageOnCZTCommand.RaiseCanExecuteChanged();
                 SetHighVoltageOffCZTCommand.RaiseCanExecuteChanged();
+                InitiateCZTAPICommand.RaiseCanExecuteChanged();
             }));
 
         }

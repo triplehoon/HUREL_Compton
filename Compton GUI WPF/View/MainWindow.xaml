@@ -295,8 +295,7 @@
                                     </Grid.RowDefinitions>
                                     <Button Content="HV On" Grid.Column="0" Grid.Row="0" Command="{Binding SetHighVoltageOnCZTCommand}" Style="{StaticResource ButtonDesignHYU}" Margin="10,0"/>
                                     <Button Content="HV Off" Grid.Column="1" Grid.Row="0" Command="{Binding SetHighVoltageOffCZTCommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
-                                    
-
+                                    <Button Content="Initiate" Grid.Column="2" Grid.Row="0" Command="{Binding InitiateCZTAPICommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
                                 </Grid>
                                 <Button Content="Test Buton" Command="{Binding TestCommand}" Margin="10"/>
                             </StackPanel>

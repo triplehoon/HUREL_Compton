@@ -25,6 +25,7 @@ using HUREL.Compton.CZT;
 using HUREL.Compton.LACC;
 using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
+using Python.Runtime;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -39,6 +40,12 @@ namespace Compton_GUI_WPF.ViewModel
         /// </summary>
         public MainViewModel()
         {
+            if (!PythonEngine.IsInitialized)
+            {
+                PythonEngine.Initialize();
+                PythonEngine.BeginAllowThreads();
+            }
+
             FPGAControl = new CRUXELLLACC();
             FPGAVariable = FPGAControl.Variables;
 
@@ -63,17 +70,7 @@ namespace Compton_GUI_WPF.ViewModel
             InitiateRealsenseAsync().SafeFireAndForget(onException: ex => Console.WriteLine(ex));
             InitiateLACCAsync().SafeFireAndForget(onException: ex => Console.WriteLine(ex));
             SRE3021API.InitiateSRE3021API();
-            System.Windows.Application.Current.Dispatcher.Invoke(
-                DispatcherPriority.ApplicationIdle,
-                new Action(() => {
-                    StartCZTCommmand.RaiseCanExecuteChanged();
-                    StopCZTCommmand.RaiseCanExecuteChanged();
-                    StartOrStopCZTCommand.RaiseCanExecuteChanged();
-                }));
-
-
-            TestFunction("").SafeFireAndForget(onException: ex => Console.WriteLine(ex));
-            
+            RaiseCanExecuteChangedCZT();
         }
 
 
@@ -515,27 +512,24 @@ namespace Compton_GUI_WPF.ViewModel
 
         private async Task TestFunction(object t)
         {
-            List<Isotope> isotopes = new List<Isotope>();
-            isotopes.Add(new Isotope(ISOTOPE.Cs137, 662));
-            isotopes.Add(new Isotope(ISOTOPE.Co60, 1332));
-            CZTFindIsotopes = new ObservableCollection<Isotope>(isotopes);
-            SpectrumEnergy testSpecturm1 = new SpectrumEnergy(5, 2000);
-            SpectrumEnergy testSpecturm2 = new SpectrumEnergy(5, 2000);
-            Random rand = new Random();
-            for (int i = 0; i < 1000; ++i)
-            {               
-                double randE = 1500 * rand.NextDouble();
-                testSpecturm1.AddEnergy(randE);
-                if (randE < 700 && randE >600)
-                {
-                    testSpecturm2.AddEnergy(randE);
-                }
+            System.Windows.Forms.SaveFileDialog svFile = new System.Windows.Forms.SaveFileDialog();
+
+            string saveFileName = "";
+            if (svFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                saveFileName = svFile.FileName;
             }
-            SpectrumHistoCZT = new ObservableCollection<HistoEnergy>(testSpecturm1.HistoEnergies);
-            SpectrumCZTPeak = new ObservableCollection<HistoEnergy>(testSpecturm2.HistoEnergies);
+            SpectrumEnergy cztSPE = SRE3021API.GetSpectrumEnergy;
+
+            if (!cztSPE.IsEmpty())
+            {
+                cztSPE.SaveSpectrumData(Path.GetDirectoryName(saveFileName), Path.GetFileName(saveFileName) + "CZT_Spectrum");
+            }
 
             await Task.Run(() =>
             {
+
+               
                 while (false)
                 {
                     

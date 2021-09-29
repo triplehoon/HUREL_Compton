@@ -1188,6 +1188,9 @@ namespace HUREL.Compton.CZT
 
         private static NetworkStream TCPNetworkStream;
         private static byte[] TCPNetworkStreamBuffer = new byte[15000];
+
+        static int pingcount = 0;
+
         public static bool IsTCPOpen
         {
             get
@@ -1216,12 +1219,14 @@ namespace HUREL.Compton.CZT
                 PingReply reply = ping.Send(SRE3021IP, timeout, buffer, options);
 
 
-
                 if (reply.Status == IPStatus.Success)
                 {
                     try
                     {
-                        Console.WriteLine("CZT Ping Succeess");
+                        if (pingcount++ % 10 == 0)
+                        {
+                            Console.WriteLine($"SRE3021API: CZT Ping Succeess.({pingcount})");
+                        }
                     }
                     catch
                     {
@@ -1231,7 +1236,8 @@ namespace HUREL.Compton.CZT
                 else
 
                 {
-                    Console.WriteLine("CZT Ping Fail");
+                    pingcount = 0;
+                    Console.WriteLine("SRE3021API: CZT Ping Fail");
                     return false;
                 }
 
@@ -1321,7 +1327,7 @@ namespace HUREL.Compton.CZT
                 return true;
             }
             UDPSocket = new UdpClient(SRE3021UDPPort);
-
+            UDPSocket.Client.ReceiveBufferSize = 16 * 4096;
             UDPListener();
 
             return true;
@@ -1329,15 +1335,15 @@ namespace HUREL.Compton.CZT
         private static void UDPListener()
         {
             var epUdp = new IPEndPoint(SRE3021IP, SRE3021UDPPort);
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 while (UDPSocket != null)
                 {
                     //IPEndPoint object will allow us to read datagrams sent from any source.
                     try
                     {
-                        var receivedResults = UDPSocket.Receive(ref epUdp);
-                        UDPImagBuffer.Add(receivedResults);
+                        var receivedResults = await UDPSocket.ReceiveAsync();
+                        UDPImagBuffer.Add(receivedResults.Buffer);
                         Thread.Sleep(0);
                     }
                     catch
@@ -1355,6 +1361,7 @@ namespace HUREL.Compton.CZT
                     while (UDPImagBuffer.TryTake(out buffer))
                     {
                         RaiseReadImagDataEvent(buffer);
+                        Thread.Sleep(0);
                     }
                     Thread.Sleep(0);
                 }
@@ -1502,7 +1509,7 @@ namespace HUREL.Compton.CZT
             for (int j = 1; j <= 650; ++j)
             {
                 bool result = GetASICConfigtBitValue((SRE3021ASICRegisterADDR)j);
-                Debug.WriteLine("{0} is {1}", ((SRE3021ASICRegisterADDR)j).ToString(), result);
+                //Debug.WriteLine("{0} is {1}", ((SRE3021ASICRegisterADDR)j).ToString(), result);
             }
         }
         public static void ReadWriteASICReg(SRE3021ASICRegisterADDR addr, bool value)
@@ -1651,11 +1658,27 @@ namespace HUREL.Compton.CZT
                 IMGDataEventRecieved -= ProcessImgData;
             }
         }
+        /// <summary>
+        /// E = p1 * x + p2. updating p1, p2
+        /// </summary>
+        /// <param name="p1"></param>
+        /// <param name="p2"></param>
+        public static void SetProcessImgDataEcalP1P2(double p1, double p2)
+        {
+            //y = p1_origin*x + p2_origin
+            //y_calc = p1*y + p2
+            //y_calc = p1 * p1_org * x + p1 * p2_org + p2
+            double p1_org = ProcessImgDataEnergyP1;
+            double p2_org = ProcessImgDataEnergyP2;
+            ProcessImgDataEnergyP1 = p1 * p1_org;
+            ProcessImgDataEnergyP2 = p1 * p2_org +  p2;
+        }
+
+        private static double ProcessImgDataEnergyP1 = 0.3222;
+        private static double ProcessImgDataEnergyP2 = 22.39;
+
         private static void ProcessImgData(SRE3021ImageData imgData)
         {
-            const double p1 = 0.2987;
-            const double p2 = 49.72;
-
             List<int> interactionX = new List<int>();
             List<int> interactionY = new List<int>();
             int interactionPotins = 0;
@@ -1665,7 +1688,7 @@ namespace HUREL.Compton.CZT
             {
                 for (int Y = 0; Y < 11; ++Y)
                 {
-                    if (imgData.AnodeTiming[X, Y] > 150)
+                    if (imgData.AnodeTiming[X, Y] > 250)
                     {
                         ++interactionPotins;
                         if (interactionPotins == 3)
@@ -1690,8 +1713,8 @@ namespace HUREL.Compton.CZT
             {
                 backgroundNoise = backgroundNoise / 120;
 
-                SpectrumEnergy.AddEnergy((Convert.ToDouble(imgData.AnodeValue[interactionX[0], interactionY[0]]) - backgroundNoise) * p1 + p2);
-                SpectrumEnergyIsoFind.AddEnergy((Convert.ToDouble(imgData.AnodeValue[interactionX[0], interactionY[0]]) - backgroundNoise) * p1 + p2);
+                SpectrumEnergy.AddEnergy((Convert.ToDouble(imgData.AnodeValue[interactionX[0], interactionY[0]]) - backgroundNoise) * ProcessImgDataEnergyP1 + ProcessImgDataEnergyP2);
+                SpectrumEnergyIsoFind.AddEnergy((Convert.ToDouble(imgData.AnodeValue[interactionX[0], interactionY[0]]) - backgroundNoise) * ProcessImgDataEnergyP1 + ProcessImgDataEnergyP2);
             }
         }
 
@@ -1751,22 +1774,22 @@ namespace HUREL.Compton.CZT
         {
             int numPulses = 10000;
 
-            Trace.WriteLine("Configuring ASIC.");
+            Console.WriteLine("SRE3021API: Configuring ASIC.");
             ReadWriteASICReg(SRE3021ASICRegisterADDR.Test_on, false);
             ReadWriteASICReg(SRE3021ASICRegisterADDR.Current_compensation_enable, true);
 
-            Trace.WriteLine("Configuring system.");
+            Console.WriteLine("SRE3021API: Configuring system.");
             WriteSysReg(SRE3021SysRegisterADDR.CFG_FIXED_CH, 128); //This vale ensures that single channel readout is not envoked during baseline readout.
             WriteSysReg(SRE3021SysRegisterADDR.CFG_HOLD_DLY, 1); //This is the minimum value for the peak-hold to pick up less noise.
             WriteSysReg(SRE3021SysRegisterADDR.CFG_CALTRIG_EN, 1);
 
-            Trace.WriteLine("Configuring calibration pulse genenerator (CalGen).");
+            Console.WriteLine("SRE3021API: Configuring calibration pulse genenerator (CalGen).");
             WriteSysReg(SRE3021SysRegisterADDR.CAL_PULSE_POLAR, 0);
             WriteSysReg(SRE3021SysRegisterADDR.CAL_NUM_PULSE, numPulses);
             WriteSysReg(SRE3021SysRegisterADDR.CAL_PULSE_LENGTH, 500);
             WriteSysReg(SRE3021SysRegisterADDR.CAL_PULSE_INTERVAL, 40000);
 
-            Trace.WriteLine("Start pulse genenerator (CalGen).");
+            Console.WriteLine("SRE3021API: Start pulse genenerator (CalGen).");
 
             Stopwatch sw = new Stopwatch();
             IMGDataEventRecieved += BaseLineEventCheck;
@@ -1779,7 +1802,7 @@ namespace HUREL.Compton.CZT
 
                 if (sw.ElapsedMilliseconds > 15000)
                 {
-                    Trace.WriteLine($"BaseLineImageEvents Count is {BaseLineImageEvents.Count}");
+                    Console.WriteLine($"SRE3021API: BaseLineImageEvents Count is {BaseLineImageEvents.Count}");
                     if (BaseLineImageEvents.Count > numPulses * 0.99)
                     {
                         break;
@@ -1788,7 +1811,7 @@ namespace HUREL.Compton.CZT
                 }
             }
             sw.Stop();
-            Trace.WriteLine($"Baseline Cal Execute time is {sw.ElapsedMilliseconds} [ms]");
+            Console.WriteLine($"SRE3021API: Baseline Cal Execute time is {sw.ElapsedMilliseconds} [ms]");
             IMGDataEventRecieved -= BaseLineEventCheck;
 
             int[,] baselineSum = new int[11, 11];
@@ -1832,8 +1855,8 @@ namespace HUREL.Compton.CZT
         #endregion
 
         #region Acquire Data
-        static private SpectrumEnergyNasa SpectrumEnergy = new SpectrumEnergyNasa(5, 2000);
-        static private SpectrumEnergyNasa SpectrumEnergyIsoFind = new SpectrumEnergyNasa(5, 2000);
+        static private SpectrumEnergyNasa SpectrumEnergy = new SpectrumEnergyNasa(2, 2000);
+        static private SpectrumEnergyNasa SpectrumEnergyIsoFind = new SpectrumEnergyNasa(2, 2000);
 
 
 
@@ -1842,8 +1865,8 @@ namespace HUREL.Compton.CZT
 
         public static void ResetSpectrumEnergy()
         {
-            SpectrumEnergy = new SpectrumEnergyNasa(5, 2000);
-            SpectrumEnergyIsoFind = new SpectrumEnergyNasa(5, 2000);
+            SpectrumEnergy = new SpectrumEnergyNasa(2, 2000);
+            SpectrumEnergyIsoFind = new SpectrumEnergyNasa(2, 2000);
         }
 
         public static SpectrumEnergyNasa GetSpectrumEnergy
@@ -1882,7 +1905,10 @@ namespace HUREL.Compton.CZT
                     }
 
                     CurrentVoltage = (int)WriteSysReg(SRE3021SysRegisterADDR.HV_DAC, setVoltage).Value;
-                    Debug.WriteLine($"SRE3021API: Voltage drop to {CurrentVoltage}");
+                    if (CurrentVoltage % 200 == 0)
+                    {
+                        Console.WriteLine($"SRE3021API: Voltage drop to {CurrentVoltage}");
+                    }
                     Thread.Sleep(sleepTimeInMillisecond);
                 }
             }
@@ -1901,7 +1927,10 @@ namespace HUREL.Compton.CZT
                     }
 
                     CurrentVoltage = (int)WriteSysReg(SRE3021SysRegisterADDR.HV_DAC, setVoltage).Value;
-                    Debug.WriteLine($"SRE3021API: Voltage rise to {CurrentVoltage}");
+                    if (CurrentVoltage % 200 == 0)
+                    {
+                        Console.WriteLine($"SRE3021API: Voltage rise to {CurrentVoltage}");
+                    }
                     Thread.Sleep(sleepTimeInMillisecond);
                 }
             }

@@ -215,15 +215,36 @@ namespace HUREL.Compton
 
         public void SaveSpectrumData(string path, string fileName)
         {
+            List<HistoEnergy> tmpHistoE = new List<HistoEnergy>(HistoEnergies.Count);
+            for (int i = 0; i < HistoEnergies.Count; ++i)
+            {
+                tmpHistoE.Add(HistoEnergies[i]);
+            }
+            int tmpListCount = EnergyList.Count;
+            List<double> tmpListData = new List<double>(tmpListCount);
+            for (int i = 0; i < tmpListCount; ++i)
+            {
+                tmpListData.Add(EnergyList[i]);
+            }
 
             string csvPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_" + fileName + "_Spectrum.csv");
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(csvPath))
             {
                 //file.WriteLine("Time[HHMMssFFF],SCposX[m],SCposY,SCposZ,SCEnergy[keV],ABposX,ABposY,ABposZ,ABEnergy");
                 file.WriteLine("Energy,Count");
-                foreach (HistoEnergy hist in HistoEnergies)
+                foreach (HistoEnergy hist in tmpHistoE)
                 {
                     file.WriteLine($"{hist.Energy},{hist.Count}");
+                }
+            }
+            string csvListPath = Path.Combine(path.ToString(), DateTime.Now.ToString("yyyyMMddHHmm") + "_" + fileName + "_ListEnergyData.csv");
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(csvListPath))
+            {
+                //file.WriteLine("Time[HHMMssFFF],SCposX[m],SCposY,SCposZ,SCEnergy[keV],ABposX,ABposY,ABposZ,ABEnergy");
+                file.WriteLine("Energy[keV]");
+                foreach (double e in tmpListData)
+                {
+                    file.WriteLine($"{e}");
                 }
             }
         }
@@ -234,13 +255,34 @@ namespace HUREL.Compton
             {
                 if (hist.Count > 0)
                 {
-                    return true;
+                    return false;
                 }
             }
-            return false;
+            return true;
         }
 
         public bool LoadSpectrumData(string path)
+        {
+            using (StreamReader file = new StreamReader(path))
+            {
+                string firstLine = file.ReadLine();
+                if (firstLine != "Energy[keV]")
+                {
+                    return false;
+                }
+                else
+                {
+                    this.Reset();
+                    while (!file.EndOfStream)
+                    {
+                        string line = file.ReadLine();
+                        AddEnergy(Convert.ToDouble(line));
+                    }
+                }
+            }
+            return true;
+        }
+        public bool LoadEnergyListModeData(string path)
         {
             using (StreamReader file = new StreamReader(path))
             {
@@ -262,7 +304,6 @@ namespace HUREL.Compton
             }
             return true;
         }
-
     }
 
     public class SpectrumEnergyNasa : SpectrumEnergy
@@ -277,8 +318,10 @@ namespace HUREL.Compton
                     dynamic nasagamma = Py.Import("nasagamma");
                 }
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine("EnergyCalibration: No Python module error");
+                Console.WriteLine(e.Message);
                 Debug.Assert(false, "Spectrum NASA not available");
             }
             BinSize = binSize;
@@ -305,7 +348,13 @@ namespace HUREL.Compton
 
             List<double> PeakE = new List<double>();
 
-
+            int eCount = EnergyList.Count;
+            List<double> listData = new List<double>(EnergyList.Count); 
+            
+            for (int i = 0; i < eCount; ++i)
+            {
+                listData.Add(EnergyList[i]);
+            }
             using (Py.GIL())
             {           
                 dynamic np = Py.Import("numpy");
@@ -313,7 +362,7 @@ namespace HUREL.Compton
                 dynamic sp = nasagamma.spectrum;
                 dynamic ps = nasagamma.peaksearch;
 
-                dynamic eData = np.array(EnergyList);
+                dynamic eData = np.array(listData);
                 dynamic bin = np.arange(0, 3000, 5);
                 dynamic hist = np.histogram(eData, bin);
                 dynamic cts_np = hist[0];
@@ -382,8 +431,8 @@ namespace HUREL.Compton
                 {
                     if (bNa22Find[0])
                     {
-                        isotopes.Add(new Isotope(ISOTOPE.Na22, 1275));
                         isotopes.Add(new Isotope(ISOTOPE.Na22, 511));
+                        isotopes.Add(new Isotope(ISOTOPE.Na22, 1275));
                     }
                 }
 
@@ -403,8 +452,9 @@ namespace HUREL.Compton
                 {
                     if (bBa133Find[0])
                     {
-                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 356));
                         isotopes.Add(new Isotope(ISOTOPE.Ba133, 276));
+                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 303));
+                        isotopes.Add(new Isotope(ISOTOPE.Ba133, 356));
                     }
                 }
             }
@@ -436,7 +486,7 @@ namespace HUREL.Compton
                 calcedFWHM = (double)fwhm;
             }
 
-            if (energy < refPeak + 2 * calcedFWHM && energy > refPeak - 2 * calcedFWHM)
+            if (energy < refPeak + 5 * calcedFWHM && energy > refPeak - 5 * calcedFWHM)
             {
                 return true;
             }
