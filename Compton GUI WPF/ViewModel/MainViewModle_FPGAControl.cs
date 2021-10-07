@@ -17,6 +17,7 @@ using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using System.IO;
 using HUREL.Compton.CZT;
+using HUREL.Compton.RadioisotopeAnalysis;
 
 namespace Compton_GUI_WPF.ViewModel
 {

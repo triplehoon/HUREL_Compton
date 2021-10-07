@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EnergyCalibration": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
