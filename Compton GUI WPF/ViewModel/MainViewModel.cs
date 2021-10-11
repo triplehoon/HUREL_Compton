@@ -169,8 +169,11 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     continue;
                 }
-                temp2.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - T265ToLACCOffset.X, lmdata.RelativeInteractionPoint3D.Y - T265ToLACCOffset.Y));      
-                
+                temp2.Add(new MlpePositionInfo(lmdata.RelativeInteractionPoint3D.X - T265ToLACCOffset.X, lmdata.RelativeInteractionPoint3D.Y - T265ToLACCOffset.Y));
+                if (sw.ElapsedMilliseconds > 5000)
+                {
+                    break;
+                }
             }
             ScatterPositionData = temp2;
             sw.Stop();
