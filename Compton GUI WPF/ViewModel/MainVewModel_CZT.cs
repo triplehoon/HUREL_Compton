@@ -1,6 +1,7 @@
 ﻿using AsyncAwaitBestPractices.MVVM;
 using HUREL.Compton;
 using HUREL.Compton.CZT;
+using HUREL.Compton.RadioisotopeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -86,21 +87,38 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     List<HistoEnergy> cztESpectrum = SRE3021API.GetSpectrumEnergy.HistoEnergies;
                     SpectrumHistoCZT = new ObservableCollection<HistoEnergy>(cztESpectrum);
-                    List<double> peaks = SRE3021API.GetSpectrumEnergyIsoFind.FindPeaks(662, 16.5f, 0.1f, 3.0f);
-                 
-                    List<Isotope> Isotopes = SpectrumEnergyNasa.GetIsotopesFromPeaks(peaks, 16.5f, 0.1f, 3.0f);
+                    List<double> peaks = SRE3021API.GetSpectrumEnergyIsoFind.FindPeaks(662, 2.5f / 100 * 662, 0.1f, 3.0f);
+
+                    List<Isotope> Isotopes = PeakSearching.GetIsotopesFromPeaks(peaks, 4, 662, 2.5f / 100 * 662, 0.5f);
                     List<HistoEnergy> peakArea = new List<HistoEnergy>();
                     foreach (Isotope iso in Isotopes)
                     {
-                        foreach (HistoEnergy e in cztESpectrum)
+                        foreach (double energy in iso.PeakEnergy)
                         {
-                            if (e.Energy > iso.PeakEnergy - 15 && e.Energy < iso.PeakEnergy + 15)
+                            foreach (HistoEnergy e in cztESpectrum)
                             {
-                                peakArea.Add(e);
+                                if (e.Energy > energy - 15 && e.Energy < energy + 15)
+                                {
+                                    peakArea.Add(e);
+                                }
+                            }
+                        }                        
+                    }
+                    if (Isotopes.Count != CZTFindIsotopes.Count)
+                    {
+                        CZTFindIsotopes = new ObservableCollection<Isotope>(Isotopes);
+                    }                    
+                    else
+                    {
+                        for (int i = 0; i < Isotopes.Count; ++i)
+                        {
+                            if (CZTFindIsotopes[i] != Isotopes[i])
+                            {
+                                CZTFindIsotopes = new ObservableCollection<Isotope>(Isotopes);
+                                break;
                             }
                         }
                     }
-                    CZTFindIsotopes = new ObservableCollection<Isotope>(Isotopes);
                     SpectrumCZTPeak = new ObservableCollection<HistoEnergy>(peakArea);
                     Thread.Sleep(100);
                 }
