@@ -1295,7 +1295,7 @@ namespace HUREL.Compton.CZT
 
             if (!TCPSocket.Connected)
             {
-                Trace.WriteLine("TCP Connection Fail");
+                Trace.WriteLine("SRE3021API: TCP Connection Fail");
                 TCPSocket.Close();
                 TCPSocket = null;
                 return false;

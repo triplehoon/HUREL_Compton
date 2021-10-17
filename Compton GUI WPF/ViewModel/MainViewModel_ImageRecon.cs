@@ -26,7 +26,7 @@ namespace Compton_GUI_WPF.ViewModel
     {
         private RealsenseControlWrapper RealsenseControl = new RealsenseControlWrapper();
 
-        private Vector3D T265ToLACCOffset = new Vector3D(0, -0.236, -0.05);
+        private Vector3D T265ToLACCOffset = new Vector3D(0, -0.240, -0.05);
         private double t265ToLACCOffsetX;
         public double T265ToLACCOffsetX
         {
@@ -827,7 +827,7 @@ namespace Compton_GUI_WPF.ViewModel
             //Trace.WriteLine("LM Data count " + tempListModeData.Count());
             var tempVector3s = SurfaceImageVector3;
             var tempUVs = SurfaceImageUVs;
-            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, false, 5, 0.8);
+            var (v3, c4, bitmap) = ImageRecon.BPtoPointCloudBitmap(tempVector3s, tempUVs, tempListModeData, ReconRGBPixelHeight, ReconRGBPixelWidth, false, 5, 0.95);
 
             ReconBitmapImage = Bitmap2BitmapImage(bitmap);
             //RealtimeReconPointCloud = new PointGeometry3D() { Positions = v3, Colors = c4 };
