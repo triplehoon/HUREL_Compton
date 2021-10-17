@@ -232,8 +232,8 @@
                                 <ColumnDefinition Width="1.9*"/>
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
-                            <Image Source="{Binding RealtimeRGB}" Width="640" Height="480" Stretch="Uniform" Grid.Column="0" HorizontalAlignment="Left"/>
-                            <Image Source="{Binding ReconBitmapImage}" Width="640" Height="480" Stretch="Uniform" Grid.Column="0" HorizontalAlignment="Left"/>
+                            <Image Source="{Binding RealtimeRGB}" Width="640" Height="360" Stretch="Uniform" Grid.Column="0" HorizontalAlignment="Left"/>
+                            <Image Source="{Binding ReconBitmapImage}" Width="640" Height="360" Stretch="Uniform" Grid.Column="0" HorizontalAlignment="Left"/>
                             <StackPanel Grid.Column="1">
 
                                 <TextBlock Text="Image Reconstruction Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />

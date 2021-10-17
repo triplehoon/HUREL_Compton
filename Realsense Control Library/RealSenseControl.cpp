@@ -28,7 +28,7 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 		serials.push_back(dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER));
 	}
 
-	if (serials.size() != 2)
+	if (serials.size() != 1)
 	{
 		*outMessage = "No camera connected";
 		//std::cout << outMessage->c_str() << "\n";
@@ -41,20 +41,20 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 		
 
 		cfgD455 = rs2::config();
-		cfgD455.enable_stream(RS2_STREAM_COLOR, D435_H_COLOR_SIZE, D435_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
-		cfgD455.enable_stream(RS2_STREAM_DEPTH, D435_H_DEPTH_SIZE, D435_V_DEPTH_SIZE, RS2_FORMAT_Z16, 15);
+		cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
+		cfgD455.enable_stream(RS2_STREAM_DEPTH, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_Z16, 5);
 		pipeD455 = rs2::pipeline();
 
-		cfgT265 = rs2::config();
-		cfgT265.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
-		pipeT265 = rs2::pipeline(ctx);
+		//cfgT265 = rs2::config();
+		//cfgT265.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
+		//pipeT265 = rs2::pipeline(ctx);
 		Sleep(1000);
 		
 		pipeD455.start(cfgD455);
-		pipeT265.start(cfgT265);
+		//pipeT265.start(cfgT265);
 
 		pipeD455.stop();
-		pipeT265.stop();
+		//pipeT265.stop();
 	}
 	catch (const rs2::camera_disconnected_error& e)
 	{		
@@ -153,6 +153,41 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 		}
 	}		
 	return std::make_tuple(cloud, t265toLACCTransform * TransF, out_uv);
+}
+
+std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> RealsenseControl::PCL_Conversion(const rs2::points& points, const rs2::video_frame& color)
+{
+	// Object Declaration (Point Cloud)
+	std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d> tupleCloudTrans;
+	open3d::geometry::PointCloud cloud;
+	std::vector<Eigen::Vector2f> out_uv;
+	std::tuple<double, double, double> RGB_Color;
+	auto Texture_Coord = points.get_texture_coordinates();
+	auto Vertex = points.get_vertices();
+	
+	for (int i = 0; i < points.size(); i++)
+	{
+		if (Texture_Coord[i].u > 0 && Texture_Coord[i].v > 0 && Texture_Coord[i].u < 1 && Texture_Coord[i].v < 1)// && (Vertex[i].x) * (Vertex[i].x) + (Vertex[i].y) * (Vertex[i].y) + (Vertex[i].z) * (Vertex[i].z) < 9)
+		{
+			//===================================
+			// Mapping Depth Coordinates
+			// - Depth data stored as XYZ values
+			//===================================
+			/*if (-Vertex[i].y + D455ToT265Coord[1] > 0.7)
+				continue;
+			if (Vertex[i].z - D455ToT265Coord[2] < 0.5)
+				continue;*/
+			Eigen::Vector3d pointVector = { -Vertex[i].x, -Vertex[i].y, Vertex[i].z};
+
+			cloud.points_.push_back(pointVector);
+
+			RGB_Color = RGB_Texture(color, Texture_Coord[i]);
+			Eigen::Vector3d colorVector = { std::get<0>(RGB_Color), std::get<1>(RGB_Color),  std::get<2>(RGB_Color) }; // RGB vector
+			cloud.colors_.push_back(colorVector);
+			out_uv.push_back(Eigen::Vector2f(Texture_Coord[i].u, Texture_Coord[i].v));
+		}
+	}
+	return std::make_tuple(cloud, out_uv);
 }
 
 std::tuple<double, double, double> RealsenseControl::RGB_Texture(const rs2::video_frame& texture, const rs2::texture_coordinate& Texture_XY)
@@ -311,11 +346,10 @@ void RealsenseControl::SLAMPipeline()
 void RealsenseControl::RealsensesPipeline()
 {
 	m_Posedata = rs2_pose();
-	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 7);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3);
-	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0);
+	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 10.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 15);
@@ -330,9 +364,7 @@ void RealsenseControl::RealsensesPipeline()
 	/*auto depth_device = pipe_profile_D455.get_device().query_sensors()[0];
 	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_MEDIUM_DENSITY);
 	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);*/
-	pipeT265.start(cfgT265);
 	pipelines.emplace_back(pipeD455);
-	pipelines.emplace_back(pipeT265);
 
 	Sleep(1000);
 	std::mutex mu;
@@ -351,7 +383,6 @@ void RealsenseControl::RealsensesPipeline()
 
 			auto color = frames.get_color_frame();
 			auto depth = frames.get_depth_frame();
-			auto pose = frames.get_pose_frame();
 
 		
 			if (color) {
@@ -368,42 +399,19 @@ void RealsenseControl::RealsensesPipeline()
 				depth2 = temp_filter.process(depth2);
 				points = pc.calculate(depth2);
 			}
-			if (pose) {
-				pose_frame = pose;
-			}
 
-			if (points && pose_frame && color)
+			if (points && color)
 			{				
-				rs2_pose tempPoseData = pose_frame.get_pose_data();
-				m_Posedata = tempPoseData;
-				rs2::pose_frame null_pose_frame(nullptr);
-				pose_frame = null_pose_frame;
-				int trackerConfidence = tempPoseData.tracker_confidence;
-
-
-
-
-
-				auto realTimeCloudPoseTransposed = PCL_Conversion(points, color, tempPoseData);
+				auto realTimeCloudPoseTransposed = PCL_Conversion(points, color);
 
 
 				// realTimeCloudPoseTransposed transposed from here
-				std::vector<Eigen::Vector2f> uv = std::get<2>(realTimeCloudPoseTransposed);
+				std::vector<Eigen::Vector2f> uv = std::get<1>(realTimeCloudPoseTransposed);
 				rtMutex.lock();
 
-				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), uv);
+				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed), uv);
 				rtMutex.unlock();
 
-
-				
-				if (IsSLAMON &&tempPoseData.tracker_confidence >= 2)
-				{
-					open3d::geometry::PointCloud untransPosedPC = open3d::geometry::PointCloud(std::get<0>(realTimeCloudPoseTransposed));
-					mQueueRealtimePTMutex.lock();
-					m_QueueRealtimeCloudTrans.push(std::make_tuple(untransPosedPC.Transform(std::get<1>(realTimeCloudPoseTransposed).inverse()),
-												T265toLACCTransform.inverse() * std::get<1>(realTimeCloudPoseTransposed)));
-					mQueueRealtimePTMutex.unlock();
-				}
 
 			}
 		}
@@ -412,7 +420,7 @@ void RealsenseControl::RealsensesPipeline()
 
 	m_Posedata = rs2_pose();	
 	pipeD455.stop();
-	pipeT265.stop();
+
 #ifdef DEBUG
 	printf("realsense lib: Finished\n");
 #endif // DEBUG

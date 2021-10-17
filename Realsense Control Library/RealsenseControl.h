@@ -36,6 +36,7 @@ class RealsenseControl
 private:
 	std::queue<PC_TRANSPOS_TUPLE> m_QueueRealtimeCloudTrans;
 	static std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vector2f>> PCL_Conversion(const rs2::points& points, const rs2::video_frame& color, const rs2_pose& pose);
+	static std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> PCL_Conversion(const rs2::points& points, const rs2::video_frame& color);
 	static std::tuple<double, double, double> RGB_Texture(const rs2::video_frame& texture, const rs2::texture_coordinate& Texture_XY);
 	std::queue<std::tuple<open3d::geometry::PointCloud>> m_QueueSLAMedCloudTrans;
 	Eigen::Matrix4d T265toLACCTransform;
@@ -53,8 +54,8 @@ private:
 	std::vector<rs2::pipeline> pipelines;
 	rs2::pipeline pipeD455;
 	rs2::config cfgD455;
-	rs2::pipeline pipeT265;
-	rs2::config cfgT265;
+	//rs2::pipeline pipeT265; -> not use for mono
+	//rs2::config cfgT265;
 	rs2::decimation_filter dec_filter;
 	rs2::threshold_filter thr_filter;
 	rs2::spatial_filter spat_filter;
