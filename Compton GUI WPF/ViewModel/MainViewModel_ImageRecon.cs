@@ -67,7 +67,7 @@ namespace Compton_GUI_WPF.ViewModel
         public string RealsenseState
         {
             get { return realsenseState; }
-            set { realsenseState = value; OnPropertyChanged(nameof(RealsenseState)); }
+            set { realsenseState = value; MainViewModelLog = value; OnPropertyChanged(nameof(RealsenseState)); }
         }
 
         private bool isRealsenseOn;

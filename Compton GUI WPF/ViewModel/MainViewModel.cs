@@ -76,7 +76,17 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
 
-
+        private string mainViewModelLog = "";
+        public string MainViewModelLog
+        {
+            get { return mainViewModelLog; }
+            set
+            {
+                DateTime now = DateTime.Now;
+                mainViewModelLog = mainViewModelLog + DateTime.Now.ToString("HH:mm:ss") + ": " + value + "\n";
+                OnPropertyChanged(nameof(MainViewModel));
+            }
+        }
 
 
         private ModuleInfo selectedModuleInfo = ModuleInfo.Mono;
@@ -586,7 +596,7 @@ namespace Compton_GUI_WPF.ViewModel
         public string VMStatus
         {
             get { return vmStatus; }
-            set { vmStatus = value; OnPropertyChanged(nameof(VMStatus)); }
+            set { vmStatus = value; MainViewModelLog = value; OnPropertyChanged(nameof(VMStatus)); }
         }
         #endregion
 

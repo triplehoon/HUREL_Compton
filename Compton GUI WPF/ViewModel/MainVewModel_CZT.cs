@@ -72,6 +72,7 @@ namespace Compton_GUI_WPF.ViewModel
             await Task.Run(() =>
             {
                 Console.WriteLine("MainViewModel_CZT: Starting CZT");
+                MainViewModelLog = "MainViewModel_CZT: Starting CZT";
                 VMStatus = "Starting CZT";
                 isStartingCZT = true;
                 SRE3021API.ResetSpectrumEnergy();

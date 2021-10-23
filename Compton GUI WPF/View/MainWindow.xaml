@@ -13,7 +13,7 @@
          xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
 
         mc:Ignorable="d"
-        Title="HUREL Compton GUI" Height="900" Width="1600"
+        Title="HUREL LACC GUI" Height="900" Width="1600"
         syncfusionskin:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=Metro}"        
         >
 
@@ -152,7 +152,7 @@
                                 <ColumnDefinition Width="auto"/>
 
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Energy Spectrum" Style="{StaticResource TextBlockTitle}" Margin="5,5,5,5" Grid.Column="0" Grid.ColumnSpan="2"/>
+                            <TextBlock Text="CZT Nuclide Analysis" Style="{StaticResource TextBlockTitle}" Margin="5,5,5,5" Grid.Column="0" Grid.ColumnSpan="2"/>
                             <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding ResetCZTSpectrumCommand}" Grid.Column="1" Margin="5" Content="Reset"/>
                             <CheckBox Content="MLPE On" IsChecked="{Binding IsMLPEOn}" Grid.Column="2" VerticalAlignment="Center" Margin="5,0,5,0"/>
                             <ComboBox Grid.Column="3" Margin="5,5,5,5" x:Name="ComboboxSelectedSpectrum" SelectionChanged="ComboboxSelectedSpectrum_SelectionChanged" SelectedIndex="0"/>
@@ -235,8 +235,6 @@
                             <Image Source="{Binding RealtimeRGB}" Width="640" Height="360" Stretch="Uniform" Grid.Column="0" HorizontalAlignment="Left"/>
                             <Image Source="{Binding ReconBitmapImage}" Width="640" Height="360" Stretch="Uniform" Grid.Column="0" HorizontalAlignment="Left"/>
                             <StackPanel Grid.Column="1">
-
-                                <TextBlock Text="Image Reconstruction Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
                                 <StackPanel Orientation="Horizontal" Visibility="Collapsed">
 
                                     <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_NEAR}" 
@@ -245,6 +243,50 @@
                                     <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_FAR}" 
                                 Content="Far-field mode" FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
                                 </StackPanel>
+ 
+                                <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="3D Camera"/><Run Text=" Status"/></TextBlock>
+                                <Grid Margin="10,0,10,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+                                    <Button Content="Initiate" Grid.Column="0" Grid.Row="0" Command="{Binding InitiateRealsenseCommand}" Style="{StaticResource ButtonDesignHYU}" Margin="10,0"/>
+                                    <Button Content="Stop" Grid.Column="1" Grid.Row="0" Command="{Binding StopRealsensePipelineCommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
+                                    <Button Content="Reset" Grid.Column="2" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Command="{Binding ResetRealsensePipelineCommand}" Margin="10,0"/>
+
+                                </Grid>
+                                <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="CZT Setting"/></TextBlock>
+                                <Grid Margin="10,0,10,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+                                    <Button Content="HV On" Grid.Column="0" Grid.Row="0" Command="{Binding SetHighVoltageOnCZTCommand}" Style="{StaticResource ButtonDesignHYU}" Margin="10,0"/>
+                                    <Button Content="HV Off" Grid.Column="1" Grid.Row="0" Command="{Binding SetHighVoltageOffCZTCommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
+                                    <Button Content="Initiate" Grid.Column="2" Grid.Row="0" Command="{Binding InitiateCZTAPICommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
+                                </Grid>
+                                <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="Post processing"/></TextBlock>
+                                <Grid Margin="10,0,10,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+                                    <Button Content="ML-EM" Grid.Column="0" Grid.Row="0" Command="{Binding }" Style="{StaticResource ButtonDesignHYU}" Margin="10,0"/>
+                                    <Button Content="Activity Estimation" Grid.Column="1" Grid.Row="0" Command="{Binding }" Style="{StaticResource ButtonDesignHYU}" Margin="10,0"/>
+                                </Grid>
+                                <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="Back projection Setting"/></TextBlock>
+
                                 <Grid >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -268,38 +310,19 @@
                                     </syncfusion:SfTextInputLayout>
 
                                 </Grid>
-                                <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="3D Camera"/><Run Text=" Status"/></TextBlock>
-                                <Grid Margin="10,0,10,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="30"/>
-                                    </Grid.RowDefinitions>
-                                    <Button Content="Initiate" Grid.Column="0" Grid.Row="0" Command="{Binding InitiateRealsenseCommand}" Style="{StaticResource ButtonDesignHYU}" Margin="10,0"/>
-                                    <Button Content="Stop" Grid.Column="1" Grid.Row="0" Command="{Binding StopRealsensePipelineCommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
-                                    <Button Content="Reset RS" Grid.Column="2" Grid.Row="0" Style="{StaticResource ButtonDesignHYU}" Command="{Binding ResetRealsensePipelineCommand}" Margin="10,0"/>
+                                <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="Log data"/></TextBlock>
 
-                                </Grid>
-                                <TextBlock Margin="5" Style="{StaticResource TextBlockTitle2}"><Run Language="ko-kr" Text="CZT Setting"/></TextBlock>
-                                <Grid Margin="10,0,10,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="30"/>
-                                    </Grid.RowDefinitions>
-                                    <Button Content="HV On" Grid.Column="0" Grid.Row="0" Command="{Binding SetHighVoltageOnCZTCommand}" Style="{StaticResource ButtonDesignHYU}" Margin="10,0"/>
-                                    <Button Content="HV Off" Grid.Column="1" Grid.Row="0" Command="{Binding SetHighVoltageOffCZTCommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
-                                    <Button Content="Initiate" Grid.Column="2" Grid.Row="0" Command="{Binding InitiateCZTAPICommand}" Style="{StaticResource ButtonDesignHYURed}" Margin="10,0"/>
-                                </Grid>
-                                <Button Content="Test Buton" Command="{Binding TestCommand}" Margin="10"/>
+                                <ScrollViewer Grid.Row="4" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" >
+                                        <TextBlock TextWrapping="WrapWithOverflow" Margin="5" Text="{Binding MainViewModelLog}"/>
+
+                                    </StackPanel>
+                                </ScrollViewer>
+
+                                <!--<Button Content="Test Buton" Command="{Binding TestCommand}" Margin="10"/>-->
                             </StackPanel>
                         </Grid>
+ 
                     </StackPanel>
 
                 </Grid>
@@ -329,7 +352,7 @@
 
                         <syncfusion:TabControlExt Grid.Row="1" FontWeight="Bold" IsCustomTabItemContextMenuEnabled="False" Background="White" Margin="10" CloseButtonType="Hide" TabStripPlacement="Top" TabListContextMenuOptions="None"   TabItemSelectedBackground="#FF00457E" TabItemHoverBorderBrush="#FF00457E" TabItemLayout="SingleLineStar"  >
                             <syncfusion:TabItemExt TabIndex="1" Header="LACC" >
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ScrollViewer1">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="ScrollViewer1" Margin="8,0,-8,0">
                                     <StackPanel>
                                         <Grid Margin="5">
                                             <Grid.ColumnDefinitions>
@@ -557,8 +580,8 @@
                                     </StackPanel>
                                 </ScrollViewer>
                             </syncfusion:TabItemExt>
-
-
+                            <syncfusion:TabItemExt TabIndex="2" Header="CZT" />
+                            <syncfusion:TabItemExt TabIndex="3" Header="3D Camera" />
                         </syncfusion:TabControlExt>
 
                     </Grid>
