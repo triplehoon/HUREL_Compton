@@ -169,7 +169,7 @@ namespace Compton_GUI_WPF.ViewModel
             IsSessionAvailable = true;
         }
 
-        private bool isMLPEOn = false;
+        private bool isMLPEOn = true;
         public bool IsMLPEOn
         {
             get { return isMLPEOn; }

@@ -122,7 +122,7 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 			string againFileDirectory = string("config\\QUAD_DUAL\\Absorber\\Gain\\") + to_string(i) + string(".csv");
 
 
-			double gain[10];
+			double gain[10]{ 0,0,0,0,0 ,0,0,0,0,0 };
 			if(!Module::LoadGain(sgainFileDirectory, type, gain))
 			{
 				return;

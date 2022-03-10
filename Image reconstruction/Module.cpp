@@ -308,8 +308,8 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
         point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetY;
         break;
     case HUREL::Compton::eMouduleType::QUAD_DUAL:
-        point[0] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX;
-        point[1] = (static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetY;
+        point[0] = -(static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX;
+        point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetY;
         break;
     default:
         assert(false);

@@ -495,7 +495,7 @@
                 </Grid>
 
             </syncfusion:TabItemExt>
-            <syncfusion:TabItemExt Header="MLPE Data" Background="White" BorderBrush="#FFEAEAEA" Visibility="Collapsed">
+            <syncfusion:TabItemExt Header="MLPE Data" Background="White" BorderBrush="#FFEAEAEA" Visibility="Visible">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -510,7 +510,7 @@
                             <syncfusion:NumericalAxis Minimum="-0.50" Maximum="0.50" ShowGridLines="False" IsInversed="True"/>
                         </syncfusion:SfChart.PrimaryAxis>
                         <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="-0.5" Maximum="+0.50" ShowGridLines="False"/>
+                            <syncfusion:NumericalAxis Minimum="-0.2" Maximum="+0.20" ShowGridLines="False"/>
                         </syncfusion:SfChart.SecondaryAxis>
                         <syncfusion:FastScatterBitmapSeries ItemsSource="{Binding ScatterPositionData}" XBindingPath="X" YBindingPath="Y" />
                     </syncfusion:SfChart>
