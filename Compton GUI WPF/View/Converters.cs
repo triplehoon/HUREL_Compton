@@ -265,6 +265,28 @@ namespace Compton_GUI_WPF.View
         #endregion
     }
 
+    public class ReconTypeToVisibilityConverter
+    {
+        #region IValueConverter Members
+
+        public object Convert(object value, Type targetType, object parameter,
+            System.Globalization.CultureInfo culture)
+        {
+            if (targetType != typeof(eProcessingType))
+                throw new InvalidOperationException("The target must be a eProcessingType");
+
+            return !(bool)value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter,
+            System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+
+        #endregion
+    }
+
     public class BoolToBrushConverter : BoolToValueConverter<String> { }
     public class BoolToStringConverter : BoolToValueConverter<String> { }
     public class BoolToVisibilityConverter : BoolToValueConverter<Visibility> { }

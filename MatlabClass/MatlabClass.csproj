@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="ComptonNative">
+      <HintPath>..\..\..\..\..\..\..\Program Files\hurel\MLEM_Func\application\ComptonNative.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="MWArray">
+      <HintPath>..\..\..\..\..\..\..\Program Files\MATLAB\MATLAB Runtime\v911\toolbox\dotnetbuilder\bin\win64\v4.0\MWArray.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -249,6 +249,8 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
+        
+
         private record PositionInfos(Vector3Collection V3, Color4Collection C4, List<double> Values);
         private PositionInfos RealtimePositionInfo = new PositionInfos(new Vector3Collection(), new Color4Collection(), new List<double>());
 
