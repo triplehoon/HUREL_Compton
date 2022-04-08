@@ -103,7 +103,7 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData
 
 	double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
 
-	if (abs(effectedAngle - comptonScatteringAngle) < 2)
+	if (abs(effectedAngle - comptonScatteringAngle) < 3)
 	{
 		return 1;
 	}

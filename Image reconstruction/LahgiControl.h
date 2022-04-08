@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <numeric>
 
-#define ACTIVE_AREA_LENGTH 0.14
+#define ACTIVE_AREA_LENGTH 0.50
 
 //false = block, true = not block 
 //Lahgi axis coordiante	

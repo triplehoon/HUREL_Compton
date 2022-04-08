@@ -1218,7 +1218,7 @@ namespace HUREL.Compton.CZT
             }
             catch (Exception e)
             {
-                TCPSocket.Close();
+                TCPSocket?.Close();
                 Trace.WriteLine(e.ToString());
                 Trace.WriteLine("TCP Connection Fail");
                 TCPSocket = null;
@@ -1228,7 +1228,7 @@ namespace HUREL.Compton.CZT
             if (!TCPSocket.Connected)
             {
                 Trace.WriteLine("TCP Connection Fail");
-                TCPSocket.Close();
+                TCPSocket?.Close();
                 TCPSocket = null;
                 return false;
             }

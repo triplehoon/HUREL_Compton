@@ -15,22 +15,22 @@ RealsenseControl::RealsenseControl() :IsPipeLineOn(false), IsSLAMON(false)
 }
 bool RealsenseControl::SaveRTPointCloud(std::string& fileName)
 {
-	open3d::geometry::PointCloud savePointCloud = std::get<0>(this->GetRTPointCloud());
+	open3d::geometry::PointCloud savePointCloud = std::get<0>(this->GetRTPointCloudTransposed());
 	open3d::io::WritePointCloudOption option;
-	return open3d::io::WritePointCloudToPCD(fileName, savePointCloud, option);
+	return open3d::io::WritePointCloudToPLY(fileName, savePointCloud, option);
 }
 bool RealsenseControl::SaveSLAMEDPointCloud(std::string& fileName)
 {
 	open3d::geometry::PointCloud savePointCloud = this->GetSLAMEDPointCloud();
 	open3d::io::WritePointCloudOption option;
-	return open3d::io::WritePointCloudToPCD(fileName, savePointCloud, option);
+	return open3d::io::WritePointCloudToPLY(fileName, savePointCloud, option);
 }
 
 bool RealsenseControl::SaveDownSampledSLAMEDPointCloud(std::string& fileName)
 {
 	open3d::geometry::PointCloud savePointCloud = this->GetSLAMEDPointCloudDownSampled();
 	open3d::io::WritePointCloudOption option;
-	return open3d::io::WritePointCloudToPCD(fileName, savePointCloud, option);
+	return open3d::io::WritePointCloudToPLY(fileName, savePointCloud, option);
 }
 
 RealsenseControl::~RealsenseControl()
@@ -56,8 +56,8 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 		cfgD455 = rs2::config();
 		//cfgD455.enable_device("935322071433");	
 		//cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
-		cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
-		cfgD455.enable_stream(RS2_STREAM_DEPTH, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_Z16, 5);
+		cfgD455.enable_stream(RS2_STREAM_COLOR, D435_H_COLOR_SIZE, D435_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
+		cfgD455.enable_stream(RS2_STREAM_DEPTH, D435_H_DEPTH_SIZE, D435_V_DEPTH_SIZE, RS2_FORMAT_Z16, 6);
 		pipeD455 = rs2::pipeline();
 
 		cfgT265 = rs2::config();
@@ -270,7 +270,7 @@ void RealsenseControl::SLAMPipeline()
 				continue;
 			}
 			m_SLAMEDPointCloud = robustRecon->GetSLAMEDPointCloud().Transform(T265toLACCTransform);
-			m_SLAMEDPointCloudDownSampled = *m_SLAMEDPointCloud.VoxelDownSample(0.1);
+			m_SLAMEDPointCloudDownSampled = *open3d::geometry::PointCloud(m_SLAMEDPointCloud).VoxelDownSample(0.1);
 		}
 	}
 	robustRecon->StopRobustRecon();
@@ -334,7 +334,7 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 7);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3f);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 10.0f);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0f);

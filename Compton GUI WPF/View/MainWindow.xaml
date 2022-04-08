@@ -651,7 +651,16 @@
             </syncfusion:TabItemExt>
             <syncfusion:TabItemExt Header="Realsense Configuration" Background="White" BorderBrush="#FFEAEAEA"/>
             <syncfusion:TabItemExt Header="Internal Contemination" Background="White" BorderBrush="#FFEAEAEA"/>
-            <syncfusion:TabItemExt Header="System Status" Background="White" BorderBrush="#FFEAEAEA"/>
+            <syncfusion:TabItemExt Header="System Status" Background="White" BorderBrush="#FFEAEAEA">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="351*"/>
+                        <ColumnDefinition Width="233*"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Source="{Binding RealtimeRGB}" Width="1200" Height="1000" Stretch="Uniform" Grid.ColumnSpan="2" Margin="0,0,52,0"/>
+                    <Image Source="{Binding ReconBitmapImage}" Width="1200" Height="1000" Stretch="Uniform" Grid.ColumnSpan="2" Margin="0,0,52,0"/>
+                </Grid>
+            </syncfusion:TabItemExt>
         </syncfusion:TabControlExt>
 
         <Grid Grid.Column="1">
@@ -781,10 +790,10 @@
                             <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
                         </syncfusion:SfChart.Behaviors>
                         <syncfusion:SfChart.PrimaryAxis>
-                            <syncfusion:NumericalAxis Minimum="0" Maximum="1500" ShowTrackBallInfo="True"/>
+                            <syncfusion:NumericalAxis Minimum="0" Maximum="3000" ShowTrackBallInfo="True"/>
                         </syncfusion:SfChart.PrimaryAxis>
                         <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="0"/>
+                            <syncfusion:LogarithmicAxis Minimum="0"/>
                         </syncfusion:SfChart.SecondaryAxis>
                         <syncfusion:FastLineBitmapSeries x:Name="MainSpectrumView" Interior="Black"
                                                                      ListenPropertyChange="True"

@@ -4,11 +4,16 @@
 #include <mutex>
 
 #define D455_H_COLOR_SIZE (1280)
-#define D455_V_COLOR_SIZE (720)
+#define D455_V_COLOR_SIZE (800)
 #define D455_H_DEPTH_SIZE (848)
 #define D455_V_DEPTH_SIZE (480)
 
-#define T265_TO_LAHGI_OFFSET_X (0)
+#define D435_H_COLOR_SIZE (1280)
+#define D435_V_COLOR_SIZE (720)
+#define D435_H_DEPTH_SIZE (848)
+#define D435_V_DEPTH_SIZE (480)
+
+#define T265_TO_LAHGI_OFFSET_X (-0.05)
 #define T265_TO_LAHGI_OFFSET_Y (-0.308)
 #define T265_TO_LAHGI_OFFSET_Z (-0.05)
 #define T265_To_Mask_OFFSET_X (T265_TO_LAHGI_OFFSET_X)

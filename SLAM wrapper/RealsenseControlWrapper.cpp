@@ -214,12 +214,16 @@ void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vect
 
 
 	for (int i = 0; i < count - 1; i++) {
-		array<double, 1>^ poseVector = gcnew array<double>{rcPC.points_[i][0], rcPC.points_[i][1], rcPC.points_[i][2]};
-		vectors->Add(poseVector);
-		RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.8, maxValue);
-		array<double, 1>^ colorVector = gcnew array<double>{color.R, color.G, color.B};
-		colors->Add(colorVector);
+		if (rcPC.reconValues_[i] > maxValue * 0.5)
+		{
+			array<double, 1>^ poseVector = gcnew array<double>{rcPC.points_[i][0], rcPC.points_[i][1], rcPC.points_[i][2]};
+			vectors->Add(poseVector);
+			RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.5, maxValue);
+			array<double, 1>^ colorVector = gcnew array<double>{color.R, color.G, color.B, color.A};
+			colors->Add(colorVector);
 		}
+
+	}
 }
 
 bool HUREL::Compton::LACC::RealsenseControlWrapper::SaveRTPointCloud(String^ fileName)

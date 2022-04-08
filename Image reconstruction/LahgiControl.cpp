@@ -73,9 +73,11 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 	{	mScatterModules = new Module * [4];
 	mAbsorberModules = new Module * [4];
 	double offset = 0.083;
-
-	double xOffset[4]{ -offset, +offset, -offset, +offset };
-	double yOffset[4]{ -offset, -offset, +offset, +offset };
+	// 3 0
+	// 2 1
+	//
+	double xOffset[4]{ -offset, -offset, +offset, +offset };
+	double yOffset[4]{ +offset, -offset, -offset, +offset };
 	for (int i = 0; i < 4; ++i)
 	{
 		string slutFileDirectory = string("config\\QUAD\\Scatter\\LUT\\") + to_string(i) + string(".csv");
@@ -179,14 +181,14 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 		const unsigned short* scatterShorts[4];
 		const unsigned short* absorberShorts[4];
 
-		for (int i = 0; i < 4; ++i)
+		for (int i = 4; i < 8; ++i)
 		{
-			scatterShorts[i] = &byteData[i * 9];
+			scatterShorts[i-4] = &byteData[i * 9];
 		}
 
-		for (int i = 8; i < 12; ++i)
+		for (int i = 12; i < 16; ++i)
 		{
-			absorberShorts[i - 8] = &byteData[i * 9];
+			absorberShorts[i - 12] = &byteData[i * 9];
 		}
 
 
@@ -298,20 +300,21 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 	{
 		unsigned short scatterShorts[4][9];
 		unsigned short absorberShorts[4][9];
-
-		for (int i = 0; i < 4; ++i)
+		//Channel 4 to 8
+		for (int i = 4; i < 8; ++i)
 		{
 			for (int j = 0; j < 9; ++j)
 			{
-				scatterShorts[i][j] = byteData[i * 9 + j];
+				scatterShorts[i-4][j] = byteData[i * 9 + j];
 			}
 		}
 
-		for (int i = 8; i < 12; ++i)
+		//Channel 12 to 16
+		for (int i = 12; i < 16; ++i)
 		{
 			for (int j = 0; j < 9; ++j)
 			{
-				absorberShorts[i - 8][j] = byteData[i * 9 + j];
+				absorberShorts[i - 12][j] = byteData[i * 9 + j];
 			}
 		}
 
@@ -446,9 +449,10 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 		saveFile.close();
 		return;
 	}
-	for (unsigned int i = 0; mListedListModeData.size(); ++i)
+	std::vector<ListModeData> data = this->GetListedListModeData();
+	for (unsigned int i = 0; i < data.size(); ++i)
 	{
-		ListModeData& d = mListedListModeData[i];
+		ListModeData& d = data[i];
 		switch (d.Type)
 		{
 		case eInterationType::NONE:
@@ -457,7 +461,7 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << std::endl;
 			break;
 		case eInterationType::COMPTON:
-			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy;
+			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << ",";
 			saveFile << d.Absorber.RelativeInteractionPoint[0] << "," << d.Absorber.RelativeInteractionPoint[1] << "," << d.Absorber.RelativeInteractionPoint[2] << "," << d.Absorber.InteractionEnergy << std::endl;
 			break;
 		default:
@@ -605,8 +609,8 @@ HUREL::Compton::ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePo
 	std::vector<ListModeData> tempLMData = mListedListModeData;
 	mListModeDataMutex.unlock();
 
-	std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
-	std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
+	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
+	//std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
 	int reconStartIndex = 0;
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{

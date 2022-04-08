@@ -87,7 +87,7 @@ std::tuple<unsigned int, unsigned int> HUREL::Compton::Module::FastMLPosEstimati
                 val += mXYLogMue[x][y][i] * normalizePMTValue[i];
 
             }
-            val -= mXYSumMu[x][y];
+            val += mXYSumMu[x][y];
 
             if (val > valMaxChk)
             {
@@ -279,7 +279,7 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
 
     Eigen::Vector4d point;
 
-    point[0] = -(static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX;
+    point[0] = (static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX;
     point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetY;
     point[2] = mModuleOffsetZ;
     point[3] = 1;
