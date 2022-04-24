@@ -334,6 +334,13 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();
 	rs2::pose_frame pose_frame(nullptr);
 
+	Eigen::Matrix4d t265toLACCTransform;
+	t265toLACCTransform << -1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, -1, 0,
+		0, 0, 0, 1;
+
+
 	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3f);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 10.0f);
@@ -410,9 +417,9 @@ void RealsenseControl::RealsensesPipeline()
 
 				auto realTimeCloudPoseTransposed = PCL_Conversion(points, color, tempPoseData);
 
-
+				auto fixedrealTimeCloudPoseTransposed = realTimeCloudPoseTransposed;
 				// realTimeCloudPoseTransposed transposed from here
-
+				open3d::geometry::PointCloud fixedRTPC = std::get<0>(realTimeCloudPoseTransposed);
 				rtMutex.lock();
 				Eigen::Vector4d Quaternion = { m_Posedata.rotation.w, -m_Posedata.rotation.x ,m_Posedata.rotation.y,-m_Posedata.rotation.z };
 				Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
@@ -420,7 +427,8 @@ void RealsenseControl::RealsensesPipeline()
 				Eigen::Matrix4d TransF; // Your Transformation Matrix
 				mRTTransformationTrue.block<3, 3>(0, 0) = RMat;
 				mRTTransformationTrue.block<3, 1>(0, 3) = TransPoseMat;
-				
+				m_RTPointCloud = std::make_tuple(fixedRTPC.Transform(t265toLACCTransform), std::get<2>(fixedrealTimeCloudPoseTransposed));
+
 				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), std::get<2>(realTimeCloudPoseTransposed));
 				mRTTransformation = std::get<1>(realTimeCloudPoseTransposed);
 				rtMutex.unlock();
@@ -461,7 +469,11 @@ rs2::video_frame RealsenseControl::GetCurrentVideoFrame() {
 	return m_CurrentVideoFrame;
 }
 std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> RealsenseControl::GetRTPointCloud() {
-	return m_RTPointCloud;
+	rtMutex.lock();
+
+	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> returnValue = m_RTPointCloud;
+	rtMutex.unlock();
+	return returnValue;
 }
 std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> RealsenseControl::GetRTPointCloudTransposed()
 {

@@ -91,7 +91,7 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		Module::LoadGain(sgainFileDirectory, type, gain);
 
 
-		double offsetZ = -(0.235);
+		double offsetZ = -(0.220);
 		mScatterModules[i] = new Module(eMouduleType::QUAD, gain, gain, slutFileDirectory, xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, T265_TO_LAHGI_OFFSET_Z);
 
 		Module::LoadGain(againFileDirectory, type, gain);
@@ -593,6 +593,40 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCoded(op
 			reconPC.CalculateReconPoint(tempLMData[i], SimpleCodedBackprojection);
 		}
 
+	}
+	std::cout << "End Recon: " << tempLMData.size() << std::endl;
+
+
+	return reconPC;
+}
+ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudComptonUntransformed(open3d::geometry::PointCloud& outPC, double seconds)
+{
+	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
+
+	time_t t = time(NULL);
+	mListModeDataMutex.lock();
+
+	std::vector<ListModeData> tempLMData = mListedListModeData;
+	mListModeDataMutex.unlock();
+
+	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
+	//std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
+	int reconStartIndex = 0;
+	for (int i = 0; i < tempLMData.size(); ++i)
+	{
+
+		if (t - tempLMData[i].InterationTime < static_cast<__int64>(seconds))
+		{
+			reconStartIndex = i;
+			break;
+		}
+
+	}
+
+#pragma omp parallel for
+	for (int i = reconStartIndex; i < tempLMData.size(); ++i)
+	{
+		reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleComptonBackprojectionUntransformed);
 	}
 	std::cout << "End Recon: " << tempLMData.size() << std::endl;
 

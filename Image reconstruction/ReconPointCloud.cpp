@@ -75,6 +75,7 @@ void HUREL::Compton::ReconPointCloud::CalculateReconPoint(ListModeData lmData, d
 	maxReoconValue = -DBL_MAX;
 	for (size_t i = 0; i < size; ++i)
 	{
+#pragma omp atomic
 		reconValues_[i] += calcFunc(lmData, points_[i]);
 		if (reconValues_[i] > maxReoconValue)
 		{
@@ -112,6 +113,38 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData
 		return 0;
 	}
 }
+
+
+double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed(ListModeData lmData, Eigen::Vector3d imgPoint)
+{
+	if (lmData.Type != eInterationType::COMPTON)
+	{
+		return 0;
+	}
+	double comptonCal = 1 - 511 * lmData.Scatter.InteractionEnergy / lmData.Absorber.InteractionEnergy / (lmData.Scatter.InteractionEnergy + lmData.Absorber.InteractionEnergy);
+	if (comptonCal >= 1 || comptonCal <= -1)
+	{
+		return 0;
+	}
+	double comptonScatteringAngle = acos(comptonCal) / EIGEN_PI * 180;
+	Eigen::Vector3d effectToScatterVector = (imgPoint - lmData.Scatter.RelativeInteractionPoint.head<3>());
+	Eigen::Vector3d scatterToAbsorberVector = (lmData.Scatter.RelativeInteractionPoint.head<3>() - lmData.Absorber.RelativeInteractionPoint.head<3>());
+	effectToScatterVector.normalize();
+	scatterToAbsorberVector.normalize();
+	double positionDotPord = effectToScatterVector.dot(scatterToAbsorberVector);
+
+	double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
+
+	if (abs(effectedAngle - comptonScatteringAngle) < 3)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 
 
 HUREL::Compton::RGBA_t HUREL::Compton::ReconPointCloud::ColorScaleJet(double v, double vmin, double vmax)

@@ -175,8 +175,14 @@ void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, List<array
 	switch (reconType)
 	{
 	case HUREL::Compton::eReconType::CODED:
-		rcPC = lahgiControlInstance.GetReconRealtimePointCloudCoded(pose, time);
+	{
+		auto fixedrtPC = realsenseControlInstance.GetRTPointCloud();
+		auto fixedpose = std::get<0>(fixedrtPC);
+		uv = std::get<1>(fixedrtPC);
+		rcPC = lahgiControlInstance.GetReconRealtimePointCloudComptonUntransformed(fixedpose, time);
+
 		break;
+	}
 	case HUREL::Compton::eReconType::COMPTON:
 		rcPC = lahgiControlInstance.GetReconRealtimePointCloudCompton(pose, time);
 		break;

@@ -34,6 +34,9 @@ namespace HUREL
 
 			static double SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint);
 
+			static double SimpleComptonBackprojectionUntransformed(ListModeData lmData, Eigen::Vector3d imgPoint);
+
+
 			static RGBA_t ColorScaleJet(double v, double vmin, double vmax);
 
 			std::shared_ptr<ReconPointCloud> VoxelDownSample(double voxel_size) const;

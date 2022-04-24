@@ -113,6 +113,9 @@ namespace HUREL {
 
 			void ResetEnergySpectrum(int fpgaChannelNumber);
 
+
+			ReconPointCloud GetReconRealtimePointCloudComptonUntransformed(open3d::geometry::PointCloud& pc, double time);
+
 			ReconPointCloud GetReconRealtimePointCloudCompton(open3d::geometry::PointCloud& pc, double time);
 			ReconPointCloud GetReconRealtimePointCloudCoded(open3d::geometry::PointCloud& pc, double time);
 
