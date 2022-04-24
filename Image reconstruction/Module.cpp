@@ -26,8 +26,8 @@ HUREL::Compton::Module::Module(eMouduleType moduleType,
 	mIsModuleSet(false),
     mEnergySpectrum(EnergySpectrum(binSize, maxEnergy))
 {
-    std::string lutFileName = configDir + "\\LUT" + "\\" + moduleName + "_LUT.csv";
-    std::string gainFileName = configDir + "\\gain" + "\\" + moduleName + "_gain.csv";
+    std::string lutFileName = configDir + "\\LUT" + "\\" + moduleName + ".csv";
+    std::string gainFileName = configDir + "\\Gain" + "\\" + moduleName + ".csv";
     
     if (moduleType == eMouduleType::QUAD)
     {
@@ -47,12 +47,12 @@ HUREL::Compton::Module::Module(eMouduleType moduleType,
     }        	
 	if (LoadLUT(lutFileName))
 	{
-		//cout << "Successfuly to load a lut file" << endl;
+		cout << "Successfuly to load a lut file" << endl;
 		mIsModuleSet = true;
 	}
 	else
 	{
-		//cout << "FAIL to load a lut file" << endl;
+		cout << "FAIL to load a lut file" << endl;
 		assert(false);
 	}	
 
@@ -84,9 +84,9 @@ std::tuple<unsigned int, unsigned int> HUREL::Compton::Module::FastMLPosEstimati
 
     double valMaxChk = -numeric_limits<double>::max();
     std::tuple<unsigned int, unsigned int> maxPoint;
-    for (unsigned int x = static_cast<unsigned int>(minX); x < static_cast<unsigned int>(maxX); x += gridSize)
+    for (unsigned int x = static_cast<unsigned int>(minX); x <= static_cast<unsigned int>(maxX); x += gridSize)
     {
-        for (unsigned int y = static_cast<unsigned int>(minY); y < static_cast<unsigned int>(maxY); y += gridSize)
+        for (unsigned int y = static_cast<unsigned int>(minY); y <= static_cast<unsigned int>(maxY); y += gridSize)
         {
             double val = 0;
             if (isnan(mXYLogMue[x][y][0]))
@@ -278,26 +278,29 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
     static_cast<double>(pmtADCValue[6]) * mGain[6],
     static_cast<double>(pmtADCValue[7]) * mGain[7],
     static_cast<double>(pmtADCValue[8]) * mGain[8]};
-
-    int gridSize = mLutSize / 3;
+    
+    int gridSize = mLutSize / 3;//45
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize, gridSize, mLutSize - 1, gridSize, mLutSize - 1, normalizedPMTValue);
     
-    int gridSize2 = mLutSize / 9;
-    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize2, get<0>(maxPoint) - gridSize, get<0>(maxPoint) + gridSize, get<1>(maxPoint) - gridSize, get<1>(maxPoint) + gridSize, normalizedPMTValue);
+    int gridSize2 = mLutSize / 9;//14
+    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize2, get<0>(maxPoint) - gridSize , get<0>(maxPoint) + gridSize, get<1>(maxPoint) - gridSize, get<1>(maxPoint) + gridSize, normalizedPMTValue);
     
-    int gridSize3 = mLutSize / 27;
-    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize3, get<0>(maxPoint) - gridSize2, get<0>(maxPoint) + gridSize2 , get<1>(maxPoint) - gridSize2, get<1>(maxPoint) + gridSize2, normalizedPMTValue);
+    int gridSize3 = mLutSize / 27 ;//3
+    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize3, get<0>(maxPoint) - gridSize2, get<0>(maxPoint) + gridSize2, get<1>(maxPoint) - gridSize2, get<1>(maxPoint) + gridSize2, normalizedPMTValue);
     
-    int gridSize4 = 1;
-    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize4, get<0>(maxPoint) - gridSize3, get<0>(maxPoint) + gridSize3, get<1>(maxPoint) - gridSize3,  get<1>(maxPoint) + gridSize3, normalizedPMTValue);
 
-    /*int gridSize5 = 1;
-    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize5, get<0>(maxPoint) - gridSize4, get<0>(maxPoint) + gridSize4, get<1>(maxPoint) - gridSize4, get<1>(maxPoint) + gridSize4, normalizedPMTValue);*/
+
+
+    int gridSize4 = 1;
+    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize4, get<0>(maxPoint) - gridSize3 , get<0>(maxPoint) + gridSize3 , get<1>(maxPoint) - gridSize3,  get<1>(maxPoint) + gridSize3, normalizedPMTValue);
+
+    ////int gridSize5 = 1;
+    //maxPoint = FastMLPosEstimationFindMaxIndex(gridSize5, get<0>(maxPoint) - gridSize4 - 5, get<0>(maxPoint) + gridSize4 + 5, get<1>(maxPoint) - gridSize4 - 5, get<1>(maxPoint) + gridSize4 + 5, normalizedPMTValue);
 
     Eigen::Vector4d point;
 
-    point[0] = (static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetX;
-    point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize + 1) / 2) / 1000 + mModuleOffsetY;
+    point[0] = (static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize - 1) / 2.0) / 1000 + mModuleOffsetX;
+    point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize - 1) / 2.0) / 1000 + mModuleOffsetY;
     point[2] = mModuleOffsetZ;
     point[3] = 1;
     return point;   

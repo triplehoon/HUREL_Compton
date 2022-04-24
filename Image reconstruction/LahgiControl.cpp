@@ -31,7 +31,7 @@ ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationTyp
 	listmodeData.Scatter = scatter;
 	listmodeData.Absorber = absorber;
 	listmodeData.DetectorTransformation = transformation;
-	time(&listmodeData.InterationTime);
+	time(&listmodeData.InteractionTime);
 
 	return listmodeData;
 }
@@ -67,7 +67,8 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		assert(false);
 		break;
 	case HUREL::Compton::eMouduleType::QUAD:
-	{	mScatterModules = new Module * [4];
+	{	
+		mScatterModules = new Module * [4];
 	mAbsorberModules = new Module * [4];
 	double offset = 0.083;
 	// 3 0
@@ -85,15 +86,12 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 
 
 		double gain[10];
-		Module::LoadGain(sgainFileDirectory, type, gain);
-
-
+		
+		
 		double offsetZ = -(0.220);
-		mScatterModules[i] = new Module(eMouduleType::QUAD, gain, gain, slutFileDirectory, xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, T265_TO_LAHGI_OFFSET_Z);
+		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD\\Scatter", std::to_string(i), xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, T265_TO_LAHGI_OFFSET_Z);
 
-		mScatterModules[i] = new Module(eMouduleType::QUAD, "config", "test", xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, T265_TO_LAHGI_OFFSET_Z);
-
-		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config", "test", xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, offsetZ + T265_TO_LAHGI_OFFSET_Z);
+		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD\\Absorber", to_string(i), xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, offsetZ + T265_TO_LAHGI_OFFSET_Z);
 	}
 	break;
 	}
@@ -468,11 +466,13 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 	for (unsigned int i = 0; i < data.size(); ++i)
 	{
 		ListModeData& d = data[i];
-		saveFile << static_cast<long int>(d.InterationTime) << ",";	
+		saveFile << static_cast<long int>(d.InteractionTime) << ",";	
 		saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << ",";
 		saveFile << d.Absorber.RelativeInteractionPoint[0] << "," << d.Absorber.RelativeInteractionPoint[1] << "," << d.Absorber.RelativeInteractionPoint[2] << "," << d.Absorber.InteractionEnergy << std::endl;
 	}
 	saveFile.close();
+
+
 	return;
 }
 
@@ -503,7 +503,7 @@ void HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 		{
 			break;
 		}
-		temp.InterationTime = static_cast<time_t>(stol(token));
+		temp.InteractionTime = static_cast<time_t>(stol(token));
 		
 		token = strtok(nullptr, ",");
 		temp.Scatter.RelativeInteractionPoint[0] = stod(token);
@@ -663,7 +663,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCoded(op
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{
 
-		if (t - tempLMData[i].InterationTime < static_cast<__int64>(seconds))
+		if (t - tempLMData[i].InteractionTime < static_cast<__int64>(seconds))
 		{
 			reconPC.CalculateReconPoint(tempLMData[i], SimpleCodedBackprojection);
 		}
@@ -674,6 +674,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCoded(op
 
 	return reconPC;
 }
+
 ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudComptonUntransformed(open3d::geometry::PointCloud& outPC, double seconds)
 {
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
@@ -690,7 +691,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudComptonU
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{
 
-		if (t - tempLMData[i].InterationTime < static_cast<__int64>(seconds))
+		if (t - tempLMData[i].InteractionTime < static_cast<__int64>(seconds))
 		{
 			reconStartIndex = i;
 			break;
@@ -726,7 +727,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{
 
-		if (t - tempLMData[i].InterationTime < static_cast<__int64>(seconds))
+		if (t - tempLMData[i].InteractionTime < static_cast<__int64>(seconds))
 		{
 			reconStartIndex = i;
 			break;

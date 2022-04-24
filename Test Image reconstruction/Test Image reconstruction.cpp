@@ -34,7 +34,7 @@ void ShowCV_32SAsJet(Mat img, int size);
 void RemapAsSherical(const Mat& source, Mat& target);
 
 std::tuple<bool, Eigen::Matrix4d_u, Eigen::Matrix6d> PairwayRgbdRegisteration(open3d::geometry::RGBDImage& source, open3d::geometry::RGBDImage& target);
-int main()
+int main2()
 {
     RealsenseControl rs = RealsenseControl::instance();
     
@@ -149,42 +149,47 @@ std::tuple<bool, Eigen::Matrix4d_u, Eigen::Matrix6d> PairwayRgbdRegisteration(op
     return open3d::pipelines::odometry::ComputeRGBDOdometry(source, target, intrinsic, Eigen::Matrix4d::Identity(), open3d::pipelines::odometry::RGBDOdometryJacobianFromHybridTerm());
 }
 
-int main2()
+int main()
 {
     LahgiControl lahgi = LahgiControl::instance();
     lahgi.SetType(eMouduleType::TEST);
-    lahgi.LoadListedListModeData("202109111256_Cs137_60s_80uCi_1.5m_CodedT265Offset_0_-0.236_-0.05__lmData.csv");
+    lahgi.LoadListedListModeData("Cs137_Front_10s_LMData.csv");
 
     std::vector<ListModeData> lmData = lahgi.GetListedListModeData();
 
     for (size_t i = 0; i < lmData.size(); ++i)
     {
-        lmData[i].Scatter.RelativeInteractionPoint[1] += 0.236;
-        lmData[i].Scatter.RelativeInteractionPoint[2] += 0.05;
+        lmData[i].Scatter.RelativeInteractionPoint[0] -= T265_TO_LAHGI_OFFSET_X;
+        lmData[i].Scatter.RelativeInteractionPoint[1] -= T265_TO_LAHGI_OFFSET_Y;
+        lmData[i].Scatter.RelativeInteractionPoint[2] -= T265_TO_LAHGI_OFFSET_Z;
     }
-    Mat img = MakeDetectorResponse(lmData);
 
+    Mat img = MakeDetectorResponse(lmData);
+    ShowCV_32SAsJet(img, 1000);
     Mat scaleG;
     int ResImporv = 2;
-    cv::resize(CodedMaskMat(), scaleG, Size(145, 145), 0, 0, INTER_NEAREST_EXACT);
+    cv::resize(CodedMaskMat(), scaleG, Size(230, 230), 0, 0, INTER_NEAREST_EXACT);
     
     Mat reconImg;
     cv::filter2D(img, reconImg, CV_32S, scaleG);
-    reconImg = -reconImg;
+    reconImg = reconImg;
     ShowCV_32SAsJet(reconImg, 1000);
     return 0;
 }
 Mat MakeDetectorResponse(std::vector<ListModeData> lmData)
 {
-    double dectorWidth = 0.270;
-    double pixelSize = 0.002;
+    double dectorWidth = 0.35;
+    double pixelSize = 0.005;
     int pixelCount = static_cast<int>(round(dectorWidth / pixelSize));
     Mat img(pixelCount, pixelCount, CV_32S, Scalar(0));
     int* ptrImg = img.ptr<int>();
     for (ListModeData lm : lmData)
     {
         int i = 0;
-       
+        if (lm.Scatter.InteractionEnergy <= 620 || lm.Scatter.InteractionEnergy >= 700)
+        {
+            continue;
+        }
         for (double x = -dectorWidth / 2; x < dectorWidth / 2; x += pixelSize)
         {
             int j = 0;

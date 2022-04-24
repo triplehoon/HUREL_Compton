@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <numeric>
 
-#define ACTIVE_AREA_LENGTH 0.50
+#define ACTIVE_AREA_LENGTH 0.12
 
 
 namespace HUREL {
@@ -72,9 +72,7 @@ namespace HUREL {
 
 			void ResetEnergySpectrum(int fpgaChannelNumber);
 
-
 			ReconPointCloud GetReconRealtimePointCloudComptonUntransformed(open3d::geometry::PointCloud& pc, double time);
-
 			ReconPointCloud GetReconRealtimePointCloudCompton(open3d::geometry::PointCloud& pc, double time);
 			ReconPointCloud GetReconRealtimePointCloudCoded(open3d::geometry::PointCloud& pc, double time);
 

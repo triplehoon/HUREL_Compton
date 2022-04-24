@@ -336,9 +336,9 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 1);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 6);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3f);
-	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 3.0f);
+	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0f);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0f);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 1.00f);
 	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 1.0f);

@@ -1,7 +1,10 @@
 #pragma once
 
 #include <ctime>
+#include <vector>
+
 #include <Eigen/Core>
+#include <opencv2/opencv.hpp>
 
 namespace HUREL {
 	namespace Compton {
@@ -29,8 +32,26 @@ namespace HUREL {
 			eInterationType Type;
 			InteractionData Scatter;
 			InteractionData Absorber;
-			time_t InterationTime;
+			time_t InteractionTime;
 			Eigen::Matrix4d DetectorTransformation = Eigen::Matrix4d::Zero();
+		};
+
+		class PlaneReconsturctImage
+		{
+		private: 
+			std::vector<ListModeData> mListedListModeData;
+			cv::Mat mComptonImage;
+			cv::Mat mCodedImage;
+			cv::Mat mHybridImage;
+
+			time_t mInteractionInterval;
+			
+
+		public:
+			double Distance;
+
+
+			PlaneReconsturctImage(double distance);
 		};
 
 	}
