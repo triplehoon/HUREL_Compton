@@ -17,11 +17,11 @@ namespace HUREL
 			double B;
 			double A;
 		} typedef RGBA_t;
+
+
 		class ReconPointCloud : public open3d::geometry::PointCloud
 		{
-		private:
-
-			
+		private:	
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			/// ReconValue;		
@@ -37,7 +37,6 @@ namespace HUREL
 			static RGBA_t ColorScaleJet(double v, double vmin, double vmax);
 
 			std::shared_ptr<ReconPointCloud> VoxelDownSample(double voxel_size) const;
-
 		};
 
 

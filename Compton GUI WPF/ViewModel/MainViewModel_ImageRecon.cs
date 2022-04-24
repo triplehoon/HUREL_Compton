@@ -240,27 +240,14 @@ namespace Compton_GUI_WPF.ViewModel
                     continue;
                 }
                 tempBitmap = new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format24bppRgb, data);
-                //tempBitmap = new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format16bppGrayScale, data);
-
-                //for (int x = 0; x < tempBitmap.Width; ++x)
-                //{
-                //    for (int y = 0; y < tempBitmap.Height; ++y)
-                //    {
-                //        System.Drawing.Color tmpColor = tempBitmap.GetPixel(x, y);
-                //        int brightness = (int)(0.299 * tmpColor.R + 0.587 * tmpColor.G + 0.114 * tmpColor.B);
-                //        System.Drawing.Color grey = System.Drawing.Color.FromArgb(brightness, brightness, brightness);
-                //        tempBitmap.SetPixel(x, y, grey);
-                //    }
-                //}
 
                 if (tempBitmap.Width == 1)
                 {
                     continue;
                 }
+
                 //to gray scale
-                //tempBitmap = MakeGrayscale3(tempBitmap);
                 MemoryStream ms = new MemoryStream();
-                //System.Windows.Forms.ToolStripRenderer.CreateDisabledImage(tempBitmap)
                 tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
                 BitmapImage img = new BitmapImage();
                 img.BeginInit();

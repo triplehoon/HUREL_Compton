@@ -19,38 +19,36 @@
 namespace HUREL {
 	namespace Compton {
 		enum class eMouduleType 
-		{
+		{			
 			MONO, // Not working.
 			QUAD,
-			QUAD_DUAL
+			QUAD_DUAL,
+			TEST
 		};		
 
 		class Module
 		{
-			
-			private:
-				double mEnergyCalibrationA = 0;
-				double mEnergyCalibrationB = 1;
-				double mEnergyCalibrationC = 0;
+#pragma region private
+		private:
+			double mEnergyCalibrationA = 0;
+			double mEnergyCalibrationB = 1;
+			double mEnergyCalibrationC = 0;
 
-				unsigned int mLutSize = 0;
-				double*** mXYLogMue = NULL;
-				double** mXYSumMu = NULL;
+			unsigned int mLutSize = 0;
+			double*** mXYLogMue = nullptr;
+			double** mXYSumMu = nullptr;
 
-				
+			double mGain[10];
 
-				double mEnergyGain[10];
-				double mMlpeGain[10];
+			std::string mModuleName = "";
+			eMouduleType mModuleType = HUREL::Compton::eMouduleType::MONO;
+			EnergySpectrum mEnergySpectrum = EnergySpectrum(5, 3000);
+			bool mIsModuleSet = false;
 
-				std::string mLutFileName;
-
-				eMouduleType mModuleType;
-
-				bool mIsModuleSet;
-
-				bool LoadLUT(std::string FileName);
-				std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
-			
+			bool LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
+			bool LoadLUT(std::string FileName);
+			std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
+#pragma endregion
 			public:
 				double mModuleOffsetX;
 				double mModuleOffsetY;
@@ -59,24 +57,22 @@ namespace HUREL {
 				EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 				Module();
 				Module(eMouduleType moduleType, 
-						double (&eGain)[10],
-						double (&mlpeGain)[10],
-						std::string lutFileName,
-						double moduleOffesetX = 0, double moduleOffsetX = 0, double moduleOffsetZ = 0,
+						std::string configDir, std::string moduleName,
+						double moduleOffesetX = 0, double moduleOffsetY = 0, double moduleOffsetZ = 0,
 						unsigned int binSize = SPECTRUM_ENERGY_BIN_SIZE, double maxEnergy = SPECTRUM_MAX_ENERGY);
 				~Module();
 
-				EnergySpectrum* _EnergySpectrum;
-				const bool IsModuleSet() const;
 				
-				static void LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
-
+				const bool IsModuleSet() const;
+								
 				const Eigen::Vector4d FastMLPosEstimation(const unsigned short pmtADCValue[]) const;
-
 				const Eigen::Vector4d FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const;
 
 				const double GetEcal(const unsigned short pmtADCValue[]) const;
-				
+				EnergySpectrum& GetEnergySpectrum();
+				const std::string GetModuleName() const;
+				bool SetGain(eMouduleType type, std::vector<double> gain);
+
 				/// <summary>
 				/// E = a*x^2 + b*x + c
 				/// </summary>

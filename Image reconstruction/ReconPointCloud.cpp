@@ -1,6 +1,6 @@
 #include "ReconPointCloud.h"
 
-
+#include "open3d/geometry/Image.h"
 // helper classes for VoxelDownSample and VoxelDownSampleAndTrace
 namespace {
 	class AccumulatedReconPoint {
@@ -54,11 +54,6 @@ namespace {
 		double reconValue_;
 	};
 };
-namespace HUREL {
-	namespace Comton {
-
-	}
-};
 
 HUREL::Compton::ReconPointCloud::ReconPointCloud(open3d::geometry::PointCloud& pc) :
 	open3d::geometry::PointCloud(pc)
@@ -75,6 +70,7 @@ void HUREL::Compton::ReconPointCloud::CalculateReconPoint(ListModeData lmData, d
 	maxReoconValue = -DBL_MAX;
 	for (size_t i = 0; i < size; ++i)
 	{
+		#pragma omp atomic
 		reconValues_[i] += calcFunc(lmData, points_[i]);
 		if (reconValues_[i] > maxReoconValue)
 		{
@@ -112,7 +108,6 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData
 		return 0;
 	}
 }
-
 
 HUREL::Compton::RGBA_t HUREL::Compton::ReconPointCloud::ColorScaleJet(double v, double vmin, double vmax)
 {
@@ -188,7 +183,7 @@ std::shared_ptr<HUREL::Compton::ReconPointCloud> HUREL::Compton::ReconPointCloud
 	}
 	bool has_normals = HasNormals();
 	bool has_colors = HasColors();
-	for (const auto accpoint : voxelindex_to_accpoint) {
+	for (const auto& accpoint : voxelindex_to_accpoint) {
 		output->points_.push_back(accpoint.second.GetAveragePoint());
 		if (has_normals) {
 			output->normals_.push_back(accpoint.second.GetAverageNormal());
