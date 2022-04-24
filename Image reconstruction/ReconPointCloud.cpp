@@ -1,6 +1,6 @@
 #include "ReconPointCloud.h"
 
-
+#include "open3d/geometry/Image.h"
 // helper classes for VoxelDownSample and VoxelDownSampleAndTrace
 namespace {
 	class AccumulatedReconPoint {
@@ -53,11 +53,6 @@ namespace {
 		Eigen::Vector3d color_;
 		double reconValue_;
 	};
-};
-namespace HUREL {
-	namespace Comton {
-
-	}
 };
 
 HUREL::Compton::ReconPointCloud::ReconPointCloud(open3d::geometry::PointCloud& pc) :
@@ -146,7 +141,6 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed
 }
 
 
-
 HUREL::Compton::RGBA_t HUREL::Compton::ReconPointCloud::ColorScaleJet(double v, double vmin, double vmax)
 {
 	double dv;
@@ -221,7 +215,7 @@ std::shared_ptr<HUREL::Compton::ReconPointCloud> HUREL::Compton::ReconPointCloud
 	}
 	bool has_normals = HasNormals();
 	bool has_colors = HasColors();
-	for (const auto accpoint : voxelindex_to_accpoint) {
+	for (const auto& accpoint : voxelindex_to_accpoint) {
 		output->points_.push_back(accpoint.second.GetAveragePoint());
 		if (has_normals) {
 			output->normals_.push_back(accpoint.second.GetAverageNormal());

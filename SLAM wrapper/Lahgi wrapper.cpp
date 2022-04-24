@@ -24,7 +24,6 @@ HUREL::Compton::LahgiWrapper::LahgiWrapper(eModuleManagedType type)
 	lahgiControlInstance.SetType(moduleType);
 }
 
-
 Boolean HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks)
 {
 	pin_ptr<unsigned short> intParamsPtr = &adcData[0];
@@ -210,7 +209,6 @@ void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, List<array
 	if (uv.size() < size) {
 		size = uv.size();
 	}
-
 	if (uv.size() == 0)
 	{
 		return;

@@ -621,8 +621,6 @@ namespace Compton_GUI_WPF.ViewModel
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-
-
     }
 
 

@@ -256,23 +256,15 @@ void RealsenseControlWrapper::GetRealTimeRGB(int% width, int% height, int% strid
 		return;
 	}*/
 
-	rs2::video_frame* color = &m_RealsenseControlNative->GetCurrentVideoFrame();
+	cv::Mat color = m_RealsenseControlNative->GetCurrentVideoFrame();
 	
 
 
-	if (*color) {
-
-		if (color->get_data() == nullptr) {
-			System::Diagnostics::Debug::WriteLine("color.getdata null ptr");
-			data == IntPtr::Zero;
-			return;
-		}
-
-		width = color->get_width();
-		height = color->get_height();
-		stride = color->get_stride_in_bytes();
-
-		void* ptr = (void*)color->get_data();
+	if (color.cols > 1) {
+		width = color.cols;
+		height = color.rows;		
+		stride = color.step;
+		void* ptr = static_cast<void*>(color.ptr());
 
 		if (ptr == NULL)
 		{
@@ -280,7 +272,6 @@ void RealsenseControlWrapper::GetRealTimeRGB(int% width, int% height, int% strid
 		}
 
 		data = IntPtr(ptr);
-
 	}
 }
 

@@ -2,42 +2,57 @@
 
 
 using namespace std;
-
+using namespace HUREL::Compton;
 HUREL::Compton::Module::Module() :
     mModuleType(HUREL::Compton::eMouduleType::MONO),
-    mLutFileName(""),
+    mModuleName(""),
     mModuleOffsetX(0),
     mModuleOffsetY(0),
     mModuleOffsetZ(0),
     mIsModuleSet(false),
-    _EnergySpectrum(new EnergySpectrum(5, 3000))
+    mEnergySpectrum(EnergySpectrum(5, 3000))
 {
-    *mEnergyGain = {0,};
-    *mMlpeGain = { 0, };
 }
 
-HUREL::Compton::Module::Module(eMouduleType moduleType, double(&eGain)[10], double(&mlpeGain)[10], std::string lutFileName, double moduleOffsetX, double moduleOffsetY, double moduleOffsetZ, unsigned int binSize, double maxEnergy):
+HUREL::Compton::Module::Module(eMouduleType moduleType,
+    std::string configDir, std::string moduleName,
+    double moduleOffsetX, double moduleOffsetY, double moduleOffsetZ,
+    unsigned int binSize, double maxEnergy):
     mModuleType(moduleType),
-    mLutFileName(lutFileName),
+    mModuleName(moduleName),
 	mModuleOffsetX(moduleOffsetX),
 	mModuleOffsetY(moduleOffsetY),
     mModuleOffsetZ(moduleOffsetZ),
 	mIsModuleSet(false),
-    _EnergySpectrum(new EnergySpectrum(binSize, maxEnergy))
+    mEnergySpectrum(EnergySpectrum(binSize, maxEnergy))
 {
-	for (int i = 0; i < 10; ++i)
+    std::string lutFileName = configDir + "\\LUT" + "\\" + moduleName + "_LUT.csv";
+    std::string gainFileName = configDir + "\\gain" + "\\" + moduleName + "_gain.csv";
+    
+    if (moduleType == eMouduleType::QUAD)
+    {
+        double gain[10];
+        if (LoadGain(gainFileName, eMouduleType::QUAD, gain))
+        {
+            for (int i = 0; i < 10; ++i)
+            {
+                mGain[i] = gain[i];
+            }
+        }        
+        else
+        {
+            mIsModuleSet = false;
+            return;
+        }
+    }        	
+	if (LoadLUT(lutFileName))
 	{
-		mEnergyGain[i] = eGain[i];
-		mMlpeGain[i] = mlpeGain[i];
-	}
-	if (LoadLUT(mLutFileName))
-	{
-		cout << "Successfuly to load a lut file" << endl;
+		//cout << "Successfuly to load a lut file" << endl;
 		mIsModuleSet = true;
 	}
 	else
 	{
-		cout << "FAIL to load a lut file" << endl;
+		//cout << "FAIL to load a lut file" << endl;
 		assert(false);
 	}	
 
@@ -103,7 +118,6 @@ std::tuple<unsigned int, unsigned int> HUREL::Compton::Module::FastMLPosEstimati
 
 HUREL::Compton::Module::~Module()
 {
-
     for (int i = 0; i < static_cast<int>(mLutSize); ++i)
     {
         for (int j = 0; j < static_cast<int>(mLutSize); ++j)
@@ -113,7 +127,6 @@ HUREL::Compton::Module::~Module()
         delete[] mXYLogMue[i];
         delete[] mXYSumMu[i];         
     }
-    delete _EnergySpectrum;
 }
 
 bool HUREL::Compton::Module::LoadLUT(std::string fileName)
@@ -125,7 +138,7 @@ bool HUREL::Compton::Module::LoadLUT(std::string fileName)
 
     if (!io.is_open())
     {
-        cerr << "Cannot open a file" << endl;
+        //cerr << "Cannot open a file" << endl;
 
         io.close();
         return false;
@@ -182,7 +195,7 @@ bool HUREL::Compton::Module::LoadLUT(std::string fileName)
         mXYSumMu[indexX][indexY] = lutData[i][12];
     }
 
-    cout << "Done loading look up table" << endl;
+    //cout << "Done loading look up table" << endl;
 
     io.close();
     return true;
@@ -193,7 +206,7 @@ const bool HUREL::Compton::Module::IsModuleSet() const
     return mIsModuleSet;
 }
 
-void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain)
+bool HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain)
 {
     std::ifstream io;
     io.open(fileName);
@@ -202,9 +215,10 @@ void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
     assert(outEGain != NULL);
     if (io.fail())
     {
-        cout << "Cannot open a file" << endl;
+        //cout << "Cannot open a file" << endl;
 
         io.close();        
+        return false;
     }
 
     unsigned int pmtCounts = 0;
@@ -222,6 +236,7 @@ void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
         break;
     default:
         pmtCounts = 0;
+        return false;
         break;
     }
 
@@ -235,7 +250,7 @@ void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
         string val;
         vector<double> row;
         std::stringstream lineStream(line);
-        int i = 0;
+        unsigned int i = 0;
         while (std::getline(lineStream, val, ','))
         {       
             assert(i < pmtCounts + 1);
@@ -244,6 +259,8 @@ void HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
         }      
     }
     io.close();
+
+    return true;
 }
 
 const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned short pmtADCValue[]) const
@@ -252,15 +269,15 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
     std::tuple<unsigned int, unsigned int> maxPoint;
 
     const double normalizedPMTValue[9] { 
-    static_cast<double>(pmtADCValue[0]) * mEnergyGain[0],
-    static_cast<double>(pmtADCValue[1]) * mEnergyGain[1],
-    static_cast<double>(pmtADCValue[2]) * mEnergyGain[2],
-    static_cast<double>(pmtADCValue[3]) * mEnergyGain[3],
-    static_cast<double>(pmtADCValue[4]) * mEnergyGain[4],
-    static_cast<double>(pmtADCValue[5]) * mEnergyGain[5],
-    static_cast<double>(pmtADCValue[6]) * mEnergyGain[6],
-    static_cast<double>(pmtADCValue[7]) * mEnergyGain[7],
-    static_cast<double>(pmtADCValue[8]) * mEnergyGain[8]};
+    static_cast<double>(pmtADCValue[0]) * mGain[0],
+    static_cast<double>(pmtADCValue[1]) * mGain[1],
+    static_cast<double>(pmtADCValue[2]) * mGain[2],
+    static_cast<double>(pmtADCValue[3]) * mGain[3],
+    static_cast<double>(pmtADCValue[4]) * mGain[4],
+    static_cast<double>(pmtADCValue[5]) * mGain[5],
+    static_cast<double>(pmtADCValue[6]) * mGain[6],
+    static_cast<double>(pmtADCValue[7]) * mGain[7],
+    static_cast<double>(pmtADCValue[8]) * mGain[8]};
 
     int gridSize = mLutSize / 3;
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize, gridSize, mLutSize - 1, gridSize, mLutSize - 1, normalizedPMTValue);
@@ -298,14 +315,14 @@ const double HUREL::Compton::Module::GetEcal(const unsigned short pmtADCValue[])
     unsigned short checkZero = 0;
     for (int i = 0; i < 9; ++i)
     {
-        sumEnergy += static_cast<double>(pmtADCValue[i]) * mEnergyGain[i];
+        sumEnergy += static_cast<double>(pmtADCValue[i]) * mGain[i];
         checkZero += pmtADCValue[i];
     }
     if (checkZero == 0)
     {
         return static_cast<double>(NAN);
     }
-    sumEnergy += mEnergyGain[9];
+    sumEnergy += mGain[9];
     return mEnergyCalibrationA * sumEnergy * sumEnergy + mEnergyCalibrationB * sumEnergy + mEnergyCalibrationC;
 }
 
@@ -319,4 +336,29 @@ void HUREL::Compton::Module::SetEnergyCalibration(double a, double b, double c)
 std::tuple<double, double, double>  HUREL::Compton::Module::GetEnergyCalibration()
 {
     return make_tuple(mEnergyCalibrationA,  mEnergyCalibrationB, mEnergyCalibrationC);
+}
+
+EnergySpectrum& HUREL::Compton::Module::GetEnergySpectrum()
+{
+    return mEnergySpectrum;
+}
+
+const std::string HUREL::Compton::Module::GetModuleName() const
+{
+    return mModuleName;
+}
+
+bool HUREL::Compton::Module::SetGain(eMouduleType type, std::vector<double> gain)
+{
+    if (type != eMouduleType::QUAD)
+    {
+        return false;
+    }
+    else
+    {
+        for (int i = 0; i < 10; ++i)
+        {
+            mGain[i] = gain[i];
+        }
+    }
 }

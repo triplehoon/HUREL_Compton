@@ -5,11 +5,8 @@
 static std::mutex mListModeDataMutex;
 
 using namespace std;
-
 using namespace HUREL;
 using namespace Compton;
-
-
 
 ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation)
 {
@@ -94,8 +91,9 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		double offsetZ = -(0.220);
 		mScatterModules[i] = new Module(eMouduleType::QUAD, gain, gain, slutFileDirectory, xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, T265_TO_LAHGI_OFFSET_Z);
 
-		Module::LoadGain(againFileDirectory, type, gain);
-		mAbsorberModules[i] = new Module(eMouduleType::QUAD, gain, gain, alutFileDirectory, xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, offsetZ + T265_TO_LAHGI_OFFSET_Z);
+		mScatterModules[i] = new Module(eMouduleType::QUAD, "config", "test", xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, T265_TO_LAHGI_OFFSET_Z);
+
+		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config", "test", xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, offsetZ + T265_TO_LAHGI_OFFSET_Z);
 	}
 	break;
 	}
@@ -129,10 +127,16 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		//}
 		break;
 	}
+	case HUREL::Compton::eMouduleType::TEST:
+	{
+		break;
+	}
 	default:
 		assert(false);
 		break;
 	}
+
+
 }
 
 HUREL::Compton::LahgiControl::~LahgiControl()
@@ -157,6 +161,8 @@ HUREL::Compton::LahgiControl::~LahgiControl()
 			delete mScatterModules[i];
 			delete mAbsorberModules[i];
 		}*/
+		break;
+	case HUREL::Compton::eMouduleType::TEST:
 		break;
 	default:
 		assert(false);
@@ -205,7 +211,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 			scattersEnergy[i] = mScatterModules[i]->GetEcal(scatterShorts[i]);
 			if (!isnan(scattersEnergy[i]))
 			{
-				mScatterModules[i]->_EnergySpectrum->AddEnergy(scattersEnergy[i]);
+				mScatterModules[i]->GetEnergySpectrum().AddEnergy(scattersEnergy[i]);
 				mSumSpectrum.AddEnergy(scattersEnergy[i]);
 				mScatterSumSpectrum.AddEnergy(scattersEnergy[i]);
 				scatterInteractModuleNum = i;
@@ -214,7 +220,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 			absorbersEnergy[i] = mAbsorberModules[i]->GetEcal(absorberShorts[i]);
 			if (!isnan(absorbersEnergy[i]))
 			{
-				mAbsorberModules[i]->_EnergySpectrum->AddEnergy(absorbersEnergy[i]);
+				mAbsorberModules[i]->GetEnergySpectrum().AddEnergy(absorbersEnergy[i]);
 				mSumSpectrum.AddEnergy(absorbersEnergy[i]);
 				mAbsorberSumSpectrum.AddEnergy(absorbersEnergy[i]);
 				absorberInteractModuleNum = i;
@@ -332,7 +338,7 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 			scattersEnergy[i] = mScatterModules[i]->GetEcal(scatterShorts[i]);
 			if (!isnan(scattersEnergy[i]))
 			{
-				mScatterModules[i]->_EnergySpectrum->AddEnergy(scattersEnergy[i]);
+				mScatterModules[i]->GetEnergySpectrum().AddEnergy(scattersEnergy[i]);
 				mSumSpectrum.AddEnergy(scattersEnergy[i]);
 				mScatterSumSpectrum.AddEnergy(scattersEnergy[i]);
 				scatterInteractModuleNum = i;
@@ -341,7 +347,7 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 			absorbersEnergy[i] = mAbsorberModules[i]->GetEcal(absorberShorts[i]);
 			if (!isnan(absorbersEnergy[i]))
 			{
-				mAbsorberModules[i]->_EnergySpectrum->AddEnergy(absorbersEnergy[i]);
+				mAbsorberModules[i]->GetEnergySpectrum().AddEnergy(absorbersEnergy[i]);
 				mSumSpectrum.AddEnergy(absorbersEnergy[i]);
 				mAbsorberSumSpectrum.AddEnergy(absorbersEnergy[i]);
 				absorberInteractModuleNum = i;
@@ -429,6 +435,15 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 	return lmData;
 }
 
+std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData()
+{
+	mListModeDataMutex.lock();
+	std::vector<ListModeData> lmData = mListedListModeData;
+	mListModeDataMutex.unlock();
+
+	return lmData;
+}
+
 void HUREL::Compton::LahgiControl::ResetListedListModeData()
 {
 	mListModeDataMutex.lock();
@@ -453,23 +468,82 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 	for (unsigned int i = 0; i < data.size(); ++i)
 	{
 		ListModeData& d = data[i];
-		switch (d.Type)
-		{
-		case eInterationType::NONE:
-			break;
-		case eInterationType::CODED:
-			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << std::endl;
-			break;
-		case eInterationType::COMPTON:
-			saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << ",";
-			saveFile << d.Absorber.RelativeInteractionPoint[0] << "," << d.Absorber.RelativeInteractionPoint[1] << "," << d.Absorber.RelativeInteractionPoint[2] << "," << d.Absorber.InteractionEnergy << std::endl;
-			break;
-		default:
-			break;
-		}
-		continue;
+		saveFile << static_cast<long int>(d.InterationTime) << ",";	
+		saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << ",";
+		saveFile << d.Absorber.RelativeInteractionPoint[0] << "," << d.Absorber.RelativeInteractionPoint[1] << "," << d.Absorber.RelativeInteractionPoint[2] << "," << d.Absorber.InteractionEnergy << std::endl;
 	}
 	saveFile.close();
+	return;
+}
+
+void HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
+{
+	std::ifstream loadFile;
+	loadFile.open(fileName);
+	if (!loadFile.is_open())
+	{
+		std::cout << "File is not opened" << endl;
+		loadFile.close();
+		return;
+	}
+	mListedListModeData.clear();
+	string buffer;
+	char line[2048];
+	while (loadFile.good())
+	{
+		ListModeData temp;
+		getline(loadFile, buffer);
+		for (int i = 0; i < 2048; ++i)
+		{
+			line[i] = buffer.c_str()[i];
+		}
+		char* context[7]{ nullptr };
+		char* token = strtok(line, ",");
+		if (token == nullptr)
+		{
+			break;
+		}
+		temp.InterationTime = static_cast<time_t>(stol(token));
+		
+		token = strtok(nullptr, ",");
+		temp.Scatter.RelativeInteractionPoint[0] = stod(token);
+		if (isnan(stod(token)))
+		{
+			temp.Type = eInterationType::NONE;
+		}
+
+		token = strtok(nullptr, ",");
+		temp.Scatter.RelativeInteractionPoint[1] = stod(token);
+
+		token = strtok(nullptr, ",");
+		temp.Scatter.RelativeInteractionPoint[2] = stod(token);
+
+		token = strtok(nullptr, ",");
+		temp.Scatter.InteractionEnergy = stod(token);
+
+		token = strtok(nullptr, ",");
+		temp.Absorber.RelativeInteractionPoint[0] = stod(token);
+		if (isnan(stod(token)))
+		{
+			temp.Type = eInterationType::CODED;
+		}
+		else
+		{
+			temp.Type = eInterationType::COMPTON;
+		}
+
+		token = strtok(nullptr, ",");
+		temp.Absorber.RelativeInteractionPoint[1] = stod(token);
+
+		token = strtok(nullptr, ",");
+		temp.Absorber.RelativeInteractionPoint[2] = stod(token);
+
+		token = strtok(nullptr, ",");
+		temp.Absorber.InteractionEnergy = stod(token);
+		mListedListModeData.push_back(temp);
+	}
+
+	loadFile.close();
 	return;
 }
 
@@ -480,32 +554,32 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelNu
 	case eMouduleType::MONO:
 		if (fpgaChannelNumber == 0)
 		{
-			return *mScatterModules[0]->_EnergySpectrum;
+			return mScatterModules[0]->GetEnergySpectrum();
 		}
 		else if (fpgaChannelNumber == 8)
 		{
-			return *mAbsorberModules[0]->_EnergySpectrum;
+			return mAbsorberModules[0]->GetEnergySpectrum();
 		}
 		break;
 
 	case eMouduleType::QUAD:
 		if (fpgaChannelNumber >= 0 && fpgaChannelNumber < 4)
 		{
-			return *mScatterModules[fpgaChannelNumber]->_EnergySpectrum;
+			return mScatterModules[fpgaChannelNumber]->GetEnergySpectrum();
 		}
 		else if (fpgaChannelNumber >= 8 && fpgaChannelNumber < 12)
 		{
-			return *mAbsorberModules[fpgaChannelNumber - 8]->_EnergySpectrum;
+			return mAbsorberModules[fpgaChannelNumber - 8]->GetEnergySpectrum();
 		}
 		break;
 	case eMouduleType::QUAD_DUAL:
 		if (fpgaChannelNumber >= 0 && fpgaChannelNumber < 8)
 		{
-			return *mScatterModules[fpgaChannelNumber]->_EnergySpectrum;
+			return mScatterModules[fpgaChannelNumber]->GetEnergySpectrum();
 		}
 		else if (fpgaChannelNumber >= 8 && fpgaChannelNumber < 16)
 		{
-			return *mAbsorberModules[fpgaChannelNumber - 8]->_EnergySpectrum;
+			return mAbsorberModules[fpgaChannelNumber - 8]->GetEnergySpectrum();
 		}
 		break;
 	default:
@@ -539,32 +613,32 @@ void HUREL::Compton::LahgiControl::ResetEnergySpectrum(int fpgaChannelNumber)
 	case eMouduleType::MONO:
 		if (fpgaChannelNumber == 0)
 		{
-			mScatterModules[0]->_EnergySpectrum->Reset();
+			mScatterModules[0]->GetEnergySpectrum().Reset();
 		}
 		else if (fpgaChannelNumber == 8)
 		{
-			mAbsorberModules[0]->_EnergySpectrum->Reset();
+			mAbsorberModules[0]->GetEnergySpectrum().Reset();
 		}
 		break;
 
 	case eMouduleType::QUAD:
 		if (fpgaChannelNumber >= 0 && fpgaChannelNumber < 4)
 		{
-			mScatterModules[fpgaChannelNumber]->_EnergySpectrum->Reset();
+			mScatterModules[fpgaChannelNumber]->GetEnergySpectrum().Reset();
 		}
 		else if (fpgaChannelNumber >= 8 && fpgaChannelNumber < 12)
 		{
-			mAbsorberModules[fpgaChannelNumber - 8]->_EnergySpectrum->Reset();
+			mAbsorberModules[fpgaChannelNumber - 8]->GetEnergySpectrum().Reset();
 		}
 		break;
 	case eMouduleType::QUAD_DUAL:
 		if (fpgaChannelNumber >= 0 && fpgaChannelNumber < 8)
 		{
-			mScatterModules[fpgaChannelNumber]->_EnergySpectrum->Reset();
+			mScatterModules[fpgaChannelNumber]->GetEnergySpectrum().Reset();
 		}
 		else if (fpgaChannelNumber >= 8 && fpgaChannelNumber < 16)
 		{
-			mAbsorberModules[fpgaChannelNumber - 8]->_EnergySpectrum->Reset();
+			mAbsorberModules[fpgaChannelNumber - 8]->GetEnergySpectrum().Reset();
 		}
 		break;
 	default:
@@ -572,6 +646,7 @@ void HUREL::Compton::LahgiControl::ResetEnergySpectrum(int fpgaChannelNumber)
 	}
 	return;
 }
+
 ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCoded(open3d::geometry::PointCloud& outPC, double seconds)
 {
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
@@ -628,12 +703,14 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudComptonU
 	{
 		reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleComptonBackprojectionUntransformed);
 	}
+
 	std::cout << "End Recon: " << tempLMData.size() << std::endl;
 
 
 	return reconPC;
 }
-HUREL::Compton::ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(open3d::geometry::PointCloud& outPC, double seconds)
+
+ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(open3d::geometry::PointCloud& outPC, double seconds)
 {
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
 
@@ -670,33 +747,7 @@ HUREL::Compton::ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePo
 
 double HUREL::Compton::LahgiControl::mCalcMuOnCodedMask(double x, double y)
 {
-	assert(false);
-	double pixelSize = 0.01;
-	unsigned int indexX = UINT_MAX;
-	unsigned int indexY = UINT_MAX;
-	if (pow(x, 2) + pow(y, 2) < pow(0.58, 2))
-	{
-		//inside Circle
-		if (abs(x) < 0.135 && abs(y) < 0.135)
-		{
-			indexX = static_cast<unsigned int>(x / pixelSize + 13.5 + 0.5);
-			indexY = static_cast<unsigned int>(y / pixelSize + 13.5 + 0.5);
-			assert(indexX < 37);
-			assert(indexY < 37);
-
-			return mCodeMask[indexX][indexY];
-		}
-		else
-		{
-			//But outside CM
-			return 0;
-		}
-	}
-	else
-	{
-		return 0;
-	}
-
+	return 0;
 }
 
 double HUREL::Compton::LahgiControl::mCalcIsPassOnCodedMask(double x, double y)
@@ -708,22 +759,7 @@ double HUREL::Compton::LahgiControl::mCalcIsPassOnCodedMask(double x, double y)
 	{
 		//inside Circle
 		if (abs(x) < 0.185 && abs(y) < 0.185)
-		{
-			//inside CM
-			//printf("%lf, %lf\n", x, y);
-
-			indexX = static_cast<unsigned int>(x / pixelSize + 18 + 0.5);
-			indexY = static_cast<unsigned int>(-y / pixelSize + 18 + 0.5);
-			assert(indexX < 37);
-			assert(indexY < 37);
-			if (mCodeMask[indexX][indexY])
-			{
-				return 1;
-			}
-			else
-			{
-				return 0;
-			}
+		{			
 		}
 		else
 		{

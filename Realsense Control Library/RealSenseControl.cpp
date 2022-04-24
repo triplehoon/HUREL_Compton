@@ -1,10 +1,12 @@
 #include "RealsenseControl.h"
 #include <mutex>
 
+using namespace cv;
+
 static std::mutex mQueueRealtimePTMutex;
 static std::mutex rtMutex;
 
-RealsenseControl::RealsenseControl() :IsPipeLineOn(false), IsSLAMON(false)
+RealsenseControl::RealsenseControl() :IsPipeLineOn(false), IsSLAMON(false), m_CurrentVideoFrame(Mat())
 {
 	T265toLACCTransform << -1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -55,15 +57,14 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 
 		cfgD455 = rs2::config();
 		//cfgD455.enable_device("935322071433");	
-		//cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_COLOR_SIZE, D455_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
-		cfgD455.enable_stream(RS2_STREAM_COLOR, D435_H_COLOR_SIZE, D435_V_COLOR_SIZE, RS2_FORMAT_BGR8, 15);
-		cfgD455.enable_stream(RS2_STREAM_DEPTH, D435_H_DEPTH_SIZE, D435_V_DEPTH_SIZE, RS2_FORMAT_Z16, 6);
+		cfgD455.enable_stream(RS2_STREAM_COLOR, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_BGR8, 15);
+		//cfgD455.enable_stream(RS2_STREAM_COLOR, D435_H_COLOR_SIZE, D435_V_COLOR_SIZE, RS2_FORMAT_RGB8, 15);
+		cfgD455.enable_stream(RS2_STREAM_DEPTH, D455_H_DEPTH_SIZE, D455_V_DEPTH_SIZE, RS2_FORMAT_Z16, 15);
 		pipeD455 = rs2::pipeline();
 
 		cfgT265 = rs2::config();
 		cfgT265.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
 		pipeT265 = rs2::pipeline(ctx);
-		Sleep(1000);
 		pipeD455.start(cfgD455);
 		pipeT265.start(cfgT265);
 
@@ -72,26 +73,22 @@ bool RealsenseControl::InitiateRealsense(std::string* outMessage)
 	}
 	catch (const rs2::camera_disconnected_error& e)
 	{
-		*outMessage = "Camera was disconnected! Please connect it back";
-
-		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
+		*outMessage = "Camera was disconnected! Please connect it back ";
+		*outMessage = *outMessage + e.what();
 		return false;
-		// wait for connect event
 	}
 	// continue with more general cases
 	catch (const rs2::recoverable_error& e)
 	{
-		*outMessage = "Operation failed, please try again";
-
-		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
+		*outMessage = "Operation failed, please try again ";
+		*outMessage = *outMessage + e.what();
 		return false;
 	}
 	// you can also catch "anything else" raised from the library by catching rs2::error
 	catch (const rs2::error& e)
 	{
-		*outMessage = "Some other error occurred!";
-
-		printf("realsense lib: %s %s\n", outMessage->c_str(), e.what());
+		*outMessage = "Some other error occurred! ";
+		*outMessage = *outMessage + e.what();
 		return false;
 	}
 
@@ -173,7 +170,12 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 			out_uv.push_back(Eigen::Vector2f(Texture_Coord[i].u, Texture_Coord[i].v));
 		}
 	}
+
+
+
 	return std::make_tuple(cloud, t265toLACCTransform * TransF, out_uv);
+
+
 }
 
 std::tuple<double, double, double> RealsenseControl::RGB_Texture(const rs2::video_frame& texture, const rs2::texture_coordinate& Texture_XY)
@@ -334,31 +336,53 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();
 	rs2::pose_frame pose_frame(nullptr);
 
-	Eigen::Matrix4d t265toLACCTransform;
-	t265toLACCTransform << -1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, -1, 0,
-		0, 0, 0, 1;
-
-
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 4);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 1);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3f);
-	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 10.0f);
+	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 3.0f);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0f);
-	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.25f);
-	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 15);
-	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.4f);
-	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 20.0f);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 1.00f);
+	spat_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 1.0f);
+	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, 0.3f);
+	temp_filter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, 30.0f);
 
 
 
 	pipelines.clear();
 
 	rs2::pipeline_profile pipe_profile_D455 = pipeD455.start(cfgD455);
-	/*auto depth_device = pipe_profile_D455.get_device().query_sensors()[0];
-	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_MEDIUM_DENSITY);
-	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);*/
+	float depthScale = (static_cast<rs2::depth_sensor>(pipe_profile_D455.get_device().query_sensors()[0])).get_depth_scale();
+	std::cout << "depth scale: " << (static_cast<rs2::depth_sensor>(pipe_profile_D455.get_device().query_sensors()[0])).get_depth_scale() << std::endl;
+	auto profiles = (static_cast<rs2::color_sensor>(pipe_profile_D455.get_device().query_sensors()[1])).get_stream_profiles();
+	/*for (int i = 0; i < profiles.size(); ++i)
+	{
+		/*if (auto video_stream = profiles[i].as<rs2::video_stream_profile>())
+		{
+			try
+			{
+				//If the stream is indeed a video stream, we can now simply call get_intrinsics()
+				rs2_intrinsics intrinsics = video_stream.get_intrinsics();
 
+				auto principal_point = std::make_pair(intrinsics.ppx, intrinsics.ppy);
+				auto focal_length = std::make_pair(intrinsics.fx, intrinsics.fy);
+				rs2_distortion model = intrinsics.model;
+
+				std::cout << "Principal Point         : " << principal_point.first << ", " << principal_point.second << std::endl;
+				std::cout << "Focal Length            : " << focal_length.first << ", " << focal_length.second << std::endl;
+				std::cout << "Distortion Model        : " << model << std::endl;
+				std::cout << "Distortion Coefficients : [" << intrinsics.coeffs[0] << "," << intrinsics.coeffs[1] << "," <<
+					intrinsics.coeffs[2] << "," << intrinsics.coeffs[3] << "," << intrinsics.coeffs[4] << "]" << std::endl;
+			}
+			catch (const std::exception& e)
+			{
+				std::cerr << "Failed to get intrinsics for the given stream. " << e.what() << std::endl;
+			}
+		}
+	}
+	*/
+	auto depth_device = pipe_profile_D455.get_device().query_sensors()[0];
+	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_HIGH_ACCURACY);
+	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
+	depth_device.set_option(RS2_OPTION_LASER_POWER, 360);
 	rs2::pipeline_profile t265Profile = pipeT265.start(cfgT265);
 	rs2::pose_sensor t265 = t265Profile.get_device().query_sensors().front();
 	//t265.set_option(RS2_OPTION_ENABLE_RELOCALIZATION, 0);
@@ -378,21 +402,42 @@ void RealsenseControl::RealsensesPipeline()
 			}
 			rs2::points points;
 
-
-
+			
 			auto color = frames.get_color_frame();
 			auto depth = frames.get_depth_frame();
+			
 			auto pose = frames.get_pose_frame();
 
 
 			if (color) {
-				m_CurrentVideoFrame = color;
+			
+				rs2_intrinsics intrinsics = color.get_profile().as<rs2::video_stream_profile>().get_intrinsics();
+
+				auto principal_point = std::make_pair(intrinsics.ppx, intrinsics.ppy);
+				auto focal_length = std::make_pair(intrinsics.fx, intrinsics.fy);
+				rs2_distortion model = intrinsics.model;
+
+				//std::cout << "Principal Point         : " << principal_point.first << ", " << principal_point.second << std::endl;
+			//std::cout << "Focal Length            : " << focal_length.first << ", " << focal_length.second << std::endl;
+			//std::cout << "Distortion Model        : " << model << std::endl;
+				//std::cout << "Distortion Coefficients : [" << intrinsics.coeffs[0] << "," << intrinsics.coeffs[1] << "," <<
+				//intrinsics.coeffs[2] << "," << intrinsics.coeffs[3] << "," << intrinsics.coeffs[4] << "]" << std::endl;
+					
 				pc.map_to(color);
+				const int w = color.as<rs2::video_frame>().get_width();
+				const int h = color.as<rs2::video_frame>().get_height();
+							
+
+				m_CurrentVideoFrame = Mat(Size(w, h), CV_8UC3, (void*)color.get_data(), Mat::AUTO_STEP);
+
+				
 			}
 			if (depth) {
 				//System::Diagnostics::Debug::WriteLine("Frame");			
 				rs2::frame depth2 = depth;
 
+
+				
 				depth2 = dec_filter.process(depth2);
 				depth2 = thr_filter.process(depth2);
 				depth2 = spat_filter.process(depth2);
@@ -410,16 +455,11 @@ void RealsenseControl::RealsensesPipeline()
 				rs2::pose_frame null_pose_frame(nullptr);
 				pose_frame = null_pose_frame;
 				int trackerConfidence = tempPoseData.tracker_confidence;
-
-
-
-
-
 				auto realTimeCloudPoseTransposed = PCL_Conversion(points, color, tempPoseData);
 
-				auto fixedrealTimeCloudPoseTransposed = realTimeCloudPoseTransposed;
+
 				// realTimeCloudPoseTransposed transposed from here
-				open3d::geometry::PointCloud fixedRTPC = std::get<0>(realTimeCloudPoseTransposed);
+
 				rtMutex.lock();
 				Eigen::Vector4d Quaternion = { m_Posedata.rotation.w, -m_Posedata.rotation.x ,m_Posedata.rotation.y,-m_Posedata.rotation.z };
 				Eigen::Matrix3d RMat = open3d::geometry::PointCloud::GetRotationMatrixFromQuaternion(Quaternion);
@@ -427,8 +467,7 @@ void RealsenseControl::RealsensesPipeline()
 				Eigen::Matrix4d TransF; // Your Transformation Matrix
 				mRTTransformationTrue.block<3, 3>(0, 0) = RMat;
 				mRTTransformationTrue.block<3, 1>(0, 3) = TransPoseMat;
-				m_RTPointCloud = std::make_tuple(fixedRTPC.Transform(t265toLACCTransform), std::get<2>(fixedrealTimeCloudPoseTransposed));
-
+				
 				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), std::get<2>(realTimeCloudPoseTransposed));
 				mRTTransformation = std::get<1>(realTimeCloudPoseTransposed);
 				rtMutex.unlock();
@@ -457,16 +496,28 @@ void RealsenseControl::RealsensesPipeline()
 #endif // DEBUG
 
 
-	m_CurrentVideoFrame = rs2::video_frame(nullptr);
+	//m_CurrentVideoFrame = rs2::video_frame(nullptr);
 
 	Sleep(1000);
 
 }
-rs2_pose RealsenseControl::GetPoseData() {
+rs2_pose RealsenseControl::GetPoseData() 
+{
 	return m_Posedata;
 }
-rs2::video_frame RealsenseControl::GetCurrentVideoFrame() {
+cv::Mat RealsenseControl::GetCurrentVideoFrame() 
+{
 	return m_CurrentVideoFrame;
+}
+
+cv::Mat RealsenseControl::GetCurrentDepthFrame()
+{
+
+	rtMutex.lock();
+
+	Mat returnValue = m_CurrentDepthFrame;
+	rtMutex.unlock();
+	return returnValue;
 }
 std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> RealsenseControl::GetRTPointCloud() {
 	rtMutex.lock();
@@ -475,6 +526,7 @@ std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> Realsense
 	rtMutex.unlock();
 	return returnValue;
 }
+
 std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> RealsenseControl::GetRTPointCloudTransposed()
 {
 	rtMutex.lock();
@@ -483,6 +535,8 @@ std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> Realsense
 	rtMutex.unlock();
 	return returnValue;
 }
+
+
 open3d::geometry::PointCloud RealsenseControl::GetSLAMEDPointCloud()
 {
 

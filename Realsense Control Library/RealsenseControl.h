@@ -20,15 +20,6 @@
 #define T265_To_Mask_OFFSET_Y (T265_TO_LAHGI_OFFSET_Y)
 #define T265_To_Mask_OFFSET_Z (0.025)
 
-
-
-
-#include <librealsense2/rs.hpp>
-#include <open3d/geometry/PointCloud.h>
-#include <open3d/pipelines/registration/Registration.h>
-#include <open3d/io/PointCloudIO.h>
-#include <librealsense2/hpp/rs_frame.hpp>
-
 #define NOMINMAX
 #include <Windows.h>
 #include <chrono>
@@ -41,6 +32,14 @@
 #include <queue>
 #include <math.h>
 #include <thread>
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <librealsense2/rs.hpp>
+#include <open3d/geometry/PointCloud.h>
+#include <open3d/pipelines/registration/Registration.h>
+#include <open3d/io/PointCloudIO.h>
+#include <librealsense2/hpp/rs_frame.hpp>
 
 #include "SLAMRobustRecon.h"
 
@@ -57,7 +56,9 @@ private:
 	Eigen::Matrix4d mRTTransformationTrue;
 
 	rs2_pose m_Posedata = rs2_pose();
-	rs2::video_frame m_CurrentVideoFrame = rs2::video_frame(nullptr);
+	cv::Mat m_CurrentVideoFrame;
+	cv::Mat m_CurrentDepthFrame;
+
 	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> m_RTPointCloud;
 	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> m_RTPointCloudTransposed;
 	open3d::geometry::PointCloud m_SLAMEDPointCloud;
@@ -81,7 +82,9 @@ private:
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	rs2_pose GetPoseData();
-	rs2::video_frame GetCurrentVideoFrame();
+	cv::Mat GetCurrentVideoFrame();
+	cv::Mat GetCurrentDepthFrame();
+
 	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> GetRTPointCloud();
 	std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> GetRTPointCloudTransposed();
 	open3d::geometry::PointCloud GetSLAMEDPointCloud();

@@ -126,12 +126,6 @@ void SLAMRobustRecon::RobustReconPipe()
 		mReconPCsMutex.lock();
 		std::vector<PC_TRANSPOS_TUPLE> reconPCs = mReconPCs;
 		mReconPCsMutex.unlock();
-		//std::cout << "Start Robust Recon Pipe! Vector size: " << reconPCs.size() << std::endl;
-
-		//if (reconPCs.size() == 1) { //2		
-		//	mSLAMEDPointCloud = open3d::geometry::PointCloud(std::get<0>(reconPCs[0])).Transform(std::get<1>(reconPCs[0]));
-		//	continue;
-		//}
 
 		if (reconPCs.size() == 0) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -139,14 +133,6 @@ void SLAMRobustRecon::RobustReconPipe()
 		}
 
 		open3d::geometry::PointCloud sumPC;
-
-		//for (int i = 0; i < reconPCs.size(); ++i) {
-		//	sumPC += std::get<0>(reconPCs[i]).Transform(get<1>(reconPCs[i]));
-		//}
-
-		//mSLAMEDPointCloud = (*sumPC.VoxelDownSample(VOXEL_SIZE)).Transform(t265toLACCTransform);
-
-		//continue;
 
 		PoseGraph* poseGraph = new PoseGraph();
 
@@ -173,22 +159,8 @@ void SLAMRobustRecon::RobustReconPipe()
 					//odomentry case
 					auto result = PairwayRegisteration(sourcePC, targetPC, 0.1 , 0.1,  targetTM.inverse() * sourceTM, false);
 					auto& resultTM = get<0>(result);
-					/*writeFile << "ICP" << endl;
-					writeFile << resultTM(0, 0) << ", " << resultTM(0, 1) << ", " << resultTM(0, 2) << ", " << resultTM(0, 3) << endl;
-					writeFile << resultTM(1, 0) << ", " << resultTM(1, 1) << ", " << resultTM(1, 2) << ", " << resultTM(1, 3) << endl;
-					writeFile << resultTM(2, 0) << ", " << resultTM(2, 1) << ", " << resultTM(2, 2) << ", " << resultTM(2, 3) << endl;
-					writeFile << resultTM(3, 0) << ", " << resultTM(3, 1) << ", " << resultTM(3, 2) << ", " << resultTM(3, 3) << endl;*/
-
-
+			
 					auto& resultIM = get<1>(result);
-					/*resultTM = targetTM.inverse() * sourceTM;
-					writeFile << "Maybe True" << endl;
-					writeFile << resultTM(0, 0) << ", " << resultTM(0, 1) << ", " << resultTM(0, 2) << ", " << resultTM(0, 3) << endl;
-					writeFile << resultTM(1, 0) << ", " << resultTM(1, 1) << ", " << resultTM(1, 2) << ", " << resultTM(1, 3) << endl;
-					writeFile << resultTM(2, 0) << ", " << resultTM(2, 1) << ", " << resultTM(2, 2) << ", " << resultTM(2, 3) << endl;
-					writeFile << resultTM(3, 0) << ", " << resultTM(3, 1) << ", " << resultTM(3, 2) << ", " << resultTM(3, 3) << endl;
-
-					resultIM = open3d::pipelines::registration::GetInformationMatrixFromPointClouds(sourcePC, targetPC, 0.1, resultTM);*/
 					odometry = resultTM * odometry;
 					poseGraph->nodes_.push_back(PoseGraphNode(odometry.inverse()));
 					poseGraph->edges_.push_back(PoseGraphEdge(s, t, resultTM, resultIM, false));
@@ -196,13 +168,6 @@ void SLAMRobustRecon::RobustReconPipe()
 				}
 				else 
 				{
-					////loop closure case
-					//auto sourceFeture = open3d::pipelines::registration::ComputeFPFHFeature(std::get<0>(reconPCs[s]), open3d::geometry::KDTreeSearchParamHybrid(VOXEL_SIZE * 5, 100));
-					//auto targetFeture = open3d::pipelines::registration::ComputeFPFHFeature(std::get<0>(reconPCs[t]), open3d::geometry::KDTreeSearchParamHybrid(VOXEL_SIZE * 5, 100));
-					/*auto result = RobustReconPairwayRegisteration(sourcePC, targetPC, *sourceFeture, *targetFeture);
-					/*auto& isSuccess = get<0>(result);					
-					auto& resultTM = get<1>(result);
-					auto& resultIM = get<2>(result);*/
 					bool isSuccess = true;
 					auto& resultTM = targetTM.inverse() * sourceTM;
 					auto resultIM = open3d::pipelines::registration::GetInformationMatrixFromPointClouds(sourcePC, targetPC, 0.1, resultTM);
