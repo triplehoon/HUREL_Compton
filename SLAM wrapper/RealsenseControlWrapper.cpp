@@ -4,7 +4,7 @@
 
 using namespace HUREL::Compton::LACC;
 
-Boolean RealsenseControlWrapper::InitiateRealsense(String^% message)
+Boolean RealsenseControlWrapper::InitiateRealsense(System::String^% message)
 {
 	std::string resultMsg;
 
@@ -12,7 +12,7 @@ Boolean RealsenseControlWrapper::InitiateRealsense(String^% message)
 	{
 		System::Diagnostics::Debug::WriteLine("Initiating Realsense");
 		IsInitiated = m_RealsenseControlNative->InitiateRealsense(&resultMsg);
-		message = gcnew String(resultMsg.c_str());
+		message = gcnew System::String(resultMsg.c_str());
 		System::Diagnostics::Debug::WriteLine("PipeLine Setting Compelete");
 	}
 	catch(...)
@@ -226,15 +226,15 @@ void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vect
 	}
 }
 
-bool HUREL::Compton::LACC::RealsenseControlWrapper::SaveRTPointCloud(String^ fileName)
+bool HUREL::Compton::LACC::RealsenseControlWrapper::SaveRTPointCloud(System::String^ fileName)
 {
 	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(fileName);
 	std::string fileNameString = std::string(static_cast<char*>(ptrToNativeString.ToPointer()));
-	
+
 	return m_RealsenseControlNative->SaveRTPointCloud(fileNameString);
 }
 
-bool HUREL::Compton::LACC::RealsenseControlWrapper::SaveSLAMEDPointCloud(String^ fileName)
+bool HUREL::Compton::LACC::RealsenseControlWrapper::SaveSLAMEDPointCloud(System::String^ fileName)
 {
 	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(fileName);
 	std::string fileNameString = std::string(static_cast<char*>(ptrToNativeString.ToPointer()));
@@ -277,7 +277,7 @@ void RealsenseControlWrapper::GetRealTimeRGB(int% width, int% height, int% strid
 
 
 
-Boolean RealsenseControlWrapper::ResetPipeline(String^% msg)
+Boolean RealsenseControlWrapper::ResetPipeline(System::String^% msg)
 {
 	if (!IsPipelineOn) {
 		msg = "Pipeline is not on";
@@ -294,7 +294,7 @@ void RealsenseControlWrapper::StartRealsensePipelineNative()
 	m_RealsenseControlNative->RealsensesPipeline();
 }
 
-Boolean RealsenseControlWrapper::StartRealsensePipeline(String^% msg)
+Boolean RealsenseControlWrapper::StartRealsensePipeline(System::String^% msg)
 {
 	if (!IsInitiated) {
 		msg = "Realsense need to initiate";
@@ -334,7 +334,7 @@ array<double>^ RealsenseControlWrapper::GetPoseFrame(int% tranckingConf)
 	}
 }
 
-Boolean RealsenseControlWrapper::StartSLAM(String^% msg)
+Boolean RealsenseControlWrapper::StartSLAM(System::String^% msg)
 {
 	if (!m_RealsenseControlNative->IsPipeLineOn) {
 		msg = "Realsense is not on.";

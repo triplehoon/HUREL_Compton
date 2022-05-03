@@ -1,5 +1,8 @@
 #pragma once
 
+#include <chrono>
+#include <iostream>
+#include <time.h>
 #include <ctime>
 #include <vector>
 
@@ -33,6 +36,7 @@ namespace HUREL {
 			InteractionData Scatter;
 			InteractionData Absorber;
 			time_t InteractionTime;
+			std::chrono::milliseconds InteractionTimeInMili;
 			Eigen::Matrix4d DetectorTransformation = Eigen::Matrix4d::Zero();
 		};
 

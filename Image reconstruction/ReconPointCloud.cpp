@@ -79,6 +79,8 @@ void HUREL::Compton::ReconPointCloud::CalculateReconPoint(ListModeData lmData, d
 	}
 }
 
+
+
 double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint)
 {
 	if (lmData.Type != eInterationType::COMPTON)
@@ -130,7 +132,7 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed
 
 	double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
 
-	if (abs(effectedAngle - comptonScatteringAngle) < 3)
+	if (abs(effectedAngle - comptonScatteringAngle) < 5)
 	{
 		return 1;
 	}

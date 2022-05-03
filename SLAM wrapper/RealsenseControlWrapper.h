@@ -34,7 +34,7 @@ namespace HUREL {
 				static  RealsenseControl* m_RealsenseControlNative = &RealsenseControl::instance();
 
 				double AverageDepth;
-				Boolean InitiateRealsense(String^% message);
+				Boolean InitiateRealsense(System::String^% message);
 				Boolean^ IsPipelineOn;
 
 				RealsenseControlWrapper();
@@ -47,19 +47,19 @@ namespace HUREL {
 
 				void GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data);
 
-				Boolean ResetPipeline(String^% msg);
+				Boolean ResetPipeline(System::String^% msg);
 
-				Boolean StartRealsensePipeline(String^% msg);
+				Boolean StartRealsensePipeline(System::String^% msg);
 				void StopRealsensePipeline();
 				
-				Boolean StartSLAM(String^% msg);
+				Boolean StartSLAM(System::String^% msg);
 				void StopSLAM();
 
 				void GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 				void GetReconSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
-				bool SaveRTPointCloud(String^ fileName);
-				bool SaveSLAMEDPointCloud(String^ fileName);
+				bool SaveRTPointCloud(System::String^ fileName);
+				bool SaveSLAMEDPointCloud(System::String^ fileName);
 
 				// C# 소멸자. Finalize 메서드임
 				~RealsenseControlWrapper();

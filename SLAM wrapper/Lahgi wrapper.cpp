@@ -123,7 +123,7 @@ void HUREL::Compton::LahgiWrapper::GetAbsorberSumSpectrum(List<array<double>^>^%
 	}
 }
 
-void HUREL::Compton::LahgiWrapper::SaveListModeData(String^ fileName)
+void HUREL::Compton::LahgiWrapper::SaveListModeData(System::String^ fileName)
 {
 	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(fileName);
 	lahgiControlInstance.SaveListedListModeData(static_cast<char*>(ptrToNativeString.ToPointer()));

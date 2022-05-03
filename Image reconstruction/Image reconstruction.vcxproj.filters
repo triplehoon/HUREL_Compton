@@ -30,7 +30,7 @@
     <ClInclude Include="ReconPointCloud.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="CodeMaskCalc.h">
+    <ClInclude Include="RadiationImage.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,7 +47,7 @@
     <ClCompile Include="ReconPointCloud.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="CodeMaskCalc.cpp">
+    <ClCompile Include="RadiationImage.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -17,6 +17,7 @@
 
 namespace HUREL {
 	namespace Compton {	
+
 		struct sEnergyCheck
 		{
 			double minE;
@@ -30,7 +31,7 @@ namespace HUREL {
 			Module** mAbsorberModules;	//./Module information/QUADScatter1/Gain.csv, LUT.csv ...
 			eMouduleType mModuleType;
 			std::vector<ListModeData> mListedListModeData;
-			
+			std::vector<RadiationImage> mListModeImage;
 			EnergySpectrum mSumSpectrum;
 			EnergySpectrum mScatterSumSpectrum;
 			EnergySpectrum mAbsorberSumSpectrum;
@@ -39,12 +40,13 @@ namespace HUREL {
 
 			//CodeMaks Setting
 			double mMaskThickness = 0.006;
-			static double SimpleCodedBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint);
-			static double mCalcMuOnCodedMask(double x, double y);
-			static double mCalcIsPassOnCodedMask(double x, double y);
+		
 			bool IsOnActiveArea(double x, double y, Module& module);
 
+			bool mIsListModeGenOn = false;
+			void ListModeGenPipe();
 
+			double mListModeImgInterval;
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			static LahgiControl& instance();
@@ -74,7 +76,9 @@ namespace HUREL {
 
 			ReconPointCloud GetReconRealtimePointCloudComptonUntransformed(open3d::geometry::PointCloud& pc, double time);
 			ReconPointCloud GetReconRealtimePointCloudCompton(open3d::geometry::PointCloud& pc, double time);
-			ReconPointCloud GetReconRealtimePointCloudCoded(open3d::geometry::PointCloud& pc, double time);
+
+			void StartListModeGenPipe(double milliseconds = 1000);
+			void StopListModeGenPipe();
 
 		};
 	}

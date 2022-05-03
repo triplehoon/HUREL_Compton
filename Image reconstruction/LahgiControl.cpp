@@ -3,6 +3,7 @@
 #include <mutex>
 
 static std::mutex mListModeDataMutex;
+static std::mutex mListModeImageMutex;
 
 using namespace std;
 using namespace HUREL;
@@ -32,7 +33,8 @@ ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationTyp
 	listmodeData.Absorber = absorber;
 	listmodeData.DetectorTransformation = transformation;
 	time(&listmodeData.InteractionTime);
-
+	listmodeData.InteractionTimeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	
 	return listmodeData;
 }
 
@@ -89,9 +91,9 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		
 		
 		double offsetZ = -(0.220);
-		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD\\Scatter", std::to_string(i), xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, T265_TO_LAHGI_OFFSET_Z);
+		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD\\Scatter", std::to_string(i), xOffset[i], yOffset[i] , 0);
 
-		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD\\Absorber", to_string(i), xOffset[i] + T265_TO_LAHGI_OFFSET_X, yOffset[i] + T265_TO_LAHGI_OFFSET_Y, offsetZ + T265_TO_LAHGI_OFFSET_Z);
+		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD\\Absorber", to_string(i), xOffset[i], yOffset[i], offsetZ);
 	}
 	break;
 	}
@@ -647,32 +649,56 @@ void HUREL::Compton::LahgiControl::ResetEnergySpectrum(int fpgaChannelNumber)
 	return;
 }
 
-ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCoded(open3d::geometry::PointCloud& outPC, double seconds)
+static std::future<void> t1;
+
+void HUREL::Compton::LahgiControl::StartListModeGenPipe(double miliSec)
 {
-	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
+	mListModeImgInterval = miliSec;
+	mIsListModeGenOn = true;
+	mListModeImage.clear();
+	auto func = std::bind(&LahgiControl::ListModeGenPipe, this);
+	t1 = std::async(std::launch::async, func);
+}
 
-	time_t t = time(NULL);
-	mListModeDataMutex.lock();
-	std::vector<ListModeData> tempLMData = mListedListModeData;
-	mListModeDataMutex.unlock();
+void HUREL::Compton::LahgiControl::StopListModeGenPipe()
+{
+	mIsListModeGenOn = false;
+	t1.get();
 
-	std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
-	std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
+	printf("ListMode Gen Pipe is end\n");
+}
 
-#pragma omp parallel for
-	for (int i = 0; i < tempLMData.size(); ++i)
+void HUREL::Compton::LahgiControl::ListModeGenPipe()
+{
+	size_t startIdx = 0;
+	while (mIsListModeGenOn)
 	{
+		Sleep(mListModeImgInterval);
+		mListModeDataMutex.lock();
+		vector<ListModeData> tmp = mListedListModeData;
+		mListModeDataMutex.unlock();
+		long long timeInMiliStart = tmp[startIdx].InteractionTimeInMili.count();
 
-		if (t - tempLMData[i].InteractionTime < static_cast<__int64>(seconds))
+		for (size_t i = startIdx; i < tmp.size() - 1; ++i)
 		{
-			reconPC.CalculateReconPoint(tempLMData[i], SimpleCodedBackprojection);
+			long long timeInMiliEnd = tmp[i + 1].InteractionTimeInMili.count();
+
+			if (timeInMiliEnd - timeInMiliStart > mListModeImgInterval)
+			{
+				vector<ListModeData>::const_iterator first = tmp.begin() + startIdx;
+				vector<ListModeData>::const_iterator last = tmp.begin() + i + 2;
+				vector<ListModeData> effectiveData(first, last);
+				RadiationImage effectiveImg(effectiveData);
+
+				mListModeImageMutex.lock();
+				mListModeImage.push_back(effectiveImg);
+				mListModeImageMutex.unlock();
+				startIdx = i;
+				timeInMiliStart = tmp[startIdx].InteractionTimeInMili.count();
+			}
 		}
-
 	}
-	std::cout << "End Recon: " << tempLMData.size() << std::endl;
-
-
-	return reconPC;
+	
 }
 
 ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudComptonUntransformed(open3d::geometry::PointCloud& outPC, double seconds)
@@ -746,34 +772,6 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 	return reconPC;
 }
 
-double HUREL::Compton::LahgiControl::mCalcMuOnCodedMask(double x, double y)
-{
-	return 0;
-}
-
-double HUREL::Compton::LahgiControl::mCalcIsPassOnCodedMask(double x, double y)
-{
-	double pixelSize = 0.01;
-	unsigned int indexX = UINT_MAX;
-	unsigned int indexY = UINT_MAX;
-	if (pow(x, 2) + pow(y, 2) < pow(0.58, 2))
-	{
-		//inside Circle
-		if (abs(x) < 0.185 && abs(y) < 0.185)
-		{			
-		}
-		else
-		{
-			//But outside CM
-			return 0;
-		}
-	}
-	else
-	{
-		return 0;
-	}
-}
-
 bool HUREL::Compton::LahgiControl::IsOnActiveArea(double x, double y, Module& module)
 {
 	double realPosX = x - module.mModuleOffsetX;
@@ -787,32 +785,4 @@ bool HUREL::Compton::LahgiControl::IsOnActiveArea(double x, double y, Module& mo
 	{
 		return false;
 	}
-}
-
-double HUREL::Compton::LahgiControl::SimpleCodedBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint)
-{
-	if (lmData.Type != eInterationType::CODED)
-	{
-		return 0;
-	}
-	
-	Eigen::Vector4d detectorVector(0, 0, 1, 1);
-	detectorVector = lmData.DetectorTransformation * detectorVector;
-
-	double zLength = (imgPoint - lmData.Scatter.TransformedInteractionPoint.head<3>()).dot(detectorVector.head<3>());
-	if (zLength < 0)
-	{
-		return 0;
-	}
-
-	double m = T265_To_Mask_OFFSET_Z - T265_TO_LAHGI_OFFSET_Z;
-	double n = zLength - m;
-
-	Eigen::Vector3d internalDivPoint = (m * imgPoint + n * lmData.Scatter.TransformedInteractionPoint.head<3>()) / (m + n);
-
-
-
-	double reconValue = mCalcIsPassOnCodedMask(internalDivPoint[0] - T265_To_Mask_OFFSET_X, internalDivPoint[1] - T265_To_Mask_OFFSET_Y);
-
-	return reconValue;
 }

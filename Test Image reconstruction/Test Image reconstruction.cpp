@@ -25,6 +25,7 @@
 #include "RealsenseControl.h"
 #include "LahgiControl.h"
 #include "CodeMaskCalc.h"
+#include "RadiationImage.h"
 
 using namespace cv;
 using namespace HUREL::Compton;
@@ -34,126 +35,134 @@ void ShowCV_32SAsJet(Mat img, int size);
 void RemapAsSherical(const Mat& source, Mat& target);
 
 std::tuple<bool, Eigen::Matrix4d_u, Eigen::Matrix6d> PairwayRgbdRegisteration(open3d::geometry::RGBDImage& source, open3d::geometry::RGBDImage& target);
-int main2()
-{
-    RealsenseControl rs = RealsenseControl::instance();
-    
-    std::string msg;
-    rs.InitiateRealsense(&msg);
-    std::cout << msg <<std::endl;
-    rs.IsPipeLineOn = true;
-    
-    std::thread t([&] {rs.RealsensesPipeline(); });
 
-    std::vector<open3d::geometry::RGBDImage> rgbdImgs;
-    while (true)
-    {              
+#include <stdio.h>
 
-        Mat depth = rs.GetCurrentDepthFrame();
 
-        if (depth.cols < 1)
-        {
-            Sleep(1000);
 
-            continue;
-        }
 
-        open3d::geometry::Image depthImage;
-        
-        depthImage.Prepare(depth.cols, depth.rows, 1, 4);
-        std::cout << depth.cols << ", " << depth.rows << std::endl;
-        for (size_t i = 0; i < depthImage.data_.size(); ++i)
-        {
-            depthImage.data_[i] = depth.data[i];
-        }
-      
-        Mat colorBGRResize = rs.GetCurrentVideoFrame();
-        if (colorBGRResize.cols < 1)
-        {
-            continue;
-        }
-        
-        Mat colorBGR;
-        cv::resize(colorBGRResize, colorBGR, Size(depth.cols, depth.rows), 0, 0, INTER_NEAREST_EXACT);
-
-        Mat color;
-        cv::cvtColor(colorBGR, color, COLOR_BGR2RGB);
-        open3d::geometry::Image colorImage;
-        colorImage.Prepare(color.cols, color.rows, 3, 1);
-        std::cout << color.cols << ", " << color.rows << std::endl;
-        for (size_t i = 0; i < colorImage.data_.size(); ++i)
-        {
-            colorImage.data_[i] = color.data[i];
-        }
-       
-        open3d::geometry::RGBDImage rgbd(colorImage, depthImage);
-        rgbdImgs.push_back(rgbd);
-        Sleep(100);
-        if (rgbdImgs.size() == 30)
-        {
-            break;
-        }
-        //auto image_ptr = std::make_shared<open3d::geometry::RGBDImage>();
-        //*image_ptr = rgbd;
-        //open3d::visualization::DrawGeometries({ image_ptr });
-    }
-    std::cout << "End data\n";
-    auto volume = open3d::pipelines::integration::ScalableTSDFVolume(0.02, 0.015, open3d::pipelines::integration::TSDFVolumeColorType::RGB8, 16, 4);
-    open3d::camera::PinholeCameraIntrinsic intrinsic(rgbdImgs[0].color_.width_, rgbdImgs[0].color_.height_, 418.131, 417.802, 419.79, 235.873);
-    volume.Integrate(rgbdImgs[0], intrinsic, Eigen::Matrix4d_u::Identity());
-    Eigen::Matrix4d_u odometry = Eigen::Matrix4d_u::Identity();
-    open3d::geometry::LineSet line;
-    std::shared_ptr <open3d::geometry::LineSet> lineptr = std::make_shared<open3d::geometry::LineSet>(line);
-    for (int i = 0; i < rgbdImgs.size() - 1; ++i)
-    {
-        clock_t start, end1, end2;
-        start = clock();
-        //auto pair = PairwayRgbdRegisteration(rgbdImgs[i], rgbdImgs[i + 1]);
-        end1 = clock();
-        std::cout << "Pairway: " << (double)(end1 - start) << " ms\n";
-        //Eigen::Matrix4d_u diff = std::get<1>(pair);
-        //odometry = diff * odometry;
-        if (true)//std::get<0>(pair))
-        {
-            std::cout << odometry << std::endl;
-        }
-        else
-        {
-            std::cout << "fail" << std::endl;
-        }
-        auto odoInverse = odometry;    
-        start = clock();
-        volume.Integrate(rgbdImgs[i + 1], intrinsic, odoInverse);
-        end2 = clock();
-        std::cout << "Integrate: " << (double)(end2 - start) << " ms\n";
-    }
-    auto pc = volume.ExtractPointCloud();
-    Eigen::Vector3d lookAt(0, 0, 0);
-    Eigen::Vector3d up(0, -1, 0);
-    Eigen::Vector3d front(0, 0, -1);
-    double zoom = 0.02;
-    
-    open3d::visualization::DrawGeometries({ pc, lineptr }, "Test", 640*2, 2*480, 50, 50, false, false, false, &lookAt, &up, &front, &zoom);
-
-    auto pcFiltered= pc->VoxelDownSample(0.04);
-    pcFiltered = std::get<0>(pcFiltered->RemoveStatisticalOutliers(20, 2));
-    open3d::visualization::DrawGeometries({ pcFiltered, lineptr }, "Test", 640 * 2, 2 * 480, 50, 50, false, false, false, & lookAt, & up, & front, & zoom);
-    
-    rs.IsPipeLineOn = false;
-    t.join();
-    return 0;
-}
-std::tuple<bool, Eigen::Matrix4d_u, Eigen::Matrix6d> PairwayRgbdRegisteration(open3d::geometry::RGBDImage& source, open3d::geometry::RGBDImage& target)
-{        
-    open3d::camera::PinholeCameraIntrinsic intrinsic(source.color_.width_, source.color_.height_, 418.131, 417.802, 419.79, 235.873);
-    return open3d::pipelines::odometry::ComputeRGBDOdometry(source, target, intrinsic, Eigen::Matrix4d::Identity(), open3d::pipelines::odometry::RGBDOdometryJacobianFromHybridTerm());
-}
+//int main2()
+//{
+//    Camera* cmera = 0;
+//
+//}
+//
+//
+//int main3()
+//{
+//    RealsenseControl rs = RealsenseControl::instance();
+//    
+//    std::string msg;
+//    rs.InitiateRealsense(&msg);
+//    std::cout << msg <<std::endl;
+//    rs.IsPipeLineOn = true;
+//    
+//    std::thread t([&] {rs.RealsensesPipeline(); });
+//
+//    std::vector<open3d::geometry::RGBDImage> rgbdImgs;
+//    while (true)
+//    {              
+//
+//        Mat depth = rs.GetCurrentDepthFrame();
+//
+//        if (depth.cols < 1)
+//        {
+//            Sleep(1000);
+//
+//            continue;
+//        }
+//
+//        open3d::geometry::Image depthImage;
+//        
+//        depthImage.Prepare(depth.cols, depth.rows, 1, 4);
+//        std::cout << depth.cols << ", " << depth.rows << std::endl;
+//        for (size_t i = 0; i < depthImage.data_.size(); ++i)
+//        {
+//            depthImage.data_[i] = depth.data[i];
+//        }
+//      
+//        Mat colorBGRResize = rs.GetCurrentVideoFrame();
+//        if (colorBGRResize.cols < 1)
+//        {
+//            continue;
+//        }
+//        
+//        Mat colorBGR;
+//        cv::resize(colorBGRResize, colorBGR, Size(depth.cols, depth.rows), 0, 0, INTER_NEAREST_EXACT);
+//
+//        Mat color;
+//        cv::cvtColor(colorBGR, color, COLOR_BGR2RGB);
+//        open3d::geometry::Image colorImage;
+//        colorImage.Prepare(color.cols, color.rows, 3, 1);
+//        std::cout << color.cols << ", " << color.rows << std::endl;
+//        for (size_t i = 0; i < colorImage.data_.size(); ++i)
+//        {
+//            colorImage.data_[i] = color.data[i];
+//        }
+//       
+//        open3d::geometry::RGBDImage rgbd(colorImage, depthImage);
+//        rgbdImgs.push_back(rgbd);
+//        Sleep(100);
+//        if (rgbdImgs.size() == 20)
+//        {
+//            break;
+//        }
+//        auto image_ptr = std::make_shared<open3d::geometry::RGBDImage>();
+//        *image_ptr = rgbd;
+//        open3d::visualization::DrawGeometries({ image_ptr });
+//    }
+//    std::cout << "End data\n";
+//    auto volume = open3d::pipelines::integration::ScalableTSDFVolume(0.02, 0.015, open3d::pipelines::integration::TSDFVolumeColorType::RGB8, 16, 4);
+//    open3d::camera::PinholeCameraIntrinsic intrinsic(rgbdImgs[0].color_.width_, rgbdImgs[0].color_.height_, 418.131, 417.802, 419.79, 235.873);
+//    volume.Integrate(rgbdImgs[0], intrinsic, Eigen::Matrix4d_u::Identity());
+//    Eigen::Matrix4d_u odometry = Eigen::Matrix4d_u::Identity();
+//    open3d::geometry::LineSet line;
+//    std::shared_ptr <open3d::geometry::LineSet> lineptr = std::make_shared<open3d::geometry::LineSet>(line);
+//    for (int i = 0; i < rgbdImgs.size() - 1; ++i)
+//    {
+//        clock_t start, end1, end2;
+//        start = clock();
+//        auto pair = PairwayRgbdRegisteration(rgbdImgs[i], rgbdImgs[i + 1]);
+//        end1 = clock();
+//        std::cout << "Pairway: " << (double)(end1 - start) << " ms\n";
+//        Eigen::Matrix4d_u diff = std::get<1>(pair);
+//        odometry = diff * odometry;
+//        if (true)//std::get<0>(pair))
+//        {
+//            std::cout << odometry << std::endl;
+//        }
+//        else
+//        {
+//            std::cout << "fail" << std::endl;
+//        }
+//        auto odoInverse = odometry;    
+//        start = clock();
+//        volume.Integrate(rgbdImgs[i + 1], intrinsic, odoInverse);
+//        end2 = clock();
+//        std::cout << "Integrate: " << (double)(end2 - start) << " ms\n";
+//    }
+//    auto pc = volume.ExtractPointCloud();
+//    Eigen::Vector3d lookAt(0, 0, 0);
+//    Eigen::Vector3d up(0, -1, 0);
+//    Eigen::Vector3d front(0, 0, -1);
+//    double zoom = 0.02;
+//    
+//    open3d::visualization::DrawGeometries({ pc, lineptr }, "Test", 640 * 2, 2 * 480, 50, 50, false, false, false);// , & lookAt, & up, & front, & zoom);
+//    rs.IsPipeLineOn = false;
+//    t.join();
+//    return 0;
+//}
+//std::tuple<bool, Eigen::Matrix4d_u, Eigen::Matrix6d> PairwayRgbdRegisteration(open3d::geometry::RGBDImage& source, open3d::geometry::RGBDImage& target)
+//{        
+//    open3d::camera::PinholeCameraIntrinsic intrinsic(source.color_.width_, source.color_.height_, 418.131, 417.802, 419.79, 235.873);
+//    return open3d::pipelines::odometry::ComputeRGBDOdometry(source, target, intrinsic, Eigen::Matrix4d::Identity(), open3d::pipelines::odometry::RGBDOdometryJacobianFromHybridTerm());
+//}
 
 int main()
 {
     LahgiControl lahgi = LahgiControl::instance();
     lahgi.SetType(eMouduleType::TEST);
-    lahgi.LoadListedListModeData("Cs137_Front_10s_LMData.csv");
+    lahgi.LoadListedListModeData("E:\\OneDrive - 한양대학교\\바탕 화면\\CC,CA code\\Cs137_Front_TopLeft_1.5m_60s_LMData.csv");
 
     std::vector<ListModeData> lmData = lahgi.GetListedListModeData();
 
@@ -162,18 +171,12 @@ int main()
         lmData[i].Scatter.RelativeInteractionPoint[0] -= T265_TO_LAHGI_OFFSET_X;
         lmData[i].Scatter.RelativeInteractionPoint[1] -= T265_TO_LAHGI_OFFSET_Y;
         lmData[i].Scatter.RelativeInteractionPoint[2] -= T265_TO_LAHGI_OFFSET_Z;
+        lmData[i].Absorber.RelativeInteractionPoint[0] -= T265_TO_LAHGI_OFFSET_X;
+        lmData[i].Absorber.RelativeInteractionPoint[1] -= T265_TO_LAHGI_OFFSET_Y;
+        lmData[i].Absorber.RelativeInteractionPoint[2] -= T265_TO_LAHGI_OFFSET_Z;
     }
-
-    Mat img = MakeDetectorResponse(lmData);
-    ShowCV_32SAsJet(img, 1000);
-    Mat scaleG;
-    int ResImporv = 2;
-    cv::resize(CodedMaskMat(), scaleG, Size(230, 230), 0, 0, INTER_NEAREST_EXACT);
-    
-    Mat reconImg;
-    cv::filter2D(img, reconImg, CV_32S, scaleG);
-    reconImg = reconImg;
-    ShowCV_32SAsJet(reconImg, 1000);
+    RadiationImage radImg(lmData);
+   
     return 0;
 }
 Mat MakeDetectorResponse(std::vector<ListModeData> lmData)
@@ -209,60 +212,6 @@ Mat MakeDetectorResponse(std::vector<ListModeData> lmData)
         }
     }    
     return img;
-}
-void ShowCV_32SAsJet(Mat img, int size)
-{
-    if (img.type() != CV_32S)
-    {
-        return;
-    }
-    Mat normImg(img.rows, img.cols, CV_8UC1, Scalar(0));
-    double minValue;
-    double maxValue;
-    cv::minMaxIdx(img, &minValue, &maxValue);
-    for (int i = 0; i < img.rows; i++)
-    {
-        for (int j = 0; j < img.cols; j++)
-        {
-            normImg.at<uchar>(i, j) = static_cast<uchar>((static_cast<double>(img.at<int>(i, j)) - minValue) / (maxValue - minValue) * 255);
-        }
-    }
-    Mat colorImg;
-    cv::applyColorMap(normImg, colorImg, COLORMAP_JET);
-    Mat showImg;
-    
-    cv::resize(colorImg, showImg, Size(size, size), 0, 0, INTER_NEAREST_EXACT);
-    imshow("img", showImg);
-    waitKey(0);
-}
-static Mat CodedMaskMat()
-{
-    static bool isMaskMade = false;
-    static Mat mask;
-    if (isMaskMade)
-    {
-        return mask;
-    }
-    else
-    {
-        mask = Mat(37, 37, CV_32S);
-        for (int i = 0; i < 37; ++i)
-        {
-            for (int j = 0; j < 37; ++j)
-            {
-                if (HUREL::Compton::mCodeMask[i][j])
-                {
-                    mask.at<int>(i, j) = 1;
-                }
-                else
-                {
-                    mask.at<int>(i, j) = -1;
-                }                              
-            }
-        }
-        isMaskMade = true;
-        return mask;
-    }
 }
 
 // 프로그램 실행: <Ctrl+F5> 또는 [디버그] > [디버깅하지 않고 시작] 메뉴

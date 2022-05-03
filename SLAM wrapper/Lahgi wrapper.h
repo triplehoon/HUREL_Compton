@@ -37,7 +37,7 @@ namespace HUREL {
 
 			void ResetListmodeData();
 
-			void SaveListModeData(String^ fileName);
+			void SaveListModeData(System::String^ fileName);
 
 			void GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount);
 

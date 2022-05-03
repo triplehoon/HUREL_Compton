@@ -134,10 +134,16 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 	std::tuple<double, double, double> RGB_Color;
 	auto Texture_Coord = points.get_texture_coordinates();
 	auto Vertex = points.get_vertices();
-	Eigen::Matrix4d t265toLACCTransform;
-	t265toLACCTransform << -1, 0, 0, 0,
+	Eigen::Matrix4d t265toLACCAxisTransform;
+	t265toLACCAxisTransform << -1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, -1, 0,
+		0, 0, 0, 1;
+
+	Eigen::Matrix4d t265toLACCPosTransform;
+	t265toLACCAxisTransform << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
+		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
+		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
 		0, 0, 0, 1;
 
 	Eigen::Vector3d D455ToT265Coord = { 0.031, -0.029, 0 };
@@ -173,7 +179,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 
 
 
-	return std::make_tuple(cloud, t265toLACCTransform * TransF, out_uv);
+	return std::make_tuple(cloud, t265toLACCPosTransform * t265toLACCAxisTransform * TransF, out_uv);
 
 
 }
@@ -336,7 +342,7 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 6);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 1);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3f);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0f);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0f);
@@ -433,16 +439,12 @@ void RealsenseControl::RealsensesPipeline()
 				
 			}
 			if (depth) {
-				//System::Diagnostics::Debug::WriteLine("Frame");			
-				rs2::frame depth2 = depth;
-
-
-				
-				depth2 = dec_filter.process(depth2);
-				depth2 = thr_filter.process(depth2);
-				depth2 = spat_filter.process(depth2);
-				depth2 = temp_filter.process(depth2);
-				points = pc.calculate(depth2);
+				//System::Diagnostics::Debug::WriteLine("Frame");						
+				depth = dec_filter.process(depth);
+				depth = thr_filter.process(depth);
+				depth = spat_filter.process(depth);
+				depth = temp_filter.process(depth);
+				points = pc.calculate(depth);
 			}
 			if (pose) {
 				pose_frame = pose;
@@ -470,6 +472,14 @@ void RealsenseControl::RealsensesPipeline()
 				
 				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), std::get<2>(realTimeCloudPoseTransposed));
 				mRTTransformation = std::get<1>(realTimeCloudPoseTransposed);
+
+				const int w = depth.as<rs2::video_frame>().get_width();
+				const int h = depth.as<rs2::video_frame>().get_height();
+				Mat depth16UC = Mat(Size(w, h), CV_16UC1, (void*)depth.get_data(), Mat::AUTO_STEP);
+				Mat depth32F;
+				depth16UC.convertTo(depth32F, CV_32FC1, depthScale);
+				m_CurrentDepthFrame = depth32F;
+
 				rtMutex.unlock();
 
 
