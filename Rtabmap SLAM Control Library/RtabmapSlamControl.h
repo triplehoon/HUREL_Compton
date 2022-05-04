@@ -38,18 +38,20 @@ namespace HUREL
 	namespace Compton
 	{
 
-		class LahgiRtabmapSlam
+		class RtabmapSlamControl
 		{
 		public:
+			bool Initiate(std::string* outMessage);
+
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-				Eigen::Matrix4d GetOdomentry();
+			Eigen::Matrix4d GetOdomentry();
 			cv::Mat GetCurrentVideoFrame();
 			cv::Mat GetCurrentDepthFrame();
 			std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> GetRTPointCloud();
 			std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> GetRTPointCloudTransposed();
 
 		public:
-			static LahgiRtabmapSlam& instance();
+			static RtabmapSlamControl& instance();
 		};
 
 

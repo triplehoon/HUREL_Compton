@@ -15,10 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Rtabmap SLAM.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LahgiRtabmapSlam.cpp">
+    <ClInclude Include="RtabmapSlamControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="RtabmapSlamControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
