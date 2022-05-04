@@ -214,7 +214,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LahgiRtabmapSlam.cpp" />
     <ClCompile Include="Rtabmap SLAM.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LahgiRtabmapSlam.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

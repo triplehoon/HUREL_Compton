@@ -741,7 +741,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 {
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
 
-	time_t t = time(NULL);
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	mListModeDataMutex.lock();
 
 	std::vector<ListModeData> tempLMData = mListedListModeData;
@@ -753,7 +753,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{
 
-		if (t - tempLMData[i].InteractionTime < static_cast<__int64>(seconds))
+		if (t.count() - tempLMData[i].InteractionTimeInMili.count() < static_cast<__int64>(seconds))
 		{
 			reconStartIndex = i;
 			break;
@@ -767,6 +767,108 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 		reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleComptonBackprojection);
 	}
 	std::cout << "End Recon: " << tempLMData.size() << std::endl;
+
+
+	return reconPC;
+}
+
+ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudCoded(open3d::geometry::PointCloud& outPC, double seconds)
+{
+	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
+
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	mListModeImageMutex.lock();
+
+	std::vector<RadiationImage> tempLMData = mListModeImage;
+	mListModeImageMutex.unlock();
+
+	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
+	//std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
+	int reconStartIndex = 0;
+	for (int i = 0; i < tempLMData.size(); ++i)
+	{
+
+		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(seconds))
+		{
+			reconStartIndex = i;
+			break;
+		}
+
+	}
+
+	for (int i = reconStartIndex; i < tempLMData.size(); ++i)
+	{
+		reconPC.CalculateReconPointCoded(tempLMData[i]);
+	}
+	std::cout << "End GetReconOverlayPointCloudCoded: " << tempLMData.size() << std::endl;
+
+
+	return reconPC;
+}
+
+ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudCompton(open3d::geometry::PointCloud& outPC, double seconds)
+{
+	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
+
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	mListModeImageMutex.lock();
+
+	std::vector<RadiationImage> tempLMData = mListModeImage;
+	mListModeImageMutex.unlock();
+
+	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
+	//std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
+	int reconStartIndex = 0;
+	for (int i = 0; i < tempLMData.size(); ++i)
+	{
+
+		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(seconds))
+		{
+			reconStartIndex = i;
+			break;
+		}
+
+	}
+
+	for (int i = reconStartIndex; i < tempLMData.size(); ++i)
+	{
+		reconPC.CalculateReconPointCompton(tempLMData[i]);
+	}
+	std::cout << "End GetReconOverlayPointCloudCompton: " << tempLMData.size() << std::endl;
+
+
+	return reconPC;
+}
+
+ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudHybrid(open3d::geometry::PointCloud& outPC, double seconds)
+{
+	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
+
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	mListModeImageMutex.lock();
+
+	std::vector<RadiationImage> tempLMData = mListModeImage;
+	mListModeImageMutex.unlock();
+
+	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
+	//std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
+	int reconStartIndex = 0;
+	for (int i = 0; i < tempLMData.size(); ++i)
+	{
+
+		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(seconds))
+		{
+			reconStartIndex = i;
+			break;
+		}
+
+	}
+
+	for (int i = reconStartIndex; i < tempLMData.size(); ++i)
+	{
+		reconPC.CalculateReconPointHybrid(tempLMData[i]);
+	}
+	std::cout << "End GetReconOverlayPointCloudHybrid: " << tempLMData.size() << std::endl;
 
 
 	return reconPC;

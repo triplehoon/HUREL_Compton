@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SRE3021 API", "SRE3021 API\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test Image reconstruction", "Test Image reconstruction\Test Image reconstruction.vcxproj", "{B4DB5AF4-F09F-4BBA-9122-127AC30229F0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rtabmap SLAM", "C:\Users\triplehoon\source\repos\triplehoon\HUREL_Compton\Rtabmap SLAM\Rtabmap SLAM.vcxproj", "{70362933-37B2-4E4E-9F3B-63E095D8E785}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rtabmap SLAM", "Rtabmap SLAM\Rtabmap SLAM.vcxproj", "{70362933-37B2-4E4E-9F3B-63E095D8E785}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

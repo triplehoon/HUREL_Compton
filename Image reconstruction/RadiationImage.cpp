@@ -89,27 +89,19 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 
 	for (ListModeData lm : data)
 	{
-		if (lm.Scatter.InteractionEnergy > 620 && lm.Scatter.InteractionEnergy < 700)
-		{
-			double& interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
-			double& interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
 
-			int iX = findIndex(interactionPoseX, -Det_W / 2, Det_W / pixelCount);
-			int iY = findIndex(interactionPoseY, -Det_W / 2, Det_W / pixelCount);
-			if (iX >= 0 && iY >= 0 && iX < pixelCount && iY < pixelCount)
-			{
-				++responseImgPtr[pixelCount * iY + iX];
-			}
+		double& interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
+		double& interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
+
+		int iX = findIndex(interactionPoseX, -Det_W / 2, Det_W / pixelCount);
+		int iY = findIndex(interactionPoseY, -Det_W / 2, Det_W / pixelCount);
+		if (iX >= 0 && iY >= 0 && iX < pixelCount && iY < pixelCount)
+		{
+			++responseImgPtr[pixelCount * iY + iX];
 		}
 		
-		
 		if (lm.Type == eInterationType::COMPTON)
-		{
-			double e = lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy;
-			if (e < 620 || e > 700)
-			{
-				continue;
-			}
+		{		
 			for (int i = 0; i < pixelCount; ++i)
 			{
 				for (int j = 0; j < pixelCount; ++j)
@@ -154,3 +146,49 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 	ShowCV_32SAsJet(mComptonImage, 1000);
 	ShowCV_32SAsJet(mHybridImage, 1000);
 }
+
+double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadiationImagingMode mode)
+{
+	double imagePlaneZ = S2M + M2D + 0.01;
+	Eigen::Vector3d detectorNormalVector(0, 0, 1);
+	Eigen::Vector4d point4d(point.x(), point.y(), point.z(), 1);
+	Eigen::Vector4d transformedPoint = mDetectorTransformation.inverse() * point4d;
+	double xPoseOnImgPlane = transformedPoint.x() * imagePlaneZ / transformedPoint.z();
+	double yPoseOnImgPlane = transformedPoint.x() * imagePlaneZ / transformedPoint.z();
+
+
+	int iX = findIndex(xPoseOnImgPlane, -Det_W / 2, Det_W / pixelCount);
+	int iY = findIndex(yPoseOnImgPlane, -Det_W / 2, Det_W / pixelCount);
+
+
+	if (iX >= 0 && iY >= 0 && iX < pixelCount && iY < pixelCount)
+	{
+		__int32 value = 0;
+		switch (mode)
+		{
+		case HUREL::Compton::eRadiationImagingMode::CODED:
+			value = static_cast<__int32*>(static_cast<void*>(mCodedImage.ptr()))[pixelCount * iY + iX];
+			break;
+		case HUREL::Compton::eRadiationImagingMode::COMPTON:
+			value = static_cast<__int32*>(static_cast<void*>(mComptonImage.ptr()))[pixelCount * iY + iX];
+		case HUREL::Compton::eRadiationImagingMode::HYBRID:
+			value = static_cast<__int32*>(static_cast<void*>(mHybridImage.ptr()))[pixelCount * iY + iX];
+			break;
+		default:
+			assert(false);
+			return 0.0;
+			break;
+		}
+		return static_cast<double>(value);
+	}
+	else
+	{
+		return 0.0;
+	}
+	
+
+
+
+	
+}
+

@@ -10,6 +10,7 @@
 
 namespace HUREL
 {
+
 	namespace Compton
 	{
 		struct RGBA {
@@ -19,6 +20,7 @@ namespace HUREL
 			double A;
 		} typedef RGBA_t;
 
+		class RadiationImage;
 
 		class ReconPointCloud : public open3d::geometry::PointCloud
 		{
@@ -32,7 +34,11 @@ namespace HUREL
 			double maxReoconValue = 0;
 
 			void CalculateReconPoint(ListModeData lmData, double(*calcFunc)(ListModeData, Eigen::Vector3d));
-			//void CalculateReconPoint(RadiationImage& lmImage);
+			void CalculateReconPointCoded(RadiationImage& lmImage);
+			void CalculateReconPointCompton(RadiationImage& lmImage);
+			void CalculateReconPointHybrid(RadiationImage& lmImage);
+
+
 
 			static double SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint);
 

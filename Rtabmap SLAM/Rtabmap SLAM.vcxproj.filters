@@ -18,5 +18,13 @@
     <ClCompile Include="Rtabmap SLAM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LahgiRtabmapSlam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LahgiRtabmapSlam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

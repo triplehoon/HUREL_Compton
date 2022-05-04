@@ -79,7 +79,53 @@ void HUREL::Compton::ReconPointCloud::CalculateReconPoint(ListModeData lmData, d
 	}
 }
 
+void HUREL::Compton::ReconPointCloud::CalculateReconPointCoded(RadiationImage& lmImage)
+{
+	size_t size = points_.size();
+	maxReoconValue = -DBL_MAX;
+#pragma omp parallel for
+	for (int i = 0; i < size; ++i)
+	{
+#pragma omp atomic
+		reconValues_[i] += lmImage.OverlayValue(points_[i], eRadiationImagingMode::CODED);
+		if (reconValues_[i] > maxReoconValue)
+		{
+			maxReoconValue = reconValues_[i];
+		}
+	}
+}
 
+void HUREL::Compton::ReconPointCloud::CalculateReconPointCompton(RadiationImage& lmImage)
+{
+	size_t size = points_.size();
+	maxReoconValue = -DBL_MAX;
+#pragma omp parallel for
+	for (int i = 0; i < size; ++i)
+	{
+#pragma omp atomic
+		reconValues_[i] += lmImage.OverlayValue(points_[i], eRadiationImagingMode::COMPTON);
+		if (reconValues_[i] > maxReoconValue)
+		{
+			maxReoconValue = reconValues_[i];
+		}
+	}
+}
+
+void HUREL::Compton::ReconPointCloud::CalculateReconPointHybrid(RadiationImage& lmImage)
+{
+	size_t size = points_.size();
+	maxReoconValue = -DBL_MAX;
+#pragma omp parallel for
+	for (int i = 0; i < size; ++i)
+	{
+#pragma omp atomic
+		reconValues_[i] += lmImage.OverlayValue(points_[i], eRadiationImagingMode::HYBRID);
+		if (reconValues_[i] > maxReoconValue)
+		{
+			maxReoconValue = reconValues_[i];
+		}
+	}
+}
 
 double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint)
 {

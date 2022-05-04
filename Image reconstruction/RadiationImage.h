@@ -68,12 +68,10 @@ namespace HUREL {
 
 		class RadiationImage
 		{
-		private:
-			std::vector<ListModeData> mListedListModeData;
-			
+		public:	
+			std::vector<ListModeData> mListedListModeData;			
 			Eigen::Matrix4d mDetectorTransformation;
 
-		public:
 
 			//		  ^
 			//<-- x   | 
@@ -88,6 +86,8 @@ namespace HUREL {
 			Mat mHybridImage;
 			
 			RadiationImage(std::vector<ListModeData> data);			
+
+			double OverlayValue(Eigen::Vector3d point, eRadiationImagingMode mode);
 		};
 	};
 };
