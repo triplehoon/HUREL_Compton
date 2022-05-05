@@ -78,22 +78,17 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 	//
 	double xOffset[4]{ -offset, -offset, +offset, +offset };
 	double yOffset[4]{ +offset, -offset, -offset, +offset };
+	string scatterSerial = "50777";
+	string absorberSerial = "50784";
 	for (int i = 0; i < 4; ++i)
 	{
-		string slutFileDirectory = string("config\\QUAD\\Scatter\\LUT\\") + to_string(i) + string(".csv");
-		string sgainFileDirectory = string("config\\QUAD\\Scatter\\Gain\\") + to_string(i) + string(".csv");
-
-		string alutFileDirectory = string("config\\QUAD\\Absorber\\LUT\\") + to_string(i) + string(".csv");
-		string againFileDirectory = string("config\\QUAD\\Absorber\\Gain\\") + to_string(i) + string(".csv");
-
-
 		double gain[10];
 		
 		
 		double offsetZ = -(0.220);
-		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD\\Scatter", std::to_string(i), xOffset[i], yOffset[i] , 0);
+		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i] , 0);
 
-		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD\\Absorber", to_string(i), xOffset[i], yOffset[i], offsetZ);
+		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], offsetZ);
 	}
 	break;
 	}
@@ -174,8 +169,14 @@ HUREL::Compton::LahgiControl::~LahgiControl()
 
 void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk)
 {
-	Eigen::Matrix4d deviceTransformation = RealsenseControl::instance().GetPoseDataEigen();
+	Eigen::Matrix4d t265toLACCPosTransform;
+	t265toLACCPosTransform << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
+		   					0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
+		   					0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
+		   					0, 0, 0, 1;
+	Eigen::Matrix4d deviceTransformation = RealsenseControl::instance().GetPoseDataEigen()*t265toLACCPosTransform;
 
+	
 
 
 	switch (mModuleType)
@@ -676,7 +677,12 @@ void HUREL::Compton::LahgiControl::ListModeGenPipe()
 		Sleep(mListModeImgInterval);
 		mListModeDataMutex.lock();
 		vector<ListModeData> tmp = mListedListModeData;
+		if (tmp.size() == 0)
+		{
+			return;
+		}
 		mListModeDataMutex.unlock();
+		
 		long long timeInMiliStart = tmp[startIdx].InteractionTimeInMili.count();
 
 		for (size_t i = startIdx; i < tmp.size() - 1; ++i)
@@ -766,7 +772,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 	{
 		reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleComptonBackprojection);
 	}
-	std::cout << "End Recon: " << tempLMData.size() << std::endl;
+	std::cout << "GetReconRealtimePointCloudCompton End Recon: " << tempLMData.size() << std::endl;
 
 
 	return reconPC;

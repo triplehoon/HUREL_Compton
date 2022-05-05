@@ -1,7 +1,9 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
+#include <Eigen/Dense>
 #include <Eigen/Core>
+
 #include <open3d/geometry/Octree.h>
 
 #include "ListModeData.h"

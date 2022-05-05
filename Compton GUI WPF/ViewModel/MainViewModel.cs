@@ -159,7 +159,7 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     continue;
                 }
-                temp1.Add(new MlpePositionInfo(lmdata[0], lmdata[1] + 0.308));
+                temp1.Add(new MlpePositionInfo(lmdata[0], lmdata[1]));
                 
             }
             AbsorberPositionData = temp1;
@@ -172,7 +172,7 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     continue;
                 }
-                temp2.Add(new MlpePositionInfo(lmdata[0], lmdata[1] + 0.308));
+                temp2.Add(new MlpePositionInfo(lmdata[0], lmdata[1]));
 
             }
             

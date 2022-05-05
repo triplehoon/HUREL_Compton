@@ -179,9 +179,10 @@
                             <hx:PointGeometryModel3D Geometry="{Binding SLAMReconPointCloud}" Color="White" FixedSize="True" Size="10,10">
                             </hx:PointGeometryModel3D>
                             <hx:PointGeometryModel3D Geometry="{Binding SLAMPointCloud}" Color="White" FixedSize="True" Size="3,3">
-                            </hx:PointGeometryModel3D>
+                            </hx:PointGeometryModel3D> 
                             <hx:LineGeometryModel3D Geometry="{Binding SLAMPoseInfo}" Color="LightGreen" Thickness="4"/>
-                            
+                            <hx:PointGeometryModel3D Geometry="{Binding RTPointCloud}" Color="White" FixedSize="True" Size="3,3">
+                            </hx:PointGeometryModel3D>
 
                         </hx:Viewport3DX>
                         <StackPanel Orientation="Horizontal">

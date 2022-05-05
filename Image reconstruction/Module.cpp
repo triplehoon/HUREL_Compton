@@ -38,21 +38,23 @@ HUREL::Compton::Module::Module(eMouduleType moduleType,
             {
                 mGain[i] = gain[i];
             }
+            cout << "Module.cpp: Successfuly to load a gain file: " << moduleName << endl;
         }        
         else
         {
+            cout << "Module.cpp: FAIL to load a gain file: " << moduleName << endl;
             mIsModuleSet = false;
             return;
         }
     }        	
 	if (LoadLUT(lutFileName))
 	{
-		cout << "Successfuly to load a lut file" << endl;
+		cout << "Module.cpp: Successfuly to load a lut file: " << moduleName << endl;
 		mIsModuleSet = true;
 	}
 	else
 	{
-		cout << "FAIL to load a lut file" << endl;
+		cout << "Module.cpp: FAIL to load a lut file: " << moduleName << endl;
 		assert(false);
 	}	
 

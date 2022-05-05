@@ -444,8 +444,25 @@ namespace Compton_GUI_WPF.ViewModel
                 {
                     AveragePointCloudDepth = RealsenseControl.AverageDepth;
                     Thread.Sleep(0);
+                    var vc = new Vector3Collection();
+                    var cc = new Color4Collection();
+                    var poseVect = new List<double[]>();
+                    var  colorVect = new List<double[]>();
+                    Vector3 currentPose = new Vector3(Convert.ToSingle(systemPoseX), Convert.ToSingle(systemPoseY), Convert.ToSingle(systemPoseZ));
 
-                    //RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
+
+                    var uns = new List<float[]>();
+
+                    RealsenseControl.GetRealTimePointCloudTransPosed(ref poseVect, ref colorVect, ref uns);
+
+                    for (int i = 0; i < poseVect.Count; i++)
+                    {
+                        vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
+                        //cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
+                        cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
+                        //id.Add(i);
+                    }
+                    RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
 
                 }
                 catch
@@ -608,7 +625,7 @@ namespace Compton_GUI_WPF.ViewModel
                 previousPose = currentPose;
 
 
-                RealsenseControl.GetSLAMPointCloud(ref poseVect, ref colorVect);
+                //RealsenseControl.GetSLAMPointCloud(ref poseVect, ref colorVect);
 
                 for (int i = 0; i < poseVect.Count; i++)
                 {
@@ -929,13 +946,13 @@ namespace Compton_GUI_WPF.ViewModel
             var cc = new Color4Collection();
             var tempposeVect = new List<double[]>();
             var tempColorVect = new List<double[]>();
+            List<float[]> uvs = new List<float[]>();
 
-
-            RealsenseControl.GetReconSLAMPointCloud(ref tempposeVect, ref tempColorVect);
+            RealsenseControl.GetReconRealTimePointCloud(ref tempposeVect, ref tempColorVect);
             for (int i = 0; i < tempposeVect.Count; i++)
             {
                 vc.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
-                cc.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][2]), Convert.ToSingle(tempColorVect[i][3])));
+                cc.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][2]), 0.1F));
             }
 
             SLAMReconPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };

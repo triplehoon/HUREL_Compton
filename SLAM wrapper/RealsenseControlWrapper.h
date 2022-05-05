@@ -55,6 +55,8 @@ namespace HUREL {
 				Boolean StartSLAM(System::String^% msg);
 				void StopSLAM();
 
+				void GetReconRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
+
 				void GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 				void GetReconSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 

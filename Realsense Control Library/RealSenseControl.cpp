@@ -140,11 +140,6 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 		0, 0, -1, 0,
 		0, 0, 0, 1;
 
-	Eigen::Matrix4d t265toLACCPosTransform;
-	t265toLACCAxisTransform << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
-		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
-		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
-		0, 0, 0, 1;
 
 	Eigen::Vector3d D455ToT265Coord = { 0.031, -0.029, 0 };
 	Eigen::Vector4d Quaternion = { pose.rotation.w, pose.rotation.x ,pose.rotation.y,pose.rotation.z };
@@ -179,7 +174,7 @@ std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vec
 
 
 
-	return std::make_tuple(cloud, t265toLACCPosTransform * t265toLACCAxisTransform * TransF, out_uv);
+	return std::make_tuple(cloud, t265toLACCAxisTransform * TransF, out_uv);
 
 
 }
@@ -342,7 +337,7 @@ void RealsenseControl::RealsensesPipeline()
 	m_Posedata = rs2_pose();
 	rs2::pose_frame pose_frame(nullptr);
 
-	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 1);
+	dec_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 3);
 	thr_filter.set_option(RS2_OPTION_MIN_DISTANCE, 0.3f);
 	thr_filter.set_option(RS2_OPTION_MAX_DISTANCE, 6.0f);
 	spat_filter.set_option(RS2_OPTION_FILTER_MAGNITUDE, 2.0f);
@@ -386,7 +381,9 @@ void RealsenseControl::RealsensesPipeline()
 	}
 	*/
 	auto depth_device = pipe_profile_D455.get_device().query_sensors()[0];
-	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_HIGH_ACCURACY);
+	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_DEFAULT);
+
+//	depth_device.set_option(RS2_OPTION_VISUAL_PRESET, rs2_rs400_visual_preset::RS2_RS400_VISUAL_PRESET_HIGH_ACCURACY);
 	depth_device.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
 	depth_device.set_option(RS2_OPTION_LASER_POWER, 360);
 	rs2::pipeline_profile t265Profile = pipeT265.start(cfgT265);
@@ -469,7 +466,7 @@ void RealsenseControl::RealsensesPipeline()
 				Eigen::Matrix4d TransF; // Your Transformation Matrix
 				mRTTransformationTrue.block<3, 3>(0, 0) = RMat;
 				mRTTransformationTrue.block<3, 1>(0, 3) = TransPoseMat;
-				
+				mRTTransformationTrue(3, 3) = 1;
 				m_RTPointCloudTransposed = std::make_tuple(std::get<0>(realTimeCloudPoseTransposed).Transform(std::get<1>(realTimeCloudPoseTransposed)), std::get<2>(realTimeCloudPoseTransposed));
 				mRTTransformation = std::get<1>(realTimeCloudPoseTransposed);
 

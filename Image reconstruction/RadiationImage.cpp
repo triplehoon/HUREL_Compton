@@ -141,10 +141,10 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 	mDetectorTransformation = data[0].DetectorTransformation;
 	mListedListModeData = data;
 
-	ShowCV_32SAsJet(mDetectorResponseImage, 1000);
-	ShowCV_32SAsJet(mCodedImage, 1000);
-	ShowCV_32SAsJet(mComptonImage, 1000);
-	ShowCV_32SAsJet(mHybridImage, 1000);
+	//ShowCV_32SAsJet(mDetectorResponseImage, 1000);
+	//ShowCV_32SAsJet(mCodedImage, 1000);
+	//ShowCV_32SAsJet(mComptonImage, 1000);
+	//ShowCV_32SAsJet(mHybridImage, 1000);
 }
 
 double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadiationImagingMode mode)
@@ -152,13 +152,13 @@ double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadi
 	double imagePlaneZ = S2M + M2D + 0.01;
 	Eigen::Vector3d detectorNormalVector(0, 0, 1);
 	Eigen::Vector4d point4d(point.x(), point.y(), point.z(), 1);
-	Eigen::Vector4d transformedPoint = mDetectorTransformation.inverse() * point4d;
+	Eigen::Vector4d transformedPoint = mDetectorTransformation.inverse()* point4d;
 	double xPoseOnImgPlane = transformedPoint.x() * imagePlaneZ / transformedPoint.z();
-	double yPoseOnImgPlane = transformedPoint.x() * imagePlaneZ / transformedPoint.z();
+	double yPoseOnImgPlane = transformedPoint.y() * imagePlaneZ / transformedPoint.z();
 
 
-	int iX = findIndex(xPoseOnImgPlane, -Det_W / 2, Det_W / pixelCount);
-	int iY = findIndex(yPoseOnImgPlane, -Det_W / 2, Det_W / pixelCount);
+	int iX = findIndex(xPoseOnImgPlane, -reconPlaneWidth / 2, reconPlaneWidth / pixelCount);
+	int iY = findIndex(yPoseOnImgPlane, -reconPlaneWidth / 2, reconPlaneWidth / pixelCount);
 
 
 	if (iX >= 0 && iY >= 0 && iX < pixelCount && iY < pixelCount)
@@ -167,12 +167,12 @@ double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadi
 		switch (mode)
 		{
 		case HUREL::Compton::eRadiationImagingMode::CODED:
-			value = static_cast<__int32*>(static_cast<void*>(mCodedImage.ptr()))[pixelCount * iY + iX];
+			value = static_cast<__int32*>(static_cast<void*>(mCodedImage.ptr()))[pixelCount * (pixelCount - iY) + pixelCount - iX];
 			break;
 		case HUREL::Compton::eRadiationImagingMode::COMPTON:
-			value = static_cast<__int32*>(static_cast<void*>(mComptonImage.ptr()))[pixelCount * iY + iX];
+			value = static_cast<__int32*>(static_cast<void*>(mComptonImage.ptr()))[pixelCount * (pixelCount - iY) + pixelCount - iX];
 		case HUREL::Compton::eRadiationImagingMode::HYBRID:
-			value = static_cast<__int32*>(static_cast<void*>(mHybridImage.ptr()))[pixelCount * iY + iX];
+			value = static_cast<__int32*>(static_cast<void*>(mHybridImage.ptr()))[pixelCount * (pixelCount - iY) + pixelCount - iX];
 			break;
 		default:
 			assert(false);
