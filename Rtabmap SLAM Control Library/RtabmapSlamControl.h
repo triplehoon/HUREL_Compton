@@ -33,6 +33,13 @@
 #include <pcl/io/ply_io.h>
 #include <pcl/filters/filter.h>
 
+#define T265_TO_LAHGI_OFFSET_X (-0.05)
+#define T265_TO_LAHGI_OFFSET_Y (-0.308)
+#define T265_TO_LAHGI_OFFSET_Z (-0.05)
+#define T265_To_Mask_OFFSET_X (T265_TO_LAHGI_OFFSET_X)
+#define T265_To_Mask_OFFSET_Y (T265_TO_LAHGI_OFFSET_Y)
+#define T265_To_Mask_OFFSET_Z (0.025)
+
 namespace HUREL
 {
 	namespace Compton
@@ -40,18 +47,59 @@ namespace HUREL
 
 		class RtabmapSlamControl
 		{
+
+		private:
+			
+			Eigen::Matrix4d mInitOdo = Eigen::Matrix4d::Identity();
+
+			rtabmap::CameraRealSense2* mCamera = nullptr;
+			rtabmap::CameraThread* mCameraThread = nullptr;
+			rtabmap::Odometry* mOdo;// = rtabmap::Odometry::create();;
+			
+			cv::Mat mCurrentVideoFrame = cv::Mat();
+			cv::Mat mCurrentDepthFrame = cv::Mat();
+			void VideoStream();
+
+			pcl::PointCloud<pcl::PointXYZRGB> mRealtimePointCloud = pcl::PointCloud<pcl::PointXYZRGB>();
+			pcl::PointCloud<pcl::PointXYZRGB> mSlamedPointCloud = pcl::PointCloud<pcl::PointXYZRGB>();
+			Eigen::Matrix4d mCurrentOdometry = Eigen::Matrix4d::Identity();
+			void SlamPipe();
+
+			RtabmapSlamControl();
 		public:
+			bool mIsInitiate = false;
+			bool mIsVideoStreamOn = false;
+			bool mIsSlamPipeOn = false;
+			bool mOdoInit = false;
+
 			bool Initiate(std::string* outMessage);
 
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			Eigen::Matrix4d GetOdomentry();
-			cv::Mat GetCurrentVideoFrame();
-			cv::Mat GetCurrentDepthFrame();
-			std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> GetRTPointCloud();
-			std::tuple<open3d::geometry::PointCloud, std::vector<Eigen::Vector2f>> GetRTPointCloudTransposed();
 
+			void LockVideoFrame();
+			cv::Mat GetCurrentVideoFrame();
+			void UnlockVideoFrame();
+			void LockDepthFrame();
+			cv::Mat GetCurrentDepthFrame();
+			void UnlockDepthFrame();
+			open3d::geometry::PointCloud GetRTPointCloud();
+			open3d::geometry::PointCloud GetRTPointCloudTransposed();
+
+			void StartVideoStream();
+			void StopVideoStream();
+			
+			void StartSlamPipe();
+			void StopSlamPipe();
+
+			void ResetSlam();
+
+			open3d::geometry::PointCloud GetSlamPointCloud();
+
+			std::vector<double> getMatrix3DOneLineFromPoseData();
 		public:
 			static RtabmapSlamControl& instance();
+			~RtabmapSlamControl();
 		};
 
 

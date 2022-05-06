@@ -2,7 +2,9 @@
 
 #include <vector>
 
-#include "RealsenseControl.h"
+//#include "RealsenseControl.h"
+
+#include "RtabmapSlamControl.h"
 
 #include "Module.h"
 #include "ListModeData.h"
@@ -80,6 +82,10 @@ namespace HUREL {
 			ReconPointCloud GetReconOverlayPointCloudCoded(open3d::geometry::PointCloud& pc, double time);
 			ReconPointCloud GetReconOverlayPointCloudCompton(open3d::geometry::PointCloud& pc, double time);
 			ReconPointCloud GetReconOverlayPointCloudHybrid(open3d::geometry::PointCloud& pc, double time);
+
+			cv::Mat GetListModeImageCoded(double time);
+			cv::Mat GetListModeImageCompton(double time);
+			cv::Mat GetListModeImageHybrid(double time);
 
 			void StartListModeGenPipe(double milliseconds = 1000);
 			void StopListModeGenPipe();

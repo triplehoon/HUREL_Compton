@@ -174,10 +174,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 		   					0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
 		   					0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
 		   					0, 0, 0, 1;
-	Eigen::Matrix4d deviceTransformation = RealsenseControl::instance().GetPoseDataEigen()*t265toLACCPosTransform;
-
-	
-
+	Eigen::Matrix4d deviceTransformation = RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransform;
 
 	switch (mModuleType)
 	{
@@ -878,6 +875,87 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudHybrid(op
 
 
 	return reconPC;
+}
+
+cv::Mat HUREL::Compton::LahgiControl::GetListModeImageCoded(double time)
+{
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	
+	mListModeImageMutex.lock();
+	std::vector<RadiationImage> tempLMData = mListModeImage;
+	mListModeImageMutex.unlock();
+
+	int reconStartIndex = 0;
+	for (int i = 0; i < tempLMData.size(); ++i)
+	{
+
+		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(time))
+		{
+			reconStartIndex = i;
+			break;
+		}
+
+	}
+	cv::Mat img = tempLMData[reconStartIndex].mCodedImage;
+	for (int i = reconStartIndex + 1; i < tempLMData.size(); ++i)
+	{
+		img + tempLMData[i].mCodedImage;
+	}
+	return img;
+}
+
+cv::Mat HUREL::Compton::LahgiControl::GetListModeImageCompton(double time)
+{
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	
+	mListModeImageMutex.lock();
+	std::vector<RadiationImage> tempLMData = mListModeImage;
+	mListModeImageMutex.unlock();
+
+	int reconStartIndex = 0;
+	for (int i = 0; i < tempLMData.size(); ++i)
+	{
+
+		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(time))
+		{
+			reconStartIndex = i;
+			break;
+		}
+
+	}
+	cv::Mat img = tempLMData[reconStartIndex].mComptonImage;
+	for (int i = reconStartIndex + 1; i < tempLMData.size(); ++i)
+	{
+		img + tempLMData[i].mComptonImage;
+	}
+	return img;
+}
+
+cv::Mat HUREL::Compton::LahgiControl::GetListModeImageHybrid(double time)
+{
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	
+	mListModeImageMutex.lock();
+	std::vector<RadiationImage> tempLMData = mListModeImage;
+	mListModeImageMutex.unlock();
+
+	int reconStartIndex = 0;
+	for (int i = 0; i < tempLMData.size(); ++i)
+	{
+
+		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(time))
+		{
+			reconStartIndex = i;
+			break;
+		}
+
+	}
+	cv::Mat img = tempLMData[reconStartIndex].mHybridImage;
+	for (int i = reconStartIndex + 1; i < tempLMData.size(); ++i)
+	{
+		img + tempLMData[i].mHybridImage;
+	}
+	return img;
 }
 
 bool HUREL::Compton::LahgiControl::IsOnActiveArea(double x, double y, Module& module)

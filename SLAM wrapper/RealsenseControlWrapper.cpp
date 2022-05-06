@@ -76,7 +76,6 @@ void RealsenseControlWrapper::GetRealTimePointCloud(List<array<double>^>^% vecto
 	AverageDepth = averageDepth / size;
 }
 
-
 void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
 {
 	vectors = gcnew List< array<double>^>();
@@ -204,8 +203,6 @@ void RealsenseControlWrapper::GetRealTimeRGB(int% width, int% height, int% strid
 		data = IntPtr(ptr);
 	}
 }
-
-
 
 Boolean RealsenseControlWrapper::ResetPipeline(System::String^% msg)
 {
@@ -416,8 +413,6 @@ void RealsenseControlWrapper::GetRealTimePointCloudTransPosed(List<array<double>
 	}
 	AverageDepth = averageDepth / size;
 }
-
-
 
 RealsenseControlWrapper::~RealsenseControlWrapper()
 {

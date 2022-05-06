@@ -29,7 +29,6 @@ namespace HUREL {
 
 
 		public:
-
 			LahgiWrapper(eModuleManagedType type);
 			Boolean AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks);
 
@@ -46,9 +45,8 @@ namespace HUREL {
 			void GetScatterSumSpectrum(List<array<double>^>^% energyCount);
 			void ResetSpectrum(unsigned int channelNumber);
 
-			void GetSLAMReconPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
+			void GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data);
 
-			void GetRealTimeReconImage(double time, List<array<double>^>^% colors, List<array<float>^>^% uvs, eReconType reconType);
 		};
 
 

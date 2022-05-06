@@ -116,8 +116,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Realsense Control Library;C:\Program Files (x86)\Open3D_MDd\include;C:\opencv\build\include;C:\Program Files (x86)\Open3D_MDd\include\open3d\3rdparty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\opencv\build\include;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Eigen\eigen3;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;C:\Program Files (x86)\Open3D_MDd\include;%(AdditionalIncludeDirectories);C:\Program Files (x86)\Open3D_MDd\include\open3d\3rdparty;$(SolutionDir)\Rtabmap SLAM Control Library;$(SolutionDir)\Realsense Control Library</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4819</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,8 +133,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Realsense Control Library;C:\Program Files (x86)\Open3D_MD\include;C:\opencv\build\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Rtabmap SLAM Control Library;$(SolutionDir)\Realsense Control Library;C:\Program Files (x86)\Open3D_MD\include;C:\opencv\build\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Eigen\eigen3;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4819</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,8 +160,8 @@
     <ClCompile Include="ReconPointCloud.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Realsense Control Library\Realsense Control Library.vcxproj">
-      <Project>{7b5c39fb-826b-4fcc-9b2e-90d025688fae}</Project>
+    <ProjectReference Include="..\Rtabmap SLAM Control Library\Rtabmap SLAM Control Library.vcxproj">
+      <Project>{ca04cca4-477d-436c-8df9-40bda121fb22}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

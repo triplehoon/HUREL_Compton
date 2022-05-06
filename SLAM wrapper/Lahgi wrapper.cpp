@@ -149,86 +149,38 @@ void HUREL::Compton::LahgiWrapper::ResetSpectrum(unsigned int channelNumber)
 	lahgiControlInstance.ResetEnergySpectrum(channelNumber);	
 }
 
-void HUREL::Compton::LahgiWrapper::GetSLAMReconPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
+void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data)
 {
-	throw gcnew System::NotImplementedException();
-}
-
-void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, List<array<double>^>^% colorAlphas, List<array<float>^>^% uvs, eReconType reconType)
-{
-	colorAlphas = gcnew List< array<double>^>();
-	uvs = gcnew List< array<float>^>();
-	
-//	realsenseControlInstance = RealsenseControl::instance();
-
-	int size;
-	
-	if (!realsenseControlInstance.IsPipeLineOn) {
-		return;
-	}
-
-	auto rtPC =  realsenseControlInstance.GetRTPointCloudTransposed();
-	open3d::geometry::PointCloud pose = std::get<0>(rtPC);
-	std::vector<Eigen::Vector2f> uv = std::get<1>(rtPC);
-	ReconPointCloud rcPC;
+	cv::Mat color = cv::Mat();
 	switch (reconType)
 	{
 	case HUREL::Compton::eReconType::CODED:
 	{
-		auto fixedrtPC = realsenseControlInstance.GetRTPointCloud();
-		auto fixedpose = std::get<0>(fixedrtPC);
-		uv = std::get<1>(fixedrtPC);
-		rcPC = lahgiControlInstance.GetReconRealtimePointCloudComptonUntransformed(fixedpose, time);
-
+		color = lahgiControlInstance.GetListModeImageCoded(time);
 		break;
 	}
 	case HUREL::Compton::eReconType::COMPTON:
-		rcPC = lahgiControlInstance.GetReconRealtimePointCloudCompton(pose, time);
+		color = lahgiControlInstance.GetListModeImageCompton(time);
 		break;
 	case HUREL::Compton::eReconType::HYBRID:
 		break;
 	default:
+		color = lahgiControlInstance.GetListModeImageCompton(time);
 		break;
 	}
 
-	
 
+	if (color.cols > 1) {
+		width = color.cols;
+		height = color.rows;
+		stride = color.step;
+		void* ptr = static_cast<void*>(color.ptr());
 
-	if (pose.IsEmpty()) {
-		return;
-	}
+		if (ptr == NULL)
+		{
+			return;
+		}
 
-	if (pose.colors_.size() > pose.points_.size())
-	{
-		size = pose.points_.size();
-	}
-	else
-	{
-		size = pose.colors_.size();
-	}
-	if (uv.size() < size) {
-		size = uv.size();
-	}
-	if (uv.size() == 0)
-	{
-		return;
-	}
-
-	double maxValue = rcPC.maxReoconValue;
-
-	colorAlphas->Capacity = size;
-	uvs->Capacity = size;
-	
-	for (int i = 0; i < size; i++) 
-	{
-
-		RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.5, maxValue);
-
-		array<double, 1>^ colorAlphaVector = gcnew array<double>{color.R, color.G, color.B, color.A};
-		colorAlphas->Add(colorAlphaVector);
-
-		array<float, 1>^ uvVector = gcnew array<float>{uv[i][0], uv[i][1]};
-		uvs->Add(uvVector);
-
+		data = IntPtr(ptr);
 	}
 }

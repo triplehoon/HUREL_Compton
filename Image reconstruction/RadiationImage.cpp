@@ -153,6 +153,10 @@ double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadi
 	Eigen::Vector3d detectorNormalVector(0, 0, 1);
 	Eigen::Vector4d point4d(point.x(), point.y(), point.z(), 1);
 	Eigen::Vector4d transformedPoint = mDetectorTransformation.inverse()* point4d;
+	if (transformedPoint.z() < 0)
+	{
+		return 0;
+	}
 	double xPoseOnImgPlane = transformedPoint.x() * imagePlaneZ / transformedPoint.z();
 	double yPoseOnImgPlane = transformedPoint.y() * imagePlaneZ / transformedPoint.z();
 

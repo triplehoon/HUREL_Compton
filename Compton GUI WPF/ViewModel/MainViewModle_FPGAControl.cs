@@ -159,8 +159,8 @@ namespace Compton_GUI_WPF.ViewModel
                     VMStatus = "Saving CSV file";                    
                     string saveFileName = Path.GetDirectoryName(FPGAControl.FileMainPath) + "\\"+ fileName;
                     LahgiWrapper_Static.SaveListModeData(saveFileName + "_LMData.csv");
-                    RealsenseControl.SaveRTPointCloud(saveFileName + "_RTPointCloud.ply");
-                    RealsenseControl.SaveSLAMEDPointCloud(saveFileName + "_SLAMPointCloud.ply");
+                    //RealsenseControl.SaveRTPointCloud(saveFileName + "_RTPointCloud.ply");
+                    //RealsenseControl.SaveSLAMEDPointCloud(saveFileName + "_SLAMPointCloud.ply");
                     VMStatus = "Done saving CSV file";
                 }                
             }

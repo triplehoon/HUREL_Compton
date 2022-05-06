@@ -16,7 +16,7 @@ namespace HUREL {
 	namespace Compton {
 		namespace LACC {
 
-			public ref class RealsenseControlWrapper : IDisposable
+			ref class RealsenseControlWrapper : IDisposable
 			{
 			private:
 				Thread^ PipelineThread;
@@ -32,6 +32,7 @@ namespace HUREL {
 				
 			public:
 				static  RealsenseControl* m_RealsenseControlNative = &RealsenseControl::instance();
+				array<double>^ GetPoseFrame(int% tranckingConf);
 
 				double AverageDepth;
 				Boolean InitiateRealsense(System::String^% message);
@@ -43,7 +44,6 @@ namespace HUREL {
 
 				void GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors, List<array<float>^>^% uvs);
 				void GetRealTimePointCloudTransPosed(List<array<double>^>^% vectors, List<array<double>^>^% colors, List<array<float>^>^% uvs);
-				array<double>^ GetPoseFrame(int% tranckingConf);
 
 				void GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data);
 

@@ -21,13 +21,16 @@ using System.Windows.Threading;
 using System.Windows.Interop;
 using System.Collections.ObjectModel;
 using System.Drawing.Imaging;
+using System.Runtime.ExceptionServices;
+
+//using OpenCvSharp;
 
 namespace Compton_GUI_WPF.ViewModel
 {
     public partial class MainViewModel
     {
-        private RealsenseControlWrapper RealsenseControl = new RealsenseControlWrapper();
-
+        //private RealsenseControlWrapper RealsenseControl = new RealsenseControlWrapper();
+        private RtabmapWrapper RealsenseControl = new RtabmapWrapper();
         private Vector3D T265ToLACCOffset = new Vector3D(0, -0.308, -0.05);
         private double t265ToLACCOffsetX;
         public double T265ToLACCOffsetX
@@ -91,7 +94,7 @@ namespace Compton_GUI_WPF.ViewModel
             await Task.Run(() =>
             {
                 string s = "";
-                IsRealsenseOn = RealsenseControl.InitiateRealsense(ref s);
+                IsRealsenseOn = RealsenseControl.InitiateRtabmap(ref s);
                 RealsenseState = s;
                 
             });
@@ -135,9 +138,10 @@ namespace Compton_GUI_WPF.ViewModel
                 if (!IsRealsenseOn)
                 {
                     RealsenseState = "Please Initiate Realsense.";
+                    Console.WriteLine(RealsenseState);
                     return;
                 }
-                IsRealsensePipelineOn = RealsenseControl.StartRealsensePipeline(ref s);
+                IsRealsensePipelineOn = RealsenseControl.StartRtabmapPipeline(ref s);
                 if (IsRealsensePipelineOn)
                 {
                     UpdateRGBPoseTask = Task.Run(() => UpdateRGBPose());
@@ -160,8 +164,7 @@ namespace Compton_GUI_WPF.ViewModel
             await Task.Run(() =>
             {
                 string temp = "";
-                RealsenseControl.ResetPipeline(ref temp);
-                RealsenseState = temp;
+                RealsenseControl.ResetPipeline();
             });
 
         }
@@ -178,7 +181,7 @@ namespace Compton_GUI_WPF.ViewModel
                 RealsenseState = "Pipeline is not on";
                 return;
             }
-            RealsenseControl.StopRealsensePipeline();
+            RealsenseControl.StopRtabmapPipeline();
             IsRealsensePipelineOn = false;
             await UpdateRGBPoseTask;
             await UpdateRealTimePointCloudTask;
@@ -196,13 +199,17 @@ namespace Compton_GUI_WPF.ViewModel
         }
 
         private Task UpdateRGBPoseTask;
+        
         private void UpdateRGBPose()
         {
             int tmpT265TrackingConfidence = 0;
             Thread.Sleep(0);
+
+           
             while (IsRealsensePipelineOn)
             {
-                var marix3DElement = RealsenseControl.GetPoseFrame(ref tmpT265TrackingConfidence);
+                double[] marix3DElement = new double[0];
+                RealsenseControl.GetPoseFrame(ref marix3DElement);
                 if (marix3DElement != null)
                 {
                    
@@ -226,43 +233,72 @@ namespace Compton_GUI_WPF.ViewModel
                     IsT265TrackingConfidence3 = false;
                 }
 
-                Bitmap tempBitmap = new Bitmap(1, 1);
+
                 int width = 1;
                 int height = 1;
                 int stride = 1;
+
                 IntPtr data = IntPtr.Zero;
                 RealsenseControl.GetRealTimeRGB(ref width, ref height, ref stride, ref data);
-                
+
                 //tempBitmap.Save("E:\\OneDrive - 한양대학교\\01.Hurel\\01.현재작업\\20201203 Comtpon GUI\\Compton GUI Main\\HUREL Compton\\RealsensWrapperTest\\bin\\Debug\\net5.0-windows\\test.png");
                 // Bitmap 담을 메모리스트림 
+
                 if (data == IntPtr.Zero)
                 {
                     continue;
                 }
-                tempBitmap = new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format24bppRgb, data);
+                Bitmap tempBitmap = new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format24bppRgb, data);
 
                 if (tempBitmap.Width == 1)
                 {
                     continue;
                 }
 
-                //to gray scale
-                MemoryStream ms = new MemoryStream();
-                tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Bmp);
-                BitmapImage img = new BitmapImage();
-                img.BeginInit();
-                ms.Seek(0, SeekOrigin.Begin);
-                img.StreamSource = ms;
-                img.CacheOption = BitmapCacheOption.OnLoad;
-                img.EndInit();
-                img.Freeze();
-                //Debug.WriteLine("Img Update");
+                using (MemoryStream ms = new MemoryStream())
+                {
 
 
+                    tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
 
-                RealtimeRGB = img;
+                    BitmapImage bitMapimg = new BitmapImage();
+                    bitMapimg.BeginInit();
+                    ms.Seek(0, SeekOrigin.Begin);
+                    bitMapimg.StreamSource = ms;
+                    bitMapimg.CacheOption = BitmapCacheOption.OnLoad;
+                    bitMapimg.EndInit();
+                    bitMapimg.Freeze();
+                    RealtimeRGB = bitMapimg;
+                }
+                
+                //Console.WriteLine("Img Update");
 
-                tempBitmap.Dispose();
+                ////to gray scale
+                //tempBitmap.Dispose();
+
+                //int width = 1;
+                //int height = 1;
+                //int type = 1;
+                //byte[] data = new byte[0];
+                //if(RealsenseControl.GetRealTimeRGBStream(ref width, ref height, ref type, ref data))
+                //{
+                //    Mat img = new Mat(width, height, type, data);
+
+                //    MemoryStream ms = img.ToMemoryStream();
+
+
+                //    BitmapImage bitMapimg = new BitmapImage();
+                //    bitMapimg.BeginInit();
+                //    ms.Seek(0, SeekOrigin.Begin);
+                //    bitMapimg.StreamSource = ms;
+                //    bitMapimg.CacheOption = BitmapCacheOption.OnLoad;
+                //    bitMapimg.EndInit();
+                //    bitMapimg.Freeze();
+                //    Console.WriteLine("Img Update");
+                //}
+
+
+                //tempBitmap.Dispose();
 
             }
         }
@@ -440,36 +476,56 @@ namespace Compton_GUI_WPF.ViewModel
             Thread.Sleep(2000);
             while (IsRealsensePipelineOn)
             {
-               try
+
+
+                //AveragePointCloudDepth = RealsenseControl.AverageDepth;
+                Thread.Sleep(0);
+                var vc = new Vector3Collection();
+                var cc = new Color4Collection();
+                var poseVect = new List<double[]>();
+                var colorVect = new List<double[]>();
+                Vector3 currentPose = new Vector3(Convert.ToSingle(systemPoseX), Convert.ToSingle(systemPoseY), Convert.ToSingle(systemPoseZ));
+
+
+
+                RealsenseControl.GetRealTimePointCloudTransPosed(ref poseVect, ref colorVect);
+
+                for (int i = 0; i < poseVect.Count; i++)
                 {
-                    AveragePointCloudDepth = RealsenseControl.AverageDepth;
-                    Thread.Sleep(0);
-                    var vc = new Vector3Collection();
-                    var cc = new Color4Collection();
-                    var poseVect = new List<double[]>();
-                    var  colorVect = new List<double[]>();
-                    Vector3 currentPose = new Vector3(Convert.ToSingle(systemPoseX), Convert.ToSingle(systemPoseY), Convert.ToSingle(systemPoseZ));
-
-
-                    var uns = new List<float[]>();
-
-                    RealsenseControl.GetRealTimePointCloudTransPosed(ref poseVect, ref colorVect, ref uns);
-
-                    for (int i = 0; i < poseVect.Count; i++)
-                    {
-                        vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
-                        //cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
-                        cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
-                        //id.Add(i);
-                    }
-                    RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
-
+                    vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
+                    //cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
+                    cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 1.0f));
+                    //id.Add(i);
                 }
-                catch
+             
+                for (int i = 0; i < 10; ++i)
                 {
-                    error++;
-                    Trace.WriteLine("Error Count is " + error);
+                    var pointx = new Point3D(0.1 * i, 0, 0);
+                    var pointy = new Point3D(0, 0.1 * i, 0);
+                    var pointz = new Point3D(0, 0, 0.1 * i);
+                    vc.Add(new Vector3(Convert.ToSingle(pointx.X), Convert.ToSingle(pointx.Y), Convert.ToSingle(pointx.Z)));
+                    cc.Add(new Color4(1f, 0f, 0f, 1f));
+                    vc.Add(new Vector3(Convert.ToSingle(pointy.X), Convert.ToSingle(pointy.Y), Convert.ToSingle(pointy.Z)));
+                    cc.Add(new Color4(0f, 1f, 0f, 1f));
+                    vc.Add(new Vector3(Convert.ToSingle(pointz.X), Convert.ToSingle(pointz.Y), Convert.ToSingle(pointz.Z)));
+                    cc.Add(new Color4(0f, 0f, 1f, 1f));
                 }
+                for (int i = 0; i < 10; ++i)
+                {
+                    var pointx = currentSystemTranformation.Transform(new Point3D(0.1 * i, 0, 0));
+                    var pointy = currentSystemTranformation.Transform(new Point3D(0, 0.1 * i, 0));
+                    var pointz = currentSystemTranformation.Transform(new Point3D(0, 0, 0.1 * i));
+                    vc.Add(new Vector3(Convert.ToSingle(pointx.X), Convert.ToSingle(pointx.Y), Convert.ToSingle(pointx.Z)));
+                    cc.Add(new Color4(1f, 0f, 0f, 1f));
+                    vc.Add(new Vector3(Convert.ToSingle(pointy.X), Convert.ToSingle(pointy.Y), Convert.ToSingle(pointy.Z)));
+                    cc.Add(new Color4(0f, 1f, 0f, 1f));
+                    vc.Add(new Vector3(Convert.ToSingle(pointz.X), Convert.ToSingle(pointz.Y), Convert.ToSingle(pointz.Z)));
+                    cc.Add(new Color4(0f, 0f, 1f, 1f));
+                }
+
+               // RTPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
+
+
             }
         }
 
@@ -625,13 +681,13 @@ namespace Compton_GUI_WPF.ViewModel
                 previousPose = currentPose;
 
 
-                //RealsenseControl.GetSLAMPointCloud(ref poseVect, ref colorVect);
+                RealsenseControl.GetSLAMPointCloud(ref poseVect, ref colorVect);
 
                 for (int i = 0; i < poseVect.Count; i++)
                 {
                     vc.Add(new Vector3(Convert.ToSingle(poseVect[i][0]), Convert.ToSingle(poseVect[i][1]), Convert.ToSingle(poseVect[i][2])));
                     //cc.Add(new Color4(0.1f, 0.1f, 0.1f, 0.5f));
-                    cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 0.5f));
+                    cc.Add(new Color4(Convert.ToSingle(colorVect[i][0]), Convert.ToSingle(colorVect[i][1]), Convert.ToSingle(colorVect[i][2]), 1f));
                     //id.Add(i);
                 }
                 for (int i = 0; i < 10; ++i)
@@ -646,8 +702,6 @@ namespace Compton_GUI_WPF.ViewModel
                     vc.Add(new Vector3(Convert.ToSingle(pointz.X), Convert.ToSingle(pointz.Y), Convert.ToSingle(pointz.Z)));
                     cc.Add(new Color4(0f, 0f, 1f, 1f));
                 }
-
-
                 for (int i = 0; i < 10; ++i)
                 {
                     var pointx = currentSystemTranformation.Transform(new Point3D(0.1 * i, 0, 0));
@@ -839,7 +893,7 @@ namespace Compton_GUI_WPF.ViewModel
             {
 
 
-                LahgiWrapper_Static.GetRealTimeReconImage((double)MLPETime, ref color, ref uvs, selectReconType);
+                //LahgiWrapper_Static.GetRealTimeReconImage((double)MLPETime, ref color, ref uvs, );
 
             }
             catch (NullReferenceException e)
@@ -948,7 +1002,7 @@ namespace Compton_GUI_WPF.ViewModel
             var tempColorVect = new List<double[]>();
             List<float[]> uvs = new List<float[]>();
 
-            RealsenseControl.GetReconRealTimePointCloud(ref tempposeVect, ref tempColorVect);
+            //RealsenseControl.GetReconRealTimePointCloud(ref tempposeVect, ref tempColorVect);
             for (int i = 0; i < tempposeVect.Count; i++)
             {
                 vc.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
@@ -968,3 +1022,4 @@ namespace Compton_GUI_WPF.ViewModel
 
 
 }
+
