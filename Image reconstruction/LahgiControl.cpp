@@ -651,6 +651,10 @@ static std::future<void> t1;
 
 void HUREL::Compton::LahgiControl::StartListModeGenPipe(double miliSec)
 {
+	if (mIsListModeGenOn == true)
+	{
+		StopListModeGenPipe();
+	}
 	mListModeImgInterval = miliSec;
 	mIsListModeGenOn = true;
 	mListModeImage.clear();
@@ -660,6 +664,10 @@ void HUREL::Compton::LahgiControl::StartListModeGenPipe(double miliSec)
 
 void HUREL::Compton::LahgiControl::StopListModeGenPipe()
 {
+	if (mIsListModeGenOn == false)
+	{
+		return;
+	}
 	mIsListModeGenOn = false;
 	t1.get();
 
@@ -803,7 +811,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudCoded(ope
 	{
 		reconPC.CalculateReconPointCoded(tempLMData[i]);
 	}
-	std::cout << "End GetReconOverlayPointCloudCoded: " << tempLMData.size() << std::endl;
+	//std::cout << "End GetReconOverlayPointCloudCoded: " << tempLMData.size() << std::endl;
 
 
 	return reconPC;
@@ -837,7 +845,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudCompton(o
 	{
 		reconPC.CalculateReconPointCompton(tempLMData[i]);
 	}
-	std::cout << "End GetReconOverlayPointCloudCompton: " << tempLMData.size() << std::endl;
+	//std::cout << "End GetReconOverlayPointCloudCompton: " << tempLMData.size() << std::endl;
 
 
 	return reconPC;
@@ -871,7 +879,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudHybrid(op
 	{
 		reconPC.CalculateReconPointHybrid(tempLMData[i]);
 	}
-	std::cout << "End GetReconOverlayPointCloudHybrid: " << tempLMData.size() << std::endl;
+	//std::cout << "End GetReconOverlayPointCloudHybrid: " << tempLMData.size() << std::endl;
 
 
 	return reconPC;

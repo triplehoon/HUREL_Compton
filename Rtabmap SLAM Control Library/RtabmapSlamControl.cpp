@@ -12,8 +12,8 @@ HUREL::Compton::RtabmapSlamControl::RtabmapSlamControl()
 
 bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 {
-	mCamera = new rtabmap::CameraRealSense2();
-	mCamera->setResolution(1280, 720);
+mCamera = new rtabmap::CameraRealSense2();
+	mCamera->setResolution(848, 480);
 
 	const rtabmap::Transform test(0.006f, 0.0025f, 0.0f, 0.0f, 0.0f, 0.0f);
 	mCamera->setDualMode(true, test);
@@ -67,6 +67,7 @@ void HUREL::Compton::RtabmapSlamControl::StopVideoStream()
 }
 
 static std::mutex videoStreamMutex;
+static std::mutex pcMutex;
 
 void HUREL::Compton::RtabmapSlamControl::VideoStream()
 {
@@ -102,14 +103,15 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 				mCurrentOdometry = t265toLACCAxisTransform * mOdo->getPose().toEigen4d()* mInitOdo.inverse();
 			}
 
+			
+
+			videoStreamMutex.unlock();
+			pcMutex.lock();
 			mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
 				4.0f,        // maximum depth of the cloud
 				0.0f));
-
-			videoStreamMutex.unlock();
-
+			pcMutex.unlock();
 		}
-		Sleep(1);
 	}
 
 	mCameraThread->join(true);
@@ -154,9 +156,9 @@ void HUREL::Compton::RtabmapSlamControl::UnlockVideoFrame()
 
 open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetRTPointCloud()
 {
-	videoStreamMutex.lock();
+	pcMutex.lock();
 	pcl::PointCloud<pcl::PointXYZRGB> tmp = mRealtimePointCloud;
-	videoStreamMutex.unlock();
+	pcMutex.unlock();
 	
 	open3d::geometry::PointCloud tmpOpen3dPc;
 	Eigen::Matrix4d t265toLACCAxisTransform;
@@ -181,9 +183,9 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetRTPointCloud
 
 open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetRTPointCloudTransposed()
 {
-	videoStreamMutex.lock();
+	pcMutex.lock();
 	pcl::PointCloud<pcl::PointXYZRGB> tmp = mRealtimePointCloud;
-	videoStreamMutex.unlock();
+	pcMutex.unlock();
 	open3d::geometry::PointCloud tmpOpen3dPc;
 	Eigen::Matrix4d t265toLACCAxisTransform;
 	t265toLACCAxisTransform << 0, 1, 0, 0,
@@ -275,8 +277,6 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		}
 		rtabmap->getGraph(optimizedPoses, links, true, true, &nodes, true, true, true, true);
 
-
-		
 		pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 		int i = 0;
 		for (std::map<int, rtabmap::Transform>::iterator iter = optimizedPoses.begin(); iter != optimizedPoses.end(); ++iter)
@@ -306,7 +306,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		slamPipeMutex.lock();
 		mSlamedPointCloud = *cloud;
 		slamPipeMutex.unlock();
-		Sleep(1);
+		Sleep(0);
 
 
 
@@ -335,11 +335,17 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointClo
 	for (int i = 0; i < tmp.size(); ++i)
 	{
 		Eigen::Vector3d color(tmp[i].b/255.0, tmp[i].g / 255.0, tmp[i].r / 255.0);
-		Eigen::Vector3d point(tmp[i].x, tmp[i].y, tmp[i].z);
+		Eigen::Vector4d point(tmp[i].x, tmp[i].y, tmp[i].z, 1);
+		Eigen::Vector4d transFormedpoint = t265toLACCAxisTransform * point;
+		if (transFormedpoint.y() > 0.6)
+		{
+			continue;
+		}
+		Eigen::Vector3d inputpoint(transFormedpoint.x(), transFormedpoint.y(), transFormedpoint.z());
 		tmpOpen3dPc.colors_.push_back(color);
-		tmpOpen3dPc.points_.push_back(point);
+		tmpOpen3dPc.points_.push_back(inputpoint);
 	}
-	return tmpOpen3dPc.Transform(t265toLACCAxisTransform);
+	return *tmpOpen3dPc.VoxelDownSample(0.02);
 }
 
 std::vector<double> HUREL::Compton::RtabmapSlamControl::getMatrix3DOneLineFromPoseData()

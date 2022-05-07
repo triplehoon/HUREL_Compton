@@ -257,8 +257,6 @@ namespace Compton_GUI_WPF.ViewModel
 
                 using (MemoryStream ms = new MemoryStream())
                 {
-
-
                     tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
 
                     BitmapImage bitMapimg = new BitmapImage();
@@ -270,36 +268,7 @@ namespace Compton_GUI_WPF.ViewModel
                     bitMapimg.Freeze();
                     RealtimeRGB = bitMapimg;
                 }
-                
-                //Console.WriteLine("Img Update");
-
-                ////to gray scale
-                //tempBitmap.Dispose();
-
-                //int width = 1;
-                //int height = 1;
-                //int type = 1;
-                //byte[] data = new byte[0];
-                //if(RealsenseControl.GetRealTimeRGBStream(ref width, ref height, ref type, ref data))
-                //{
-                //    Mat img = new Mat(width, height, type, data);
-
-                //    MemoryStream ms = img.ToMemoryStream();
-
-
-                //    BitmapImage bitMapimg = new BitmapImage();
-                //    bitMapimg.BeginInit();
-                //    ms.Seek(0, SeekOrigin.Begin);
-                //    bitMapimg.StreamSource = ms;
-                //    bitMapimg.CacheOption = BitmapCacheOption.OnLoad;
-                //    bitMapimg.EndInit();
-                //    bitMapimg.Freeze();
-                //    Console.WriteLine("Img Update");
-                //}
-
-
-                //tempBitmap.Dispose();
-
+                Thread.Sleep(0);
             }
         }
 
@@ -474,12 +443,12 @@ namespace Compton_GUI_WPF.ViewModel
         {
             int error = 0;
             Thread.Sleep(2000);
-            while (IsRealsensePipelineOn)
+            while (!IsRealsensePipelineOn)
             {
 
 
                 //AveragePointCloudDepth = RealsenseControl.AverageDepth;
-                Thread.Sleep(0);
+                Thread.Sleep(500);
                 var vc = new Vector3Collection();
                 var cc = new Color4Collection();
                 var poseVect = new List<double[]>();
@@ -629,6 +598,7 @@ namespace Compton_GUI_WPF.ViewModel
             RealsenseState = temp;
             SLAMPointCloud = new PointGeometry3D();
             SLAMPoseInfo = new LineGeometry3D();
+            await ResetRealsensePipeline();
             UpdateSLAMPointCloudTask = Task.Run(() => UpdateSLAMPointCloud());
             SLAMReconTaskAsync = Task.Run(() => SLAMRecon());
         }
@@ -982,7 +952,7 @@ namespace Compton_GUI_WPF.ViewModel
                 //Stopwatch sw = new Stopwatch();
                 //sw.Start();
                 DrawBPPointCloudToSLAMPointCloud();
-                Thread.Sleep(1000);
+                Thread.Sleep(0);
                 //sw.Stop();
                 //Debug.WriteLine("BP Draw Image tooks " + sw.ElapsedMilliseconds + " ms.");
             }
@@ -1002,11 +972,11 @@ namespace Compton_GUI_WPF.ViewModel
             var tempColorVect = new List<double[]>();
             List<float[]> uvs = new List<float[]>();
 
-            //RealsenseControl.GetReconRealTimePointCloud(ref tempposeVect, ref tempColorVect);
+            RealsenseControl.GetReconSLAMPointCloud((double)MLPETime * 1000 , selectReconType, ref tempposeVect, ref tempColorVect);
             for (int i = 0; i < tempposeVect.Count; i++)
             {
                 vc.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
-                cc.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][2]), 0.1F));
+                cc.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][2]), Convert.ToSingle(tempColorVect[i][3])));
             }
 
             SLAMReconPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };

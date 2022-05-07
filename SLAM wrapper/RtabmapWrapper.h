@@ -1,6 +1,6 @@
 #pragma once
 #include "RtabmapSlamControl.h"
-
+#include "Lahgi wrapper.h"
 
 using namespace System;
 using namespace System::IO;
@@ -34,6 +34,7 @@ namespace HUREL {
 				Boolean GetRealTimeRGBStream(int% width, int% height, int% type, array<Byte>^% data);
 				Boolean StartRtabmapPipeline(System::String^% msg);
 				void StopRtabmapPipeline();
+				void GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
 				Boolean StartSLAM(System::String^% msg);
 				void StopSLAM();

@@ -91,7 +91,7 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimePointCloudTransPosed(List<
 
 void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data)
 {
-	delete[] mColorImg;
+	static int imagesize = 0;
 	if (!mSlamcontrolNative.mIsVideoStreamOn) {
 		data = IntPtr::Zero;
 		return;
@@ -99,12 +99,22 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimeRGB(int% width, int% heigh
 	
 	mSlamcontrolNative.LockVideoFrame();
 	cv::Mat color = mSlamcontrolNative.GetCurrentVideoFrame();
-	
+	if (color.cols == 0)
+	{
+		mSlamcontrolNative.UnlockVideoFrame();
+		return;
+	}
 	width = color.cols;
 	height = color.rows;
 	stride = color.step;
-	int imagesize = width * height * color.channels();
-	mColorImg = new uchar[imagesize];
+	if (imagesize != width * height * color.channels())
+	{
+		Console::WriteLine("size diff");
+		imagesize = width * height * color.channels();
+		delete[] mColorImg;
+		mColorImg = new uchar[imagesize];
+	}
+	
 	memcpy(mColorImg, color.data, imagesize);
 	mSlamcontrolNative.UnlockVideoFrame();
 
@@ -165,7 +175,6 @@ Boolean HUREL::Compton::LACC::RtabmapWrapper::StartRtabmapPipeline(System::Strin
 	{
 		if (sw->ElapsedMilliseconds > 10000)
 		{
-			msg = gcnew String("Starting Slam Failed");
 			return false;
 		}
 	}
@@ -177,6 +186,65 @@ void HUREL::Compton::LACC::RtabmapWrapper::StopRtabmapPipeline()
 {
 	mSlamcontrolNative.StopSlamPipe();
 	mSlamcontrolNative.StopVideoStream();
+}
+
+void HUREL::Compton::LACC::RtabmapWrapper::GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors)
+{
+	vectors = gcnew List< array<double>^>();
+	colors = gcnew List< array<double>^>();
+	int size;
+	
+
+
+	open3d::geometry::PointCloud points = *mSlamcontrolNative.GetSlamPointCloud().VoxelDownSample(0.1);
+
+	ReconPointCloud rcPC;
+	switch (reconType)
+	{
+	case HUREL::Compton::eReconType::CODED:
+		rcPC = LahgiControl::instance().GetReconOverlayPointCloudCoded(points, time);
+
+		break;
+	case HUREL::Compton::eReconType::COMPTON:
+		rcPC = LahgiControl::instance().GetReconOverlayPointCloudCompton(points, time);
+
+		break;
+	case HUREL::Compton::eReconType::HYBRID:
+		rcPC = LahgiControl::instance().GetReconOverlayPointCloudHybrid(points, time);
+
+		break;
+	default:
+		break;
+	}
+
+
+	int count = 0;
+	if (rcPC.colors_.size() < rcPC.points_.size())
+	{
+		count = rcPC.colors_.size();
+	}
+	else
+	{
+		count = rcPC.points_.size();
+	}
+
+	double maxValue = rcPC.maxReoconValue;
+
+	vectors->Capacity = count;
+	colors->Capacity = count;
+
+
+	for (int i = 0; i < count - 1; i++) {
+		if (rcPC.reconValues_[i] > maxValue * 0.5)
+		{
+			array<double, 1>^ poseVector = gcnew array<double>{rcPC.points_[i][0], rcPC.points_[i][1], rcPC.points_[i][2]};
+			vectors->Add(poseVector);
+			RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.5, maxValue);
+			array<double, 1>^ colorVector = gcnew array<double>{color.R, color.G, color.B, color.A};
+			colors->Add(colorVector);
+		}
+
+	}
 }
 
 Boolean HUREL::Compton::LACC::RtabmapWrapper::StartSLAM(System::String^% msg)
@@ -192,8 +260,10 @@ void HUREL::Compton::LACC::RtabmapWrapper::StopSLAM()
 
 void HUREL::Compton::LACC::RtabmapWrapper::ResetPipeline()
 {
-	mSlamcontrolNative.ResetSlam();
+	LahgiControl::instance().StopListModeGenPipe();
 
+	mSlamcontrolNative.ResetSlam();
+	LahgiControl::instance().StartListModeGenPipe();
 	
 }
 
@@ -249,6 +319,7 @@ HUREL::Compton::LACC::RtabmapWrapper::RtabmapWrapper()
 HUREL::Compton::LACC::RtabmapWrapper::~RtabmapWrapper()
 {
 	this->!RtabmapWrapper();
+	delete[] mColorImg;
 }
 
 HUREL::Compton::LACC::RtabmapWrapper::!RtabmapWrapper()

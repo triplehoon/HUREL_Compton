@@ -111,6 +111,7 @@ void RealsenseControlWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, 
 	}
 }
 
+
 void RealsenseControlWrapper::GetReconSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
 {
 	vectors = gcnew List< array<double>^>();

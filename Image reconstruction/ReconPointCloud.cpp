@@ -196,7 +196,7 @@ HUREL::Compton::RGBA_t HUREL::Compton::ReconPointCloud::ColorScaleJet(double v, 
 	if (v < vmin)
 	{
 		v = vmin;
-		RGBA_t rgba = { 0, 0, 0, 0 };
+		RGBA_t rgba = { 0, 0, 0, 0.0001 };
 		return rgba;
 	}
 	if (v > vmax)
@@ -206,7 +206,7 @@ HUREL::Compton::RGBA_t HUREL::Compton::ReconPointCloud::ColorScaleJet(double v, 
 	dv = vmax - vmin;
 	if (dv == 0)
 	{
-		RGBA_t rgba = { 0, 0, 0, 0 };
+		RGBA_t rgba = { 0, 0, 0, 0.0001 };
 		return rgba;
 	}
 	double r = 1.0f, g = 1.0f, b = 1.0f;
