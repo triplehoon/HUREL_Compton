@@ -83,7 +83,7 @@ void ShowCV_32SAsJet(cv::Mat img, int size)
 HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 {
 	Mat responseImg(pixelCount, pixelCount, CV_32S, Scalar(0));
-	Mat comptonImg(pixelCount, pixelCount, CV_32S, Scalar(0));
+	Mat comptonImg(pixelCount, pixelCount, CV_32S, Scalar(1));
 	__int32* responseImgPtr = static_cast<__int32*>(static_cast<void*>(responseImg.data));
 	__int32* comptonImgPtr = static_cast<__int32*>(static_cast<void*>(comptonImg.data));
 
