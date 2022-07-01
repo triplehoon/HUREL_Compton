@@ -338,3 +338,6 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/SLAM data collector/test.ply
+/SLAM data collector/test.m
+/SLAM data collector/test.csv

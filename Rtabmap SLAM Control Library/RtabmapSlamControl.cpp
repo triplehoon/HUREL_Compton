@@ -99,7 +99,7 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 
 			if (mOdoInit && mIsSlamPipeOn)
 			{
-				mCurrentOdometry = t265toLACCAxisTransform * mOdo->getPose().toEigen4d()* mInitOdo.inverse();
+				mCurrentOdometry = t265toLACCAxisTransform * mOdo->getPose().toEigen4d()* mInitOdo.inverse();				
 			}
 
 			
@@ -330,7 +330,7 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointClo
 		0, 0, 0, 1;
 	for (int i = 0; i < tmp.size(); ++i)
 	{
-		Eigen::Vector3d color(tmp[i].b/255.0, tmp[i].g / 255.0, tmp[i].r / 255.0);
+		Eigen::Vector3d color(tmp[i].r/255.0, tmp[i].g / 255.0, tmp[i].b / 255.0);
 		Eigen::Vector4d point(tmp[i].x, tmp[i].y, tmp[i].z, 1);
 		Eigen::Vector4d transFormedpoint = t265toLACCAxisTransform * point;
 		if (transFormedpoint.y() > 0.6)
