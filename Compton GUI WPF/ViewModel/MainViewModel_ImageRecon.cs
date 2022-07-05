@@ -615,7 +615,7 @@ namespace Compton_GUI_WPF.ViewModel
         }
         private async Task StopSLAM()
         {
-            await Task.Run(() => RealsenseControl.StopSLAM());
+          
             IsSLAMOn = false;
             if (UpdateSLAMPointCloudTask != null) {
                 await UpdateSLAMPointCloudTask;
@@ -623,6 +623,7 @@ namespace Compton_GUI_WPF.ViewModel
             if(SLAMReconTaskAsync != null) {
                 await SLAMReconTaskAsync;
             }
+            await Task.Run(() => RealsenseControl.StopSLAM());
             //SLAMReconTask.Wait();
         }
 
@@ -638,7 +639,7 @@ namespace Compton_GUI_WPF.ViewModel
             Point3D lineVect = new Point3D(0, 0, 0.3);
             while (IsSLAMOn)
             {
-                Thread.Sleep(500);
+                Thread.Sleep(100);
                 var vc = new Vector3Collection();               
                 var cc = new Color4Collection();
                 poseVect = new List<double[]>();

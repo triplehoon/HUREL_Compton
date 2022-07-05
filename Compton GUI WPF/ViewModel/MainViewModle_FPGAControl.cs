@@ -141,6 +141,8 @@ namespace Compton_GUI_WPF.ViewModel
 
                     }
                     VMStatus = status;
+
+                    await Task.Run(() => StartSLAM());
                 }
             }
             else // Stoppping Usb
@@ -162,7 +164,10 @@ namespace Compton_GUI_WPF.ViewModel
                     //RealsenseControl.SaveRTPointCloud(saveFileName + "_RTPointCloud.ply");
                     //RealsenseControl.SaveSLAMEDPointCloud(saveFileName + "_SLAMPointCloud.ply");
                     VMStatus = "Done saving CSV file";
-                }                
+                }
+
+                await Task.Run(() => StopSLAM());
+
             }
             IsSessionAvailable = true;
         }
@@ -222,6 +227,10 @@ namespace Compton_GUI_WPF.ViewModel
                 LahgiWrapper_Static.ResetSpectrum(i);
             }
             //LACC_Control_Static.ResetLMData();
+
+           
+
+
             while (IsAddingListModeData)
             {
                 ushort[] item;

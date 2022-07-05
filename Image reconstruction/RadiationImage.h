@@ -8,7 +8,7 @@
 
 #include "ListModeData.h"
 #include "ReconPointCloud.h"
-
+#include "LahgiControl.h"
 
 
 namespace HUREL {
@@ -16,7 +16,8 @@ namespace HUREL {
 	{
 		using namespace cv;
 		using namespace Eigen;		
-		
+	
+		class LahgiControl;
 		const static bool mCodeMask[37][37] = {
 		{false,true,true,false,false,false,false,true,false,true,false,true,true,true,true,false,false,true,true,false,true,true,false,false,false,false,true,false,true,false,true,true,true,true,false,false,true},
 		{true,false,false,true,true,true,true,false,true,false,true,false,false,false,false,true,true,false,true,true,false,false,true,true,true,true,false,true,false,true,false,false,false,false,true,true,false},
