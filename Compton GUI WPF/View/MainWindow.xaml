@@ -377,8 +377,14 @@
                                             <TextBlock Grid.Column="0" Text="LAHGI Configuration" Style="{StaticResource TextBlockTitle}"/>
                                             <Button Style="{StaticResource ButtonDesignHYU}" IsEnabled="{Binding IsLACCModuleInitiate}" 
                                                     Command="{Binding InitiateLACCommand}"
-                                                    Grid.Column="1" Content="Apply Changes"/>
+                                                    Grid.Column="1" Content="Apply Changes">
+                                               
+                                            </Button>
+                                            <syncfusion:DropDownButton SizeForm="Large" HorizontalAlignment="Left" Margin="1,29,0,0" VerticalAlignment="Top">
+                                                <syncfusion:DropDownMenuItem Header="test"/>
+                                            </syncfusion:DropDownButton>
                                         </Grid>
+                                        
                                     </StackPanel>
                                 </ScrollViewer>
 

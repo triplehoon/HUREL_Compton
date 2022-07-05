@@ -116,9 +116,9 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 			{
 				for (int j = 0; j < pixelCount; ++j)
 				{
-					double imagePlaneX = reconPlaneWidth / pixelCount * i + reconPlaneWidth / pixelCount / 2 - reconPlaneWidth / 2;
-					double imagePlaneY = reconPlaneWidth / pixelCount * j + reconPlaneWidth / pixelCount / 2 - reconPlaneWidth / 2;
-					double imagePlaneZ = S2M + M2D + 0.01;
+					double imagePlaneX = reconPlaneWidth / pixelCount * i + reconPlaneWidth / pixelCount / 2 * 3- reconPlaneWidth / 2;
+					double imagePlaneY = reconPlaneWidth / pixelCount * j + reconPlaneWidth / pixelCount - reconPlaneWidth / 2;
+					double imagePlaneZ = S2M + M2D + 0.02;
 					Eigen::Vector3d imgPoint;
 					imgPoint[0] = imagePlaneX;
 					imgPoint[1] = imagePlaneY;
@@ -138,7 +138,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 	reconImg = -reconImg;	
 	double maxValue;
 	cv::minMaxLoc(reconImg, nullptr, &maxValue);
-	Mat idxImg(pixelCount, pixelCount, CV_32S, Scalar(maxValue*0.2));
+	Mat idxImg(pixelCount, pixelCount, CV_32S, Scalar(maxValue*0.1));
 
 	cv::max(reconImg, idxImg, mCodedImage);
 	

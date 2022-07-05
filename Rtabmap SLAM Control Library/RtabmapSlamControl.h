@@ -66,6 +66,14 @@ namespace HUREL
 			void SlamPipe();
 
 			RtabmapSlamControl();
+
+
+			void LockVideoFrame();
+
+			void UnlockVideoFrame();
+			void LockDepthFrame();
+
+			void UnlockDepthFrame();
 		public:
 			bool mIsInitiate = false;
 			bool mIsVideoStreamOn = false;
@@ -77,12 +85,8 @@ namespace HUREL
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			Eigen::Matrix4d GetOdomentry();
 
-			void LockVideoFrame();
 			cv::Mat GetCurrentVideoFrame();
-			void UnlockVideoFrame();
-			void LockDepthFrame();
 			cv::Mat GetCurrentDepthFrame();
-			void UnlockDepthFrame();
 			open3d::geometry::PointCloud GetRTPointCloud();
 			open3d::geometry::PointCloud GetRTPointCloudTransposed();
 

@@ -31,14 +31,14 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	if (!mCamera->init(".", ""))
 	{
 		*outMessage = "RtabmapSlamControl: Initiate failed\n";
-		std::cout << (*outMessage);
+		
 		mIsInitiate = false;
 		return false;
 	}
 	else
 	{
 		*outMessage = "RtabmapSlamControl: Initiate sucess \n";
-		std::cout << (*outMessage);
+		
 		mIsInitiate = true;
 		return true;
 	}	
@@ -47,7 +47,6 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 RtabmapSlamControl& HUREL::Compton::RtabmapSlamControl::instance()
 {
 	static RtabmapSlamControl* instance = new RtabmapSlamControl();
-	//std::cout << "instance: " << instance << std::endl;
 	return *instance;
 }
 
@@ -109,7 +108,7 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 
 			if (mOdoInit && mIsSlamPipeOn)
 			{
-				mCurrentOdometry = t265toLACCAxisTransform * mOdo->getPose().toEigen4d()* mInitOdo.inverse();
+				mCurrentOdometry = t265toLACCAxisTransform * mOdo->getPose().toEigen4d()* mInitOdo.inverse();				
 			}
 
 			
@@ -141,13 +140,13 @@ void HUREL::Compton::RtabmapSlamControl::ResetSlam()
 
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentVideoFrame()
 {
-	return mCurrentVideoFrame;
+	return mCurrentVideoFrame.clone();
 }
 
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentDepthFrame()
 {
 	videoStreamMutex.lock();
-	cv::Mat tmp = mCurrentDepthFrame;
+	cv::Mat tmp = mCurrentDepthFrame.clone();
 	videoStreamMutex.unlock();
 	return tmp;
 }
@@ -184,7 +183,7 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetRTPointCloud
 		Eigen::Vector3d color(tmp[i].r/255.0, tmp[i].g / 255.0, tmp[i].b / 255.0);
 		Eigen::Vector3d point(tmp[i].x, tmp[i].y, tmp[i].z);
 		tmpOpen3dPc.colors_.push_back(color);
-		tmpOpen3dPc.points_.push_back(point);
+		tmpOpen3dPc.points_.push_back(point); 
 	}
 
 	return tmpOpen3dPc.Transform(t265toLACCAxisTransform);
@@ -329,9 +328,6 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		mSlamedPointCloud = *cloud;
 		slamPipeMutex.unlock();
 		Sleep(0);
-
-
-
 	}
 	mOdoInit = false;
 	mCurrentOdometry = Eigen::Matrix4d::Identity();
@@ -360,7 +356,7 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointClo
 		0, 0, 0, 1;
 	for (int i = 0; i < tmp.size(); ++i)
 	{
-		Eigen::Vector3d color(tmp[i].b/255.0, tmp[i].g / 255.0, tmp[i].r / 255.0);
+		Eigen::Vector3d color(tmp[i].r/255.0, tmp[i].g / 255.0, tmp[i].b / 255.0);
 		Eigen::Vector4d point(tmp[i].x, tmp[i].y, tmp[i].z, 1);
 		Eigen::Vector4d transFormedpoint = t265toLACCAxisTransform * point;
 		if (transFormedpoint.y() > 0.7)
