@@ -14,11 +14,13 @@
 #include <algorithm>
 #include <numeric>
 
-#define ACTIVE_AREA_LENGTH 0.12
+#define ACTIVE_AREA_LENGTH 0.14
 
 
 namespace HUREL {
 	namespace Compton {	
+		class RadiationImage;
+		class ReconPointCloud;
 
 		struct sEnergyCheck
 		{
@@ -87,8 +89,9 @@ namespace HUREL {
 			cv::Mat GetListModeImageCompton(double time);
 			cv::Mat GetListModeImageHybrid(double time);
 
-			void StartListModeGenPipe(double milliseconds = 1000);
+			void StartListModeGenPipe(double milliseconds = 500);
 			void StopListModeGenPipe();
+			void ResetListModeImage();
 
 		};
 	}

@@ -3,7 +3,7 @@
 using namespace Eigen;
 
 // Makting Detector Response Image
-constexpr double Det_W = 0.270;
+constexpr double Det_W = 0.300;
 constexpr double Mask_W = 0.370;
 constexpr double Mpix = 37;
 constexpr double S2M = 1;
@@ -17,7 +17,7 @@ int pixelCount = static_cast<int>(round(Dproj * ResImprov));
 
 inline int findIndex(double value, double min, double pixelSize)
 {
-	if (value - min < 0)
+	if (value - min <= 0)
 	{
 		return -1;
 	}
@@ -86,22 +86,32 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 	Mat comptonImg(pixelCount, pixelCount, CV_32S, Scalar(1));
 	__int32* responseImgPtr = static_cast<__int32*>(static_cast<void*>(responseImg.data));
 	__int32* comptonImgPtr = static_cast<__int32*>(static_cast<void*>(comptonImg.data));
-
+	int codedImageCount = 0;
+	int comptonImageCount = 0;
 	for (ListModeData lm : data)
 	{
-
-		double& interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
-		double& interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
-
-		int iX = findIndex(interactionPoseX, -Det_W / 2, Det_W / pixelCount);
-		int iY = findIndex(interactionPoseY, -Det_W / 2, Det_W / pixelCount);
-		if (iX >= 0 && iY >= 0 && iX < pixelCount && iY < pixelCount)
+		if (lm.Type == eInterationType::CODED)
 		{
-			++responseImgPtr[pixelCount * iY + iX];
+			double& interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
+			double& interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
+
+			int iX = findIndex(interactionPoseX, -Det_W / 2, Det_W / pixelCount);
+			int iY = findIndex(interactionPoseY, -Det_W / 2, Det_W / pixelCount);
+			if (iX >= 0 && iY >= 0 && iX < pixelCount && iY < pixelCount)
+			{
+				++responseImgPtr[pixelCount * iY + iX];
+				++codedImageCount;
+			}
 		}
 		
+		
 		if (lm.Type == eInterationType::COMPTON)
-		{		
+		{	
+			if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 200)
+			{
+				continue;
+			}
+			++comptonImageCount;
 			for (int i = 0; i < pixelCount; ++i)
 			{
 				for (int j = 0; j < pixelCount; ++j)
@@ -119,7 +129,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 
 		}
 	}
-
+	std::cout << "Lm Count: " << data.size() << " Coded count: " << codedImageCount << " Compton count: " << comptonImageCount << std::endl;
 	Mat scaleG;
 	cv::resize(CodedMaskMat(), scaleG, Size(37 * ResImprov, 37 * ResImprov), 0, 0, INTER_NEAREST_EXACT);
 	Mat reconImg;
@@ -132,7 +142,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 
 	cv::max(reconImg, idxImg, mCodedImage);
 	
-
+	//mCodedImage = reconImg;
 
 	mDetectorResponseImage = responseImg;
 	mComptonImage = comptonImg;
@@ -149,12 +159,19 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 
 double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadiationImagingMode mode)
 {
-	double imagePlaneZ = S2M + M2D + 0.01;
+	Eigen::Matrix4d t265toLACCPosTransform;
+	t265toLACCPosTransform << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
+		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
+		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
+		0, 0, 0, 1;
+
+	constexpr double imagePlaneZ = S2M + M2D + 0.011;
 	Eigen::Vector3d detectorNormalVector(0, 0, 1);
 	Eigen::Vector4d point4d(point.x(), point.y(), point.z(), 1);
-	Eigen::Vector4d transformedPoint = mDetectorTransformation.inverse()* point4d;
-	if (transformedPoint.z() < 0)
+	Eigen::Vector4d transformedPoint = ((mDetectorTransformation).inverse()* point4d);
+	if (transformedPoint.z() <= imagePlaneZ || transformedPoint.z() >= 5)
 	{
+		//std::cout << transformedPoint << std::endl;
 		return 0;
 	}
 	double xPoseOnImgPlane = transformedPoint.x() * imagePlaneZ / transformedPoint.z();

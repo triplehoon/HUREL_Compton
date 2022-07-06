@@ -12,13 +12,22 @@ HUREL::Compton::RtabmapSlamControl::RtabmapSlamControl()
 
 bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 {
-mCamera = new rtabmap::CameraRealSense2();
-	mCamera->setResolution(848, 480);
+	try
+	{
+		mCamera = new rtabmap::CameraRealSense2();
 
-	const rtabmap::Transform test(0.006f, 0.0025f, 0.0f, 0.0f, 0.0f, 0.0f);
-	mCamera->setDualMode(true, test);
-	mCamera->setOdomProvided(true, false, true);
-	mCamera->setImagesRectified(true);
+		mCamera->setResolution(848, 480);
+		mCamera->setDepthResolution(848, 480);
+
+		const rtabmap::Transform test(0.006f, 0.0025f, 0.0f, 0.0f, 0.0f, 0.0f);
+		mCamera->setDualMode(false, test);
+		mCamera->setOdomProvided(true, false, true);
+		mCamera->setImagesRectified(true);
+	}
+	catch(int exp)
+	{
+		std::cout << "RtabmapSlamControl: CameraRealSense2 error " << exp << std::endl;
+	}
 	if (!mCamera->init(".", ""))
 	{
 		*outMessage = "RtabmapSlamControl: Initiate failed\n";
@@ -105,11 +114,11 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			
 
 			videoStreamMutex.unlock();
-			pcMutex.lock();
-			mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
-				4.0f,        // maximum depth of the cloud
-				0.0f));
-			pcMutex.unlock();
+			//pcMutex.lock();
+			//mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
+			//	6.0f,        // maximum depth of the cloud
+			//	0.5f));
+			//pcMutex.unlock();
 		}
 	}
 
@@ -270,17 +279,30 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		std::multimap<int, rtabmap::Link> links;
 		if (!mOdoInit)
 		{
+			videoStreamMutex.lock();
 			rtabmap->resetMemory();
 			mInitOdo = t265toLACCAxisTransform * mOdo->getPose().toEigen4d();
 			mOdoInit = true;
+			videoStreamMutex.unlock();
+			continue;
 		}
-		rtabmap->getGraph(optimizedPoses, links, true, true, &nodes, true, true, true, true);
-
+		std::map<int, rtabmap::Signature> tmpnodes;
+		std::map<int, rtabmap::Transform> tmpOptimizedPoses;
+		
+		rtabmap->getGraph(tmpOptimizedPoses, links, true, true, &tmpnodes, true, true, true, true);
+		nodes = tmpnodes;
+		optimizedPoses = tmpOptimizedPoses;
 		pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 		int i = 0;
 		for (std::map<int, rtabmap::Transform>::iterator iter = optimizedPoses.begin(); iter != optimizedPoses.end(); ++iter)
 		{
+
+			if (nodes.count(iter->first) == 0)
+			{
+				continue;
+			}
 			rtabmap::Signature node = nodes.find(iter->first)->second;
+
 
 			// uncompress data
 			node.sensorData().uncompressData();
@@ -289,7 +311,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 				node.sensorData(),
 				4,           // image decimation before creating the clouds
 				4.0f,        // maximum depth of the cloud
-				0.0f);
+				0.3f);
 			pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmpNoNaN(new pcl::PointCloud<pcl::PointXYZRGB>);
 			std::vector<int> index;
 			pcl::removeNaNFromPointCloud(*tmp, *tmpNoNaN, index);
@@ -318,6 +340,10 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 
 open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointCloud()
 {
+	if (!mIsSlamPipeOn)
+	{
+		return open3d::geometry::PointCloud();
+	}
 	slamPipeMutex.lock();
 	pcl::PointCloud<pcl::PointXYZRGB> tmp = mSlamedPointCloud;
 	slamPipeMutex.unlock();
@@ -333,7 +359,7 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointClo
 		Eigen::Vector3d color(tmp[i].r/255.0, tmp[i].g / 255.0, tmp[i].b / 255.0);
 		Eigen::Vector4d point(tmp[i].x, tmp[i].y, tmp[i].z, 1);
 		Eigen::Vector4d transFormedpoint = t265toLACCAxisTransform * point;
-		if (transFormedpoint.y() > 0.6)
+		if (transFormedpoint.y() > 0.7)
 		{
 			continue;
 		}
@@ -341,7 +367,7 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointClo
 		tmpOpen3dPc.colors_.push_back(color);
 		tmpOpen3dPc.points_.push_back(inputpoint);
 	}
-	return *tmpOpen3dPc.VoxelDownSample(0.02);
+	return *tmpOpen3dPc.VoxelDownSample(0.05);
 }
 
 std::vector<double> HUREL::Compton::RtabmapSlamControl::getMatrix3DOneLineFromPoseData()

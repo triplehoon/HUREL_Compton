@@ -655,6 +655,7 @@ void HUREL::Compton::LahgiControl::StartListModeGenPipe(double miliSec)
 	{
 		StopListModeGenPipe();
 	}
+	printf("ListMode Gen Pipe starts\n");
 	mListModeImgInterval = miliSec;
 	mIsListModeGenOn = true;
 	mListModeImage.clear();
@@ -674,6 +675,11 @@ void HUREL::Compton::LahgiControl::StopListModeGenPipe()
 	printf("ListMode Gen Pipe is end\n");
 }
 
+void HUREL::Compton::LahgiControl::ResetListModeImage()
+{
+	mListModeImage.clear();
+}
+
 void HUREL::Compton::LahgiControl::ListModeGenPipe()
 {
 	size_t startIdx = 0;
@@ -682,9 +688,12 @@ void HUREL::Compton::LahgiControl::ListModeGenPipe()
 		Sleep(mListModeImgInterval);
 		mListModeDataMutex.lock();
 		vector<ListModeData> tmp = mListedListModeData;
-		if (tmp.size() == 0)
+		if (tmp.size() < startIdx || tmp.size() == 0)
 		{
-			return;
+			mListModeDataMutex.unlock();
+
+			startIdx = 0;
+			continue;
 		}
 		mListModeDataMutex.unlock();
 		
@@ -811,7 +820,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudCoded(ope
 	{
 		reconPC.CalculateReconPointCoded(tempLMData[i]);
 	}
-	//std::cout << "End GetReconOverlayPointCloudCoded: " << tempLMData.size() << std::endl;
+	std::cout << "End GetReconOverlayPointCloudCoded: " << tempLMData.size() << std::endl;
 
 
 	return reconPC;

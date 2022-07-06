@@ -235,11 +235,11 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetReconSLAMPointCloud(double time, e
 
 
 	for (int i = 0; i < count - 1; i++) {
-		if (rcPC.reconValues_[i] > maxValue * 0.5)
+		if (rcPC.reconValues_[i] > maxValue * 0.8)
 		{
 			array<double, 1>^ poseVector = gcnew array<double>{rcPC.points_[i][0], rcPC.points_[i][1], rcPC.points_[i][2]};
 			vectors->Add(poseVector);
-			RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.5, maxValue);
+			RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], 0, maxValue);
 			array<double, 1>^ colorVector = gcnew array<double>{color.R, color.G, color.B, color.A};
 			colors->Add(colorVector);
 		}
