@@ -341,3 +341,5 @@ healthchecksdb
 /SLAM data collector/test.ply
 /SLAM data collector/test.m
 /SLAM data collector/test.csv
+/SLAM data collector/az-90al+90.ply
+/SLAM data collector/az-90al+90.csv
