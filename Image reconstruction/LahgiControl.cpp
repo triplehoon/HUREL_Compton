@@ -52,7 +52,7 @@ HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
 	return *instance;
 }
 
-void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
+bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 {
 	mListModeDataMutex.lock();
 
@@ -86,9 +86,16 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		
 		
 		double offsetZ = -(0.220);
-		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i] , 0);
-
+		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i] , 0);		
+		if (!mScatterModules[i]->IsModuleSet())
+		{
+			return false;
+		}
 		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], offsetZ);
+		if (!mAbsorberModules[i]->IsModuleSet())
+		{
+			return false;
+		}
 	}
 	break;
 	}
@@ -131,7 +138,7 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		break;
 	}
 
-
+	return true;
 }
 
 HUREL::Compton::LahgiControl::~LahgiControl()

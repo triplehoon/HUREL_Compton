@@ -2,7 +2,12 @@
 
 #include "Lahgi wrapper.h"
 
-HUREL::Compton::LahgiWrapper::LahgiWrapper(eModuleManagedType type)
+HUREL::Compton::LahgiWrapper::LahgiWrapper()
+{
+	
+}
+
+bool HUREL::Compton::LahgiWrapper::Initiate(eModuleManagedType type)
 {
 	HUREL::Compton::eMouduleType moduleType = HUREL::Compton::eMouduleType::MONO;
 	switch (type)
@@ -16,12 +21,11 @@ HUREL::Compton::LahgiWrapper::LahgiWrapper(eModuleManagedType type)
 		break;
 	case HUREL::Compton::eModuleManagedType::QUAD_DUAL:
 		moduleType = HUREL::Compton::eMouduleType::QUAD_DUAL;
-
 		break;
 	default:
 		break;
 	}
-	lahgiControlInstance.SetType(moduleType);
+	return lahgiControlInstance.SetType(moduleType);
 }
 
 Boolean HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks)

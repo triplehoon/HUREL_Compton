@@ -12,16 +12,16 @@ using namespace System::Collections;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
+
 namespace HUREL {
 	namespace Compton {
-		namespace LACC {
 
 			public ref class RtabmapWrapper:IDisposable
 			{
 			private:
 				Boolean mIsInitiated = false;
 				uchar* mColorImg = nullptr;
-
+				
 			public:
 				static RtabmapSlamControl& mSlamcontrolNative = RtabmapSlamControl::instance();
 				
@@ -50,6 +50,6 @@ namespace HUREL {
 				!RtabmapWrapper();
 			};
 
-		}
+		
 	}
 }

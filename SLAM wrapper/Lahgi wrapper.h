@@ -29,7 +29,8 @@ namespace HUREL {
 
 
 		public:
-			LahgiWrapper(eModuleManagedType type);
+			LahgiWrapper();
+			bool Initiate(eModuleManagedType type);
 			Boolean AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks);
 
 			void GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE);

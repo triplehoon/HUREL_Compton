@@ -1,0 +1,7 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="CustomWhite" Color="#f5f0e1"/>
+    <SolidColorBrush x:Key="CustomDarkBlue" Color="#123d59"/>
+    <SolidColorBrush x:Key="CustomOrange" Color="#ff6e40"/>
+    <SolidColorBrush x:Key="CustomDarkOrange" Color="#FFE43900"/>
+</ResourceDictionary>

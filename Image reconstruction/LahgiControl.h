@@ -56,7 +56,7 @@ namespace HUREL {
 			static LahgiControl& instance();
 
 
-			void SetType(eMouduleType type);
+			bool SetType(eMouduleType type);
 			
 			~LahgiControl();
 			void AddListModeData(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk);

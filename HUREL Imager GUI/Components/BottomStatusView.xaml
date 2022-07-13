@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="HUREL_Imager_GUI.Views.BottomStatusView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HUREL_Imager_GUI.Views"
+             mc:Ignorable="d"              Height="40" d:Width="1480"
+             Background="{StaticResource CustomOrange}" Padding="0">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <Button BorderBrush="Transparent" Focusable="False"  Width="auto" Height="30" Margin="5" Background="{StaticResource CustomDarkOrange}">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="15"/>
+                </Style>
+            </Button.Resources>
+            <Button.Content>
+                <Viewbox Margin="5,0,5,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Margin="5"
+                    Data="M6.40235 6.98748L5.625 6.46925V7.40351V34.9275V35.8618L6.40235 35.3435L27.0453 21.5815L27.6694 21.1655L27.0453 20.7495L6.40235 6.98748ZM1.375 39.535V2.79953L4.92786 0.898166L32.456 19.2491V23.0819L4.92784 41.4363L1.375 39.535Z" 
+                    Fill="white"
+                    />
+                        <TextBlock FontSize="25" Margin="5" Text="+99" VerticalAlignment="Center" Foreground="White"/>
+                    </StackPanel>
+                </Viewbox>
+            </Button.Content>
+        </Button>
+    </StackPanel>
+</UserControl>
