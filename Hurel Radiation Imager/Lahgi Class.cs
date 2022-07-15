@@ -191,8 +191,12 @@ namespace HUREL.Compton
             get { return isSessionStart; }
             private set { isSessionStart = value; }
         }    
-        public static async Task StartSessionAsync(string fileName, int measurementTime, CancellationTokenSource tokenSource)
+        public static async Task StartSessionAsync(string fileName, CancellationTokenSource tokenSource)
         {
+            if (!IsInitiate)
+            {
+                StatusMsg = "LAHGI is not initiated";
+            }
             if (!IsSessionStart)
             {
                 if (!fpga.SetVaribles(fpgaVariables))
@@ -234,7 +238,10 @@ namespace HUREL.Compton
             else
             {
                 StatusMsg = "Session is already started";
+                return;
             }
+
+            StatusMsg = "Session is done";
         }
         public record AddListModeDataEchk(double MinE, double MaxE);
 

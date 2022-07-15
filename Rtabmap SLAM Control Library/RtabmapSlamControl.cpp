@@ -174,6 +174,10 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 
 void HUREL::Compton::RtabmapSlamControl::ResetSlam()
 {
+	if (mOdo == nullptr)
+	{
+		return;
+	}
 	videoStreamMutex.lock();
 	mOdo->reset();
 	mOdoInit = false;	
