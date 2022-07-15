@@ -2,7 +2,12 @@
 
 #include "Lahgi wrapper.h"
 
-HUREL::Compton::LahgiWrapper::LahgiWrapper(eModuleManagedType type)
+HUREL::Compton::LahgiWrapper::LahgiWrapper()
+{
+	
+}
+
+bool HUREL::Compton::LahgiWrapper::Initiate(eModuleManagedType type)
 {
 	HUREL::Compton::eMouduleType moduleType = HUREL::Compton::eMouduleType::MONO;
 	switch (type)
@@ -16,12 +21,11 @@ HUREL::Compton::LahgiWrapper::LahgiWrapper(eModuleManagedType type)
 		break;
 	case HUREL::Compton::eModuleManagedType::QUAD_DUAL:
 		moduleType = HUREL::Compton::eMouduleType::QUAD_DUAL;
-
 		break;
 	default:
 		break;
 	}
-	lahgiControlInstance.SetType(moduleType);
+	return lahgiControlInstance.SetType(moduleType);
 }
 
 Boolean HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks)
@@ -133,6 +137,75 @@ void HUREL::Compton::LahgiWrapper::SaveListModeData(System::String^ fileName)
 void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrum(List<array<double>^>^% energyCount)
 {
 	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetScatterSumEnergySpectrum().GetHistogramEnergy();
+
+	energyCount = gcnew List<array<double>^>();
+	energyCount->Capacity = eSpect.size();
+
+	for (int i = 0; i < eSpect.size(); ++i)
+	{
+		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
+		energyCount->Add(tempECount);
+	}
+}
+
+void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrumByTime(List<array<double>^>^% energyCount, unsigned int time)
+{
+	std::vector<ListModeData> lmData = lahgiControlInstance.GetListedListModeData();
+
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+
+
+	int reconStartIndex = 0;
+
+
+	EnergySpectrum spectClass = EnergySpectrum(5, 3000);;
+	for (int i = lmData.size(); i--; i >= 0)
+	{
+		if (t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time))
+		{
+			break;
+		}
+		
+		spectClass.AddEnergy(lmData[i].Scatter.InteractionEnergy);
+	}
+
+	std::vector<BinningEnergy> eSpect = spectClass.GetHistogramEnergy();
+
+	energyCount = gcnew List<array<double>^>();
+	energyCount->Capacity = eSpect.size();
+
+	for (int i = 0; i < eSpect.size(); ++i)
+	{
+		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
+		energyCount->Add(tempECount);
+	}
+
+}
+
+void HUREL::Compton::LahgiWrapper::GetAbsorberSumSpectrumByTime(List<array<double>^>^% energyCount, unsigned int time)
+{
+	std::vector<ListModeData> lmData = lahgiControlInstance.GetListedListModeData();
+
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+
+
+	int reconStartIndex = 0;
+
+
+	EnergySpectrum spectClass = EnergySpectrum(5, 3000);;
+	for (int i = lmData.size(); i--; i >= 0)
+	{
+		if (t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time))
+		{
+			break;
+		}
+
+		spectClass.AddEnergy(lmData[i].Absorber.InteractionEnergy);
+	}
+
+	std::vector<BinningEnergy> eSpect = spectClass.GetHistogramEnergy();
 
 	energyCount = gcnew List<array<double>^>();
 	energyCount->Capacity = eSpect.size();

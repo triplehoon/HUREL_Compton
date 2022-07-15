@@ -1,0 +1,41 @@
+﻿<Window x:Class="HUREL_Imager_GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HUREL_Imager_GUI"
+        mc:Ignorable="d"
+        xmlns:views="clr-namespace:HUREL_Imager_GUI.Views"
+        xmlns:componets="clr-namespace:HUREL_Imager_GUI.Components"
+        Title="HUREL Imager GUI" Height="1040" Width="1920" WindowStartupLocation="CenterScreen" WindowState="Normal"
+             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
+        syncfusion:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=FluentLight}">
+    <DockPanel>
+        <views:BottomStatusView DockPanel.Dock="Bottom"/>
+        <syncfusion:SfNavigationDrawer
+            DrawerBackground="{StaticResource CustomWhite}"
+            Background="{StaticResource CustomWhite}"
+            x:Name="navigationDrawer"
+            DisplayMode="Compact"
+            d:DisplayMode="Expanded"
+            DockPanel.Dock="Left">
+            <syncfusion:NavigationItem Background="{StaticResource CustomWhite}" Header="Home" FontSize="30" FontWeight="Bold" Margin="5"/>
+            <syncfusion:NavigationItem Background="{StaticResource CustomWhite}" Header="Calibration"  FontSize="30" FontWeight="Bold" Margin="5"/>
+            <syncfusion:NavigationItem Background="{StaticResource CustomWhite}" Header="Report" FontSize="30" FontWeight="Bold" Margin="5"/>
+            <syncfusion:NavigationItem Background="{StaticResource CustomWhite}" Header="Setting"  FontSize="30" FontWeight="Bold" Margin="5"/>
+
+
+            <syncfusion:SfNavigationDrawer.ContentView>
+                <DockPanel Margin="0,1,0,0">
+                    <views:HomeView DockPanel.Dock="Top"/>
+                </DockPanel>
+            </syncfusion:SfNavigationDrawer.ContentView>
+        </syncfusion:SfNavigationDrawer>
+       
+    </DockPanel>
+   
+
+</Window>
+
+    

@@ -19,7 +19,7 @@ namespace HUREL {
 		{
 			CODED,
 			COMPTON,
-			HYBRID
+			HYBRID,
 		};
 		public ref class LahgiWrapper
 		{
@@ -29,7 +29,8 @@ namespace HUREL {
 
 
 		public:
-			LahgiWrapper(eModuleManagedType type);
+			LahgiWrapper();
+			bool Initiate(eModuleManagedType type);
 			Boolean AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks);
 
 			void GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE);
@@ -39,10 +40,14 @@ namespace HUREL {
 			void SaveListModeData(System::String^ fileName);
 
 			void GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount);
+			
 
 			void GetSumSpectrum(List<array<double>^>^% energyCount);
 			void GetAbsorberSumSpectrum(List<array<double>^>^% energyCount);
 			void GetScatterSumSpectrum(List<array<double>^>^% energyCount);
+			void GetScatterSumSpectrumByTime(List<array<double>^>^% energyCount, unsigned int time);
+			void GetAbsorberSumSpectrumByTime(List<array<double>^>^% energyCount, unsigned int time);
+
 			void ResetSpectrum(unsigned int channelNumber);
 
 			void GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data);

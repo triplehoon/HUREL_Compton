@@ -163,7 +163,6 @@ namespace Compton_GUI_WPF.ViewModel
         {
             await Task.Run(() =>
             {
-                string temp = "";
                 RealsenseControl.ResetPipeline();
             });
 
@@ -441,7 +440,6 @@ namespace Compton_GUI_WPF.ViewModel
         private Task UpdateRealTimePointCloudTask;
         public void UpdateRealTimePointCloud()
         {
-            int error = 0;
             Thread.Sleep(2000);
             while (!IsRealsensePipelineOn)
             {

@@ -9,13 +9,13 @@
 #include "Module.h"
 #include "ListModeData.h"
 #include "ReconPointCloud.h"
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <numeric>
 
 #define ACTIVE_AREA_LENGTH 0.14
-
 
 namespace HUREL {
 	namespace Compton {	
@@ -56,7 +56,7 @@ namespace HUREL {
 			static LahgiControl& instance();
 
 
-			void SetType(eMouduleType type);
+			bool SetType(eMouduleType type);
 			
 			~LahgiControl();
 			void AddListModeData(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk);

@@ -1,6 +1,6 @@
 #include "RtabmapWrapper.h"
 
-Boolean HUREL::Compton::LACC::RtabmapWrapper::InitiateRtabmap(System::String^% message)
+Boolean HUREL::Compton::RtabmapWrapper::InitiateRtabmap(System::String^% message)
 {
     std::string resultMsg;
     //try
@@ -16,10 +16,12 @@ Boolean HUREL::Compton::LACC::RtabmapWrapper::InitiateRtabmap(System::String^% m
 		//System::Diagnostics::Trace::WriteLine("Initiating Rtabmap Failed. Unkown Error");
 		//message = "Initiating Rtabmap Failed. Unkown Error";
 	}
+
+	
     return mIsInitiated;
 }
 
-void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
+void HUREL::Compton::RtabmapWrapper::GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
@@ -54,7 +56,7 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimePointCloud(List<array<doub
 	}
 }
 
-void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimePointCloudTransPosed(List<array<double>^>^% vectors, List<array<double>^>^% colors)
+void HUREL::Compton::RtabmapWrapper::GetRealTimePointCloudTransPosed(List<array<double>^>^% vectors, List<array<double>^>^% colors)
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
@@ -89,19 +91,22 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimePointCloudTransPosed(List<
 	}
 }
 
-void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data)
+void HUREL::Compton::RtabmapWrapper::GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data)
 {
 	static int imagesize = 0;
 	if (!mSlamcontrolNative.mIsVideoStreamOn) {
+		width = 0;
+		height = 0;
+		stride = 0;
 		data = IntPtr::Zero;
 		return;
 	}
 	
-	mSlamcontrolNative.LockVideoFrame();
+	//SlamcontrolNative.LockVideoFrame();
 	cv::Mat color = mSlamcontrolNative.GetCurrentVideoFrame();
 	if (color.cols == 0)
 	{
-		mSlamcontrolNative.UnlockVideoFrame();
+		//mSlamcontrolNative.UnlockVideoFrame();
 		return;
 	}
 	width = color.cols;
@@ -116,7 +121,7 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimeRGB(int% width, int% heigh
 	}
 	
 	memcpy(mColorImg, color.data, imagesize);
-	mSlamcontrolNative.UnlockVideoFrame();
+	//mSlamcontrolNative.UnlockVideoFrame();
 
 
 
@@ -134,9 +139,10 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetRealTimeRGB(int% width, int% heigh
 		data = IntPtr(ptr);
 	}
 }
-Boolean HUREL::Compton::LACC::RtabmapWrapper::GetRealTimeRGBStream(int% width, int% height, int% type, array<Byte>^% data)
+
+Boolean HUREL::Compton::RtabmapWrapper::GetRealTimeRGBStream(int% width, int% height, int% type, array<Byte>^% data)
 {
-	mSlamcontrolNative.LockVideoFrame();
+	//mSlamcontrolNative.LockVideoFrame();
 	cv::Mat color = mSlamcontrolNative.GetCurrentVideoFrame();
 	if (color.cols > 1) 
 	{
@@ -149,12 +155,12 @@ Boolean HUREL::Compton::LACC::RtabmapWrapper::GetRealTimeRGBStream(int% width, i
 		{
 			data[i] = color.data[i];
 		}		
-		mSlamcontrolNative.UnlockVideoFrame();
+		//mSlamcontrolNative.UnlockVideoFrame();
 		return true;
 	}
 	else
 	{
-		mSlamcontrolNative.UnlockVideoFrame();
+		//mSlamcontrolNative.UnlockVideoFrame();
 		return false;
 	}
 	
@@ -166,7 +172,7 @@ Boolean HUREL::Compton::LACC::RtabmapWrapper::GetRealTimeRGBStream(int% width, i
 	
 }
 
-Boolean HUREL::Compton::LACC::RtabmapWrapper::StartRtabmapPipeline(System::String^% msg)
+Boolean HUREL::Compton::RtabmapWrapper::StartRtabmapPipeline(System::String^% msg)
 {
 	mSlamcontrolNative.StartVideoStream();
 	Stopwatch^ sw = gcnew Stopwatch();
@@ -182,13 +188,13 @@ Boolean HUREL::Compton::LACC::RtabmapWrapper::StartRtabmapPipeline(System::Strin
 	return true;
 }
 
-void HUREL::Compton::LACC::RtabmapWrapper::StopRtabmapPipeline()
+void HUREL::Compton::RtabmapWrapper::StopRtabmapPipeline()
 {
 	mSlamcontrolNative.StopSlamPipe();
 	mSlamcontrolNative.StopVideoStream();
 }
 
-void HUREL::Compton::LACC::RtabmapWrapper::GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors)
+void HUREL::Compton::RtabmapWrapper::GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize)
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
@@ -196,7 +202,7 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetReconSLAMPointCloud(double time, e
 	
 
 
-	open3d::geometry::PointCloud points = *mSlamcontrolNative.GetSlamPointCloud().VoxelDownSample(0.1);
+	open3d::geometry::PointCloud points = *mSlamcontrolNative.GetSlamPointCloud().VoxelDownSample(voxelSize);
 
 	ReconPointCloud rcPC;
 	switch (reconType)
@@ -247,18 +253,18 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetReconSLAMPointCloud(double time, e
 	}
 }
 
-Boolean HUREL::Compton::LACC::RtabmapWrapper::StartSLAM(System::String^% msg)
+Boolean HUREL::Compton::RtabmapWrapper::StartSLAM(System::String^% msg)
 {
 	mSlamcontrolNative.StartSlamPipe();
 	return true;
 }
 
-void HUREL::Compton::LACC::RtabmapWrapper::StopSLAM()
+void HUREL::Compton::RtabmapWrapper::StopSLAM()
 {
 	mSlamcontrolNative.StopSlamPipe();
 }
 
-void HUREL::Compton::LACC::RtabmapWrapper::ResetPipeline()
+void HUREL::Compton::RtabmapWrapper::ResetPipeline()
 {
 	LahgiControl::instance().StopListModeGenPipe();
 
@@ -267,7 +273,7 @@ void HUREL::Compton::LACC::RtabmapWrapper::ResetPipeline()
 	
 }
 
-void HUREL::Compton::LACC::RtabmapWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
+void HUREL::Compton::RtabmapWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
@@ -303,7 +309,7 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetSLAMPointCloud(List<array<double>^
 	}
 }
 
-void HUREL::Compton::LACC::RtabmapWrapper::GetPoseFrame(array<double>^% mat)
+void HUREL::Compton::RtabmapWrapper::GetPoseFrame(array<double>^% mat)
 {
 	std::vector<double> transform = mSlamcontrolNative.getMatrix3DOneLineFromPoseData();
 	mat = gcnew array<double>(16);
@@ -312,17 +318,17 @@ void HUREL::Compton::LACC::RtabmapWrapper::GetPoseFrame(array<double>^% mat)
 	}
 }
 
-HUREL::Compton::LACC::RtabmapWrapper::RtabmapWrapper()
+HUREL::Compton::RtabmapWrapper::RtabmapWrapper()
 {
 }
 
-HUREL::Compton::LACC::RtabmapWrapper::~RtabmapWrapper()
+HUREL::Compton::RtabmapWrapper::~RtabmapWrapper()
 {
 	this->!RtabmapWrapper();
 	delete[] mColorImg;
 }
 
-HUREL::Compton::LACC::RtabmapWrapper::!RtabmapWrapper()
+HUREL::Compton::RtabmapWrapper::!RtabmapWrapper()
 {
 
 	delete(&mSlamcontrolNative);

@@ -12,6 +12,49 @@ HUREL::Compton::RtabmapSlamControl::RtabmapSlamControl()
 
 bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 {
+	try {
+		rs2::context ctx = rs2::context();
+
+		rs2::config cfgD455 = rs2::config();
+		//cfgD455.enable_device("935322071433");	
+		cfgD455.enable_stream(RS2_STREAM_COLOR, 848, 480, RS2_FORMAT_BGR8, 15);
+		//cfgD455.enable_stream(RS2_STREAM_COLOR, D435_H_COLOR_SIZE, D435_V_COLOR_SIZE, RS2_FORMAT_RGB8, 15);
+		cfgD455.enable_stream(RS2_STREAM_DEPTH, 848, 480, RS2_FORMAT_Z16, 15);
+		rs2::pipeline pipeD455 = rs2::pipeline();
+		
+		rs2::config cfgT265 = rs2::config();
+		cfgT265.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
+		rs2::pipeline pipeT265 = rs2::pipeline(ctx);
+		rs2::pipeline_profile d455 = pipeD455.start(cfgD455);
+
+		std::string usbInfo = d455.get_device().get_info(RS2_CAMERA_INFO_USB_TYPE_DESCRIPTOR);
+		*outMessage = "RtabmapSlamControl: d455 connencted with usb " + usbInfo + " \n";
+		pipeT265.start(cfgT265);
+
+		pipeD455.stop();
+		pipeT265.stop();
+	}
+	catch (const rs2::camera_disconnected_error& e)
+	{
+		*outMessage += "RtabmapSlamControl: Camera was disconnected! Please connect it back ";
+		*outMessage += e.what();
+		return false;
+	}
+	// continue with more general cases
+	catch (const rs2::recoverable_error& e)
+	{
+		*outMessage += "RtabmapSlamControl: Operation failed, please try again ";
+		*outMessage +=  e.what();
+		return false;
+	}
+	// you can also catch "anything else" raised from the library by catching rs2::error
+	catch (const rs2::error& e)
+	{
+		*outMessage += "RtabmapSlamControl: Some other error occurred! ";
+		*outMessage += e.what();
+		return false;
+	}
+	
 	try
 	{
 		mCamera = new rtabmap::CameraRealSense2();
@@ -20,9 +63,9 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 		mCamera->setDepthResolution(848, 480);
 
 		const rtabmap::Transform test(0.006f, 0.0025f, 0.0f, 0.0f, 0.0f, 0.0f);
-		mCamera->setDualMode(false, test);
-		mCamera->setOdomProvided(true, false, true);
-		mCamera->setImagesRectified(true);
+		mCamera->setDualMode(true, test);
+		//mCamera->setOdomProvided(true, false, true);
+		//mCamera->setImagesRectified(true);
 	}
 	catch(int exp)
 	{
@@ -30,14 +73,14 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	}
 	if (!mCamera->init(".", ""))
 	{
-		*outMessage = "RtabmapSlamControl: Initiate failed\n";
+		*outMessage += "RtabmapSlamControl: Initiate failed\n";
 		
 		mIsInitiate = false;
 		return false;
 	}
 	else
 	{
-		*outMessage = "RtabmapSlamControl: Initiate sucess \n";
+		*outMessage += "RtabmapSlamControl: Initiate success\n";
 		
 		mIsInitiate = true;
 		return true;

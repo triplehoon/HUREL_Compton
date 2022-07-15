@@ -12,16 +12,16 @@ using namespace System::Collections;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
+
 namespace HUREL {
 	namespace Compton {
-		namespace LACC {
 
 			public ref class RtabmapWrapper:IDisposable
 			{
 			private:
 				Boolean mIsInitiated = false;
 				uchar* mColorImg = nullptr;
-
+				
 			public:
 				static RtabmapSlamControl& mSlamcontrolNative = RtabmapSlamControl::instance();
 				
@@ -34,7 +34,7 @@ namespace HUREL {
 				Boolean GetRealTimeRGBStream(int% width, int% height, int% type, array<Byte>^% data);
 				Boolean StartRtabmapPipeline(System::String^% msg);
 				void StopRtabmapPipeline();
-				void GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors);
+				void GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize);
 
 				Boolean StartSLAM(System::String^% msg);
 				void StopSLAM();
@@ -50,6 +50,6 @@ namespace HUREL {
 				!RtabmapWrapper();
 			};
 
-		}
+		
 	}
 }
