@@ -34,7 +34,7 @@ namespace HUREL {
 				Boolean GetRealTimeRGBStream(int% width, int% height, int% type, array<Byte>^% data);
 				Boolean StartRtabmapPipeline(System::String^% msg);
 				void StopRtabmapPipeline();
-				void GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors);
+				void GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize);
 
 				Boolean StartSLAM(System::String^% msg);
 				void StopSLAM();

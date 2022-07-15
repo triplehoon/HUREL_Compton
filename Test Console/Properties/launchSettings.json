@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Test Console": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

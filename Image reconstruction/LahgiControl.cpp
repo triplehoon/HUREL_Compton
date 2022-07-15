@@ -9,6 +9,7 @@ using namespace std;
 using namespace HUREL;
 using namespace Compton;
 
+
 ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation)
 {
 	InteractionData scatter;
@@ -42,8 +43,7 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 	mAbsorberModules(NULL),
 	mScatterModules(NULL),
 	mModuleType(HUREL::Compton::eMouduleType::MONO)
-{
-
+{	
 }
 
 HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()

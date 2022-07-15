@@ -83,7 +83,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SLAM wrapper\SLAM wrapper.vcxproj" />
-    <ProjectReference Include="..\SRE3021 API\SRE3021 API.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -41,7 +41,7 @@ namespace HUREL.Compton
         //}
         
         
-        public bool IsSavingBinaryData;
+        public bool IsSavingBinaryData = false;
         private void ParsingCyusbBuffer()
         {
 

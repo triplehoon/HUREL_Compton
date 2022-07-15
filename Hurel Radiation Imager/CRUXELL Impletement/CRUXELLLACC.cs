@@ -166,7 +166,22 @@ namespace HUREL.Compton
         {
             public USBDevice? Device { get; set; }
             public CyUSBDevice? CyDevice { get; set; }
-            public string? DeviceName { get; set; }
+            public string deviceName = "";
+            public string DeviceName
+            {
+                get
+                {
+                    if (Device == null)
+                    {
+                        return "";
+                    }
+                    return deviceName;
+                }
+                set
+                {
+                    deviceName = value;
+                }
+            }
         }
         #endregion
 

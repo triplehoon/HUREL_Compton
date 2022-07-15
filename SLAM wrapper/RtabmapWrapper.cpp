@@ -139,6 +139,7 @@ void HUREL::Compton::RtabmapWrapper::GetRealTimeRGB(int% width, int% height, int
 		data = IntPtr(ptr);
 	}
 }
+
 Boolean HUREL::Compton::RtabmapWrapper::GetRealTimeRGBStream(int% width, int% height, int% type, array<Byte>^% data)
 {
 	//mSlamcontrolNative.LockVideoFrame();
@@ -193,7 +194,7 @@ void HUREL::Compton::RtabmapWrapper::StopRtabmapPipeline()
 	mSlamcontrolNative.StopVideoStream();
 }
 
-void HUREL::Compton::RtabmapWrapper::GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors)
+void HUREL::Compton::RtabmapWrapper::GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize)
 {
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
@@ -201,7 +202,7 @@ void HUREL::Compton::RtabmapWrapper::GetReconSLAMPointCloud(double time, eReconT
 	
 
 
-	open3d::geometry::PointCloud points = *mSlamcontrolNative.GetSlamPointCloud().VoxelDownSample(0.1);
+	open3d::geometry::PointCloud points = *mSlamcontrolNative.GetSlamPointCloud().VoxelDownSample(voxelSize);
 
 	ReconPointCloud rcPC;
 	switch (reconType)

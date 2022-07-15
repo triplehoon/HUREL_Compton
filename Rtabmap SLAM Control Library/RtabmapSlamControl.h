@@ -28,6 +28,7 @@
 #include <open3d/geometry/PointCloud.h>
 #include <open3d/pipelines/registration/Registration.h>
 #include <open3d/io/PointCloudIO.h>
+#include <librealsense2/rs.hpp>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
@@ -54,7 +55,7 @@ namespace HUREL
 
 			rtabmap::CameraRealSense2* mCamera = nullptr;
 			rtabmap::CameraThread* mCameraThread = nullptr;
-			rtabmap::Odometry* mOdo;// = rtabmap::Odometry::create();;
+			rtabmap::Odometry* mOdo = nullptr;// = rtabmap::Odometry::create();;
 			
 			cv::Mat mCurrentVideoFrame = cv::Mat();
 			cv::Mat mCurrentDepthFrame = cv::Mat();
