@@ -1,10 +1,12 @@
 #include "ReconPointCloud.h"
 
 #include "open3d/geometry/Image.h"
+
 // helper classes for VoxelDownSample and VoxelDownSampleAndTrace
 namespace {
 	class AccumulatedReconPoint {
 	public:
+		
 		AccumulatedReconPoint()
 			: num_of_points_(0),
 			point_(0.0, 0.0, 0.0),
@@ -13,6 +15,7 @@ namespace {
 			reconValue_(0){}
 
 	public:
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		void AddPoint(const HUREL::Compton::ReconPointCloud& cloud, int index) {
 			point_ += cloud.points_[index];
 			if (cloud.HasNormals()) {
@@ -139,7 +142,7 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData
 		return 0;
 	}
 	double comptonScatteringAngle = acos(comptonCal) / EIGEN_PI * 180;
-	Eigen::Vector3d effectToScatterVector = (imgPoint - lmData.Scatter.TransformedInteractionPoint.head<3>());
+	Eigen::Vector3d effectToScatterVector = (imgPoint.head<3>() - lmData.Scatter.TransformedInteractionPoint.head<3>());
 	Eigen::Vector3d scatterToAbsorberVector = (lmData.Scatter.TransformedInteractionPoint.head<3>() - lmData.Absorber.TransformedInteractionPoint.head<3>());
 	effectToScatterVector.normalize();
 	scatterToAbsorberVector.normalize();
@@ -147,7 +150,7 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData
 
 	double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
 
-	if (abs(effectedAngle - comptonScatteringAngle) < 3)
+	if (abs(effectedAngle - comptonScatteringAngle) < 5)
 	{
 		return 1;
 	}
@@ -160,6 +163,7 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData
 
 double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed(ListModeData lmData, Eigen::Vector3d imgPoint)
 {
+	
 	if (lmData.Type != eInterationType::COMPTON)
 	{
 		return 0;
@@ -170,15 +174,15 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed
 		return 0;
 	}
 	double comptonScatteringAngle = acos(comptonCal) / EIGEN_PI * 180;
-	Eigen::Vector3d effectToScatterVector = (imgPoint - lmData.Scatter.RelativeInteractionPoint.head<3>());
+	Eigen::Vector3d effectToScatterVector = (imgPoint.head<3>() - lmData.Scatter.RelativeInteractionPoint.head<3>());
 	Eigen::Vector3d scatterToAbsorberVector = (lmData.Scatter.RelativeInteractionPoint.head<3>() - lmData.Absorber.RelativeInteractionPoint.head<3>());
-	effectToScatterVector.normalize();
 	scatterToAbsorberVector.normalize();
+	effectToScatterVector.normalize();
 	double positionDotPord = effectToScatterVector.dot(scatterToAbsorberVector);
 
 	double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
 
-	if (abs(effectedAngle - comptonScatteringAngle) < 5)
+	if (abs(effectedAngle - comptonScatteringAngle) < 15)
 	{
 		return 1;
 	}

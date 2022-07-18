@@ -24,4 +24,12 @@
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="20220706_DigitalLabScan_100uCi_-1,0,2.4_Pointcloud.ply">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="20220706_DigitalLabScan_100uCi_-1,0,2.4_cpplmdata.csv">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
 </Project>

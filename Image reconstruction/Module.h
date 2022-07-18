@@ -50,11 +50,12 @@ namespace HUREL {
 			std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
 #pragma endregion
 			public:
+				EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 				double mModuleOffsetX;
 				double mModuleOffsetY;
 				double mModuleOffsetZ;
 
-				EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+				
 				Module();
 				Module(eMouduleType moduleType, 
 						std::string configDir, std::string moduleName,

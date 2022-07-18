@@ -35,6 +35,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Hurel Radiation Imager\Hurel Radiation Imager.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="CyUSB">
       <HintPath>C:\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\bin\CyUSB.dll</HintPath>
     </Reference>

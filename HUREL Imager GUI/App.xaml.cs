@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using HUREL.Compton;
 
 namespace HUREL_Imager_GUI
 {
@@ -16,6 +17,7 @@ namespace HUREL_Imager_GUI
         public App()
         {
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTcxMjAyQDMxMzkyZTM0MmUzMEw2eUs1OURYTGswSnNaZ3p5WjlIcWdPQTcrM2UxWEdSbWd6TW9iUnRlcjA9");
+            
         }
 
         protected override void OnStartup(StartupEventArgs e)

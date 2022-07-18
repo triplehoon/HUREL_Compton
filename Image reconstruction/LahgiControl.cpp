@@ -473,9 +473,7 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 	for (unsigned int i = 0; i < data.size(); ++i)
 	{
 		ListModeData& d = data[i];
-		saveFile << static_cast<long int>(d.InteractionTime) << ",";	
-		saveFile << d.Scatter.RelativeInteractionPoint[0] << "," << d.Scatter.RelativeInteractionPoint[1] << "," << d.Scatter.RelativeInteractionPoint[2] << "," << d.Scatter.InteractionEnergy << ",";
-		saveFile << d.Absorber.RelativeInteractionPoint[0] << "," << d.Absorber.RelativeInteractionPoint[1] << "," << d.Absorber.RelativeInteractionPoint[2] << "," << d.Absorber.InteractionEnergy << std::endl;
+		saveFile << d.WriteListModeData() << std::endl;
 	}
 	saveFile.close();
 
@@ -500,54 +498,10 @@ void HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 	{
 		ListModeData temp;
 		getline(loadFile, buffer);
-		for (int i = 0; i < 2048; ++i)
+		if (temp.ReadListModeData(buffer))
 		{
-			line[i] = buffer.c_str()[i];
+			mListedListModeData.push_back(temp);
 		}
-		char* context[7]{ nullptr };
-		char* token = strtok(line, ",");
-		if (token == nullptr)
-		{
-			break;
-		}
-		temp.InteractionTime = static_cast<time_t>(stol(token));
-		
-		token = strtok(nullptr, ",");
-		temp.Scatter.RelativeInteractionPoint[0] = stod(token);
-		if (isnan(stod(token)))
-		{
-			temp.Type = eInterationType::NONE;
-		}
-
-		token = strtok(nullptr, ",");
-		temp.Scatter.RelativeInteractionPoint[1] = stod(token);
-
-		token = strtok(nullptr, ",");
-		temp.Scatter.RelativeInteractionPoint[2] = stod(token);
-
-		token = strtok(nullptr, ",");
-		temp.Scatter.InteractionEnergy = stod(token);
-
-		token = strtok(nullptr, ",");
-		temp.Absorber.RelativeInteractionPoint[0] = stod(token);
-		if (isnan(stod(token)))
-		{
-			temp.Type = eInterationType::CODED;
-		}
-		else
-		{
-			temp.Type = eInterationType::COMPTON;
-		}
-
-		token = strtok(nullptr, ",");
-		temp.Absorber.RelativeInteractionPoint[1] = stod(token);
-
-		token = strtok(nullptr, ",");
-		temp.Absorber.RelativeInteractionPoint[2] = stod(token);
-
-		token = strtok(nullptr, ",");
-		temp.Absorber.InteractionEnergy = stod(token);
-		mListedListModeData.push_back(temp);
 	}
 
 	loadFile.close();

@@ -15,6 +15,7 @@ namespace HUREL {
 				std::vector<BinningEnergy> mHistogramEnergy;
 				std::vector<double> mEnergyBin;
 			public:
+				
 				EnergySpectrum() {}; //do nothing
 				EnergySpectrum(unsigned int binSize, double maxEnergy);
 				std::vector<BinningEnergy> GetHistogramEnergy();

@@ -10,6 +10,7 @@ namespace HUREL {
 		class CodeMaskCalc
 		{
 		public:
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			CodeMaskCalc() {};
 			CodeMaskCalc(int pixelCount, double activeAreaSize);
 

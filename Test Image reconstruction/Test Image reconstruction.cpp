@@ -27,75 +27,126 @@
 #include "CodeMaskCalc.h"
 #include "RadiationImage.h"
 
+
+
 using namespace cv;
 using namespace HUREL::Compton;
 static Mat CodedMaskMat();
 Mat MakeDetectorResponse(std::vector<ListModeData> lmData);
 void ShowCV_32SAsJet(Mat img, int size);
-void RemapAsSherical(const Mat& source, Mat& target);
-
-std::tuple<bool, Eigen::Matrix4d_u, Eigen::Matrix6d> PairwayRgbdRegisteration(open3d::geometry::RGBDImage& source, open3d::geometry::RGBDImage& target);
 
 #include <stdio.h>
 
 int main()
 {
-    LahgiControl lahgi = LahgiControl::instance();
-    lahgi.SetType(eMouduleType::TEST);
-    lahgi.LoadListedListModeData("E:\\OneDrive - 한양대학교\\바탕 화면\\CC,CA code\\Cs137_0_0_1_test7_LMData.csv");
+    
+    std::shared_ptr < open3d::geometry::PointCloud> pc = std::make_shared<open3d::geometry::PointCloud>();
+    open3d::io::ReadPointCloudOption opt;
 
-    std::vector<ListModeData> lmData = lahgi.GetListedListModeData();
+    std::cout << "Loading pointcloud \n";
 
-    for (size_t i = 0; i < lmData.size(); ++i)
+    if (open3d::io::ReadPointCloudFromPLY("20220706_DigitalLabScan_100uCi_-1,0,2.4_Pointcloud.ply", *pc, opt))
     {
-        lmData[i].Scatter.RelativeInteractionPoint[0] -= T265_TO_LAHGI_OFFSET_X;
-        lmData[i].Scatter.RelativeInteractionPoint[1] -= T265_TO_LAHGI_OFFSET_Y;
-        lmData[i].Scatter.RelativeInteractionPoint[2] -= T265_TO_LAHGI_OFFSET_Z;
-        lmData[i].Absorber.RelativeInteractionPoint[0] -= T265_TO_LAHGI_OFFSET_X;
-        lmData[i].Absorber.RelativeInteractionPoint[1] -= T265_TO_LAHGI_OFFSET_Y;
-        lmData[i].Absorber.RelativeInteractionPoint[2] -= T265_TO_LAHGI_OFFSET_Z;
+        std::cout << "Show pointcloud \n";
+
+        //open3d::visualization::DrawGeometries({ pc });
+    }
+    else
+    {
+        std::cout << "Fail to load point cloud\n";
     }
 
-    RadiationImage radImg(lmData);
-    ShowCV_32SAsJet(radImg.mDetectorResponseImage, 1000);
-    ShowCV_32SAsJet(radImg.mCodedImage, 1000);
-    
-    ShowCV_32SAsJet(radImg.mComptonImage, 1000);
-    ShowCV_32SAsJet(radImg.mHybridImage, 1000);
+    Vector3d test;
+    test(0) = 1;
+    test(1) = 2;
+    test(2) = 3;
+    test.normalize();
+     std::cout << "Load LAHGI \n";
+    LahgiControl& lahgi = LahgiControl::instance();
+    lahgi.SetType(eMouduleType::TEST);
 
-    return 0;
-}
-Mat MakeDetectorResponse(std::vector<ListModeData> lmData)
-{
-    double dectorWidth = 0.35;
-    double pixelSize = 0.005;
-    int pixelCount = static_cast<int>(round(dectorWidth / pixelSize));
-    Mat img(pixelCount, pixelCount, CV_32S, Scalar(0));
-    int* ptrImg = img.ptr<int>();
-    for (ListModeData lm : lmData)
+    std::cout << "Load listmode data \n";
+    lahgi.LoadListedListModeData("20220706_DigitalLabScan_100uCi_-1,0,2.4_cpplmdata.csv");
+    
+    std::vector<ListModeData> lmData = lahgi.GetListedListModeData();
+    std::cout << "Done loading listmode data: " << lmData.size() << std::endl;
+   
+    std::vector<RadiationImage> radimgs;
+
+    std::chrono::milliseconds startTime = lmData[0].InteractionTimeInMili;
+    int startIdx = 0;
+    HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(*pc);
+
+    #pragma omp parallel for
+    for (int i = 0; i < lmData.size(); ++i)
     {
-        int i = 0;
-        if (lm.Scatter.InteractionEnergy <= 620 || lm.Scatter.InteractionEnergy >= 700)
+    /*   if (lmData[i].InteractionTimeInMili != startTime)
         {
-            continue;
-        }
-        for (double x = -dectorWidth / 2; x < dectorWidth / 2; x += pixelSize)
-        {
-            int j = 0;
-            for (double y = -dectorWidth / 2; y < dectorWidth / 2; y += pixelSize)
+
+            std::vector<ListModeData>::const_iterator first = lmData.begin() + startIdx;
+            std::vector<ListModeData>::const_iterator last = lmData.begin() + i ;
+            std::vector<ListModeData> sameTimeData(first, last);
+            std::vector<ListModeData> effectiveData;
+            for (const auto lm : sameTimeData)
             {
-                if (lm.Scatter.RelativeInteractionPoint[0] < x + pixelSize &&
-                    lm.Scatter.RelativeInteractionPoint[1] < y + pixelSize &&
-                    lm.Scatter.RelativeInteractionPoint[0] >= x &&
-                    lm.Scatter.RelativeInteractionPoint[1] >= y)
+                if (lm.Type == eInterationType::CODED)
                 {
-                    //img.at<int>(j, i)++;
-                    ptrImg[j * pixelCount + i]++;
+                    if (lm.Scatter.InteractionEnergy > 600 && lm.Scatter.InteractionEnergy < 720)
+                    {
+                        effectiveData.push_back(lm);
+                    }
                 }
-                ++j;
+                else if (lm.Type == eInterationType::COMPTON)
+                {
+                    if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy > 600 && lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 720)
+                    {
+                        effectiveData.push_back(lm);
+                    }
+                }
             }
-            ++i;
+            if (effectiveData.size() == 0)
+            {
+                startTime = lmData[i].InteractionTimeInMili;
+                startIdx = i;
+                continue;
+            }
+           
+
+            radimgs.push_back(img);
+
+            startTime = lmData[i].InteractionTimeInMili;
+            startIdx = i;
+        }*/
+        if (lmData[i].Type == eInterationType::COMPTON)
+        {
+            if (lmData[i].Scatter.InteractionEnergy + lmData[i].Absorber.InteractionEnergy > 600 && lmData[i].Scatter.InteractionEnergy + lmData[i].Absorber.InteractionEnergy < 720)
+            {
+                reconPC.CalculateReconPoint(lmData[i], HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection);
+            }
         }
-    }    
-    return img;
+    }
+
+
+    std::shared_ptr < open3d::geometry::PointCloud> reconpc_ptr = std::make_shared<open3d::geometry::PointCloud>();
+    
+    for (int i = 0; i < reconPC.colors_.size(); ++i)
+    {
+        //Eigen::Matrix<double, 3, 1, Eigen::DontAlign> color;
+        //Eigen::Matrix<double, 3, 1, Eigen::DontAlign> point;
+        Vector3d color;
+        Vector3d point;
+        RGBA_t rgb = HUREL::Compton::ReconPointCloud::ColorScaleJet(reconPC.reconValues_[i], 0, reconPC.maxReoconValue);
+        pc->colors_[i](0) = rgb.R;
+        pc->colors_[i](1) = rgb.G;
+        pc->colors_[i](2) = rgb.B;
+        
+     
+    }
+    open3d::io::WritePointCloudOption opt2;
+    open3d::io::WritePointCloudToPLY("comptonImg.ply", *pc, opt2);
+
+
+
+    std::cout << "Done \n";
+    return 0;
 }

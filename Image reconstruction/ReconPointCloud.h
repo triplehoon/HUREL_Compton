@@ -13,6 +13,7 @@ namespace HUREL
 
 	namespace Compton
 	{
+
 		struct RGBA {
 			double R;
 			double G;

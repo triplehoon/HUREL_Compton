@@ -23,27 +23,31 @@ namespace HUREL {
 		/// </summary>
 		struct InteractionData
 		{
-			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-			Eigen::Vector4d RelativeInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""), nan(""));
-			Eigen::Vector4d TransformedInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""), nan(""));
+			Eigen::Vector4d RelativeInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""), 1);
+			Eigen::Vector4d TransformedInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""),1);
 			double InteractionEnergy = 0;  
+			//EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		};
 
-		struct ListModeData
+		class ListModeData
 		{
-			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-			eInterationType Type;
+		public:
+			//EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+			eInterationType Type = eInterationType::NONE;
 			InteractionData Scatter;
 			InteractionData Absorber;
-			time_t InteractionTime;
-			std::chrono::milliseconds InteractionTimeInMili;
+			time_t InteractionTime = 0;
+			std::chrono::milliseconds InteractionTimeInMili = std::chrono::milliseconds(0);
 			Eigen::Matrix4d DetectorTransformation = Eigen::Matrix4d::Zero();
+
+			std::string WriteListModeData();
+			bool ReadListModeData(std::string data);
 		};
 
 		class PlaneReconsturctImage
 		{
 		private: 
-			std::vector<ListModeData> mListedListModeData;
+			std::vector<HUREL::Compton::ListModeData> mListedListModeData;
 			cv::Mat mComptonImage;
 			cv::Mat mCodedImage;
 			cv::Mat mHybridImage;
@@ -52,6 +56,7 @@ namespace HUREL {
 			
 
 		public:
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			double Distance;
 
 

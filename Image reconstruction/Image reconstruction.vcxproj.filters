@@ -50,5 +50,8 @@
     <ClCompile Include="RadiationImage.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="ListModeData.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
