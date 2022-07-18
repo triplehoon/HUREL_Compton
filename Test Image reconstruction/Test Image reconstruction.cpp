@@ -1,27 +1,5 @@
 ﻿// Test Image reconstruction.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
 //
-
-#include <iostream>
-#include <opencv2/opencv.hpp>
-#include <math.h>
-#include <string>
-#include <thread>
-#include <vector>
-#include <time.h>
-
-#include <open3d/geometry/LineSet.h>
-#include <open3d/geometry/Image.h>
-#include <open3d/geometry/RGBDImage.h>
-#include <open3d/core/Tensor.h>
-#include <open3d/core/CoreUtil.h>
-#include <open3d/io/ImageIO.h>
-#include <open3d/io/sensor/RGBDSensor.h>
-#include <open3d/visualization/utility/DrawGeometry.h>
-#include <open3d/visualization/utility/Draw.h>
-#include <open3d/pipelines/odometry/Odometry.h>
-#include <open3d/pipelines/integration/ScalableTSDFVolume.h>
-#include <open3d/camera/PinholeCameraIntrinsic.h>
-
 #include "RealsenseControl.h"
 #include "LahgiControl.h"
 #include "CodeMaskCalc.h"
@@ -36,6 +14,7 @@ Mat MakeDetectorResponse(std::vector<ListModeData> lmData);
 void ShowCV_32SAsJet(Mat img, int size);
 
 #include <stdio.h>
+#include <open3d/visualization/utility/DrawGeometry.h>
 
 int main()
 {
@@ -48,8 +27,8 @@ int main()
     if (open3d::io::ReadPointCloudFromPLY("20220706_DigitalLabScan_100uCi_-1,0,2.4_Pointcloud.ply", *pc, opt))
     {
         std::cout << "Show pointcloud \n";
-
-        //open3d::visualization::DrawGeometries({ pc });
+        
+        open3d::visualization::DrawGeometries({ pc });
     }
     else
     {
@@ -142,6 +121,7 @@ int main()
         
      
     }
+    open3d::visualization::DrawGeometries({ pc });
     open3d::io::WritePointCloudOption opt2;
     open3d::io::WritePointCloudToPLY("comptonImg.ply", *pc, opt2);
 

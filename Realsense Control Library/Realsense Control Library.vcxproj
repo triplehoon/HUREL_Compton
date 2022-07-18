@@ -124,7 +124,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files (x86)\Open3D_MDd\include;C:\Program Files (x86)\Open3D_MDd\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;E:\OneDrive - 한양대학교\01.Hurel\01.현재작업\20201203 Comtpon GUI\Compton GUI Main\HUREL Compton\Realsense Control Library\;$(SolutionDir)\Reporter Wrapper</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\open3d-devel-windows-amd64-0.15.1-dbg\include;C:\open3d-devel-windows-amd64-0.15.1-dbg\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;E:\OneDrive - 한양대학교\01.Hurel\01.현재작업\20201203 Comtpon GUI\Compton GUI Main\HUREL Compton\Realsense Control Library\;$(SolutionDir)\Reporter Wrapper</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
