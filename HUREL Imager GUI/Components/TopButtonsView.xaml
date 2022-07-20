@@ -5,9 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
              xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
-             mc:Ignorable="d" 
-             Height="90"
+             xmlns:viewmodel="clr-namespace:HUREL_Imager_GUI.ViewModel"
+             mc:Ignorable="d"              
              Background="{StaticResource CustomDarkBlue}" Padding="0"             
+             
              >
     <UserControl.Resources>
 
@@ -70,9 +71,9 @@
                     <Ellipse Grid.Row="1" Grid.Column="1" StrokeThickness="2" Fill="White" Stroke="White" Stretch="Uniform"/>
                     <Ellipse Grid.Row="3" Grid.Column="1" StrokeThickness="2" Fill="White" Stroke="White" Stretch="Uniform"/>
                 </Grid>
-                
+
                 <Path Data="m193.2 459.2h336v-44.801h-313.6v-67.199c53.031 0 77.168-48.215 98.449-90.777 20.551-41.102 34.719-66.023 58.348-66.023 23.633 0 37.801 24.922 58.352 66.023 21.281 42.562 45.418 90.777 98.449 90.777v-44.801c-23.633 0-37.801-24.922-58.352-66.023-21.281-42.559-45.414-90.773-98.449-90.773-53.031 0-77.168 48.215-98.445 90.773-20.555 41.105-34.723 66.023-58.352 66.023v-201.6h-44.801v336c0 5.9414 2.3594 11.637 6.5586 15.84 4.2031 4.1992 9.8984 6.5586 15.84 6.5586z" Fill="white" Stretch="Uniform"/>
-                
+
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="IconTemplateRestSpecturm">
@@ -144,6 +145,7 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,0,0"/>
             <Setter Property="OverridesDefaultStyle" Value="False"/>
+
         </Style>
 
         <ControlTemplate x:Key="ButtonAdvTemplateTopButtons" TargetType="{x:Type syncfusion:ButtonAdv}">
@@ -222,16 +224,17 @@
                     <Setter Property="Foreground" TargetName="PART_NormalText" Value="{StaticResource ButtonAdvHoverForeground}"/>
                     <Setter Property="BorderBrush" TargetName="InnerBorder" Value="{StaticResource ButtonAdvPressedBackgroundBrush}"/>
                 </Trigger>
+
                 <MultiTrigger>
                     <MultiTrigger.Conditions>
                         <Condition Property="IsCheckable" Value="True"/>
                         <Condition Property="IsChecked" Value="True"/>
                         <Condition Property="IsEnabled" Value="True"/>
                     </MultiTrigger.Conditions>
-                    <Setter Property="BorderBrush" TargetName="ItemBorder" Value="{StaticResource DefaultButtonAdvCheckedBorderBrush}"/>
-                    <Setter Property="Background" TargetName="InnerBorder" Value="{StaticResource DefaultButtonAdvCheckedBackground}"/>
-                    <Setter Property="BorderThickness" TargetName="InnerBorder" Value="1,1,0,0"/>
-                    <Setter Property="CornerRadius" TargetName="InnerBorder" Value="2,2,0,0"/>
+                    <Setter Property="Background" TargetName="ItemBorder" Value="{StaticResource ButtonAdvPressedBackgroundBrush}"/>
+                    <Setter Property="BorderBrush" TargetName="ItemBorder" Value="{StaticResource ButtonAdvPressedBorderBrush}"/>
+                    <Setter Property="Foreground" TargetName="PART_NormalText" Value="{StaticResource ButtonAdvHoverForeground}"/>
+                    <Setter Property="BorderBrush" TargetName="InnerBorder" Value="{StaticResource ButtonAdvPressedBackgroundBrush}"/>
                 </MultiTrigger>
                 <Trigger Property="IsEnabled" Value="False">
                     <Setter Property="Opacity" TargetName="ItemBorder" Value="0.5"/>
@@ -333,17 +336,19 @@
     <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
         <d:CheckBox x:Name="IsRunning" IsChecked="True" Visibility="Collapsed"/>
         <d:CheckBox x:Name="IsAbled" IsChecked="True" Visibility="Collapsed"/>
-        <syncfusion:ButtonAdv Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}">
+        <syncfusion:ButtonAdv Template="{DynamicResource ButtonAdvTemplateTopButtons}" IsEnabled="{Binding StartButtonEnabled}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}">
             <syncfusion:ButtonAdv.Style>
                 <Style TargetType="syncfusion:ButtonAdv" BasedOn="{StaticResource StyleTopButton}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding test, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:TopButtonsView}}}" Value="True" d:Binding="{Binding ElementName=IsRunning, Path=IsChecked}">
+                        <DataTrigger Binding="{Binding IsRunning}" Value="False" d:Binding="{Binding ElementName=IsRunning, Path=IsChecked}">
                             <Setter Property="IconTemplate" Value="{StaticResource IconTemplatePlay}"/>
                             <Setter Property="Label" Value="Start"/>
+                            <Setter Property="Command" Value="{Binding StartSessionCommand}"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding test, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:TopButtonsView}}}" Value="False" d:Binding="{Binding ElementName=IsRunning, Path=IsChecked}">
+                        <DataTrigger Binding="{Binding IsRunning}" Value="True" d:Binding="{Binding ElementName=IsRunning, Path=IsChecked}">
                             <Setter Property="IconTemplate" Value="{StaticResource IconTemplateStop}"/>
                             <Setter Property="Label" Value="Stop"/>
+                            <Setter Property="Command" Value="{Binding StopSessionCommand}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -355,26 +360,53 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <syncfusion:ButtonAdv  Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" IsMultiLine="True" SizeMode="Large">
+            <syncfusion:ButtonAdv x:Name="TimeSetupButton" IsCheckable="True"  Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" IsMultiLine="True" SizeMode="Large">
                 <syncfusion:ButtonAdv.Style>
                     <Style TargetType="syncfusion:ButtonAdv" BasedOn="{StaticResource StyleTopButton}">
                         <Setter Property="IconTemplate" Value="{StaticResource IconTemplateAquireTime}"/>
-                        <Setter Property="Label" Value="Time Setup 500s"/>
+                        <Setter Property="Label" Value="Time Setup"/>
                     </Style>
                 </syncfusion:ButtonAdv.Style>
+
+                <Popup x:Name="TimeSetupButtonPopup" d:IsOpen="True" 
+                   IsOpen="{Binding Path=IsChecked, ElementName=TimeSetupButton, Mode=OneWay}" 
+                   Placement="Bottom" PlacementTarget="{Binding ElementName=TimeSetupButton}">
+                    <Border BorderThickness="3" Width="200"   BorderBrush="{StaticResource CustomDarkBlue}" Background="White">
+
+                        <StackPanel Margin="5,5,5,5">
+                            <TextBlock Text="Time Setup" FontSize="{StaticResource FontSize-Large}" FontWeight="Bold"/>
+                            <CheckBox Content="Is Infinite" FontSize="{StaticResource FontSize-Normal}" Margin="0,5,0,5" IsChecked="{Binding IsSaveBinary}"/>
+                            <syncfusion:UpDown FontSize="{StaticResource FontSize-Large}" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                </Popup>
             </syncfusion:ButtonAdv>
 
 
         </Grid>
 
-        <syncfusion:ButtonAdv  Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" IsMultiLine="True" SizeMode="Large">
+        <syncfusion:ButtonAdv IsCheckable="True" x:Name="SaveButton"   Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" IsMultiLine="True" SizeMode="Large">
             <syncfusion:ButtonAdv.Style>
                 <Style TargetType="syncfusion:ButtonAdv" BasedOn="{StaticResource StyleTopButton}">
                     <Setter Property="IconTemplate" Value="{StaticResource IconTemplateSave}"/>
-                    <Setter Property="Label" Value="Save"/>
+                    <Setter Property="Label" Value="Save Setting"/>
                 </Style>
             </syncfusion:ButtonAdv.Style>
+            <Popup x:Name="SaveButtonPopup" d:IsOpen="True" 
+                   IsOpen="{Binding Path=IsChecked, ElementName=SaveButton, Mode=OneWay}" 
+                   Placement="Bottom" PlacementTarget="{Binding ElementName=SaveButton}">
+                <Border BorderThickness="3" Width="200"   BorderBrush="{StaticResource CustomDarkBlue}" Background="White">
+
+                <StackPanel Margin="5,5,5,5">
+                    <TextBlock Text="Save Setting" FontSize="{StaticResource FontSize-Large}" FontWeight="Bold"/>
+                    <CheckBox Content="Save Binary File" FontSize="{StaticResource FontSize-Normal}" Margin="0,5,0,5" IsChecked="{Binding IsSaveBinary}"/>
+                    <TextBlock Text="Save File Name" Margin="0,10,0,5" FontSize="{StaticResource FontSize-Large}" FontWeight="Bold"/>
+                    <TextBox Text="{Binding FileName, Mode=Default, UpdateSourceTrigger=PropertyChanged}" FontSize="{StaticResource FontSize-Normal}"/>
+                    </StackPanel>
+                </Border>            
+            </Popup>
         </syncfusion:ButtonAdv>
+        
         <syncfusion:ButtonAdv  Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" IsMultiLine="True" SizeMode="Large">
             <syncfusion:ButtonAdv.Style>
                 <Style TargetType="syncfusion:ButtonAdv" BasedOn="{StaticResource StyleTopButton}">

@@ -1,7 +1,6 @@
 #pragma once
 #include "RtabmapSlamControl.h"
 #include "Lahgi wrapper.h"
-
 using namespace System;
 using namespace System::IO;
 using namespace System::Diagnostics;

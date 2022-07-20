@@ -10,7 +10,6 @@
 #include "ReconPointCloud.h"
 #include "LahgiControl.h"
 
-
 namespace HUREL {
 	namespace Compton
 	{

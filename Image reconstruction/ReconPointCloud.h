@@ -7,7 +7,6 @@
 
 #include "ListModeData.h"
 #include "RadiationImage.h"
-
 namespace HUREL
 {
 

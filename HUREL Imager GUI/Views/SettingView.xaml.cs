@@ -1,5 +1,4 @@
-﻿using Syncfusion.Windows.Shared;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,20 +12,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Syncfusion.Windows.Tools.Controls;
 
-
-namespace HUREL_Imager_GUI
+namespace HUREL_Imager_GUI.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for SettingView.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class SettingView : UserControl
     {
-        public MainWindow()
+        public SettingView()
         {
             InitializeComponent();
-            HomeItem.IsSelected = true;
         }
     }
 }

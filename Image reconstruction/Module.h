@@ -15,7 +15,6 @@
 
 #include "EnergySpectrum.h"
 
-
 namespace HUREL {
 	namespace Compton {
 		enum class eMouduleType 

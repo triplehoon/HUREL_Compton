@@ -1,4 +1,10 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:System="clr-namespace:System;assembly=mscorlib"
+                    >
+    <System:Double x:Key="FontSize-Smallest">8</System:Double>
+    <System:Double x:Key="FontSize-Smaller">12</System:Double>
+    <System:Double x:Key="FontSize-Normal">13.333</System:Double>
+    <System:Double x:Key="FontSize-Large">16</System:Double>
+    <System:Double x:Key="FontSize-Larger">20</System:Double>
 </ResourceDictionary>

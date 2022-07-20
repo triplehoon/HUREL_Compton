@@ -4,12 +4,29 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Views"
-             xmlns:components="clr-namespace:HUREL_Imager_GUI.Components"
+             xmlns:components="clr-namespace:HUREL_Imager_GUI.Components" 
+             xmlns:viewmodel="clr-namespace:HUREL_Imager_GUI.ViewModel"
+             
              mc:Ignorable="d" 
              d:DesignHeight="900" d:DesignWidth="1200">
-    <StackPanel>
-    <DockPanel>
-        <components:TopButtonsView DockPanel.Dock="Top"/>
-    </DockPanel>
-    </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="90"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <components:TopButtonsView DataContext="{Binding TopButtonViewModel}" Grid.Row="0"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <components:SpectrumView Grid.Column="0" DataContext="{Binding SpectrumViewModel}"/>
+            </Grid>
+        </Grid>
+    </Grid>
 </UserControl>

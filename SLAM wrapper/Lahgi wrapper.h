@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "LahgiControl.h"
 #include "RealsenseControl.h"
-
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;

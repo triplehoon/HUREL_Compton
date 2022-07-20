@@ -21,6 +21,7 @@
 #define T265_To_Mask_OFFSET_Z (0.025)
 
 #define NOMINMAX
+
 #include <Windows.h>
 #include <chrono>
 #include <stdio.h>
@@ -42,9 +43,10 @@
 #include <librealsense2/hpp/rs_frame.hpp>
 
 #include "SLAMRobustRecon.h"
-
 class RealsenseControl
 {
+public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 	std::queue<PC_TRANSPOS_TUPLE> m_QueueRealtimeCloudTrans;
 	static std::tuple<open3d::geometry::PointCloud, Eigen::Matrix4d, std::vector<Eigen::Vector2f>> PCL_Conversion(const rs2::points& points, const rs2::video_frame& color, const rs2_pose& pose);
@@ -80,7 +82,7 @@ private:
 	RealsenseControl();
 
 public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	
 	rs2_pose GetPoseData();
 	cv::Mat GetCurrentVideoFrame();
 	cv::Mat GetCurrentDepthFrame();

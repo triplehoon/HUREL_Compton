@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="HUREL_Imager_GUI.Components.SpectrumView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
+             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <syncfusion:SfChart Grid.Row="0" Margin="5" 
+                            Header="Spectrum" 
+                            VerticalAlignment="Top" 
+                            HorizontalAlignment="Center" 
+                            FontSize="{StaticResource FontSize-Larger}">
+            <syncfusion:SfChart.Resources>
+                <Style TargetType="{x:Type Line}" x:Key="lineStyle">
+                    <Setter Property="StrokeDashArray" Value="10,5"/>
+                    <Setter Property="Stroke" Value="Red"/>
+                    <Setter Property="StrokeThickness" Value="1"/>
+                </Style>
+            </syncfusion:SfChart.Resources>
+            <syncfusion:SfChart.Behaviors>
+                <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
+            </syncfusion:SfChart.Behaviors>
+            <syncfusion:SfChart.PrimaryAxis>
+                <syncfusion:NumericalAxis Minimum="0" Maximum="3000" ShowTrackBallInfo="True"/>
+            </syncfusion:SfChart.PrimaryAxis>
+            <syncfusion:SfChart.SecondaryAxis>
+                <syncfusion:NumericalAxis/>
+            </syncfusion:SfChart.SecondaryAxis>
+            <syncfusion:FastColumnBitmapSeries Interior="Black"
+                                                                     ListenPropertyChange="True"
+                                                                     Label="Energy"
+                                                                     ItemsSource="{Binding EnergySpectrum}" 
+                                                                     XBindingPath="Energy" 
+                                                                     YBindingPath="Count"
+                                                                     syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
+        </syncfusion:SfChart>
+        <syncfusion:SfDataGrid Grid.Row="1" Margin="10">
+            <syncfusion:SfDataGrid.Columns>
+                <syncfusion:GridTextColumn MappingName="Isotope"/>
+                <syncfusion:GridTextColumn MappingName="Energy"/>
+                <syncfusion:GridTextColumn MappingName="Type"/>
+                <syncfusion:GridTextColumn MappingName="Etc"/>
+            </syncfusion:SfDataGrid.Columns>
+        </syncfusion:SfDataGrid>
+    </Grid>
+</UserControl>

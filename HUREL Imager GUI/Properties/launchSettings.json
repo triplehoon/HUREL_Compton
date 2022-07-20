@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "HUREL Imager GUI": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

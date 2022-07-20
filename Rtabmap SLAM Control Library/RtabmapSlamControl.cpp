@@ -14,8 +14,15 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 {
 	try {
 		rs2::context ctx = rs2::context();
-
+		rs2::device_list devs =  ctx.query_devices();
+		
 		rs2::config cfgD455 = rs2::config();
+		int devCounts = devs.size();
+		if (devCounts == 0)
+		{
+			*outMessage += "No cameras";
+			return false;
+		}
 		//cfgD455.enable_device("935322071433");	
 		cfgD455.enable_stream(RS2_STREAM_COLOR, 848, 480, RS2_FORMAT_BGR8, 15);
 		//cfgD455.enable_stream(RS2_STREAM_COLOR, D435_H_COLOR_SIZE, D435_V_COLOR_SIZE, RS2_FORMAT_RGB8, 15);
@@ -24,9 +31,9 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 		
 		rs2::config cfgT265 = rs2::config();
 		cfgT265.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
-		rs2::pipeline pipeT265 = rs2::pipeline(ctx);
+		rs2::pipeline pipeT265 = rs2::pipeline(ctx);		
 		rs2::pipeline_profile d455 = pipeD455.start(cfgD455);
-
+		
 		std::string usbInfo = d455.get_device().get_info(RS2_CAMERA_INFO_USB_TYPE_DESCRIPTOR);
 		*outMessage = "RtabmapSlamControl: d455 connencted with usb " + usbInfo + " \n";
 		pipeT265.start(cfgT265);

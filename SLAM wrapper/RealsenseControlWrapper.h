@@ -1,7 +1,6 @@
 #pragma once
 #include "RealsenseControl.h"
 #include "LahgiControl.h"
-
 using namespace System;
 using namespace System::Diagnostics;
 using namespace System::Drawing;

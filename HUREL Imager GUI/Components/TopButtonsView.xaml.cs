@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HUREL_Imager_GUI.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,28 @@ namespace HUREL_Imager_GUI.Components
         public TopButtonsView()
         {
             InitializeComponent();
+       
+            this.Loaded += new RoutedEventHandler(View1_Loaded);
 
+        }
+
+        void View1_Loaded(object sender, RoutedEventArgs e)
+        {
+            Window w = Window.GetWindow(SaveButton);
+            if (null != w)
+            {
+                w.LocationChanged += SaveButtonMove;
+            }
+        }
+
+        void SaveButtonMove(object? sender, EventArgs args)
+        {
+            var offset = SaveButtonPopup.HorizontalOffset;
+            SaveButtonPopup.HorizontalOffset = offset + 1;
+            SaveButtonPopup.HorizontalOffset = offset;
+
+            TimeSetupButtonPopup.HorizontalOffset = offset + 1;
+            TimeSetupButtonPopup.HorizontalOffset = offset;
         }
 
         

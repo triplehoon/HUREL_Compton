@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
+using System.Windows.Threading;
+using HUREL.Compton.RadioisotopeAnalysis;
 using log4net;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
@@ -15,6 +17,11 @@ namespace HUREL.Compton
         private static RtabmapWrapper rtabmapWrapper;
         public static CRUXELLLACC.VariableInfo fpgaVariables;
 
+        public static EventHandler? StatusUpdate;
+        private static void StatusUpdateInvoke(object? obj, EventArgs args)
+        {
+            StatusUpdate?.Invoke(null, EventArgs.Empty);
+        }
         private static string statusMsg = "";
         public static string StatusMsg
         {
@@ -26,8 +33,14 @@ namespace HUREL.Compton
             private set
             {
                 log.Info(value);
-                statusMsg = value;                
+                statusMsg = value;
+                StatusUpdate?.Invoke(null, EventArgs.Empty);
             }
+        }
+        public static bool IsSavingBinary
+        {
+            get { return fpga.IsSavingBinaryData; }
+            set { fpga.IsSavingBinaryData = value; }
         }
         public static bool IsLahgiInitiate { get; private set; }
         public static bool IsRtabmapInitiate { get; private set; }
@@ -54,6 +67,8 @@ namespace HUREL.Compton
             StatusMsg = "Wrappers loaded";
             InitiateLaghi();
             InititateRtabmap();
+            StatusUpdate?.Invoke(null, EventArgs.Empty);
+            IsSavingBinary = false;
         }        
         public static bool InitiateLaghi()
         {
@@ -184,15 +199,18 @@ namespace HUREL.Compton
                 StatusMsg = "FPGA usb is unconnected";
                 IsFpgaAvailable = false;
             }
+            StatusUpdate?.Invoke(null, EventArgs.Empty);
         }
         private static bool isSessionStart = false;
         public static bool IsSessionStart
         {
             get { return isSessionStart; }
             private set { isSessionStart = value; }
-        }    
+        }
+
         public static async Task StartSessionAsync(string fileName, CancellationTokenSource tokenSource)
         {
+            
             if (!IsInitiate)
             {
                 StatusMsg = "LAHGI is not initiated";
@@ -217,20 +235,27 @@ namespace HUREL.Compton
                     {
                         IsSessionStart = true;
                         StartSlam();
+                        DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+
+                        if (StatusUpdate != null)
+                        {
+                            dispatcherTimer.Tick += StatusUpdate;
+                            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 5, 500);
+                            dispatcherTimer.Start();
+                        }
+                        
                         await Task.Run(() => AddListModeData(tokenSource));
 
                         IsSessionStart = false;
 
                         StatusMsg = await fpga.Stop_usb();
                         await Task.Run(() => StopSlam());
-
+                        dispatcherTimer.Stop();
 
                         StatusMsg = "Saving CSV file";
                         string saveFileName = Path.GetDirectoryName(fpga.FileMainPath) + "\\" + fileName;
                         lahgiWrapper.SaveListModeData(saveFileName + "_LMData.csv");
                         StatusMsg = "Done saving CSV file";
-
-
                     }
                     
                 }
@@ -372,8 +397,80 @@ namespace HUREL.Compton
             }
             return true;
         }
+        
+        public static SpectrumEnergyNasa GetSpectrumEnergy(int channelNumber)
+        {
+            List<double[]> eCount = new List<double[]>();
+            lahgiWrapper.GetSpectrum((uint)channelNumber, ref eCount);
+            List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
+            for (int i = 0; i < eCount.Count; i++)
+            {
+                histoEnergy.Add(new HistoEnergy(eCount[i][0], Convert.ToInt32(eCount[i][1])));
+            }
+            SpectrumEnergyNasa spect = new SpectrumEnergyNasa(histoEnergy);
+            return spect;
+        }
+        public static SpectrumEnergyNasa GetSumSpectrumEnergy()
+        {
+            List<double[]> eCount = new List<double[]>();
+            lahgiWrapper.GetSumSpectrum(ref eCount);
+            List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
+            for (int i = 0; i < eCount.Count; i++)
+            {
+                histoEnergy.Add(new HistoEnergy(eCount[i][0], Convert.ToInt32(eCount[i][1])));
+            }
+            SpectrumEnergyNasa spect = new SpectrumEnergyNasa(histoEnergy);
+            return spect;
+        }
+        public static SpectrumEnergyNasa GetAbsorberSumSpectrum()
+        {
+            List<double[]> eCount = new List<double[]>();
+            lahgiWrapper.GetAbsorberSumSpectrum(ref eCount);
+            List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
+            for (int i = 0; i < eCount.Count; i++)
+            {
+                histoEnergy.Add(new HistoEnergy(eCount[i][0], Convert.ToInt32(eCount[i][1])));
+            }
+            SpectrumEnergyNasa spect = new SpectrumEnergyNasa(histoEnergy);
+            return spect;
+        }
+        public static SpectrumEnergyNasa GetScatterSumSpectrum()
+        {
+            List<double[]> eCount = new List<double[]>();
+            lahgiWrapper.GetAbsorberSumSpectrum(ref eCount);
+            List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
+            for (int i = 0; i < eCount.Count; i++)
+            {
+                histoEnergy.Add(new HistoEnergy(eCount[i][0], Convert.ToInt32(eCount[i][1])));
+            }
+            SpectrumEnergyNasa spect = new SpectrumEnergyNasa(histoEnergy);
+            return spect;
+        }
 
-
+        public static SpectrumEnergyNasa GetScatterSumSpectrumByTime(uint time)
+        {
+            List<double[]> eCount = new List<double[]>();
+            lahgiWrapper.GetScatterSumSpectrumByTime(ref eCount, time);
+            List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
+            for (int i = 0; i < eCount.Count; i++)
+            {
+                histoEnergy.Add(new HistoEnergy(eCount[i][0], Convert.ToInt32(eCount[i][1])));
+            }
+            SpectrumEnergyNasa spect = new SpectrumEnergyNasa(histoEnergy);
+            return spect;
+        }
+        public static SpectrumEnergyNasa GetAbsorberSumSpectrumByTime(uint time)
+        {
+            List<double[]> eCount = new List<double[]>();
+            lahgiWrapper.GetAbsorberSumSpectrumByTime(ref eCount, time);
+            List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
+            for (int i = 0; i < eCount.Count; i++)
+            {
+                histoEnergy.Add(new HistoEnergy(eCount[i][0], Convert.ToInt32(eCount[i][1])));
+            }
+            SpectrumEnergyNasa spect = new SpectrumEnergyNasa(histoEnergy);
+            return spect;
+        }
     }
 }
     

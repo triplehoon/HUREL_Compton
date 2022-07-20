@@ -53,6 +53,21 @@ namespace HUREL.Compton.RadioisotopeAnalysis
             HistoEnergies = spectrum.HistoEnergies;
         }
 
+        public SpectrumEnergy(List<HistoEnergy> histoEnergies)
+        {
+            if (histoEnergies.Count < 10)
+            {
+                return;
+            }
+            BinSize = HistoEnergies[1].Energy - HistoEnergies[0].Energy;
+            HistoEnergies = histoEnergies;
+            for (int i = 0; i < histoEnergies.Count; ++i)
+            {
+                EnergyBin.Add(histoEnergies[i].Energy);
+            }                                  
+            MaxEnergy = histoEnergies.Last().Energy;
+        }
+
         public void AddEnergy(double energy)
         {
             EnergyList.Add(energy);
@@ -237,25 +252,46 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 Console.WriteLine(e.Message);
                 Debug.Assert(false, "Spectrum NASA not available");
             }
-            BinSize = binSize;
-            MaxEnergy = maxEnergy;
-            int binCount = (int)(MaxEnergy / binSize);
-            for (int i = 0; i < binCount; ++i)
-            {
-                double energy = i * binSize;
-
-                EnergyBin.Add(energy);
-                HistoEnergies.Add(new HistoEnergy(energy));
-            }
         }
         public SpectrumEnergyNasa(SpectrumEnergyNasa spectrum) : base(spectrum)
         {
-            BinSize = spectrum.BinSize;
-            MaxEnergy = spectrum.MaxEnergy;
-            EnergyBin = spectrum.EnergyBin;
-            HistoEnergies = spectrum.HistoEnergies;
+            try
+            {
+                using (Py.GIL())
+                {
+                    dynamic np = Py.Import("numpy");
+                    dynamic nasagamma = Py.Import("nasagamma");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("EnergyCalibration: No Python module error");
+                Console.WriteLine(e.Message);
+                Debug.Assert(false, "Spectrum NASA not available");
+            }
         }
-
+        public SpectrumEnergyNasa(List<HistoEnergy> histoEnergies) :base(histoEnergies)
+        {
+            try
+            {
+                using (Py.GIL())
+                {
+                    dynamic np = Py.Import("numpy");
+                    dynamic nasagamma = Py.Import("nasagamma");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("EnergyCalibration: No Python module error");
+                Console.WriteLine(e.Message);
+                Debug.Assert(false, "Spectrum NASA not available");
+            }
+            if (histoEnergies.Count < 10)
+            {
+                return;
+            }
+           
+        }
         public List<double> FindPeaks(float ref_x, float ref_fwhm, float fwhm_at_0, float min_snr)
         {
 

@@ -8,9 +8,13 @@
         xmlns:views="clr-namespace:HUREL_Imager_GUI.Views"
         xmlns:componets="clr-namespace:HUREL_Imager_GUI.Components"
         Title="HUREL Imager GUI" Height="1040" Width="1920" WindowStartupLocation="CenterScreen" WindowState="Normal"
-             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
-             xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
-        syncfusion:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=FluentLight}">
+        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+        xmlns:syncfusionskin ="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
+        xmlns:nav ="clr-namespace:HUREL_Imager_GUI.State.Navigator"
+        xmlns:states ="clr-namespace:HUREL_Imager_GUI.State"
+        syncfusion:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=FluentLight}"
+        
+        >
     <DockPanel>
         <views:BottomStatusView DockPanel.Dock="Bottom"/>
         <syncfusion:SfNavigationDrawer
@@ -20,16 +24,13 @@
             DisplayMode="Compact"
             d:DisplayMode="Expanded"
             DockPanel.Dock="Left">
-            <syncfusion:NavigationItem Background="{StaticResource CustomWhite}" Header="Home" FontSize="30" FontWeight="Bold" Margin="5"/>
+            <syncfusion:NavigationItem x:Name="HomeItem" Background="{StaticResource CustomWhite}" Header="Home" FontSize="30" FontWeight="Bold" Margin="5" Command="{Binding Navigator.UpdateCurrentViewModelCommand}" CommandParameter="{x:Static nav:ViewType.HOME_VIEW}"/>
             <syncfusion:NavigationItem Background="{StaticResource CustomWhite}" Header="Calibration"  FontSize="30" FontWeight="Bold" Margin="5"/>
             <syncfusion:NavigationItem Background="{StaticResource CustomWhite}" Header="Report" FontSize="30" FontWeight="Bold" Margin="5"/>
-            <syncfusion:NavigationItem Background="{StaticResource CustomWhite}" Header="Setting"  FontSize="30" FontWeight="Bold" Margin="5"/>
-
-
+            <syncfusion:NavigationItem Background="{StaticResource CustomWhite}" Header="Setting"  FontSize="30" FontWeight="Bold" Margin="5" Command="{Binding Navigator.UpdateCurrentViewModelCommand}" CommandParameter="{x:Static nav:ViewType.SETTING_VIEW}">
+            </syncfusion:NavigationItem>
             <syncfusion:SfNavigationDrawer.ContentView>
-                <DockPanel Margin="0,1,0,0">
-                    <views:HomeView DockPanel.Dock="Top"/>
-                </DockPanel>
+                <ContentControl Content="{Binding Navigator.CurrentViewModel}" />
             </syncfusion:SfNavigationDrawer.ContentView>
         </syncfusion:SfNavigationDrawer>
        
