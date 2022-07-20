@@ -117,6 +117,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>Default</LanguageStandard>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;EIGEN_DONT_VECTORIZE;EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\opencv\build\x64\vc15\lib;C:\Program Files\PCL 1.12.1\lib;C:\RTABMap\lib;%(AdditionalLibraryDirectories);C:\open3d-devel-windows-amd64-0.15.1\lib;C:\Program Files %28x86%29\Intel RealSense SDK 2.0\lib\x64;C:\opencv\build\include;$(SolutionDir)\Image reconstruction;$(OutputPath)</AdditionalLibraryDirectories>

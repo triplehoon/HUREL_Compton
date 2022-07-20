@@ -1229,6 +1229,7 @@ namespace HUREL.Compton
             // 사장님 - USB Receive Loop
             while (IsListening)
             {
+                Thread.Sleep(0);
                 nIteration++;
                 // WaitForXfer
                 unsafe

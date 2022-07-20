@@ -509,7 +509,7 @@ void HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 }
 
 EnergySpectrum HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelNumber)
-{
+{	
 	switch (mModuleType)
 	{
 	case eMouduleType::MONO:

@@ -5,7 +5,7 @@ using System.Windows.Threading;
 using HUREL.Compton.RadioisotopeAnalysis;
 using log4net;
 
-[assembly: log4net.Config.XmlConfigurator(Watch = true)]
+
 namespace HUREL.Compton
 {
     public static class LahgiApi
@@ -34,7 +34,7 @@ namespace HUREL.Compton
             {
                 log.Info(value);
                 statusMsg = value;
-                StatusUpdate?.Invoke(null, EventArgs.Empty);
+                StatusUpdateInvoke(null, EventArgs.Empty);
             }
         }
         public static bool IsSavingBinary
@@ -65,11 +65,11 @@ namespace HUREL.Compton
             lahgiWrapper = new LahgiWrapper();
             rtabmapWrapper = new RtabmapWrapper();
             StatusMsg = "Wrappers loaded";
-            InitiateLaghi();
-            InititateRtabmap();
-            StatusUpdate?.Invoke(null, EventArgs.Empty);
+
+            StatusUpdateInvoke(null, EventArgs.Empty);
             IsSavingBinary = false;
-        }        
+            UpdateDeviceList(null, EventArgs.Empty);
+        }                
         public static bool InitiateLaghi()
         {
             StatusMsg = "Initiating LAHGI";
@@ -78,12 +78,14 @@ namespace HUREL.Compton
             {
                 StatusMsg = "Successfully initiate Lahgi";
                 IsLahgiInitiate = true;
+                StatusUpdateInvoke(null, EventArgs.Empty);
                 return true;
             }
             else
             {
                 StatusMsg = "Fail to initiate Lahgi";
                 IsLahgiInitiate = false;
+                StatusUpdateInvoke(null, EventArgs.Empty);
                 return false;
             }
         }
@@ -98,6 +100,7 @@ namespace HUREL.Compton
                 StatusMsg = "Successfully initiate Rtabmap";
                 StatusMsg = msg;
                 IsRtabmapInitiate = true;
+                StatusUpdateInvoke(null, EventArgs.Empty);
                 return true;
             }
             else
@@ -105,6 +108,7 @@ namespace HUREL.Compton
                 StatusMsg = "Fail to initiate Rtabmap";
                 StatusMsg = msg;
                 IsRtabmapInitiate = false;
+                StatusUpdateInvoke(null, EventArgs.Empty);
                 return false;
             }
         }
@@ -199,13 +203,13 @@ namespace HUREL.Compton
                 StatusMsg = "FPGA usb is unconnected";
                 IsFpgaAvailable = false;
             }
-            StatusUpdate?.Invoke(null, EventArgs.Empty);
+            StatusUpdateInvoke(null, EventArgs.Empty);
         }
         private static bool isSessionStart = false;
         public static bool IsSessionStart
         {
             get { return isSessionStart; }
-            private set { isSessionStart = value; }
+            private set { StatusUpdateInvoke(null, EventArgs.Empty); isSessionStart = value; }
         }
 
         public static async Task StartSessionAsync(string fileName, CancellationTokenSource tokenSource)
@@ -224,6 +228,7 @@ namespace HUREL.Compton
                 }
                 else
                 {
+                    IsSessionStart = true;
                     StatusMsg = "FPGA setting Start";
 
                     string status = "";
@@ -235,27 +240,29 @@ namespace HUREL.Compton
                     {
                         IsSessionStart = true;
                         StartSlam();
-                        DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-
-                        if (StatusUpdate != null)
-                        {
-                            dispatcherTimer.Tick += StatusUpdate;
-                            dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 5, 500);
-                            dispatcherTimer.Start();
-                        }
-                        
-                        await Task.Run(() => AddListModeData(tokenSource));
+                        System.Timers.Timer aTimer = new System.Timers.Timer(1000);
+                        // Hook up the Elapsed event for the timer. 
+                        aTimer.Elapsed += StatusUpdateInvoke;
+                        aTimer.Start();
+                        StatusUpdateInvoke(null, EventArgs.Empty);
+                        await Task.Run(() => AddListModeData(tokenSource)).ConfigureAwait(false);
 
                         IsSessionStart = false;
 
                         StatusMsg = await fpga.Stop_usb();
                         await Task.Run(() => StopSlam());
-                        dispatcherTimer.Stop();
-
+                        aTimer.Stop();
+                        aTimer.Elapsed -= StatusUpdateInvoke;
                         StatusMsg = "Saving CSV file";
                         string saveFileName = Path.GetDirectoryName(fpga.FileMainPath) + "\\" + fileName;
                         lahgiWrapper.SaveListModeData(saveFileName + "_LMData.csv");
                         StatusMsg = "Done saving CSV file";
+                    }
+                    else
+                    {
+                        IsSessionStart= false;
+                        StatusMsg = "Something wrong with FPGA";
+                        return;
                     }
                     
                 }
@@ -319,11 +326,13 @@ namespace HUREL.Compton
                     {
                         break;
                     }
+                    Thread.Sleep(0);
                 }
                 if (tokenSource.IsCancellationRequested)
                 {
                     break;
                 }
+                Thread.Sleep(0);
             }
             StatusMsg = "Add List Mode Data loop ended";
         }
@@ -400,6 +409,10 @@ namespace HUREL.Compton
         
         public static SpectrumEnergyNasa GetSpectrumEnergy(int channelNumber)
         {
+            if (!IsLahgiInitiate)
+            {
+                return new SpectrumEnergyNasa(5, 3000);
+            }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetSpectrum((uint)channelNumber, ref eCount);
             List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
@@ -412,6 +425,10 @@ namespace HUREL.Compton
         }
         public static SpectrumEnergyNasa GetSumSpectrumEnergy()
         {
+            if (!IsLahgiInitiate)
+            {
+                return new SpectrumEnergyNasa(5, 3000);
+            }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetSumSpectrum(ref eCount);
             List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
@@ -424,6 +441,10 @@ namespace HUREL.Compton
         }
         public static SpectrumEnergyNasa GetAbsorberSumSpectrum()
         {
+            if (!IsLahgiInitiate)
+            {
+                return new SpectrumEnergyNasa(5, 3000);
+            }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetAbsorberSumSpectrum(ref eCount);
             List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
@@ -436,6 +457,10 @@ namespace HUREL.Compton
         }
         public static SpectrumEnergyNasa GetScatterSumSpectrum()
         {
+            if (!IsLahgiInitiate)
+            {
+                return new SpectrumEnergyNasa(5, 3000);
+            }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetAbsorberSumSpectrum(ref eCount);
             List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
@@ -449,6 +474,10 @@ namespace HUREL.Compton
 
         public static SpectrumEnergyNasa GetScatterSumSpectrumByTime(uint time)
         {
+            if (!IsLahgiInitiate)
+            {
+                return new SpectrumEnergyNasa(5, 3000);
+            }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetScatterSumSpectrumByTime(ref eCount, time);
             List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
@@ -461,6 +490,10 @@ namespace HUREL.Compton
         }
         public static SpectrumEnergyNasa GetAbsorberSumSpectrumByTime(uint time)
         {
+            if (!IsLahgiInitiate)
+            {
+                return new SpectrumEnergyNasa(5, 3000);
+            }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetAbsorberSumSpectrumByTime(ref eCount, time);
             List<HistoEnergy> histoEnergy = new List<HistoEnergy>();

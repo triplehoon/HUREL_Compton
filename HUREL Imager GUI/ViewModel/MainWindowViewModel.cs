@@ -17,7 +17,7 @@ namespace HUREL_Imager_GUI.ViewModel
         {
             Navigator.CurrentViewModel = new HomeViewModel();
             Debug.WriteLine("MainWindowViewModel loaded");
-            bool init = LahgiApi.IsInitiate;
+
 
         }
 

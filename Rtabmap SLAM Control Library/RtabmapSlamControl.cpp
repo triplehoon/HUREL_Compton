@@ -23,23 +23,19 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 			*outMessage += "No cameras";
 			return false;
 		}
+		std::string usbInfo;
+		for (int i = 0; i < devCounts; ++i)
+		{
+			std::string devInof = devs[i].get_info(rs2_camera_info::RS2_CAMERA_INFO_NAME);
+			if (devInof == "Intel RealSense D455")
+			{
+				usbInfo = devs[i].get_info(rs2_camera_info::RS2_CAMERA_INFO_USB_TYPE_DESCRIPTOR);
+			}
+		}
 		//cfgD455.enable_device("935322071433");	
-		cfgD455.enable_stream(RS2_STREAM_COLOR, 848, 480, RS2_FORMAT_BGR8, 15);
-		//cfgD455.enable_stream(RS2_STREAM_COLOR, D435_H_COLOR_SIZE, D435_V_COLOR_SIZE, RS2_FORMAT_RGB8, 15);
-		cfgD455.enable_stream(RS2_STREAM_DEPTH, 848, 480, RS2_FORMAT_Z16, 15);
-		rs2::pipeline pipeD455 = rs2::pipeline();
-		
-		rs2::config cfgT265 = rs2::config();
-		cfgT265.enable_stream(RS2_STREAM_POSE, RS2_FORMAT_6DOF);
-		rs2::pipeline pipeT265 = rs2::pipeline(ctx);		
-		rs2::pipeline_profile d455 = pipeD455.start(cfgD455);
-		
-		std::string usbInfo = d455.get_device().get_info(RS2_CAMERA_INFO_USB_TYPE_DESCRIPTOR);
-		*outMessage = "RtabmapSlamControl: d455 connencted with usb " + usbInfo + " \n";
-		pipeT265.start(cfgT265);
 
-		pipeD455.stop();
-		pipeT265.stop();
+		*outMessage = "RtabmapSlamControl: d455 connencted with usb " + usbInfo + " \n";
+
 	}
 	catch (const rs2::camera_disconnected_error& e)
 	{

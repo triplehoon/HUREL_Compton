@@ -65,8 +65,10 @@ namespace HUREL_Imager_GUI.ViewModel
         private async Task StartSession()
         {
             _sessionCancle = new CancellationTokenSource();
-            await LahgiApi.StartSessionAsync("", _sessionCancle);
+            await Task.Delay(100).ConfigureAwait(false);
+            SessionTask = LahgiApi.StartSessionAsync("", _sessionCancle);
         }
+        private Task? SessionTask = null;
         
         private AsyncCommand? _stopSessionCommand = null;
         public ICommand StopSessionCommand
@@ -76,6 +78,11 @@ namespace HUREL_Imager_GUI.ViewModel
         private async Task StopSession()
         {
             await Task.Run(() => { _sessionCancle?.Cancel(); });
+            if (SessionTask != null)
+            {
+                await SessionTask;
+            }
+            
         }
     
         private bool _isSaveBinary;

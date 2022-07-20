@@ -12,8 +12,8 @@ namespace HUREL {
 		class EnergySpectrum
 		{
 			private: 
-				std::vector<BinningEnergy> mHistogramEnergy;
-				std::vector<double> mEnergyBin;
+				std::vector<BinningEnergy> mHistogramEnergy = std::vector<BinningEnergy>();
+				std::vector<double> mEnergyBin = std::vector<double>();
 			public:
 				
 				EnergySpectrum() {}; //do nothing

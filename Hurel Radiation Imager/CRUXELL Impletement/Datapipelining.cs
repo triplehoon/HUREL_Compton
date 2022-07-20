@@ -57,13 +57,14 @@ namespace HUREL.Compton
             BinaryWriter writer = new BinaryWriter(File.Open(FileMainPath!, FileMode.Append));
             while (IsParsing)
             {
-              
+                Thread.Sleep(0);
                 byte[] item;
                 while (DataInQueue.TryTake(out item!))
                 {
+                    Thread.Sleep(0);
 
 
-                    if(flag==2 && IsSavingBinaryData)
+                    if (flag==2 && IsSavingBinaryData)
                     { 
                         writer.Write(item);
                         if (DataInQueue.Count + 1 % 20==0)
@@ -153,12 +154,14 @@ namespace HUREL.Compton
 
             while (IsGenerateShortArrayBuffer)
             {
+                Thread.Sleep(0);
                 byte[] item;
                 ushort[] shortCheck = new ushort[1];
 
 
                 while (ParsedQueue.TryTake(out item!))
                 {
+                    Thread.Sleep(0);
                     ushort[] shortArray = new ushort[144];
                     Buffer.BlockCopy(item, 288, shortCheck, 0, 2);
                     Buffer.BlockCopy(item, shortCheck[0] * 18, shortArray, shortCheck[0] * 18, 18);
@@ -187,13 +190,14 @@ namespace HUREL.Compton
 
             while (IsGenerateShortArrayBuffer)
             {
+                Thread.Sleep(0);
                 byte[] item;
                 ushort[] shortArray = new ushort[144];
 
 
                 while (ParsedQueue.TryTake(out item!))
                 {
-
+                    Thread.Sleep(0);
                     Buffer.BlockCopy(item, 0, shortArray, 0, 288);
                     foreach (var check511 in shortArray)
                     {
@@ -230,6 +234,7 @@ namespace HUREL.Compton
             #endregion
             while (IsGenerateShortArrayBuffer)
             {
+                Thread.Sleep(0);
 
                 byte[] item;
 
@@ -237,6 +242,7 @@ namespace HUREL.Compton
 
                 while (ParsedQueue.TryTake(out item!))
                 {
+                    Thread.Sleep(0);
                     ushort[] shortArray = new ushort[148];
                     ushort[] shortArray2 = new ushort[144];
 
@@ -270,6 +276,7 @@ namespace HUREL.Compton
 
             while (IsGenerateShortArrayBuffer)
             {
+                Thread.Sleep(0);
                 byte[] item;
                 ushort[] shortArray = new ushort[144];
                 ushort[] shortArrayTest = new ushort[148];
@@ -277,6 +284,7 @@ namespace HUREL.Compton
 
                 while (ParsedQueue.TryTake(out item!))
                 {
+                    Thread.Sleep(0);
 
                     Buffer.BlockCopy(item, 0, shortArrayTest, 0, 296);
                     Buffer.BlockCopy(item, 0, shortArray, 0, 288);
