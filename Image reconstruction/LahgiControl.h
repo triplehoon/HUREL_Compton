@@ -9,6 +9,7 @@
 #include "Module.h"
 #include "ListModeData.h"
 #include "ReconPointCloud.h"
+#include "Logger.h"
 
 #include <iostream>
 #include <vector>
@@ -74,6 +75,8 @@ namespace HUREL {
 			EnergySpectrum GetSumEnergySpectrum();
 			EnergySpectrum GetAbsorberSumEnergySpectrum();
 			EnergySpectrum GetScatterSumEnergySpectrum();
+
+
 
 
 			void ResetEnergySpectrum(int fpgaChannelNumber);

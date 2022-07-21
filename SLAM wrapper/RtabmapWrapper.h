@@ -1,6 +1,9 @@
 #pragma once
+#pragma unmanaged
 #include "RtabmapSlamControl.h"
 #include "Lahgi wrapper.h"
+#pragma managed
+
 using namespace System;
 using namespace System::IO;
 using namespace System::Diagnostics;

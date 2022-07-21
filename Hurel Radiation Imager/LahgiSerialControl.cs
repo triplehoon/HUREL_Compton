@@ -5,11 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Diagnostics;
+using log4net;
 
 namespace HUREL.Compton
 {
     public static class LahgiSerialControl
     {
+
+   
+        private static readonly ILog logger = LogManager.GetLogger(nameof(LahgiSerialControl));
+
         static SerialPort Serial = new SerialPort();
 
         public static List<string> PortsName = new List<string>();
@@ -19,11 +24,11 @@ namespace HUREL.Compton
             PortsName = new List<string>(SerialPort.GetPortNames());
             if (PortsName == null)
             {
+                logger.Warn("There is no COM port");
                 return;
             }
             SelectedPortName = PortsName[0];
-        }
-        
+        }   
         public static void UpdatePortsName()
         {
             PortsName = new List<string>(SerialPort.GetPortNames());

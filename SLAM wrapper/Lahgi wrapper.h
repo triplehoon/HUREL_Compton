@@ -1,6 +1,8 @@
 ﻿#pragma once
+#pragma unmanaged
 #include "LahgiControl.h"
-#include "RealsenseControl.h"
+#pragma managed
+
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
@@ -24,8 +26,6 @@ namespace HUREL {
 		{
 		private:
 			LahgiControl& lahgiControlInstance = LahgiControl::instance();
-			RealsenseControl& realsenseControlInstance = RealsenseControl::instance();
-
 
 		public:
 			LahgiWrapper();
@@ -39,7 +39,7 @@ namespace HUREL {
 			void SaveListModeData(System::String^ fileName);
 
 			void GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount);
-			
+
 
 			void GetSumSpectrum(List<array<double>^>^% energyCount);
 			void GetAbsorberSumSpectrum(List<array<double>^>^% energyCount);
@@ -50,9 +50,14 @@ namespace HUREL {
 			void ResetSpectrum(unsigned int channelNumber);
 
 			void GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data);
-
+			static void Logging(std::string className, std::string msg);
+		};
+		public class WrapperCaller
+		{
+		public:
+			static void Logging(std::string className, std::string msg);
 		};
 
 
-	}
+	};
 }

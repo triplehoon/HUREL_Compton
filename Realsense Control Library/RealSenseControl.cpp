@@ -8,13 +8,10 @@ static std::mutex rtMutex;
 
 RealsenseControl::RealsenseControl() :IsPipeLineOn(false), IsSLAMON(false), m_CurrentVideoFrame(Mat())
 {
-	T265toLACCTransform << -1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, -1, 0,
-		0, 0, 0, 1;
+	
 	auto stream = freopen("CONOUT$", "w", stdout);
-
 }
+
 bool RealsenseControl::SaveRTPointCloud(std::string& fileName)
 {
 	open3d::geometry::PointCloud savePointCloud = std::get<0>(this->GetRTPointCloudTransposed());

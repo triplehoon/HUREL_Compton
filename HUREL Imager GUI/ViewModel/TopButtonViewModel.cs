@@ -1,5 +1,6 @@
 ﻿using AsyncAwaitBestPractices.MVVM;
 using HUREL.Compton;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +14,8 @@ namespace HUREL_Imager_GUI.ViewModel
 {
     public class TopButtonViewModel: ViewModelBase
     {
+        private static readonly ILog logger = LogManager.GetLogger(typeof(TopButtonViewModel));
+
         private bool _startButtonEnabled = true;
         public bool StartButtonEnabled
         {
@@ -30,11 +33,12 @@ namespace HUREL_Imager_GUI.ViewModel
         public TopButtonViewModel()
         {
             LahgiApi.StatusUpdate += updateSatus;
-            updateSatus(null, EventArgs.Empty);            
+            updateSatus(null, EventArgs.Empty);
+            logger.Info("TopButtonViewModel Loaded");
         }
         private void updateSatus(object? obj, EventArgs args)
         {
-            StartButtonEnabled = (LahgiApi.IsInitiate && LahgiApi.IsFpgaAvailable);
+            StartButtonEnabled = (LahgiApi.IsInitiate && LahgiApi.IsFpgaAvailable) && !LahgiApi.IsSessionStarting;
             IsRunning = LahgiApi.IsSessionStart;
             FileName = "";
             IsSaveBinary = LahgiApi.IsSavingBinary;
@@ -43,9 +47,10 @@ namespace HUREL_Imager_GUI.ViewModel
         public override void Unhandle()
         {
             LahgiApi.StatusUpdate -= updateSatus;
+            logger.Info("Unhandle StatusUpdate");
         }
 
-        private string _fileName;
+        private string _fileName = "";
         public string FileName
         {
             get { return _fileName; }
@@ -65,10 +70,8 @@ namespace HUREL_Imager_GUI.ViewModel
         private async Task StartSession()
         {
             _sessionCancle = new CancellationTokenSource();
-            await Task.Delay(100).ConfigureAwait(false);
-            SessionTask = LahgiApi.StartSessionAsync("", _sessionCancle);
+            await LahgiApi.StartSessionAsync("", _sessionCancle);
         }
-        private Task? SessionTask = null;
         
         private AsyncCommand? _stopSessionCommand = null;
         public ICommand StopSessionCommand
@@ -78,11 +81,6 @@ namespace HUREL_Imager_GUI.ViewModel
         private async Task StopSession()
         {
             await Task.Run(() => { _sessionCancle?.Cancel(); });
-            if (SessionTask != null)
-            {
-                await SessionTask;
-            }
-            
         }
     
         private bool _isSaveBinary;

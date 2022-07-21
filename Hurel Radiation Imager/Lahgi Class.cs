@@ -10,7 +10,7 @@ namespace HUREL.Compton
 {
     public static class LahgiApi
     {
-        private static ILog log = LogManager.GetLogger("LahgiApi");
+        private static ILog log = LogManager.GetLogger(typeof(LahgiApi));
 
         private static CRUXELLLACC fpga;
         private static LahgiWrapper lahgiWrapper;
@@ -32,6 +32,7 @@ namespace HUREL.Compton
        
             private set
             {
+                log = LogManager.GetLogger("LahgiApi");
                 log.Info(value);
                 statusMsg = value;
                 StatusUpdateInvoke(null, EventArgs.Empty);
@@ -44,6 +45,7 @@ namespace HUREL.Compton
         }
         public static bool IsLahgiInitiate { get; private set; }
         public static bool IsRtabmapInitiate { get; private set; }
+        
         public static bool IsInitiate
         {
             get
@@ -211,10 +213,17 @@ namespace HUREL.Compton
             get { return isSessionStart; }
             private set { StatusUpdateInvoke(null, EventArgs.Empty); isSessionStart = value; }
         }
+        private static bool isSessionStarting = false;
+
+        public static bool IsSessionStarting
+        {
+            get { return isSessionStarting; }
+            private set { StatusUpdateInvoke(null, EventArgs.Empty); isSessionStarting = value; }
+        }
 
         public static async Task StartSessionAsync(string fileName, CancellationTokenSource tokenSource)
         {
-            
+            IsSessionStarting = true;
             if (!IsInitiate)
             {
                 StatusMsg = "LAHGI is not initiated";
@@ -224,6 +233,7 @@ namespace HUREL.Compton
                 if (!fpga.SetVaribles(fpgaVariables))
                 {
                     StatusMsg = "Please configure FPGA.";
+                    IsSessionStarting = false;
                     return;
                 }
                 else
@@ -245,9 +255,10 @@ namespace HUREL.Compton
                         aTimer.Elapsed += StatusUpdateInvoke;
                         aTimer.Start();
                         StatusUpdateInvoke(null, EventArgs.Empty);
+                        isSessionStarting = false;
                         await Task.Run(() => AddListModeData(tokenSource)).ConfigureAwait(false);
 
-                        IsSessionStart = false;
+                        IsSessionStarting = false;
 
                         StatusMsg = await fpga.Stop_usb();
                         await Task.Run(() => StopSlam());
@@ -262,6 +273,8 @@ namespace HUREL.Compton
                     {
                         IsSessionStart= false;
                         StatusMsg = "Something wrong with FPGA";
+                        IsSessionStarting = false;
+
                         return;
                     }
                     
@@ -270,10 +283,15 @@ namespace HUREL.Compton
             else
             {
                 StatusMsg = "Session is already started";
+                IsSessionStarting = false;
+
                 return;
             }
 
             StatusMsg = "Session is done";
+            IsSessionStarting = false;
+
+            return;
         }
         public record AddListModeDataEchk(double MinE, double MaxE);
 
@@ -471,7 +489,6 @@ namespace HUREL.Compton
             SpectrumEnergyNasa spect = new SpectrumEnergyNasa(histoEnergy);
             return spect;
         }
-
         public static SpectrumEnergyNasa GetScatterSumSpectrumByTime(uint time)
         {
             if (!IsLahgiInitiate)
@@ -503,7 +520,7 @@ namespace HUREL.Compton
             }
             SpectrumEnergyNasa spect = new SpectrumEnergyNasa(histoEnergy);
             return spect;
-        }
+        }        
     }
 }
     

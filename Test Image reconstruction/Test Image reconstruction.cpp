@@ -5,8 +5,6 @@
 #include "CodeMaskCalc.h"
 #include "RadiationImage.h"
 
-
-
 using namespace cv;
 using namespace HUREL::Compton;
 static Mat CodedMaskMat();
