@@ -240,7 +240,7 @@ namespace HUREL.Compton
                     {
                         IsSessionStart = true;
                         StartSlam();
-                        System.Timers.Timer aTimer = new System.Timers.Timer(1000);
+                        System.Timers.Timer aTimer = new System.Timers.Timer(100);
                         // Hook up the Elapsed event for the timer. 
                         aTimer.Elapsed += StatusUpdateInvoke;
                         aTimer.Start();
