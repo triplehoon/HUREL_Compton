@@ -27,9 +27,8 @@ namespace HUREL_Imager_GUI.ViewModel
         }
         public void StatusUpdate(object? obj, EventArgs eventArgs)
         {
-            Random rand = new Random();
             
-            var histogram = LahgiApi.GetSpectrumEnergy(rand.Next(15)).HistoEnergies;
+            var histogram = LahgiApi.GetSpectrumEnergy(0).HistoEnergies;
             EnergySpectrum = new ObservableCollection<HistoEnergy>(histogram);
             OnPropertyChanged(nameof(EnergySpectrum));
         }
