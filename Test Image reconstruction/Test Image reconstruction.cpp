@@ -112,7 +112,7 @@ int main()
         //Eigen::Matrix<double, 3, 1, Eigen::DontAlign> point;
         Vector3d color;
         Vector3d point;
-        RGBA_t rgb = HUREL::Compton::ReconPointCloud::ColorScaleJet(reconPC.reconValues_[i], 0, reconPC.maxReoconValue);
+        RGBA_t rgb = HUREL::Compton::ReconPointCloud::ColorScaleJet(reconPC.reconValues_[i], 0.9 * reconPC.maxReoconValue, reconPC.maxReoconValue);
         pc->colors_[i](0) = rgb.R;
         pc->colors_[i](1) = rgb.G;
         pc->colors_[i](2) = rgb.B;
