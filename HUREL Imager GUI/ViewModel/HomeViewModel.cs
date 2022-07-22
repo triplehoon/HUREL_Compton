@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ namespace HUREL_Imager_GUI.ViewModel
 {
     public class HomeViewModel :ViewModelBase
     {
+        private static readonly ILog logger = LogManager.GetLogger(typeof(HomeViewModel));
+
         private TopButtonViewModel _topButtonViewModel;
         public TopButtonViewModel TopButtonViewModel
         {
@@ -30,9 +33,14 @@ namespace HUREL_Imager_GUI.ViewModel
         }
         public HomeViewModel()
         {
+            // Will be not null!
+            _topButtonViewModel = null!;
+            _spectrumViewModel = null!;
+            _testValue = null!;
             TopButtonViewModel = new TopButtonViewModel();
             SpectrumViewModel = new SpectrumViewModel();
             TestValue = "Hello World";
+            logger.Info("HomeViewModel Loaded");
         }
 
         private string _testValue;

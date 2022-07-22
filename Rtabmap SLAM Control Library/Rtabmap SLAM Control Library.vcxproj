@@ -24,6 +24,11 @@
   <ItemGroup>
     <ClCompile Include="RtabmapSlamControl.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Logger\Logger.vcxproj">
+      <Project>{1e0e3f95-6659-4929-a948-355e06c1476c}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -130,10 +135,11 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\opencv\build\include;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;C:\open3d-devel-windows-amd64-0.15.1-dbg\include\open3d\3rdparty;%(AdditionalIncludeDirectories);C:\open3d-devel-windows-amd64-0.15.1-dbg\include;$(SolutionDir)\Reporter Wrapper</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\opencv\build\include;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;C:\open3d-devel-windows-amd64-0.15.1-dbg\include\open3d\3rdparty;%(AdditionalIncludeDirectories);C:\open3d-devel-windows-amd64-0.15.1-dbg\include;$(SolutionDir)\Logger</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <AdditionalOptions>/arch:AVX2 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>Default</LanguageStandard>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -151,7 +157,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\opencv\build\include;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Eigen\eigen3;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;C:\open3d-devel-windows-amd64-0.15.1\include\open3d\3rdparty;C:\open3d-devel-windows-amd64-0.15.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\opencv\build\include;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Eigen\eigen3;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;C:\open3d-devel-windows-amd64-0.15.1\include\open3d\3rdparty;C:\open3d-devel-windows-amd64-0.15.1\include;%(AdditionalIncludeDirectories);$(SolutionDir)\Logger</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <AdditionalOptions>/arch:AVX2 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>

@@ -25,13 +25,13 @@ namespace HUREL {
 			Eigen::Vector4d RelativeInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""), 1);
 			Eigen::Vector4d TransformedInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""),1);
 			double InteractionEnergy = 0;  
-			//EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		};
 
 		class ListModeData
 		{
 		public:
-			//EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			eInterationType Type = eInterationType::NONE;
 			InteractionData Scatter;
 			InteractionData Absorber;

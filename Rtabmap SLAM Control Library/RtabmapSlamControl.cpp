@@ -21,6 +21,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 		if (devCounts == 0)
 		{
 			*outMessage += "No cameras";
+			HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
 			return false;
 		}
 		std::string usbInfo;
@@ -41,6 +42,8 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	{
 		*outMessage += "RtabmapSlamControl: Camera was disconnected! Please connect it back ";
 		*outMessage += e.what();
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+
 		return false;
 	}
 	// continue with more general cases
@@ -48,6 +51,8 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	{
 		*outMessage += "RtabmapSlamControl: Operation failed, please try again ";
 		*outMessage +=  e.what();
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+
 		return false;
 	}
 	// you can also catch "anything else" raised from the library by catching rs2::error
@@ -55,6 +60,8 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	{
 		*outMessage += "RtabmapSlamControl: Some other error occurred! ";
 		*outMessage += e.what();
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+
 		return false;
 	}
 	
@@ -72,19 +79,20 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	}
 	catch(int exp)
 	{
-		std::cout << "RtabmapSlamControl: CameraRealSense2 error " << exp << std::endl;
+		*outMessage += "RtabmapSlamControl: CameraRealSense2 error " + exp ;
 	}
 	if (!mCamera->init(".", ""))
 	{
-		*outMessage += "RtabmapSlamControl: Initiate failed\n";
-		
+		*outMessage += "RtabmapSlamControl: Initiate failed";
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+
 		mIsInitiate = false;
 		return false;
 	}
 	else
 	{
-		*outMessage += "RtabmapSlamControl: Initiate success\n";
-		
+		*outMessage += "RtabmapSlamControl: Initiate success";
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
 		mIsInitiate = true;
 		return true;
 	}	
@@ -107,7 +115,8 @@ static std::future<void> t1;
 void HUREL::Compton::RtabmapSlamControl::StartVideoStream()
 {
 	mIsVideoStreamOn = true;
-	std::cout << "RtabmapSlamControl start video stream\n";
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl start video stream");
+	
 	auto func = std::bind(&RtabmapSlamControl::VideoStream, this);
 	t1 = std::async(std::launch::async, func);
 }
@@ -116,8 +125,8 @@ void HUREL::Compton::RtabmapSlamControl::StopVideoStream()
 {
 	mIsVideoStreamOn = false;
 	t1.get();
-
-	std::cout << "RtabmapSlamControl stop video stream\n";
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop video stream");
+	
 }
 
 static std::mutex videoStreamMutex;
@@ -271,16 +280,16 @@ void HUREL::Compton::RtabmapSlamControl::StartSlamPipe()
 {
 	if (!mIsVideoStreamOn || !mIsInitiate)
 	{
-		std::cout << "RtabmapSlamControl fail to start slam pipe\n";
-	}
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl fail to start slam pipe");	}
 
 	if (mIsSlamPipeOn)
 	{
-		std::cout << "SLAM Pipe is already on\n";
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "SLAM Pipe is already on");
+		
 		return;
 	}
 	mIsSlamPipeOn = true;
-	std::cout << "RtabmapSlamControl start slam pipe\n";
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl start slam pipe");
 	auto func = std::bind(&RtabmapSlamControl::SlamPipe, this);
 	t2 = std::async(std::launch::async, func);
 }
@@ -289,8 +298,8 @@ void HUREL::Compton::RtabmapSlamControl::StopSlamPipe()
 {
 	mIsSlamPipeOn = false;
 	t2.get();
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop slam pipe");
 
-	std::cout << "RtabmapSlamControl stop slam pipe\n";
 }
 
 static std::mutex slamPipeMutex;

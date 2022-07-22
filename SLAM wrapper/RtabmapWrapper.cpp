@@ -5,10 +5,8 @@ Boolean HUREL::Compton::RtabmapWrapper::InitiateRtabmap(System::String^% message
     std::string resultMsg;
     //try
     {
-		System::Diagnostics::Debug::WriteLine("Initiating Rtabmap");
 		mIsInitiated = mSlamcontrolNative.Initiate(&resultMsg);
 		message = gcnew System::String(resultMsg.c_str());
-		System::Diagnostics::Debug::WriteLine("PipeLine Setting Compelete");
 	}
 	//catch (...)
 	{

@@ -14,6 +14,7 @@
 #include <Eigen/Core>
 
 #include "EnergySpectrum.h"
+#include "Logger.h"
 
 namespace HUREL {
 	namespace Compton {

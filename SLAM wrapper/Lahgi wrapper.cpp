@@ -4,11 +4,12 @@
 
 HUREL::Compton::LahgiWrapper::LahgiWrapper()
 {
-	
+	HUREL::Logger::Instance().Handle(HUREL::Compton::WrapperCaller::Logging);
 }
 
 bool HUREL::Compton::LahgiWrapper::Initiate(eModuleManagedType type)
 {
+	WrapperLogger::Log::Info("C++CLR::HUREL::Compton::LahgiWrapper", "Initiate");
 	HUREL::Compton::eMouduleType moduleType = HUREL::Compton::eMouduleType::MONO;
 	switch (type)
 	{
@@ -57,7 +58,6 @@ void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^
 
 	for (int i = 0; i < lists.size(); ++i)
 	{
-
 		array<double>^ tempScatterArray = gcnew array<double>(4);
 		array<double>^ tempAbsorberArray = gcnew array<double>(4);
 		tempScatterArray[0] = lists[i].Scatter.RelativeInteractionPoint[0];
@@ -78,6 +78,7 @@ void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^
 
 void HUREL::Compton::LahgiWrapper::ResetListmodeData()
 {
+	WrapperLogger::Log::Info("C++CLR::UREL::Compton::LahgiWrapper", "Reset list mode data");
 	lahgiControlInstance.ResetListedListModeData();
 	for (int i = 0; i < 16; ++i)
 	{
@@ -256,4 +257,18 @@ void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, eReconType
 
 		data = IntPtr(ptr);
 	}
+}
+
+void HUREL::Compton::LahgiWrapper::Logging(std::string className, std::string msg)
+{
+	System::String^ classNameManage = gcnew System::String(className.c_str());
+	System::String^ msgManage = gcnew System::String(msg.c_str());
+	WrapperLogger::Log::Info(classNameManage, msgManage);
+}
+
+void HUREL::Compton::WrapperCaller::Logging(std::string className, std::string msg)
+{
+	System::String^ classNameManage = gcnew System::String(className.c_str());
+	System::String^ msgManage = gcnew System::String(msg.c_str());
+	WrapperLogger::Log::Info(classNameManage, msgManage);
 }

@@ -8,19 +8,22 @@ using System.Threading.Tasks;
 using System.Windows;
 using HUREL.Compton;
 using HUREL_Imager_GUI.ViewModel;
-
+using log4net;
 
 namespace HUREL_Imager_GUI
 {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App : Application        
     {
+        private static readonly ILog logger = LogManager.GetLogger(typeof(App));
         public App()
         {
             NativeMethods.AllocConsole();
+            logger.Info("Start application");
 
+            logger.Info("Console loaded");
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTcxMjAyQDMxMzkyZTM0MmUzMEw2eUs1OURYTGswSnNaZ3p5WjlIcWdPQTcrM2UxWEdSbWd6TW9iUnRlcjA9");
 
 

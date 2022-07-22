@@ -116,10 +116,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\opencv\build\include;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;C:\open3d-devel-windows-amd64-0.15.1-dbg\include;%(AdditionalIncludeDirectories);C:\open3d-devel-windows-amd64-0.15.1-dbg\include\open3d\3rdparty;$(SolutionDir)\Rtabmap SLAM Control Library;$(SolutionDir)\Realsense Control Library;$(SolutionDir)\Reporter Wrapper</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\opencv\build\include;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;C:\open3d-devel-windows-amd64-0.15.1-dbg\include;%(AdditionalIncludeDirectories);C:\open3d-devel-windows-amd64-0.15.1-dbg\include\open3d\3rdparty;$(SolutionDir)\Rtabmap SLAM Control Library;$(SolutionDir)\Logger</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <LanguageStandard>Default</LanguageStandard>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,7 +135,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Rtabmap SLAM Control Library;$(SolutionDir)\Realsense Control Library;C:\open3d-devel-windows-amd64-0.15.1\include\open3d\3rdparty;C:\opencv\build\include;C:\open3d-devel-windows-amd64-0.15.1\include;C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;$(SolutionDir)\Reporter Wrapper;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Rtabmap SLAM Control Library;$(SolutionDir)\Realsense Control Library;C:\open3d-devel-windows-amd64-0.15.1\include\open3d\3rdparty;C:\opencv\build\include;C:\open3d-devel-windows-amd64-0.15.1\include;C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;$(SolutionDir)\Reporter Wrapper;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;%(AdditionalIncludeDirectories);$(SolutionDir)\Logger</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
     </ClCompile>
@@ -156,12 +157,17 @@
   <ItemGroup>
     <ClCompile Include="EnergySpectrum.cpp" />
     <ClCompile Include="LahgiControl.cpp" />
-    <ClCompile Include="ListModeData.cpp" />
+    <ClCompile Include="ListModeData.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="Module.cpp" />
     <ClCompile Include="RadiationImage.cpp" />
     <ClCompile Include="ReconPointCloud.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Logger\Logger.vcxproj">
+      <Project>{1e0e3f95-6659-4929-a948-355e06c1476c}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Rtabmap SLAM Control Library\Rtabmap SLAM Control Library.vcxproj">
       <Project>{ca04cca4-477d-436c-8df9-40bda121fb22}</Project>
     </ProjectReference>

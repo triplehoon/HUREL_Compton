@@ -44,6 +44,11 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 	mScatterModules(NULL),
 	mModuleType(HUREL::Compton::eMouduleType::MONO)
 {	
+	Eigen::Matrix4d test;
+	test = Matrix4d::Ones();
+	Eigen::Vector3d test2 = Eigen::Vector3d(1,1,1);
+	
+	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Hello logger!");
 }
 
 HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
@@ -54,6 +59,7 @@ HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
 
 bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 {
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::LahgiControl", "Set type");
 	mListModeDataMutex.lock();
 
 	mListedListModeData.reserve(50000);	
