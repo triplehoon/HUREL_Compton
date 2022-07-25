@@ -592,7 +592,7 @@ namespace Compton_GUI_WPF.ViewModel
         {
             IsSLAMOn = true;
             string temp = "";
-            await Task.Run(()=>RealsenseControl.StartSLAM(ref temp)).ConfigureAwait(false);
+            await Task.Run(()=>RealsenseControl.StartSLAM()).ConfigureAwait(false);
             RealsenseState = temp;
             SLAMPointCloud = new PointGeometry3D();
             SLAMPoseInfo = new LineGeometry3D();

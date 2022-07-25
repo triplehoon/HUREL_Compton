@@ -2,57 +2,58 @@
 
 #include "Lahgi wrapper.h"
 
+using namespace HUREL::Compton;
+
 HUREL::Compton::LahgiWrapper::LahgiWrapper()
 {
-	HUREL::Logger::Instance().Handle(HUREL::Compton::WrapperCaller::Logging);
 }
 
 bool HUREL::Compton::LahgiWrapper::Initiate(eModuleManagedType type)
 {
 	WrapperLogger::Log::Info("C++CLR::HUREL::Compton::LahgiWrapper", "Initiate");
-	HUREL::Compton::eMouduleType moduleType = HUREL::Compton::eMouduleType::MONO;
+	HUREL::Compton::eModuleCppWrapper moduleType = HUREL::Compton::eModuleCppWrapper::MONO;
 	switch (type)
 	{
 	case HUREL::Compton::eModuleManagedType::MONO:
-		moduleType = HUREL::Compton::eMouduleType::MONO;
+		moduleType = HUREL::Compton::eModuleCppWrapper::MONO;
 		break;
 	case HUREL::Compton::eModuleManagedType::QUAD:
-		moduleType = HUREL::Compton::eMouduleType::QUAD;
+		moduleType = HUREL::Compton::eModuleCppWrapper::QUAD;
 
 		break;
 	case HUREL::Compton::eModuleManagedType::QUAD_DUAL:
-		moduleType = HUREL::Compton::eMouduleType::QUAD_DUAL;
+		moduleType = HUREL::Compton::eModuleCppWrapper::QUAD_DUAL;
 		break;
 	default:
 		break;
 	}
-	return lahgiControlInstance.SetType(moduleType);
+	return LahgiCppWrapper::instance().SetType(moduleType);
 }
 
-Boolean HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks)
+void HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks)
 {
 	pin_ptr<unsigned short> intParamsPtr = &adcData[0];
 
 	unsigned short* adcS = intParamsPtr;
 
-	std::vector<sEnergyCheck> eChkUnmanagedVector;
+	std::vector<std::vector<double>> eChkUnmanagedVector;
 	eChkUnmanagedVector.resize(echks->Count);
 	for each (array<double>^ e in echks)
 	{
-		sEnergyCheck eChkUnmanaged;
-		eChkUnmanaged.minE = e[0];
-		eChkUnmanaged.maxE = e[1];
+		std::vector<double> eChkUnmanaged;
+		eChkUnmanaged.resize(2);
+		eChkUnmanaged.push_back(e[0]);
+		eChkUnmanaged.push_back(e[1]);
 
 		eChkUnmanagedVector.push_back(eChkUnmanaged);
 	}
 
-	lahgiControlInstance.AddListModeDataWithTransformation(adcS, eChkUnmanagedVector);
-	return true;
+	LahgiCppWrapper::instance().AddListModeDataWithTransformation(adcS, eChkUnmanagedVector);
 }
 
 void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE)
 {
-	std::vector<ListModeData> lists = lahgiControlInstance.GetListedListModeData();
+	std::vector<ListModeDataCppWrapper> lists = LahgiCppWrapper::instance().GetRelativeListModeData();
 	scatterXYZE->Clear();
 	absorberXYZE->Clear();
 
@@ -60,15 +61,15 @@ void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^
 	{
 		array<double>^ tempScatterArray = gcnew array<double>(4);
 		array<double>^ tempAbsorberArray = gcnew array<double>(4);
-		tempScatterArray[0] = lists[i].Scatter.RelativeInteractionPoint[0];
-		tempScatterArray[1] = lists[i].Scatter.RelativeInteractionPoint[1];
-		tempScatterArray[2] = lists[i].Scatter.RelativeInteractionPoint[2];
-		tempScatterArray[3] = lists[i].Scatter.InteractionEnergy;
+		tempScatterArray[0] = lists[i].ScatterRelativeInteractionPointX;
+		tempScatterArray[1] = lists[i].ScatterRelativeInteractionPointY;
+		tempScatterArray[2] = lists[i].ScatterRelativeInteractionPointZ;
+		tempScatterArray[3] = lists[i].ScatterInteractionEnergy;
 
-		tempAbsorberArray[0] = lists[i].Absorber.RelativeInteractionPoint[0];
-		tempAbsorberArray[1] = lists[i].Absorber.RelativeInteractionPoint[1];
-		tempAbsorberArray[2] = lists[i].Absorber.RelativeInteractionPoint[2];
-		tempAbsorberArray[3] = lists[i].Absorber.InteractionEnergy;
+		tempAbsorberArray[0] = lists[i].AbsorberRelativeInteractionPointX;
+		tempAbsorberArray[1] = lists[i].AbsorberRelativeInteractionPointY;
+		tempAbsorberArray[2] = lists[i].AbsorberRelativeInteractionPointZ;
+		tempAbsorberArray[3] = lists[i].AbsorberInteractionEnergy;
 
 
 		scatterXYZE->Add(tempScatterArray);
@@ -79,16 +80,12 @@ void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^
 void HUREL::Compton::LahgiWrapper::ResetListmodeData()
 {
 	WrapperLogger::Log::Info("C++CLR::UREL::Compton::LahgiWrapper", "Reset list mode data");
-	lahgiControlInstance.ResetListedListModeData();
-	for (int i = 0; i < 16; ++i)
-	{
-		lahgiControlInstance.ResetEnergySpectrum(i);
-	}
+	LahgiCppWrapper::instance().RestListedListModeData();	
 }
 
 void HUREL::Compton::LahgiWrapper::GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount)
 {
-	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetEnergySpectrum(channelNumer).GetHistogramEnergy();
+	std::vector<BinningEnergy> eSpect = LahgiCppWrapper::instance().GetSpectrum(channelNumer);
 
 	energyCount = gcnew List<array<double>^>();
 	energyCount->Capacity = eSpect.size();
@@ -102,7 +99,7 @@ void HUREL::Compton::LahgiWrapper::GetSpectrum(unsigned int channelNumer, List<a
 
 void HUREL::Compton::LahgiWrapper::GetSumSpectrum(List<array<double>^>^% energyCount)
 {
-	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetSumEnergySpectrum().GetHistogramEnergy();
+	std::vector<BinningEnergy> eSpect = LahgiCppWrapper::instance().GetSumSpectrum();
 
 	energyCount = gcnew List<array<double>^>();
 	energyCount->Capacity = eSpect.size();
@@ -116,7 +113,7 @@ void HUREL::Compton::LahgiWrapper::GetSumSpectrum(List<array<double>^>^% energyC
 
 void HUREL::Compton::LahgiWrapper::GetAbsorberSumSpectrum(List<array<double>^>^% energyCount)
 {
-	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetAbsorberSumEnergySpectrum().GetHistogramEnergy();
+	std::vector<BinningEnergy> eSpect = LahgiCppWrapper::instance().GetAbsorberSumSpectrum();
 
 	energyCount = gcnew List<array<double>^>();
 	energyCount->Capacity = eSpect.size();
@@ -131,13 +128,18 @@ void HUREL::Compton::LahgiWrapper::GetAbsorberSumSpectrum(List<array<double>^>^%
 void HUREL::Compton::LahgiWrapper::SaveListModeData(System::String^ fileName)
 {
 	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(fileName);
-	lahgiControlInstance.SaveListedListModeData(static_cast<char*>(ptrToNativeString.ToPointer()));
+	LahgiCppWrapper::instance().SaveListedListModeData(static_cast<char*>(ptrToNativeString.ToPointer()));
 }
 
+bool HUREL::Compton::LahgiWrapper::LoadListModeData(System::String^ filePath)
+{
+	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(filePath);
+	return LahgiCppWrapper::instance().SaveListedListModeData(static_cast<char*>(ptrToNativeString.ToPointer()));
+}
 
 void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrum(List<array<double>^>^% energyCount)
 {
-	std::vector<BinningEnergy> eSpect = lahgiControlInstance.GetScatterSumEnergySpectrum().GetHistogramEnergy();
+	std::vector<BinningEnergy> eSpect = LahgiCppWrapper::instance().GetScatterSumSpectrum();
 
 	energyCount = gcnew List<array<double>^>();
 	energyCount->Capacity = eSpect.size();
@@ -151,27 +153,7 @@ void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrum(List<array<double>^>^% 
 
 void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrumByTime(List<array<double>^>^% energyCount, unsigned int time)
 {
-	std::vector<ListModeData> lmData = lahgiControlInstance.GetListedListModeData();
-
-	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-
-
-
-	int reconStartIndex = 0;
-
-
-	EnergySpectrum spectClass = EnergySpectrum(5, 3000);;
-	for (int i = lmData.size(); i--; i >= 0)
-	{
-		if (t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time))
-		{
-			break;
-		}
-		
-		spectClass.AddEnergy(lmData[i].Scatter.InteractionEnergy);
-	}
-
-	std::vector<BinningEnergy> eSpect = spectClass.GetHistogramEnergy();
+	std::vector<BinningEnergy> eSpect = LahgiCppWrapper::instance().GetScatterSumSpectrum(time);
 
 	energyCount = gcnew List<array<double>^>();
 	energyCount->Capacity = eSpect.size();
@@ -186,27 +168,7 @@ void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrumByTime(List<array<double
 
 void HUREL::Compton::LahgiWrapper::GetAbsorberSumSpectrumByTime(List<array<double>^>^% energyCount, unsigned int time)
 {
-	std::vector<ListModeData> lmData = lahgiControlInstance.GetListedListModeData();
-
-	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-
-
-
-	int reconStartIndex = 0;
-
-
-	EnergySpectrum spectClass = EnergySpectrum(5, 3000);;
-	for (int i = lmData.size(); i--; i >= 0)
-	{
-		if (t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time))
-		{
-			break;
-		}
-
-		spectClass.AddEnergy(lmData[i].Absorber.InteractionEnergy);
-	}
-
-	std::vector<BinningEnergy> eSpect = spectClass.GetHistogramEnergy();
+	std::vector<BinningEnergy> eSpect = LahgiCppWrapper::instance().GetAbsorberSumSpectrum(time);
 
 	energyCount = gcnew List<array<double>^>();
 	energyCount->Capacity = eSpect.size();
@@ -220,43 +182,43 @@ void HUREL::Compton::LahgiWrapper::GetAbsorberSumSpectrumByTime(List<array<doubl
 
 void HUREL::Compton::LahgiWrapper::ResetSpectrum(unsigned int channelNumber)
 {
-	lahgiControlInstance.ResetEnergySpectrum(channelNumber);	
+	LahgiCppWrapper::instance().RestEnergySpectrum(channelNumber);
 }
 
 void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data)
 {
-	cv::Mat color = cv::Mat();
-	switch (reconType)
-	{
-	case HUREL::Compton::eReconType::CODED:
-	{
-		color = lahgiControlInstance.GetListModeImageCoded(time);
-		break;
-	}
-	case HUREL::Compton::eReconType::COMPTON:
-		color = lahgiControlInstance.GetListModeImageCompton(time);
-		break;
-	case HUREL::Compton::eReconType::HYBRID:
-		break;
-	default:
-		color = lahgiControlInstance.GetListModeImageCompton(time);
-		break;
-	}
+	//cv::Mat color = cv::Mat();
+	//switch (reconType)
+	//{
+	//case HUREL::Compton::eReconType::CODED:
+	//{
+	//	color = lahgiControlInstance->GetListModeImageCoded(time);
+	//	break;
+	//}
+	//case HUREL::Compton::eReconType::COMPTON:
+	//	color = lahgiControlInstance->GetListModeImageCompton(time);
+	//	break;
+	//case HUREL::Compton::eReconType::HYBRID:
+	//	break;
+	//default:
+	//	color = lahgiControlInstance->GetListModeImageCompton(time);
+	//	break;
+	//}
 
 
-	if (color.cols > 1) {
-		width = color.cols;
-		height = color.rows;
-		stride = color.step;
-		void* ptr = static_cast<void*>(color.ptr());
+	//if (color.cols > 1) {
+	//	width = color.cols;
+	//	height = color.rows;
+	//	stride = color.step;
+	//	void* ptr = static_cast<void*>(color.ptr());
 
-		if (ptr == NULL)
-		{
-			return;
-		}
+	//	if (ptr == NULL)
+	//	{
+	//		return;
+	//	}
 
-		data = IntPtr(ptr);
-	}
+	//	data = IntPtr(ptr);
+	//}
 }
 
 void HUREL::Compton::LahgiWrapper::Logging(std::string className, std::string msg)
@@ -266,9 +228,3 @@ void HUREL::Compton::LahgiWrapper::Logging(std::string className, std::string ms
 	WrapperLogger::Log::Info(classNameManage, msgManage);
 }
 
-void HUREL::Compton::WrapperCaller::Logging(std::string className, std::string msg)
-{
-	System::String^ classNameManage = gcnew System::String(className.c_str());
-	System::String^ msgManage = gcnew System::String(msg.c_str());
-	WrapperLogger::Log::Info(classNameManage, msgManage);
-}

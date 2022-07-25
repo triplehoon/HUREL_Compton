@@ -1,6 +1,7 @@
 ﻿using AsyncAwaitBestPractices.MVVM;
 using HUREL.Compton;
 using log4net;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -102,9 +103,24 @@ namespace HUREL_Imager_GUI.ViewModel
         }
         private async Task LoadData()
         {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "ply files(*.ply)| *.ply";
+            dlg.Multiselect = false;
+            dlg.Title = "Select pointcloud file";
+            
+            if (dlg.ShowDialog() == true)
+            {
+                LahgiApi.LoadPlyFile(dlg.FileName);
+            }
+            else
+            {
+                return;
+            }
 
+            LahgiApi.StatusUpdateInvoke(null, new LahgiApiEnvetArgs(eLahgiApiEnvetArgsState.Loading));
+            
         }
 
-    
+
     }
 }

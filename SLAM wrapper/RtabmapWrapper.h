@@ -1,8 +1,7 @@
 #pragma once
-#pragma unmanaged
-#include "RtabmapSlamControl.h"
-#include "Lahgi wrapper.h"
-#pragma managed
+#pragma managed(push, off)
+#include "CppWrapper.h"
+#pragma managed(pop)
 
 using namespace System;
 using namespace System::IO;
@@ -18,34 +17,36 @@ using namespace System::Runtime::InteropServices;
 namespace HUREL {
 	namespace Compton {
 
+		public enum class eReconManaged
+		{
+			COMPTON,
+			CODED,
+			HYBIRD
+		};
 			public ref class RtabmapWrapper:IDisposable
 			{
 			private:
-				Boolean mIsInitiated = false;
-				uchar* mColorImg = nullptr;
-				
-			public:
-				static RtabmapSlamControl& mSlamcontrolNative = RtabmapSlamControl::instance();
-				
+				Boolean mIsInitiated = false;				
+			public:				
 				Boolean InitiateRtabmap(System::String^% message);
 
 				void GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 				void GetRealTimePointCloudTransPosed(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
 				void GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data);
-				Boolean GetRealTimeRGBStream(int% width, int% height, int% type, array<Byte>^% data);
-				Boolean StartRtabmapPipeline(System::String^% msg);
-				void StopRtabmapPipeline();
-				void GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize);
 
-				Boolean StartSLAM(System::String^% msg);
+				void GetReconSLAMPointCloud(double time, eReconManaged reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize);
+				
+				Boolean StartSLAM();
 				void StopSLAM();
-
-				void ResetPipeline();
+				void ResetSLAM();
 
 				void GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
 				void GetPoseFrame(array<double>^% mat);
+
+				bool LoadPlyFile(System::String^ filePath);
+				void GetLoadedPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
 				RtabmapWrapper();
 				~RtabmapWrapper();

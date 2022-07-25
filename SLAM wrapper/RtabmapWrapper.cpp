@@ -3,20 +3,19 @@
 Boolean HUREL::Compton::RtabmapWrapper::InitiateRtabmap(System::String^% message)
 {
     std::string resultMsg;
-    //try
+    try
     {
-		mIsInitiated = mSlamcontrolNative.Initiate(&resultMsg);
+		mIsInitiated = RtabmapCppWrapper::instance().Initiate();
 		message = gcnew System::String(resultMsg.c_str());
 	}
-	//catch (...)
+	catch (...)
 	{
-		//mIsInitiated = false;
-		//System::Diagnostics::Trace::WriteLine("Initiating Rtabmap Failed. Unkown Error");
-		//message = "Initiating Rtabmap Failed. Unkown Error";
+		mIsInitiated = false;
+		HUREL::Compton::WrapperCaller::Logging("C++CLI::HUREL::Compton::RtabmapWrapper", "Fail to initiate");
 	}
 
 	
-    return mIsInitiated;
+    return true;
 }
 
 void HUREL::Compton::RtabmapWrapper::GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
@@ -24,32 +23,24 @@ void HUREL::Compton::RtabmapWrapper::GetRealTimePointCloud(List<array<double>^>^
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
 
-	if (!(mSlamcontrolNative.mIsSlamPipeOn))
+	if (!(RtabmapCppWrapper::instance().GetIsSlamPipeOn()))
 	{
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = mSlamcontrolNative.GetRTPointCloud();
+	std::vector<ReconPointCppWrapper> pose = RtabmapCppWrapper::instance().GetRTPointCloud();
 
 
-	int count = 0;
-	if (pose.colors_.size() < pose.points_.size())
-	{
-		count = pose.colors_.size();
-	}
-	else
-	{
-		count = pose.points_.size();
-	}
+	int count = pose.size();
 
 	vectors->Capacity = count;
 	colors->Capacity = count;
 
 
 	for (int i = 0; i < count - 1; i++) {
-		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
+		array<double, 1>^ poseVector = gcnew array<double>{pose[i].pointX, pose[i].pointY, pose[i].pointZ};
 		vectors->Add(poseVector);
-		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
+		array<double, 1>^ colorVector = gcnew array<double>{pose[i].colorB, pose[i].colorG, pose[i].colorB};
 		colors->Add(colorVector);
 	}
 }
@@ -59,32 +50,24 @@ void HUREL::Compton::RtabmapWrapper::GetRealTimePointCloudTransPosed(List<array<
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
 
-	if (!(mSlamcontrolNative.mIsSlamPipeOn))
+	if (!(RtabmapCppWrapper::instance().GetIsSlamPipeOn()))
 	{
 		return;
 	}
 
-	open3d::geometry::PointCloud pose = mSlamcontrolNative.GetRTPointCloudTransposed();
+	std::vector<ReconPointCppWrapper> pose = RtabmapCppWrapper::instance().GetRTPointCloudTransposed();
 
 
-	int count = 0;
-	if (pose.colors_.size() < pose.points_.size())
-	{
-		count = pose.colors_.size();
-	}
-	else
-	{
-		count = pose.points_.size();
-	}
+	int count = pose.size();
 
 	vectors->Capacity = count;
 	colors->Capacity = count;
 
 
 	for (int i = 0; i < count - 1; i++) {
-		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
+		array<double, 1>^ poseVector = gcnew array<double>{pose[i].pointX, pose[i].pointY, pose[i].pointZ};
 		vectors->Add(poseVector);
-		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
+		array<double, 1>^ colorVector = gcnew array<double>{pose[i].colorB, pose[i].colorG, pose[i].colorB};
 		colors->Add(colorVector);
 	}
 }
@@ -92,183 +75,126 @@ void HUREL::Compton::RtabmapWrapper::GetRealTimePointCloudTransPosed(List<array<
 void HUREL::Compton::RtabmapWrapper::GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data)
 {
 	static int imagesize = 0;
-	if (!mSlamcontrolNative.mIsVideoStreamOn) {
+	if (!RtabmapCppWrapper::instance().GetIsVideoStreamOn()) {
 		width = 0;
 		height = 0;
 		stride = 0;
 		data = IntPtr::Zero;
 		return;
 	}
-	
-	//SlamcontrolNative.LockVideoFrame();
-	cv::Mat color = mSlamcontrolNative.GetCurrentVideoFrame();
-	if (color.cols == 0)
-	{
-		//mSlamcontrolNative.UnlockVideoFrame();
-		return;
-	}
-	width = color.cols;
-	height = color.rows;
-	stride = color.step;
-	if (imagesize != width * height * color.channels())
-	{
-		Console::WriteLine("size diff");
-		imagesize = width * height * color.channels();
-		delete[] mColorImg;
-		mColorImg = new uchar[imagesize];
-	}
-	
-	memcpy(mColorImg, color.data, imagesize);
-	//mSlamcontrolNative.UnlockVideoFrame();
+
+	//
+	////SlamcontrolNative.LockVideoFrame();
+	//cv::Mat color = RtabmapCppWrapper::instance().GetCurrentVideoFrame();
+	//if (color.cols == 0)
+	//{
+	//	//RtabmapCppWrapper::instance().UnlockVideoFrame();
+	//	return;
+	//}
+	//width = color.cols;
+	//height = color.rows;
+	//stride = color.step;
+	//if (imagesize != width * height * color.channels())
+	//{
+	//	Console::WriteLine("size diff");
+	//	imagesize = width * height * color.channels();
+	//	delete[] mColorImg;
+	//	mColorImg = new uchar[imagesize];
+	//}
+	//
+	//memcpy(mColorImg, color.data, imagesize);
+	////RtabmapCppWrapper::instance().UnlockVideoFrame();
 
 
 
-	if (color.cols > 1) {
-		width = color.cols;
-		height = color.rows;
-		stride = color.step;
-		void* ptr = static_cast<void*>(mColorImg);
+	//if (color.cols > 1) {
+	//	width = color.cols;
+	//	height = color.rows;
+	//	stride = color.step;
+	//	void* ptr = static_cast<void*>(mColorImg);
 
-		if (ptr == NULL)
-		{
-			return;
-		}
+	//	if (ptr == NULL)
+	//	{
+	//		return;
+	//	}
 
-		data = IntPtr(ptr);
-	}
+	//	data = IntPtr(ptr);
+	//}
 }
 
-Boolean HUREL::Compton::RtabmapWrapper::GetRealTimeRGBStream(int% width, int% height, int% type, array<Byte>^% data)
+
+void HUREL::Compton::RtabmapWrapper::GetReconSLAMPointCloud(double time, eReconManaged reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize)
 {
-	//mSlamcontrolNative.LockVideoFrame();
-	cv::Mat color = mSlamcontrolNative.GetCurrentVideoFrame();
-	if (color.cols > 1) 
-	{
-		width = color.cols;
-		height = color.rows;
-		type = color.type();
-		int imagesize = width * height * color.channels();
-		data = gcnew array<Byte>(imagesize);
-		for (int i = 0; i < imagesize; ++i)
-		{
-			data[i] = color.data[i];
-		}		
-		//mSlamcontrolNative.UnlockVideoFrame();
-		return true;
-	}
-	else
-	{
-		//mSlamcontrolNative.UnlockVideoFrame();
-		return false;
-	}
-	
-	
+	//vectors = gcnew List< array<double>^>();
+	//colors = gcnew List< array<double>^>();
+	//int size;
+	//
 
 
+	//open3d::geometry::PointCloud points = *RtabmapCppWrapper::instance().GetSlamPointCloud().VoxelDownSample(voxelSize);
+
+	//ReconPointCloud rcPC;
+	//switch (reconType)
+	//{
+	//case HUREL::Compton::eReconType::CODED:
+	//	rcPC = LahgiControl::instance()->GetReconOverlayPointCloudCoded(points, time);
+
+	//	break;
+	//case HUREL::Compton::eReconType::COMPTON:
+	//	rcPC = LahgiControl::instance()->GetReconOverlayPointCloudCompton(points, time);
+
+	//	break;
+	//case HUREL::Compton::eReconType::HYBRID:
+	//	rcPC = LahgiControl::instance()->GetReconOverlayPointCloudHybrid(points, time);
+
+	//	break;
+	//default:
+	//	break;
+	//}
 
 
-	
+	//int count = 0;
+	//if (rcPC.colors_.size() < rcPC.points_.size())
+	//{
+	//	count = rcPC.colors_.size();
+	//}
+	//else
+	//{
+	//	count = rcPC.points_.size();
+	//}
+
+	//double maxValue = rcPC.maxReoconValue;
+
+	//vectors->Capacity = count;
+	//colors->Capacity = count;
+
+
+	//for (int i = 0; i < count - 1; i++) {
+	//	if (rcPC.reconValues_[i] > maxValue * 0.8)
+	//	{
+	//		array<double, 1>^ poseVector = gcnew array<double>{rcPC.points_[i][0], rcPC.points_[i][1], rcPC.points_[i][2]};
+	//		vectors->Add(poseVector);
+	//		RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], 0, maxValue);
+	//		array<double, 1>^ colorVector = gcnew array<double>{color.R, color.G, color.B, color.A};
+	//		colors->Add(colorVector);
+	//	}
+
+	//}
 }
 
-Boolean HUREL::Compton::RtabmapWrapper::StartRtabmapPipeline(System::String^% msg)
+Boolean HUREL::Compton::RtabmapWrapper::StartSLAM()
 {
-	mSlamcontrolNative.StartVideoStream();
-	Stopwatch^ sw = gcnew Stopwatch();
-	sw->Start();
-	while (!mSlamcontrolNative.mIsVideoStreamOn)
-	{
-		if (sw->ElapsedMilliseconds > 10000)
-		{
-			return false;
-		}
-	}
-	mSlamcontrolNative.StartSlamPipe();
-	return true;
-}
-
-void HUREL::Compton::RtabmapWrapper::StopRtabmapPipeline()
-{
-	mSlamcontrolNative.StopSlamPipe();
-	mSlamcontrolNative.StopVideoStream();
-}
-
-void HUREL::Compton::RtabmapWrapper::GetReconSLAMPointCloud(double time, eReconType reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize)
-{
-	vectors = gcnew List< array<double>^>();
-	colors = gcnew List< array<double>^>();
-	int size;
-	
-
-
-	open3d::geometry::PointCloud points = *mSlamcontrolNative.GetSlamPointCloud().VoxelDownSample(voxelSize);
-
-	ReconPointCloud rcPC;
-	switch (reconType)
-	{
-	case HUREL::Compton::eReconType::CODED:
-		rcPC = LahgiControl::instance().GetReconOverlayPointCloudCoded(points, time);
-
-		break;
-	case HUREL::Compton::eReconType::COMPTON:
-		rcPC = LahgiControl::instance().GetReconOverlayPointCloudCompton(points, time);
-
-		break;
-	case HUREL::Compton::eReconType::HYBRID:
-		rcPC = LahgiControl::instance().GetReconOverlayPointCloudHybrid(points, time);
-
-		break;
-	default:
-		break;
-	}
-
-
-	int count = 0;
-	if (rcPC.colors_.size() < rcPC.points_.size())
-	{
-		count = rcPC.colors_.size();
-	}
-	else
-	{
-		count = rcPC.points_.size();
-	}
-
-	double maxValue = rcPC.maxReoconValue;
-
-	vectors->Capacity = count;
-	colors->Capacity = count;
-
-
-	for (int i = 0; i < count - 1; i++) {
-		if (rcPC.reconValues_[i] > maxValue * 0.8)
-		{
-			array<double, 1>^ poseVector = gcnew array<double>{rcPC.points_[i][0], rcPC.points_[i][1], rcPC.points_[i][2]};
-			vectors->Add(poseVector);
-			RGBA_t color = ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], 0, maxValue);
-			array<double, 1>^ colorVector = gcnew array<double>{color.R, color.G, color.B, color.A};
-			colors->Add(colorVector);
-		}
-
-	}
-}
-
-Boolean HUREL::Compton::RtabmapWrapper::StartSLAM(System::String^% msg)
-{
-	mSlamcontrolNative.StartSlamPipe();
-	return true;
+	return 	RtabmapCppWrapper::instance().StartSlamPipe();
 }
 
 void HUREL::Compton::RtabmapWrapper::StopSLAM()
 {
-	mSlamcontrolNative.StopSlamPipe();
+	RtabmapCppWrapper::instance().StopSlamPipe();
 }
 
-void HUREL::Compton::RtabmapWrapper::ResetPipeline()
+void HUREL::Compton::RtabmapWrapper::ResetSLAM()
 {
-	LahgiControl::instance().StopListModeGenPipe();
-
-	mSlamcontrolNative.ResetSlam();
-	LahgiControl::instance().StartListModeGenPipe();
-	
+	RtabmapCppWrapper::instance().ResetSlam();
 }
 
 void HUREL::Compton::RtabmapWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
@@ -276,43 +202,65 @@ void HUREL::Compton::RtabmapWrapper::GetSLAMPointCloud(List<array<double>^>^% ve
 	vectors = gcnew List< array<double>^>();
 	colors = gcnew List< array<double>^>();
 
-	if (!(mSlamcontrolNative.mIsSlamPipeOn))
+	if (!(RtabmapCppWrapper::instance().GetIsSlamPipeOn()))
 	{
-		//Console::WriteLine("ttest1\n");
 		return;
 	}
-	//Console::WriteLine("ttest2\n");
-	open3d::geometry::PointCloud pose = mSlamcontrolNative.GetSlamPointCloud();
+
+	std::vector<ReconPointCppWrapper> pose = RtabmapCppWrapper::instance().GetSlamPointCloud();
 
 
-	int count = 0;
-	if (pose.colors_.size() < pose.points_.size())
-	{
-		count = pose.colors_.size();
-	}
-	else
-	{
-		count = pose.points_.size();
-	}
+	int count = pose.size();
 
 	vectors->Capacity = count;
 	colors->Capacity = count;
 
 
 	for (int i = 0; i < count - 1; i++) {
-		array<double, 1>^ poseVector = gcnew array<double>{pose.points_[i][0], pose.points_[i][1], pose.points_[i][2]};
+		array<double, 1>^ poseVector = gcnew array<double>{pose[i].pointX, pose[i].pointY, pose[i].pointZ};
 		vectors->Add(poseVector);
-		array<double, 1>^ colorVector = gcnew array<double>{pose.colors_[i][2], pose.colors_[i][1], pose.colors_[i][0]};
+		array<double, 1>^ colorVector = gcnew array<double>{pose[i].colorB, pose[i].colorG, pose[i].colorB};
 		colors->Add(colorVector);
 	}
 }
 
 void HUREL::Compton::RtabmapWrapper::GetPoseFrame(array<double>^% mat)
 {
-	std::vector<double> transform = mSlamcontrolNative.getMatrix3DOneLineFromPoseData();
+	std::vector<double> transform = RtabmapCppWrapper::instance().getMatrix3DOneLineFromPoseData();
 	mat = gcnew array<double>(16);
 	for (int i = 0; i < 16; i++) {
 		mat[i] = transform[i];
+	}	//std::vector<double> transform = RtabmapCppWrapper::instance().getMatrix3DOneLineFromPoseData();
+	mat = gcnew array<double>(16);
+	for (int i = 0; i < 16; i++) {
+		mat[i] = transform[i];
+	}
+}
+
+bool HUREL::Compton::RtabmapWrapper::LoadPlyFile(System::String^ filePath)
+{
+	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(filePath);
+	return RtabmapCppWrapper::instance().LoadPlyFile(static_cast<char*>(ptrToNativeString.ToPointer()));
+}
+
+void HUREL::Compton::RtabmapWrapper::GetLoadedPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
+{
+	std::vector<ReconPointCppWrapper> pose = RtabmapCppWrapper::instance().GetLoadedPointCloud();
+	vectors = gcnew List< array<double>^>();
+	colors = gcnew List< array<double>^>();
+	
+
+	int count = pose.size();
+
+	vectors->Capacity = count;
+	colors->Capacity = count;
+
+
+	for (int i = 0; i < count - 1; i++) {
+		array<double, 1>^ poseVector = gcnew array<double>{pose[i].pointX, pose[i].pointY, pose[i].pointZ};
+		vectors->Add(poseVector);
+		array<double, 1>^ colorVector = gcnew array<double>{pose[i].colorB, pose[i].colorG, pose[i].colorR, pose[i].colorA};
+		colors->Add(colorVector);
 	}
 }
 
@@ -322,12 +270,11 @@ HUREL::Compton::RtabmapWrapper::RtabmapWrapper()
 
 HUREL::Compton::RtabmapWrapper::~RtabmapWrapper()
 {
-	this->!RtabmapWrapper();
-	delete[] mColorImg;
+	
 }
 
 HUREL::Compton::RtabmapWrapper::!RtabmapWrapper()
 {
 
-	delete(&mSlamcontrolNative);
+	delete(&RtabmapCppWrapper::instance());
 }

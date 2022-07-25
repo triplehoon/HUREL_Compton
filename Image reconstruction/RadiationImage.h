@@ -70,8 +70,10 @@ namespace HUREL {
 
 		class RadiationImage
 		{
-		public:	
+		private:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		public:	
+			
 			std::vector<ListModeData> mListedListModeData;			
 			Eigen::Matrix4d mDetectorTransformation;
 

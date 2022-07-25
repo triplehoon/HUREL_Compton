@@ -1,6 +1,7 @@
 #include "LahgiControl.h"
 #include <future>
 #include <mutex>
+#include <open3d/visualization/utility/DrawGeometry.h>
 
 static std::mutex mListModeDataMutex;
 static std::mutex mListModeImageMutex;
@@ -48,13 +49,17 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 	test = Matrix4d::Ones();
 	Eigen::Vector3d test2 = Eigen::Vector3d(1,1,1);
 	
+	Eigen::Vector4d test3;
+	test3 = Eigen::Vector4d(1, 2, 3, 4);
+	test3.normalize();
 	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Hello logger!");
+	this->LoadListedListModeData("20220706_DigitalLabScan_100uCi_-1,0,2.4_cpplmdata.csv");
 }
 
 HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
 {
-	static LahgiControl* instance = new LahgiControl();
-	return *instance;
+	static LahgiControl& instance = *(new LahgiControl());
+	return instance;
 }
 
 bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
@@ -487,15 +492,15 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 	return;
 }
 
-void HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
+bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 {
 	std::ifstream loadFile;
 	loadFile.open(fileName);
 	if (!loadFile.is_open())
 	{
-		std::cout << "File is not opened" << endl;
+		HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Fail to open file");
 		loadFile.close();
-		return;
+		return false;
 	}
 	mListedListModeData.clear();
 	string buffer;
@@ -511,7 +516,13 @@ void HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 	}
 
 	loadFile.close();
-	return;
+	if (mListedListModeData.size() == 0)
+	{
+
+		HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Fail to load lm data");
+		return false;
+	}
+	return true;
 }
 
 EnergySpectrum HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelNumber)
@@ -567,6 +578,7 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetAbsorberSumEnergySpectrum()
 
 EnergySpectrum HUREL::Compton::LahgiControl::GetScatterSumEnergySpectrum()
 {
+
 	return mScatterSumSpectrum;
 }
 

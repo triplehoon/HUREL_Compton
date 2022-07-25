@@ -407,7 +407,8 @@
             </Popup>
         </syncfusion:ButtonAdv>
         
-        <syncfusion:ButtonAdv  Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" IsMultiLine="True" SizeMode="Large">
+        <syncfusion:ButtonAdv  Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" IsMultiLine="True" SizeMode="Large"
+                               Command="{Binding LoadDataCommand}">
             <syncfusion:ButtonAdv.Style>
                 <Style TargetType="syncfusion:ButtonAdv" BasedOn="{StaticResource StyleTopButton}">
                     <Setter Property="IconTemplate" Value="{StaticResource IconTemplateLoad}"/>

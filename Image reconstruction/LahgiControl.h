@@ -32,6 +32,7 @@ namespace HUREL {
 		class LahgiControl
 		{
 		private:		
+			
 			Module** mScatterModules;  //./Module information/MONOScatter1/Gain.csv, LUT.csv ...
 			Module** mAbsorberModules;	//./Module information/QUADScatter1/Gain.csv, LUT.csv ...
 			eMouduleType mModuleType;
@@ -68,8 +69,8 @@ namespace HUREL {
 			std::vector<ListModeData> GetListedListModeData();
 
 			void ResetListedListModeData();
-			void SaveListedListModeData(std::string fileName);			
-			void LoadListedListModeData(std::string fileName);
+			void SaveListedListModeData(std::string filePath);			
+			bool LoadListedListModeData(std::string filePath);
 
 			EnergySpectrum GetEnergySpectrum(int fpgaChannelNumber);	
 			EnergySpectrum GetSumEnergySpectrum();

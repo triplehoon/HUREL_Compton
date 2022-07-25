@@ -21,7 +21,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0" Margin="10" BorderThickness="2" BorderBrush="Black">
-                <TextBlock>image reconstruction view</TextBlock>
+                <components:ThreeDimensionalView Grid.Column="0" DataContext="{Binding ThreeDimensionalViewModel}"/>
             </Border>
             
             <Grid Grid.Column="1">

@@ -115,7 +115,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Rtabmap SLAM Control Library;C:\open3d-devel-windows-amd64-0.15.1\include;C:\opencv\build\include;C:\open3d-devel-windows-amd64-0.15.1\include\open3d\3rdparty;C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Eigen\eigen3;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;%(AdditionalIncludeDirectories);C:\Program Files %28x86%29\Open3D_MD\include;$(SolutionDir)\Image reconstruction;$(SolutionDir)\Reporter Wrapper;$(SolutionDir)\Logger</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard>stdcpp14</LanguageStandard>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
@@ -126,14 +126,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CppWrapper.h" />
     <ClInclude Include="Lahgi wrapper.h" />
+    <ClInclude Include="LogWrapperCaller.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RtabmapWrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="CppWrapper.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="Lahgi wrapper.cpp" />
+    <ClCompile Include="LogWrapperCaller.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="RtabmapWrapper.cpp" />
   </ItemGroup>

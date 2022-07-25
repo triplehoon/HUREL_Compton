@@ -25,8 +25,9 @@ namespace HUREL
 		class ReconPointCloud : public open3d::geometry::PointCloud
 		{
 		private:	
-		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		public:
+			
 			/// ReconValue;		
 			ReconPointCloud() : PointCloud() {};
 			ReconPointCloud(open3d::geometry::PointCloud& pc);

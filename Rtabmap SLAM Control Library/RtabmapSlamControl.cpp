@@ -160,14 +160,6 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			{
 				mCurrentDepthFrame = imgDepth;
 			}
-
-			if (mOdoInit && mIsSlamPipeOn)
-			{
-				mCurrentOdometry = t265toLACCAxisTransform * mOdo->getPose().toEigen4d()* mInitOdo.inverse();				
-			}
-
-			
-
 			videoStreamMutex.unlock();
 			//pcMutex.lock();
 			//mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
@@ -199,7 +191,10 @@ void HUREL::Compton::RtabmapSlamControl::ResetSlam()
 
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentVideoFrame()
 {
-	return mCurrentVideoFrame.clone();
+	videoStreamMutex.lock();
+	cv::Mat tmp = mCurrentVideoFrame.clone();
+	videoStreamMutex.unlock();
+	return tmp;
 }
 
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentDepthFrame()
@@ -328,7 +323,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		0, 0, 1, 0,
 		1, 0, 0, 0,
 		0, 0, 0, 1;
-
+	rtabmap::OccupancyGrid grid;
 
 	while (mIsSlamPipeOn)
 	{
@@ -353,19 +348,19 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		optimizedPoses = tmpOptimizedPoses;
 		pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 		int i = 0;
+		rtabmap->getStatistics();
+		//https://cpp.hotexamples.com/examples/-/Rtabmap/-/cpp-rtabmap-class-examples.html
 		for (std::map<int, rtabmap::Transform>::iterator iter = optimizedPoses.begin(); iter != optimizedPoses.end(); ++iter)
 		{
-
+			
 			if (nodes.count(iter->first) == 0)
 			{
 				continue;
 			}
 			rtabmap::Signature node = nodes.find(iter->first)->second;
-
-
 			// uncompress data
-			node.sensorData().uncompressData();
-
+			cv::Mat ground, obstacles, empty;
+			node.sensorData().uncompressData(0,0,0,0,&ground,&obstacles,&empty);
 			pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp = rtabmap::util3d::cloudRGBFromSensorData(
 				node.sensorData(),
 				4,           // image decimation before creating the clouds
@@ -374,6 +369,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 			pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmpNoNaN(new pcl::PointCloud<pcl::PointXYZRGB>);
 			std::vector<int> index;
 			pcl::removeNaNFromPointCloud(*tmp, *tmpNoNaN, index);
+			//grid.addToCache(iter->first, ground, obstacles, empty);
 			if (!tmpNoNaN->empty())
 			{
 				*cloud += *rtabmap::util3d::transformPointCloud(tmpNoNaN, iter->second); // transform the point cloud to its pose
@@ -383,6 +379,8 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 			//tmpNoNaN.reset();
 			//delete test;
 		}
+		//grid.update(optimizedPoses);
+		
 		slamPipeMutex.lock();
 		mSlamedPointCloud = *cloud;
 		slamPipeMutex.unlock();
@@ -442,6 +440,17 @@ std::vector<double> HUREL::Compton::RtabmapSlamControl::getMatrix3DOneLineFromPo
 		}
 	}
 	return matrix3DOneLine;
+}
+
+bool HUREL::Compton::RtabmapSlamControl::LoadPlyFile(std::string filePath)
+{
+	open3d::io::ReadPointCloudOption opt;
+	return open3d::io::ReadPointCloudFromPLY(filePath, mLoadedPointcloud, opt);
+}
+
+open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetLoadedPointCloud()
+{
+	return mLoadedPointcloud;
 }
 
 Eigen::Matrix4d HUREL::Compton::RtabmapSlamControl::GetOdomentry()

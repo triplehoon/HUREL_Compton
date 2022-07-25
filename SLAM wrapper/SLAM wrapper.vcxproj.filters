@@ -27,6 +27,12 @@
     <ClInclude Include="RtabmapWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CppWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LogWrapperCaller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -39,6 +45,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RtabmapWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CppWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogWrapperCaller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

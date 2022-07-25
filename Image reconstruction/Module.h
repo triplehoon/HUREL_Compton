@@ -28,8 +28,8 @@ namespace HUREL {
 
 		class Module
 		{
-#pragma region private
 		private:
+			
 			double mEnergyCalibrationA = 0;
 			double mEnergyCalibrationB = 1;
 			double mEnergyCalibrationC = 0;
@@ -48,7 +48,6 @@ namespace HUREL {
 			bool LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
 			bool LoadLUT(std::string FileName);
 			std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
-#pragma endregion
 			public:
 				EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 				double mModuleOffsetX;

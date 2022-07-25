@@ -116,10 +116,10 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\opencv\build\include;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;C:\open3d-devel-windows-amd64-0.15.1-dbg\include;%(AdditionalIncludeDirectories);C:\open3d-devel-windows-amd64-0.15.1-dbg\include\open3d\3rdparty;$(SolutionDir)\Rtabmap SLAM Control Library;$(SolutionDir)\Realsense Control Library;$(SolutionDir)\Image reconstruction;$(SolutionDir)\Logger</AdditionalIncludeDirectories>
-      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard>stdcpp14</LanguageStandard>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -136,9 +136,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Rtabmap SLAM Control Library;$(SolutionDir)\Realsense Control Library;C:\open3d-devel-windows-amd64-0.15.1\include;C:\opencv\build\include;C:\open3d-devel-windows-amd64-0.15.1\include\open3d\3rdparty;C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Eigen\eigen3;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;%(AdditionalIncludeDirectories);$(SolutionDir)\Image reconstruction;$(SolutionDir)\Logger</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

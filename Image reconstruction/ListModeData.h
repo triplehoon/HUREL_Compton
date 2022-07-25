@@ -20,18 +20,24 @@ namespace HUREL {
 		/// <summary>
 		/// meter and keV
 		/// </summary>
-		struct InteractionData
+		class InteractionData
 		{
+		private:
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		public:
+			
 			Eigen::Vector4d RelativeInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""), 1);
 			Eigen::Vector4d TransformedInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""),1);
 			double InteractionEnergy = 0;  
-			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+			
 		};
 
 		class ListModeData
 		{
-		public:
+		private:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		public:
+			
 			eInterationType Type = eInterationType::NONE;
 			InteractionData Scatter;
 			InteractionData Absorber;
@@ -52,10 +58,10 @@ namespace HUREL {
 			cv::Mat mHybridImage;
 
 			time_t mInteractionInterval;
-			
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 		public:
-			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+			
 			double Distance;
 
 

@@ -26,7 +26,7 @@ int main()
     {
         std::cout << "Show pointcloud \n";
         
-        open3d::visualization::DrawGeometries({ pc });
+        //open3d::visualization::DrawGeometries({ pc });
     }
     else
     {

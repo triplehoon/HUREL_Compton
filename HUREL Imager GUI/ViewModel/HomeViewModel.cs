@@ -31,14 +31,35 @@ namespace HUREL_Imager_GUI.ViewModel
             get { return _spectrumViewModel; }
             set { _spectrumViewModel = value; OnPropertyChanged(nameof(SpectrumViewModel)); }
         }
+
+        private ThreeDimensionalViewModel _threeDimensionalViewModel;
+        public ThreeDimensionalViewModel ThreeDimensionalViewModel
+        {
+            get
+            {
+                return _threeDimensionalViewModel;
+            }
+            set
+            {
+                _threeDimensionalViewModel = value;
+                OnPropertyChanged(nameof(ThreeDimensionalViewModel));
+            }
+        }
+
+
+
         public HomeViewModel()
         {
             // Will be not null!
             _topButtonViewModel = null!;
             _spectrumViewModel = null!;
             _testValue = null!;
+            _threeDimensionalViewModel = null!;
+
             TopButtonViewModel = new TopButtonViewModel();
             SpectrumViewModel = new SpectrumViewModel();
+            ThreeDimensionalViewModel = new ThreeDimensionalViewModel();
+
             TestValue = "Hello World";
             logger.Info("HomeViewModel Loaded");
         }

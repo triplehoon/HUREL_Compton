@@ -8,6 +8,19 @@ using log4net;
 
 namespace HUREL.Compton
 {
+    public enum eLahgiApiEnvetArgsState
+    {
+        Loading,
+        Slam
+    }
+    public class LahgiApiEnvetArgs:EventArgs
+    {
+        public eLahgiApiEnvetArgsState State { get; private set; }
+        public LahgiApiEnvetArgs(eLahgiApiEnvetArgsState state)
+        {
+            State = state;
+        }
+    }
     public static class LahgiApi
     {
         private static ILog log = LogManager.GetLogger(typeof(LahgiApi));
@@ -18,9 +31,9 @@ namespace HUREL.Compton
         public static CRUXELLLACC.VariableInfo fpgaVariables;
 
         public static EventHandler? StatusUpdate;
-        private static void StatusUpdateInvoke(object? obj, EventArgs args)
+        public static void StatusUpdateInvoke(object? obj, EventArgs args)
         {
-            StatusUpdate?.Invoke(null, EventArgs.Empty);
+            StatusUpdate?.Invoke(obj, args);
         }
         private static string statusMsg = "";
         public static string StatusMsg
@@ -114,21 +127,7 @@ namespace HUREL.Compton
                 return false;
             }
         }
-        public static bool StartRtabmap()
-        {
-            if (!IsRtabmapInitiate)
-            {
-                return false;
-            }
-            string msg = "";
-            bool isSuccess = rtabmapWrapper.StartRtabmapPipeline(ref msg);
-            StatusMsg = msg;
-            return isSuccess;
-        }
-        public static void StopRtabmap()
-        {
-            rtabmapWrapper.StopRtabmapPipeline();
-        }
+       
         public static BitmapImage? GetRgbImage()
         {
             BitmapImage? img = null; 
@@ -357,9 +356,8 @@ namespace HUREL.Compton
         private static void StartSlam()
         {
             string temp = "";
-            rtabmapWrapper.StartSLAM(ref temp);
-            StatusMsg = temp;
-            rtabmapWrapper.ResetPipeline();                        
+            rtabmapWrapper.StartSLAM();
+            StatusMsg = temp;                        
         }
         private static void StopSlam()
         {
@@ -411,7 +409,7 @@ namespace HUREL.Compton
             }
             return true;
         }
-        public static bool GetReconSLAMPointCloud(double time, eReconType reconType, ref List<double[]> poseVect, ref List<double[]> colorVect)
+        public static bool GetReconSLAMPointCloud(double time, eReconManaged reconType, ref List<double[]> poseVect, ref List<double[]> colorVect)
         {
             if (!IsSessionStart)
             {
@@ -480,7 +478,7 @@ namespace HUREL.Compton
                 return new SpectrumEnergyNasa(5, 3000);
             }
             List<double[]> eCount = new List<double[]>();
-            lahgiWrapper.GetAbsorberSumSpectrum(ref eCount);
+            lahgiWrapper.GetScatterSumSpectrum(ref eCount);
             List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
             for (int i = 0; i < eCount.Count; i++)
             {
@@ -521,6 +519,36 @@ namespace HUREL.Compton
             SpectrumEnergyNasa spect = new SpectrumEnergyNasa(histoEnergy);
             return spect;
         }        
+
+        public static bool LoadListModeData(string filePath)
+        {
+            return lahgiWrapper.LoadListModeData(filePath);
+        }
+
+        public static bool LoadPlyFile(string filePath)
+        {
+            if (Path.GetExtension(filePath) != ".ply")
+            {
+                log.Error("LoadPyFile fail due to extenstion is not ply");
+                return false;
+            }
+            log.Info($"Loading ply file: {filePath}");
+            if (rtabmapWrapper.LoadPlyFile(filePath))
+            {
+                log.Info("Loading seccess");
+                return true;
+            }
+            else
+            {
+                log.Info("Loading fail");
+                return false;
+            }            
+        }
+
+        public static void GetLoadedPointCloud(ref List<double[]> poseVect, ref List<double[]> colorVect)
+        {
+            rtabmapWrapper.GetLoadedPointCloud(ref poseVect, ref colorVect);            
+        }
     }
 }
     

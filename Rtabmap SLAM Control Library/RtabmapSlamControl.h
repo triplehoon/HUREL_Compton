@@ -70,6 +70,7 @@ namespace HUREL
 
 			RtabmapSlamControl();
 
+			open3d::geometry::PointCloud mLoadedPointcloud = open3d::geometry::PointCloud();
 
 			void LockVideoFrame();
 
@@ -104,6 +105,10 @@ namespace HUREL
 			open3d::geometry::PointCloud GetSlamPointCloud();
 
 			std::vector<double> getMatrix3DOneLineFromPoseData();
+
+			bool LoadPlyFile(std::string filePath);
+
+			open3d::geometry::PointCloud GetLoadedPointCloud();
 		public:
 			static RtabmapSlamControl& instance();
 			~RtabmapSlamControl();
