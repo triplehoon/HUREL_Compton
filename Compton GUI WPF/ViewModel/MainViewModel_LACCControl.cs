@@ -41,7 +41,7 @@ namespace Compton_GUI_WPF.ViewModel
                 batteryVoltage = value;
                 if (batteryVoltage > 12)
                 {
-                    BatteryVoltageDiv100 = (int)Math.Round((batteryVoltage - 12) / (13.7 - 12) * 100);
+                    BatteryVoltageDiv100 = (int)Math.Round((batteryVoltage - 11.7) / (13.7 - 11.7) * 100);
                 }
                 else
                 {

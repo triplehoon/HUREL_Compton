@@ -128,15 +128,15 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 				return;
 			};
 
-
+			double offsetZFromSuface = -0.04;
 			double offsetZ = -(0.235);
-			mScatterModules[i] = new Module(eMouduleType::QUAD_DUAL, gain, gain, slutFileDirectory, xOffset[i], yOffset[i] , 0);
+			mScatterModules[i] = new Module(eMouduleType::QUAD_DUAL, gain, gain, slutFileDirectory, xOffset[i], yOffset[i] , offsetZFromSuface);
 
 			if (!Module::LoadGain(againFileDirectory, type, gain))
 			{
 				return;
 			};			
-			mAbsorberModules[i] = new Module(eMouduleType::QUAD_DUAL, gain, gain, alutFileDirectory, xOffset[i] , yOffset[i], offsetZ );
+			mAbsorberModules[i] = new Module(eMouduleType::QUAD_DUAL, gain, gain, alutFileDirectory, xOffset[i] , yOffset[i], offsetZFromSuface + offsetZ );
 		}
 		break;
 	}

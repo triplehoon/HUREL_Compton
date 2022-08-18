@@ -1283,7 +1283,10 @@ namespace HUREL.Compton
                             }
                             else
                             {
-                                Trace.WriteLine($"Successes {Successes} Fail {Failures}");
+                                if (Failures == 100)
+                                {
+                                    Trace.WriteLine($"Successes {Successes} Fail {Failures}");
+                                }
                                 Failures++;// Failures++;
                             }
                         }

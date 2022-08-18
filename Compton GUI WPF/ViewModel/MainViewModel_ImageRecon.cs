@@ -514,28 +514,8 @@ namespace Compton_GUI_WPF.ViewModel
         {
             IsPostProcessingDone = false;
             
-
-            System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog();
-            ofd.Title = "List Mode CSV file";
-            ofd.Filter = "List Mode Data CSV (*.csv) | *.csv";
-
-            //파일 오픈창 로드
-            System.Windows.Forms.DialogResult dr = ofd.ShowDialog();
-            if (dr == System.Windows.Forms.DialogResult.OK)
-            {
-
-            }
-            else
-            {
-
-            }
-
-
-            await Task.Run(() => {
-                List<ReconImagePoint> reconPoints = new List<ReconImagePoint>();
-
-            });
-             
+            Calcimg.MatPostpro matPostpro = new Calcimg.MatPostpro();
+            //matPostpro.Calcimg();
             IsPostProcessingDone = true;
         }
         private bool isPostProcessingDone = true;

@@ -245,7 +245,7 @@ namespace Compton_GUI_WPF.ViewModel
             set
             {
                 isSavingBinaryFile = value;
-                FPGAControl.IsSavingBinaryData = value;
+                FPGAControl.IsSavingBinaryData = false;
                 OnPropertyChanged(nameof(IsSavingBinaryFile));
             }
         }
