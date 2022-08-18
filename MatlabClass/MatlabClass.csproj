@@ -11,12 +11,10 @@
 
   <ItemGroup>
     <Reference Include="ComptonNative">
-      <HintPath>..\..\..\..\..\..\..\Program Files\hurel\MLEM_Func\application\ComptonNative.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\hurel\MLEM_Func\application\ComptonNative.dll</HintPath>
     </Reference>
     <Reference Include="MWArray">
-      <HintPath>..\..\..\..\..\..\..\Program Files\MATLAB\MATLAB Runtime\v911\toolbox\dotnetbuilder\bin\win64\v4.0\MWArray.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\MATLAB\MATLAB Runtime\v911\toolbox\dotnetbuilder\bin\win64\v4.0\MWArray.dll</HintPath>
     </Reference>
   </ItemGroup>
 

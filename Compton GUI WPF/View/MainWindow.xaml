@@ -335,17 +335,6 @@
 
                             </Grid>
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Post Processing" Style="{StaticResource TextBlockTitle}" Margin="5" />
-                                <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding PostProcessingCommnd}" 
-                                        Content="Load List Mode csv" Grid.Column="1" Margin="50,0,50,0"/>
-                                <TextBlock Text="File Name: " Margin="2"/>
-                                <TextBlock Text="{Binding PostProcessingFileName}"></TextBlock>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Radioactivity: "/>
-                                    <TextBlock Text="?"/>
-                                    <TextBlock Text=" μCi"/>
-                                </StackPanel>
-                                <TextBlock Text="Source position" Style="{StaticResource TextBlockTitle2}"/>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="X: "/>
                                     <TextBlock Text="{Binding MaxReconPointX}"/>
@@ -452,11 +441,10 @@
                         </Grid>
 
 
-                        <Button Content="Test Buton" Command="{Binding TestCommand}"/>
                     </StackPanel>
                 </Grid>
             </syncfusion:TabItemExt>
-            <syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA">
+            <!--<syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition MaxWidth="500" Width="*"/>
@@ -527,7 +515,7 @@
 
                 </Grid>
 
-            </syncfusion:TabItemExt>
+            </syncfusion:TabItemExt>-->
         </syncfusion:TabControlExt>
 
         <Grid Grid.Column="1">
@@ -660,7 +648,7 @@
                             <syncfusion:NumericalAxis Minimum="0" Maximum="2500" ShowTrackBallInfo="True"/>
                         </syncfusion:SfChart.PrimaryAxis>
                         <syncfusion:SfChart.SecondaryAxis>
-                            <syncfusion:NumericalAxis Minimum="0"/>
+                            <syncfusion:LogarithmicAxis Minimum="0"/>
                         </syncfusion:SfChart.SecondaryAxis>
                         <syncfusion:FastLineBitmapSeries x:Name="MainSpectrumView" Interior="Black"
                                                                      ListenPropertyChange="True"
