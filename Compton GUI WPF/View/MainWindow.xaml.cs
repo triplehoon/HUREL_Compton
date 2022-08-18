@@ -29,14 +29,9 @@ namespace Compton_GUI_WPF
             NativeMethods.AllocConsole();
             Console.WriteLine("test");
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mzc0OTQ4QDMxMzgyZTM0MmUzMFRlU2dMemQrMXRGZW1iQk96NklnOVBWNnhScjVDckxTT2p1M0crRHpXcjA9");
-            try
-            {
-                InitializeComponent();
-            }
-            catch
-            {
 
-            }
+            InitializeComponent();
+   
             Debug.WriteLine("Initial Done");
             ComboboxSelectedSpectrum.ItemsSource = ComboboxSelectedSpectrumItems;
         }

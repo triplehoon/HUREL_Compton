@@ -513,8 +513,18 @@ namespace Compton_GUI_WPF.ViewModel
         private async void PostProcessing()
         {
             IsPostProcessingDone = false;
-            
-            Calcimg.MatPostpro matPostpro = new Calcimg.MatPostpro();
+            string fileName = @"C:\Program Files\Calcimg_Updated\application\Calcimg_Updated.exe";
+            FileInfo fileInfo = new FileInfo(fileName);//파일 있는지 확인 있을때(true), 없으면(false)
+            if (fileInfo.Exists)
+            {
+                Process.Start(fileName);
+            }   
+            else
+            {
+                MessageBox.Show("Error", "Please intall post processing tool.", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+
             //matPostpro.Calcimg();
             IsPostProcessingDone = true;
         }

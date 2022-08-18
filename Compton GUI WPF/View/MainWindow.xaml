@@ -335,18 +335,12 @@
 
                             </Grid>
                             <StackPanel Grid.Column="1">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="X: "/>
-                                    <TextBlock Text="{Binding MaxReconPointX}"/>
-                                    <TextBlock Text=" m  "/>
-                                    <TextBlock Text="Y: "/>
-                                    <TextBlock Text="{Binding MaxReconPointY}"/>
-                                    <TextBlock Text=" m  "/>
-                                    <TextBlock Text="Z: "/>
-                                    <TextBlock Text="{Binding MaxReconPointZ}"/>
-                                    <TextBlock Text=" m  "/>
+                                <TextBlock Text="Post Processing" Style="{StaticResource TextBlockTitle}" Margin="5" />
+                                <Button Style="{StaticResource ButtonDesignHYU}" Command="{Binding PostProcessingCommnd}" 
+                                        Content="Load List Mode csv" Grid.Column="1" Margin="50,0,50,0"/>
+                                
                                 </StackPanel>
-                            </StackPanel>
+                         
                         </Grid>
 
                     </StackPanel>
@@ -444,7 +438,7 @@
                     </StackPanel>
                 </Grid>
             </syncfusion:TabItemExt>
-            <!--<syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA">
+            <syncfusion:TabItemExt Header="Configuration" Background="White" BorderBrush="#FFEAEAEA">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition MaxWidth="500" Width="*"/>
@@ -515,7 +509,7 @@
 
                 </Grid>
 
-            </syncfusion:TabItemExt>-->
+            </syncfusion:TabItemExt>
         </syncfusion:TabControlExt>
 
         <Grid Grid.Column="1">
