@@ -186,7 +186,7 @@ void HUREL::Compton::LahgiWrapper::ContinueReconPointFor1m1m1m(List<array<double
 	std::vector<ListModeData> lmData = lahgiControlInstance.GetListedListModeData();
 
 	#pragma omp parallel for
-	for (int i = static_cast<int>(mReconPointsCount); i < lmData.size(); ++i)
+	for (int i = 0; i < lmData.size(); ++i)
 	{
 		mReconPointCloud->CalculateSimpleBackProjctionCompton(lmData[i]);
 	}
