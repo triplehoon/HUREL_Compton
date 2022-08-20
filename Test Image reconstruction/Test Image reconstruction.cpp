@@ -16,7 +16,6 @@ void ShowCV_32SAsJet(Mat img, int size);
 
 int main()
 {
-    
     std::shared_ptr < open3d::geometry::PointCloud> pc = std::make_shared<open3d::geometry::PointCloud>();
     open3d::io::ReadPointCloudOption opt;
 
@@ -53,47 +52,10 @@ int main()
     std::chrono::milliseconds startTime = lmData[0].InteractionTimeInMili;
     int startIdx = 0;
     HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(*pc);
-
+    
     #pragma omp parallel for
     for (int i = 0; i < lmData.size(); ++i)
     {
-    /*   if (lmData[i].InteractionTimeInMili != startTime)
-        {
-
-            std::vector<ListModeData>::const_iterator first = lmData.begin() + startIdx;
-            std::vector<ListModeData>::const_iterator last = lmData.begin() + i ;
-            std::vector<ListModeData> sameTimeData(first, last);
-            std::vector<ListModeData> effectiveData;
-            for (const auto lm : sameTimeData)
-            {
-                if (lm.Type == eInterationType::CODED)
-                {
-                    if (lm.Scatter.InteractionEnergy > 600 && lm.Scatter.InteractionEnergy < 720)
-                    {
-                        effectiveData.push_back(lm);
-                    }
-                }
-                else if (lm.Type == eInterationType::COMPTON)
-                {
-                    if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy > 600 && lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 720)
-                    {
-                        effectiveData.push_back(lm);
-                    }
-                }
-            }
-            if (effectiveData.size() == 0)
-            {
-                startTime = lmData[i].InteractionTimeInMili;
-                startIdx = i;
-                continue;
-            }
-           
-
-            radimgs.push_back(img);
-
-            startTime = lmData[i].InteractionTimeInMili;
-            startIdx = i;
-        }*/
         if (lmData[i].Type == eInterationType::COMPTON)
         {
             if (lmData[i].Scatter.InteractionEnergy + lmData[i].Absorber.InteractionEnergy > 600 && lmData[i].Scatter.InteractionEnergy + lmData[i].Absorber.InteractionEnergy < 720)
@@ -102,6 +64,8 @@ int main()
             }
         }
     }
+
+    
 
 
     std::shared_ptr < open3d::geometry::PointCloud> reconpc_ptr = std::make_shared<open3d::geometry::PointCloud>();
@@ -112,7 +76,7 @@ int main()
         //Eigen::Matrix<double, 3, 1, Eigen::DontAlign> point;
         Vector3d color;
         Vector3d point;
-        RGBA_t rgb = HUREL::Compton::ReconPointCloud::ColorScaleJet(reconPC.reconValues_[i], 0.9 * reconPC.maxReoconValue, reconPC.maxReoconValue);
+        RGBA_t rgb = HUREL::Compton::ReconPointCloud::ColorScaleJet(reconPC.reconValues_[i], 0.0 * reconPC.maxReoconValue, reconPC.maxReoconValue);
         pc->colors_[i](0) = rgb.R;
         pc->colors_[i](1) = rgb.G;
         pc->colors_[i](2) = rgb.B;
@@ -120,10 +84,6 @@ int main()
      
     }
     open3d::visualization::DrawGeometries({ pc });
-    open3d::io::WritePointCloudOption opt2;
-    open3d::io::WritePointCloudToPLY("comptonImg.ply", *pc, opt2);
-
-
 
     std::cout << "Done \n";
     return 0;

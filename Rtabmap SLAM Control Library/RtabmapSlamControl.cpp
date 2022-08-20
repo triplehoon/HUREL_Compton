@@ -355,7 +355,6 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		int i = 0;
 		for (std::map<int, rtabmap::Transform>::iterator iter = optimizedPoses.begin(); iter != optimizedPoses.end(); ++iter)
 		{
-
 			if (nodes.count(iter->first) == 0)
 			{
 				continue;
