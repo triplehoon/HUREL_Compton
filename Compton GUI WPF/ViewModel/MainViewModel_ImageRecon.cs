@@ -24,7 +24,19 @@ using System.Windows.Media;
 
 namespace Compton_GUI_WPF.ViewModel
 {
+    public class IsotopeInfo
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Energy { get; set; }
 
+        public IsotopeInfo(string name, string description, string energy)
+        {
+            Name = name;
+            Description = description;
+            Energy = energy;
+        }
+    }
     public enum eProcessingType
     {
         SimpleBP,
@@ -504,6 +516,19 @@ namespace Compton_GUI_WPF.ViewModel
             }
         }
 
+        public ObservableCollection<IsotopeInfo> _isotopeInfos = new ObservableCollection<IsotopeInfo>();
+        public ObservableCollection<IsotopeInfo> IsotopeInfos
+        {
+            get
+            {
+                return _isotopeInfos;
+            }
+            set
+            {
+                _isotopeInfos = value;
+                OnPropertyChanged(nameof(IsotopeInfos));
+            }
+        }
 
         private RelayCommand postProcessingCommand;
         public ICommand PostProcessingCommnd

@@ -433,7 +433,13 @@
 
 
                         </Grid>
-
+                        <syncfusion:SfDataGrid Grid.Row="1" Margin="10" ItemsSource="{Binding IsotopeInfos}">
+                            <syncfusion:SfDataGrid.Columns>
+                                <syncfusion:GridTextColumn MappingName="Name"/>
+                                <syncfusion:GridTextColumn MappingName="Description"/>
+                                <syncfusion:GridTextColumn MappingName="Energy"/>
+                            </syncfusion:SfDataGrid.Columns>
+                        </syncfusion:SfDataGrid>
 
                     </StackPanel>
                 </Grid>

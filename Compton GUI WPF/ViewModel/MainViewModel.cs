@@ -22,6 +22,7 @@ using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using HUREL.Compton;
 using HUREL.Compton.LACC;
+using HUREL.Compton.RadioisotopeAnalysis;
 using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
 
@@ -215,6 +216,8 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged($"ModuleEnergySpectrums[{i}]");
             }
 
+
+
             eCounts = new List<double[]>();
             LahgiWrapper_Static.GetSumSpectrum(ref eCounts);
             histoEnergys = new List<HistoEnergy>();
@@ -223,6 +226,8 @@ namespace Compton_GUI_WPF.ViewModel
                 histoEnergys.Add(new HistoEnergy(eData[0], (int)eData[1]));
             }
             SumEnergySpectrums = new ObservableCollection<HistoEnergy>(histoEnergys);
+            SpectrumEnergyNasa espect = new SpectrumEnergyNasa(histoEnergys);
+
             OnPropertyChanged(nameof(SumEnergySpectrums));
 
             eCounts = new List<double[]>();
@@ -247,6 +252,23 @@ namespace Compton_GUI_WPF.ViewModel
 
 
             OnPropertyChanged(nameof(ModuleEnergySpectrums));
+
+
+            ObservableCollection<IsotopeInfo> isotopeInfos = new ObservableCollection<IsotopeInfo>();
+            List<Isotope> DetectedIso = PeakSearching.GetIsotopesFromPeaks(espect.FindPeaks(662, 40, 10, 10), 1, 662, 40, 10);
+
+            foreach (Isotope iso in DetectedIso)
+            {
+                string energy = "";
+                foreach (double e in iso.PeakEnergy)
+                {
+                    energy += e.ToString("0.");
+                    energy += " ";
+                }
+
+                isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy));
+            }
+            IsotopeInfos = isotopeInfos;
             sw.Stop();
         }
 

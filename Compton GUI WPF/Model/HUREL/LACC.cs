@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 using HUREL.Compton;
+using HUREL.Compton.RadioisotopeAnalysis;
 
 namespace HUREL.Compton.LACC
 {
