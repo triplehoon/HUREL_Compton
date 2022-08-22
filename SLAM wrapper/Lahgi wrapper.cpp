@@ -217,7 +217,7 @@ void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, List<array
 	
 	for (int i = 0; i < size; i++) 
 	{
-		RGBA_t color =  ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.8, maxValue);
+		RGBA_t color =  ReconPointCloud::ColorScaleJet(rcPC.reconValues_[i], maxValue * 0.5, maxValue);
 
 		array<double, 1>^ colorAlphaVector = gcnew array<double>{color.R, color.G, color.B, color.A};
 		colorAlphas->Add(colorAlphaVector);

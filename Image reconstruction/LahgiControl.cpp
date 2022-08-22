@@ -74,8 +74,8 @@ void HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 	mAbsorberModules = new Module * [4];
 	double offset = 0.083;
 
-	double xOffset[4]{ -offset, +offset, -offset, +offset };
-	double yOffset[4]{ -offset, -offset, +offset, +offset };
+	double xOffset[4]{ -offset, -offset, +offset, +offset };
+	double yOffset[4]{ +offset, -offset, -offset, +offset };
 	for (int i = 0; i < 4; ++i)
 	{
 		string slutFileDirectory = string("config\\QUAD\\Scatter\\LUT\\") + to_string(i) + string(".csv");
@@ -179,14 +179,14 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 		const unsigned short* scatterShorts[4];
 		const unsigned short* absorberShorts[4];
 
-		for (int i = 0; i < 4; ++i)
+		for (int i = 4; i < 8; ++i)
 		{
-			scatterShorts[i] = &byteData[i * 9];
+			scatterShorts[i - 4] = &byteData[i * 9];
 		}
 
-		for (int i = 8; i < 12; ++i)
+		for (int i = 12; i < 16; ++i)
 		{
-			absorberShorts[i - 8] = &byteData[i * 9];
+			absorberShorts[i - 12] = &byteData[i * 9];
 		}
 
 
@@ -299,7 +299,7 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 		unsigned short scatterShorts[4][9];
 		unsigned short absorberShorts[4][9];
 
-		for (int i = 0; i < 4; ++i)
+		for (int i = 4; i < 8; ++i)
 		{
 			for (int j = 0; j < 9; ++j)
 			{
@@ -446,9 +446,10 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 		saveFile.close();
 		return;
 	}
-	for (unsigned int i = 0; mListedListModeData.size(); ++i)
+	std::vector<ListModeData> lm = mListedListModeData;
+	for (unsigned int i = 0; i < lm.size(); ++i)
 	{
-		ListModeData& d = mListedListModeData[i];
+		ListModeData& d = lm[i];
 		switch (d.Type)
 		{
 		case eInterationType::NONE:

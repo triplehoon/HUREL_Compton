@@ -168,7 +168,7 @@ bool HUREL::Compton::Module::LoadLUT(std::string fileName)
     
     for (int i = 0; i < lutData.size(); ++i)
     {
-        int x = static_cast<int>(lutData[i][0]);
+        int x = -static_cast<int>(lutData[i][0]);
         int y = static_cast<int>(lutData[i][1]);
 
         int indexOffset = (mLutSize - 1) / 2;
