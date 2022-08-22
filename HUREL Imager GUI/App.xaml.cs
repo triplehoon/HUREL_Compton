@@ -9,6 +9,7 @@ using System.Windows;
 using HUREL.Compton;
 using HUREL_Imager_GUI.ViewModel;
 using log4net;
+using log4net.Appender;
 
 namespace HUREL_Imager_GUI
 {
@@ -20,7 +21,8 @@ namespace HUREL_Imager_GUI
         private static readonly ILog logger = LogManager.GetLogger(typeof(App));
         public App()
         {
-            NativeMethods.AllocConsole();
+
+            //NativeMethods.AllocConsole();
             logger.Info("Start application");
 
             logger.Info("Console loaded");

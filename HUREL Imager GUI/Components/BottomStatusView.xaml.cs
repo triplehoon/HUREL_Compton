@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -20,9 +22,30 @@ namespace HUREL_Imager_GUI.Views
     /// </summary>
     public partial class BottomStatusView : UserControl
     {
+        private bool isGridOpen = false;
         public BottomStatusView()
         {
             InitializeComponent();
+            ButtonStatus.Click += OnButtonsClickEvent;
+        }
+
+
+        private void OnButtonsClickEvent(object? btn, EventArgs eventArgs)
+        {
+            if (isGridOpen == false)
+            {
+                ButtonAutomationPeer peer = new ButtonAutomationPeer(BtnOpen);
+                IInvokeProvider? invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                invokeProv?.Invoke();    
+                isGridOpen = true;
+            }
+            else
+            {
+                ButtonAutomationPeer peer = new ButtonAutomationPeer(BtnClose);
+                IInvokeProvider? invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                invokeProv?.Invoke();
+                isGridOpen = false;
+            }
         }
     }
 }

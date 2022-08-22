@@ -16,7 +16,8 @@
                             Header="Spectrum" 
                             VerticalAlignment="Top" 
                             HorizontalAlignment="Center" 
-                            FontSize="{StaticResource FontSize-Larger}">
+                            FontSize="{StaticResource FontSize-Larger}"
+                            FontWeight="Bold">
             <syncfusion:SfChart.Resources>
                 <Style TargetType="{x:Type Line}" x:Key="lineStyle">
                     <Setter Property="StrokeDashArray" Value="10,5"/>
@@ -28,10 +29,10 @@
                 <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
             </syncfusion:SfChart.Behaviors>
             <syncfusion:SfChart.PrimaryAxis>
-                <syncfusion:NumericalAxis Minimum="0" Maximum="3000" ShowTrackBallInfo="True"/>
+                <syncfusion:NumericalAxis Minimum="0" Maximum="3000" ShowTrackBallInfo="True" Header="Energy [keV]"/>
             </syncfusion:SfChart.PrimaryAxis>
             <syncfusion:SfChart.SecondaryAxis>
-                <syncfusion:NumericalAxis/>
+                <syncfusion:LogarithmicAxis Header="Counts [#]"/>
             </syncfusion:SfChart.SecondaryAxis>
             <syncfusion:FastColumnBitmapSeries Interior="Black"
                                                                      ListenPropertyChange="True"
@@ -41,12 +42,11 @@
                                                                      YBindingPath="Count"
                                                                      syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
         </syncfusion:SfChart>
-        <syncfusion:SfDataGrid Grid.Row="1" Margin="10">
+        <syncfusion:SfDataGrid Grid.Row="1" Margin="10" ItemsSource="{Binding IsotopeInfos}">
             <syncfusion:SfDataGrid.Columns>
-                <syncfusion:GridTextColumn MappingName="Isotope"/>
+                <syncfusion:GridTextColumn MappingName="Name"/>
+                <syncfusion:GridTextColumn MappingName="Description"/>
                 <syncfusion:GridTextColumn MappingName="Energy"/>
-                <syncfusion:GridTextColumn MappingName="Type"/>
-                <syncfusion:GridTextColumn MappingName="Etc"/>
             </syncfusion:SfDataGrid.Columns>
         </syncfusion:SfDataGrid>
     </Grid>

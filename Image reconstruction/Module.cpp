@@ -39,12 +39,12 @@ HUREL::Compton::Module::Module(eMouduleType moduleType,
                 mGain[i] = gain[i];
             }
             string msg = "Successfuly to load a gain file : " + moduleName;
-            HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg);
+            HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::INFO);
         }        
         else
         {
             string msg = "FAIL to load a gain file: " + moduleName;
-            HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg);
+            HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::ERROR_t);
             mIsModuleSet = false;
             return;
         }
@@ -53,14 +53,14 @@ HUREL::Compton::Module::Module(eMouduleType moduleType,
 	{
 		//cout << "Module.cpp: Successfuly to load a lut file: " << moduleName << endl;
         string msg = "Successfuly to load a lut file: " + moduleName;
-        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg);
+        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::INFO);
 		mIsModuleSet = true;
 	}
 	else
 	{
 		//cout << "Module.cpp: FAIL to load a lut file: " << moduleName << endl;
         string msg = "FAIL to load a lut file: " + moduleName;
-        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg);
+        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::ERROR_t);
 		assert(false);
 	}	
 
@@ -225,7 +225,7 @@ bool HUREL::Compton::Module::LoadGain(std::string fileName, eMouduleType moduleT
     {
         //cout << "Cannot open a file" << endl;
         string msg = "Cannot open a file";
-        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg);
+        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::ERROR_t);
         io.close();        
         return false;
     }

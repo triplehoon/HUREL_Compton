@@ -46,6 +46,19 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
+        private SourceDirectionViewModel _sourceDirectionViewModel;
+        public SourceDirectionViewModel SourceDirectionViewModel
+        {
+            get
+            {
+               return _sourceDirectionViewModel; 
+            }
+            set
+            {
+                _sourceDirectionViewModel = value;
+                OnPropertyChanged(nameof(SourceDirectionViewModel));
+            }
+        }
 
 
         public HomeViewModel()
@@ -55,10 +68,12 @@ namespace HUREL_Imager_GUI.ViewModel
             _spectrumViewModel = null!;
             _testValue = null!;
             _threeDimensionalViewModel = null!;
+            _sourceDirectionViewModel = null!;
 
             TopButtonViewModel = new TopButtonViewModel();
             SpectrumViewModel = new SpectrumViewModel();
             ThreeDimensionalViewModel = new ThreeDimensionalViewModel();
+            SourceDirectionViewModel = new SourceDirectionViewModel();
 
             TestValue = "Hello World";
             logger.Info("HomeViewModel Loaded");

@@ -4,26 +4,220 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Views"
-             mc:Ignorable="d"              Height="40" d:Width="1480"
-             Background="{StaticResource CustomOrange}" Padding="0">
-    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-        <Button BorderBrush="Transparent" Focusable="False"  Width="auto" Height="30" Margin="5" Background="{StaticResource CustomDarkOrange}">
-            <Button.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="15"/>
-                </Style>
-            </Button.Resources>
-            <Button.Content>
-                <Viewbox Margin="5,0,5,0">
-                    <StackPanel Orientation="Horizontal">
-                        <Path Margin="5"
+                          xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+
+             mc:Ignorable="d"              Height="40" d:Width="1480" d:Height="150"
+             Padding="0">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <Storyboard x:Key="OpenMenu">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)" 
+                                           Storyboard.TargetName="InfoGrid">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="0"/>
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="-450"/>
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+            <Storyboard x:Key="CloseMenu">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)" 
+                                           Storyboard.TargetName="InfoGrid">
+                    <EasingDoubleKeyFrame KeyTime="0" Value="-450"/>
+                    <EasingDoubleKeyFrame KeyTime="0:0:0.5" Value="0"/>
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+        </ResourceDictionary>
+        
+
+
+    </UserControl.Resources>
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="BtnOpen">
+            <BeginStoryboard Storyboard="{StaticResource OpenMenu}"/>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="ButtonBase.Click" SourceName="BtnClose">
+            <BeginStoryboard Storyboard="{StaticResource CloseMenu}"/>
+        </EventTrigger>
+    </UserControl.Triggers>
+
+    <Grid Margin="0,0,0,-450" Height="490" VerticalAlignment="Top" x:Name="InfoGrid" Background="{StaticResource CustomBlue}" >
+       
+        <Grid.RenderTransform>
+            <TransformGroup>
+                <ScaleTransform/>
+                <SkewTransform/>
+                <RotateTransform/>
+                <TranslateTransform/>
+            </TransformGroup>
+        </Grid.RenderTransform>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="3*"/>
+        </Grid.RowDefinitions>
+        <Button Visibility="Collapsed" x:Name="BtnOpen" HorizontalAlignment="Left" VerticalAlignment="Top" Width="30" Height="30" Content="메뉴" Grid.Row="0"/>
+        <Button Visibility="Collapsed" x:Name="BtnClose" HorizontalAlignment="Left" VerticalAlignment="Top" Width="30" Height="30" Content="메뉴" Grid.Row="0"/>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button x:Name="ButtonStatus"
+            Grid.Column="0" BorderBrush="Transparent" Focusable="False"  Width="60" Height="30" Margin="5" Background="{StaticResource CustomDarkBlue}" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="15"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Content>
+                        <Viewbox Margin="5,0,5,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Margin="5"
                     Data="M6.40235 6.98748L5.625 6.46925V7.40351V34.9275V35.8618L6.40235 35.3435L27.0453 21.5815L27.6694 21.1655L27.0453 20.7495L6.40235 6.98748ZM1.375 39.535V2.79953L4.92786 0.898166L32.456 19.2491V23.0819L4.92784 41.4363L1.375 39.535Z" 
                     Fill="white"
                     />
-                        <TextBlock FontSize="25" Margin="5" Text="+99" VerticalAlignment="Center" Foreground="White"/>
+                                <TextBlock FontSize="25" Margin="5" Text="+99" VerticalAlignment="Center" Foreground="White"/>
+                            </StackPanel>
+                        </Viewbox>
+                    </Button.Content>
+                </Button>
+                <Button x:Name="ButtonRadioacvititu"
+            Grid.Column="0" BorderBrush="Transparent" Focusable="False"  Width="auto" Height="30" Margin="5" Background="{StaticResource CustomDarkBlue}" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="15"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Content>
+                        <Viewbox Margin="5,0,5,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Margin="0" Stretch="Uniform" Width="30"
+                    Data="M258.9 48C141.92 46.42 46.42 141.92 48 258.9c1.56 112.19 92.91 203.54 205.1 205.1c117 1.6 212.48-93.9 210.88-210.88C462.44 140.91 371.09 49.56 258.9 48ZM429 239.92l-93.08-.1a2 2 0 0 1-1.95-1.57a80.08 80.08 0 0 0-27.44-44.17a2 2 0 0 1-.54-2.43l41.32-83.43a2 2 0 0 1 2.87-.81A176.2 176.2 0 0 1 431 237.71a2 2 0 0 1-2 2.21Zm-220.8 20.46a48 48 0 1 1 43.42 43.42a48 48 0 0 1-43.42-43.42Zm-43.55-152.16L206 191.65a2 2 0 0 1-.54 2.43A80.08 80.08 0 0 0 178 238.25a2 2 0 0 1-2 1.57l-93.08.1a2 2 0 0 1-2-2.21a176.2 176.2 0 0 1 80.82-130.3a2 2 0 0 1 2.91.81Zm-.37 295.34l56.31-74.09a2 2 0 0 1 2.43-.6a79.84 79.84 0 0 0 66 0a2 2 0 0 1 2.43.6l56.31 74.09a2 2 0 0 1-.54 2.92a175.65 175.65 0 0 1-182.36 0a2 2 0 0 1-.58-2.92Z" 
+                    Fill="Red"
+                    />
+                                <TextBlock FontSize="25" Margin="5" Text="2.7 ± 0.2 μSv/hr" VerticalAlignment="Center" Foreground="Red"/>
+                            </StackPanel>
+                        </Viewbox>
+                    </Button.Content>
+                </Button>
+                <Button x:Name="ButtonTemperature"
+            Grid.Column="0" BorderBrush="Transparent" Focusable="False"  Width="auto" Height="30" Margin="5" Background="{StaticResource CustomDarkBlue}" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="15"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Content>
+                        <Viewbox Margin="5,0,5,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Margin="5" Stretch="Uniform" Width="30"
+                    Data="M8 5a4 4 0 1 1 8 0v5.255a7 7 0 1 1-8 0V5zm1.144 6.895a5 5 0 1 0 5.712 0L14 11.298V5a2 2 0 1 0-4 0v6.298l-.856.597zm1.856.231V5h2v7.126A4.002 4.002 0 0 1 12 20a4 4 0 0 1-1-7.874zM12 18a2 2 0 1 0 0-4a2 2 0 0 0 0 4z" 
+                    Fill="White"
+                    />
+                                <TextBlock FontSize="25" Margin="5" Text="24 ℃" VerticalAlignment="Center" Foreground="White"/>
+                            </StackPanel>
+                        </Viewbox>
+                    </Button.Content>
+                </Button>
+                <Button x:Name="ButtonTime"
+            Grid.Column="0" BorderBrush="Transparent" Focusable="False"  Width="auto" Height="30" Margin="5" Background="{StaticResource CustomDarkBlue}" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="15"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Content>
+                        <Viewbox Margin="5,0,5,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Margin="5" Stretch="Uniform" Width="30"
+                    Data="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10s10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8s8 3.589 8 8s-3.589 8-8 8z M13 7h-2v5.414l3.293 3.293l1.414-1.414L13 11.586z" 
+                    Fill="White"
+                    />
+                                <TextBlock FontSize="25" Margin="5" Text="27:00" VerticalAlignment="Center" Foreground="White"/>
+                            </StackPanel>
+                        </Viewbox>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button 
+            Grid.Column="0" BorderBrush="Transparent" Focusable="False"  Width="auto" Height="30" Margin="5" Background="{StaticResource CustomDarkBlue}" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="15"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Content>
+                        <Viewbox Margin="5,0,5,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Margin="0" Stretch="Uniform" Width="30"
+                    Data="M19.49 5.57a5.999 5.999 0 0 1-1.893 8.962c-.649.351-1.43.135-1.952-.386l-5.79-5.791c-.522-.522-.738-1.303-.388-1.952A5.999 5.999 0 0 1 18.43 4.51l2.29-2.29a.75.75 0 1 1 1.061 1.06l-2.29 2.29Zm-2.017 7.263a4.5 4.5 0 1 0-6.306-6.306c-.266.349-.186.833.125 1.143l5.037 5.038c.31.31.795.391 1.144.125ZM3.28 21.78l2.29-2.29a5.999 5.999 0 0 0 8.962-1.893c.351-.649.135-1.43-.387-1.952l-5.79-5.79c-.522-.522-1.303-.738-1.952-.388A5.999 5.999 0 0 0 4.51 18.43l-2.29 2.29a.75.75 0 1 0 1.06 1.061Zm4.39-10.488l5.038 5.038c.31.31.39.794.125 1.143a4.5 4.5 0 1 1-6.306-6.306c.349-.266.833-.186 1.143.125Z"
+                    Fill="white"
+                    />
+                                <TextBlock FontSize="25" Margin="5" Text="Disconnect" VerticalAlignment="Center" Foreground="White"/>
+                            </StackPanel>
+                        </Viewbox>
+                    </Button.Content>
+                </Button>
+                <Button 
+            Grid.Column="0" BorderBrush="Transparent" Focusable="False"  Width="auto" Height="30" Margin="5" Background="{StaticResource CustomDarkBlue}" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="15"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Content>
+                        <Viewbox Margin="5,0,5,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Margin="0" Stretch="Uniform" Width="30"
+                    Data="M14.284 3.241L13.19 4.335a6.5 6.5 0 1 0 1.406 10.261a.75.75 0 0 1 1.06 1.06a8 8 0 1 1-1.372-12.415Zm-3.296 3.296l1.163-1.163a5.102 5.102 0 0 0-5.757 8.232a5.1 5.1 0 0 0 7.212 0a.75.75 0 1 0-1.06-1.06a3.6 3.6 0 1 1-1.558-6.009ZM15.78 4.22a.75.75 0 0 1 0 1.06l-4.33 4.331a1.5 1.5 0 1 1-1.06-1.06l4.33-4.331a.75.75 0 0 1 1.06 0Zm1.47 9.03a.75.75 0 1 1-1.5 0a.75.75 0 0 1 1.5 0ZM16.5 7.5a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Zm1.5 3.75a.75.75 0 1 1-1.5 0a.75.75 0 0 1 1.5 0Zm-.75-1.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5ZM15 11.25a.75.75 0 1 1-1.5 0a.75.75 0 0 1 1.5 0Zm-.75-1.75a.75.75 0 1 0 0-1.5a.75.75 0 0 0 0 1.5Z"
+                    Fill="white"
+                    />
+                                <TextBlock FontSize="25" Margin="5" Text="Lidar Off" VerticalAlignment="Center" Foreground="White"/>
+                            </StackPanel>
+                        </Viewbox>
+                    </Button.Content>
+                </Button>
+                <Viewbox Margin="5,10,5,10">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Margin="0" Stretch="Uniform" Width="10"
+                    Data="M24 24H6a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h18a2 2 0 0 1 2 2v1h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1v1a2 2 0 0 1-2 2ZM6 10v12h18v-3h3v-6h-3v-3Z M16 12v8H8v-8z"
+                    Fill="white"
+                    />
                     </StackPanel>
                 </Viewbox>
-            </Button.Content>
-        </Button>
-    </StackPanel>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                
+            </Grid.ColumnDefinitions>
+            <ScrollViewer Background="{StaticResource CustomDarkBlue}"  Margin="5" >
+                <TextBlock Background="{StaticResource CustomDarkBlue}" Foreground="White" Padding="10"
+                     Text="{Binding LogMsg}" TextWrapping="WrapWithOverflow"
+                       d:Text="bottomStatusViewModelbottomStatusViewModelbottomStatusViewModelbottomStatusViewModelbottomStatusViewModel
+                       bottomStatusViewModelbottomStatusViewModelbottomStatusViewModelbottomStatusViewModel
+                       bottoMo
+                       "
+                       FontSize="{StaticResource FontSize-Normal}"
+                           
+                     ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            </ScrollViewer>
+            <Border Background="White" Padding="30" Grid.Column="1">
+                <syncfusion:SfChart Grid.Column="1" Background="White" Padding="20" Header="Dose rate Graph" FontSize="{StaticResource FontSize-Larger}">
+                    <syncfusion:SfChart.PrimaryAxis>
+                        <syncfusion:NumericalAxis Header="Time [s]" Minimum="0" Maximum="3000" ShowTrackBallInfo="True"/>
+                    </syncfusion:SfChart.PrimaryAxis>
+                    <syncfusion:SfChart.SecondaryAxis>
+                        <syncfusion:NumericalAxis Header="Dose rate [μSv/hr]"/>
+                    </syncfusion:SfChart.SecondaryAxis>
+                </syncfusion:SfChart>
+
+            </Border>
+            
+        </Grid>
+
+
+
+    </Grid>
 </UserControl>

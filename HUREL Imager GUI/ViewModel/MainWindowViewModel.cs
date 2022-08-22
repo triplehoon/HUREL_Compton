@@ -16,16 +16,28 @@ namespace HUREL_Imager_GUI.ViewModel
 
         public INavigator Navigator { get; set; } = new Navigator();
 
+        private BottomSatusViewModel bottomStatusViewModel;
+        public BottomSatusViewModel BottomStatusViewModel
+        {
+            get { return bottomStatusViewModel; }
+            set
+            {
+                bottomStatusViewModel = value;
+                OnPropertyChanged(nameof(BottomStatusViewModel));
+            }
+        }
+
         public MainWindowViewModel()
         {
-            Navigator.CurrentViewModel = new HomeViewModel();
+            bottomStatusViewModel = null!;
+            Navigator.UpdateCurrentViewModelCommand.Execute(ViewType.HOME_VIEW);
             logger.Info("MainViewModel loaded");
-
+            BottomStatusViewModel = new BottomSatusViewModel();
         }
 
         public override void Unhandle()
         {
-         
+            BottomStatusViewModel.Unhandle();
         }
     }
 }

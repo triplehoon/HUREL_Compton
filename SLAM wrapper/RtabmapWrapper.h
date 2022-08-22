@@ -18,24 +18,24 @@ namespace HUREL {
 	namespace Compton {
 
 		public enum class eReconManaged
-		{
-			COMPTON,
+		{			
 			CODED,
-			HYBIRD
+			COMPTON,
+			HYBRID
 		};
 			public ref class RtabmapWrapper:IDisposable
 			{
 			private:
 				Boolean mIsInitiated = false;				
 			public:				
-				Boolean InitiateRtabmap(System::String^% message);
+				Boolean InitiateRtabmap();
 
 				void GetRealTimePointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 				void GetRealTimePointCloudTransPosed(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
 				void GetRealTimeRGB(int% width, int% height, int% stride, IntPtr% data);
 
-				void GetReconSLAMPointCloud(double time, eReconManaged reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize);
+				void GetReconSLAMPointCloud(double time, eReconManaged reconType, List<array<double>^>^% vectors, List<array<double>^>^% colors, double voxelSize, bool useLoaded);
 				
 				Boolean StartSLAM();
 				void StopSLAM();

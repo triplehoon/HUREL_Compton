@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="HUREL_Imager_GUI.Components.SourceDirectionalView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
+             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             mc:Ignorable="d" 
+            >
+    <Border>
+        <syncfusion:SfChart
+            x:Name="polarChart"            
+            Margin="0"
+            Header="Source Direction Chart"
+            FontSize="{StaticResource FontSize-Large}"
+            >
+            <syncfusion:SfChart.PrimaryAxis>
+                <syncfusion:NumericalAxis  Minimum="0" Maximum="360" Interval="20"
+                    TickLineSize="10" />
+            </syncfusion:SfChart.PrimaryAxis>
+            <syncfusion:SfChart.SecondaryAxis >
+                <syncfusion:NumericalAxis Minimum="0"/>
+            </syncfusion:SfChart.SecondaryAxis>
+            <syncfusion:PolarSeries 
+                
+                Label="Amount Spent"    
+                IsClosed="True" Interior="{StaticResource CustomDarkBlue}"
+                DrawType="Line"
+                ListenPropertyChange="True"
+                StrokeThickness="2"
+                ItemsSource="{Binding TestAngle}"
+                XBindingPath="Direction"
+                YBindingPath="Value">
+
+
+            </syncfusion:PolarSeries>
+        </syncfusion:SfChart>
+       
+    </Border>
+</UserControl>

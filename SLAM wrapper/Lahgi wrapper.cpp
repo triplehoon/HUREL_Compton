@@ -134,7 +134,7 @@ void HUREL::Compton::LahgiWrapper::SaveListModeData(System::String^ fileName)
 bool HUREL::Compton::LahgiWrapper::LoadListModeData(System::String^ filePath)
 {
 	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(filePath);
-	return LahgiCppWrapper::instance().SaveListedListModeData(static_cast<char*>(ptrToNativeString.ToPointer()));
+	return LahgiCppWrapper::instance().LoadListedListModeData(static_cast<char*>(ptrToNativeString.ToPointer()));
 }
 
 void HUREL::Compton::LahgiWrapper::GetScatterSumSpectrum(List<array<double>^>^% energyCount)

@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Views"
              xmlns:components="clr-namespace:HUREL_Imager_GUI.Components" 
              xmlns:viewmodel="clr-namespace:HUREL_Imager_GUI.ViewModel"
-             
+              xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
              mc:Ignorable="d" 
              d:DesignHeight="900" d:DesignWidth="1200">
     <Grid>
@@ -20,29 +20,109 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Margin="10" BorderThickness="2" BorderBrush="Black">
-                <components:ThreeDimensionalView Grid.Column="0" DataContext="{Binding ThreeDimensionalViewModel}"/>
-            </Border>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <components:ThreeDimensionalView  Grid.Row="0" Margin="10"  DataContext="{Binding ThreeDimensionalViewModel}"/>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Column="0" Stretch="Uniform" Margin="10">
+                        <Image.Source>
+                            <BitmapImage UriSource="/Resource/RGB image.png" />
+                        </Image.Source>
+                    </Image>
+                    <Image Grid.Column="1" Stretch="Uniform">
+                        <Image.Source>
+                            <BitmapImage UriSource="/Resource/occupation grid.png" />
+                        </Image.Source>
+                    </Image>
+
+                </Grid>
+            </Grid>
+            
+
             
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="2*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <components:SpectrumView Grid.Column="0" DataContext="{Binding SpectrumViewModel}"/>
+                <components:SpectrumView Grid.Column="0" DataContext="{Binding SpectrumViewModel}" Padding="15"/>
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Margin="10" BorderThickness="2" BorderBrush="Black">
-                        <TextBlock>Source direction view</TextBlock>
-                    </Border>
-                    <Border Grid.Column="1" Margin="10" BorderThickness="2" BorderBrush="Black">
-                        <TextBlock>map</TextBlock>
-                    </Border>
+                        <components:SourceDirectionalView DataContext="{Binding SourceDirectionViewModel}" Grid.Column="0"/>
+
+                    <Grid Grid.Column="1" Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="Dose Rate Chart" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold"/>
+                            <syncfusion:SfRangeSlider Margin="10,0,50,0"
+                                Grid.Row="1" Orientation="Horizontal"
+                                                      Maximum="1000"
+                                                      Minimum="0"
+                                                      RangeStart="0"
+                                                      RangeEnd="1000"
+                                                      ShowRange="True" MoveToPoint="None"
+
+                                                    
+                                >
+                                <syncfusion:SfRangeSlider.ActiveTrackStyle>
+                                    <Style TargetType="Rectangle">
+                                        <Setter Property="Fill">
+                                            <Setter.Value>
+                                                <LinearGradientBrush>
+                                                    <GradientStop Color="Blue" Offset="0"/>
+                                                    <GradientStop Color="Green" Offset="0.3"/>
+                                                    <GradientStop Color="Yellow" Offset="0.6"/>
+                                                    <GradientStop Color="Red" Offset="1"/>
+
+                                                </LinearGradientBrush>
+                                            </Setter.Value>
+
+                                        </Setter>
+                                    </Style>
+
+                                </syncfusion:SfRangeSlider.ActiveTrackStyle>
+                                <syncfusion:SfRangeSlider.InactiveTrackStyle>
+                                    <Style TargetType="Rectangle">
+                                        <Setter Property="Height" Value="2" />
+                                        <Setter Property="Fill" Value="#B5D0FF" />
+                                        <Setter Property="RadiusX" Value="2" />
+                                        <Setter Property="RadiusY" Value="2" />
+                                    </Style>
+                                </syncfusion:SfRangeSlider.InactiveTrackStyle>
+                            </syncfusion:SfRangeSlider>
+                            <TextBlock Grid.Row="2" Text="1µ  10µ   100µ   1m   10m   100m   1 [Sv/hr]" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="{StaticResource FontSize-Smaller}" FontWeight="Bold"/>
+                        </Grid>
+                       
+                        <Image Grid.Row="1" Stretch="Uniform">
+                            <Image.Source>
+                                <BitmapImage UriSource="/Resource/symbol_hurel.png" />
+                            </Image.Source>
+                        </Image>
+                    </Grid>
+
                 </Grid>
             </Grid>
         </Grid>
     </Grid>
 </UserControl>
+
+
+    

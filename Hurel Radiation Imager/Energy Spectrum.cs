@@ -251,18 +251,20 @@ namespace HUREL.Compton.RadioisotopeAnalysis
         }
         public List<double> FindPeaks(float ref_x, float ref_fwhm, float fwhm_at_0, float min_snr)
         {
-            PythonEngine.Initialize();
-            var m_threadState = PythonEngine.BeginAllowThreads(); ;
-
+            
             List<double> PeakE = new List<double>();
 
             int eCount = EnergyList.Count;
-            List<double> listData = new List<double>(EnergyList.Count);
-
-            for (int i = 0; i < eCount; ++i)
+            List<double> ernergyBin = new List<double>(HistoEnergies.Count);
+            List<double> energyBinCount = new List<double>(HistoEnergies.Count);
+            for (int i = 0; i < HistoEnergies.Count; ++i)
             {
-                listData.Add(EnergyList[i]);
+                ernergyBin.Add(HistoEnergies[i].Energy + BinSize / 2);
+                energyBinCount.Add(HistoEnergies[i].Count);
             }
+            PythonEngine.Initialize();
+            //var m_threadState = PythonEngine.BeginAllowThreads(); ;
+
             using (Py.GIL())
             {
                 dynamic np = Py.Import("numpy");
@@ -270,12 +272,11 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 dynamic sp = nasagamma.spectrum;
                 dynamic ps = nasagamma.peaksearch;
 
-                dynamic eData = np.array(listData);
-                dynamic bin = np.arange(0, 3000, 5);
-                dynamic hist = np.histogram(eData, bin);
-                dynamic cts_np = hist[0];
-                bin = hist[1];
-                dynamic erg = np.resize(bin, (np.size(bin) - 1));
+                
+                dynamic cts_np = np.array(energyBinCount);
+
+              
+                dynamic erg = np.array(ernergyBin);
 
                 dynamic spect = sp.Spectrum(cts_np, null, erg, "keV");
 
@@ -285,11 +286,15 @@ namespace HUREL.Compton.RadioisotopeAnalysis
 
                 for (int i = 0; i < (int)np.size(peakIdx); ++i)
                 {
-                    PeakE.Add((double)erg[peakIdx[i]]);
+                    if (peakIdx[i] + 2 < (int)np.size(erg))
+                    {
+                        PeakE.Add((double)erg[peakIdx[i] + 2]);
+                    }
+                    
                 }
             }
-            PythonEngine.EndAllowThreads(m_threadState);
-            PythonEngine.Shutdown();
+            //PythonEngine.EndAllowThreads(m_threadState);
+           // PythonEngine.Shutdown();
 
 
             return PeakE;
@@ -302,18 +307,22 @@ namespace HUREL.Compton.RadioisotopeAnalysis
         Cs137,
         Co60,
         Na22,
-        Ba133
+        Ba133,
+        K40,
+        Tl208
     }
-    public record Isotope(IsotopeElement IsotopeElement, List<double> PeakEnergy, string IsotopeName);
+    public record Isotope(IsotopeElement IsotopeElement, List<double> PeakEnergy, string IsotopeName, string IsotopeDescription);
 
     public static class PeakSearching
     {
         public static readonly List<Isotope> IsotopeList = new List<Isotope>() {
-            new Isotope(IsotopeElement.Am241, new List<double>(){ 60 }, "Am-241"),
-            new Isotope(IsotopeElement.Cs137, new List<double>(){ 662 }, "Cs-137"),
-            new Isotope(IsotopeElement.Co60, new List<double>(){ 1173, 1332 }, "Co-60"),
-            new Isotope(IsotopeElement.Ba133, new List<double>(){ 276, 356 }, "Ba-133"),
-            new Isotope(IsotopeElement.Na22, new List<double>(){511, 1275 }, "Na-22"),
+            //new Isotope(IsotopeElement.Am241, new List<double>(){ 60 }, "Am-241", "Industrial"),
+            new Isotope(IsotopeElement.Cs137, new List<double>(){ 662 }, "Cs-137", "Industrial"),
+            new Isotope(IsotopeElement.Co60, new List<double>(){ 1173, 1332 }, "Co-60", "Industrial"),
+            new Isotope(IsotopeElement.Ba133, new List<double>(){ 276, 356 }, "Ba-133", "Industrial"),
+            new Isotope(IsotopeElement.Na22, new List<double>(){511, 1275 }, "Na-22", "Industrial"),
+            new Isotope(IsotopeElement.K40, new List<double>(){1461 }, "K-40", "Background"),
+            new Isotope(IsotopeElement.Tl208, new List<double>(){2615 }, "Tl-208", "Background")
         };
 
         private static bool IsPeaksHasIsotope(List<double> peaks, Isotope iso, double sigma, float ref_x, float ref_fwhm, float fwhm_at_0)

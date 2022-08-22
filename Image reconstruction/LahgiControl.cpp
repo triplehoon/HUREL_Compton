@@ -52,8 +52,8 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 	Eigen::Vector4d test3;
 	test3 = Eigen::Vector4d(1, 2, 3, 4);
 	test3.normalize();
-	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Hello logger!");
-	this->LoadListedListModeData("20220706_DigitalLabScan_100uCi_-1,0,2.4_cpplmdata.csv");
+	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Logger loaded in cpp!", eLoggerType::INFO);
+	//this->LoadListedListModeData("20220706_DigitalLabScan_100uCi_-1,0,2.4_cpplmdata.csv");
 }
 
 HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
@@ -64,7 +64,7 @@ HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
 
 bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 {
-	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::LahgiControl", "Set type");
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::LahgiControl", "Set type", eLoggerType::INFO);
 	mListModeDataMutex.lock();
 
 	mListedListModeData.reserve(50000);	
@@ -498,7 +498,7 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 	loadFile.open(fileName);
 	if (!loadFile.is_open())
 	{
-		HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Fail to open file");
+		HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Fail to open file", eLoggerType::ERROR_t);
 		loadFile.close();
 		return false;
 	}
@@ -519,9 +519,11 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 	if (mListedListModeData.size() == 0)
 	{
 
-		HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Fail to load lm data");
+		HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Fail to load lm data", eLoggerType::ERROR_t);
 		return false;
 	}
+
+	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Load lm data: " + fileName, eLoggerType::INFO);
 	return true;
 }
 
@@ -721,9 +723,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudComptonU
 			reconStartIndex = i;
 			break;
 		}
-
 	}
-
 #pragma omp parallel for
 	for (int i = reconStartIndex; i < tempLMData.size(); ++i)
 	{
@@ -752,6 +752,11 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{
 
+		if (seconds == 0)
+		{
+			reconStartIndex = 0;
+			break;
+		}
 		if (t.count() - tempLMData[i].InteractionTimeInMili.count() < static_cast<__int64>(seconds))
 		{
 			reconStartIndex = i;
@@ -760,12 +765,24 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 
 	}
 
-#pragma omp parallel for
-	for (int i = reconStartIndex; i < tempLMData.size(); ++i)
+	std::vector<ListModeData> reconLm;
+	reconLm.reserve(tempLMData.size());
+	assert(0, "temp energy search");
+	for (const auto lm : tempLMData)
 	{
-		reconPC.CalculateReconPoint(tempLMData[i], ReconPointCloud::SimpleComptonBackprojection);
+		if (lm.Absorber.InteractionEnergy + lm.Scatter.InteractionEnergy > 620 && lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 700)
+		{
+			reconLm.push_back(lm);
+		}
+		
 	}
-	std::cout << "GetReconRealtimePointCloudCompton End Recon: " << tempLMData.size() << std::endl;
+
+#pragma omp parallel for
+	for (int i = 0; i < reconLm.size(); ++i)
+	{
+		reconPC.CalculateReconPoint(reconLm[i], ReconPointCloud::SimpleComptonBackprojection);
+	}
+	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "GetReconRealtimePointCloudCompton End Recon: " + reconLm.size(), eLoggerType::INFO);
 
 
 	return reconPC;

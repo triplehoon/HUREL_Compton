@@ -109,11 +109,9 @@ namespace HUREL.Compton
 
             StatusMsg = "Initiating RTABAMP";
 
-            string msg = "";
-            if (rtabmapWrapper.InitiateRtabmap(ref msg))
+            if (rtabmapWrapper.InitiateRtabmap())
             {
                 StatusMsg = "Successfully initiate Rtabmap";
-                StatusMsg = msg;
                 IsRtabmapInitiate = true;
                 StatusUpdateInvoke(null, EventArgs.Empty);
                 return true;
@@ -121,7 +119,6 @@ namespace HUREL.Compton
             else
             {
                 StatusMsg = "Fail to initiate Rtabmap";
-                StatusMsg = msg;
                 IsRtabmapInitiate = false;
                 StatusUpdateInvoke(null, EventArgs.Empty);
                 return false;
@@ -409,13 +406,10 @@ namespace HUREL.Compton
             }
             return true;
         }
-        public static bool GetReconSLAMPointCloud(double time, eReconManaged reconType, ref List<double[]> poseVect, ref List<double[]> colorVect)
+        public static bool GetReconSLAMPointCloud(double time, eReconManaged reconType, ref List<double[]> poseVect, ref List<double[]> colorVect, double voxelSize, bool isLoading)
         {
-            if (!IsSessionStart)
-            {
-                return false;
-            }
-            rtabmapWrapper.GetReconSLAMPointCloud(time, reconType, ref poseVect, ref colorVect, 0.1);
+     
+            rtabmapWrapper.GetReconSLAMPointCloud(time, reconType, ref poseVect, ref colorVect, voxelSize, isLoading);
             if (poseVect.Count == 0 || colorVect.Count == 0)
             {
                 return false;
@@ -489,10 +483,6 @@ namespace HUREL.Compton
         }
         public static SpectrumEnergyNasa GetScatterSumSpectrumByTime(uint time)
         {
-            if (!IsLahgiInitiate)
-            {
-                return new SpectrumEnergyNasa(5, 3000);
-            }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetScatterSumSpectrumByTime(ref eCount, time);
             List<HistoEnergy> histoEnergy = new List<HistoEnergy>();
@@ -505,10 +495,6 @@ namespace HUREL.Compton
         }
         public static SpectrumEnergyNasa GetAbsorberSumSpectrumByTime(uint time)
         {
-            if (!IsLahgiInitiate)
-            {
-                return new SpectrumEnergyNasa(5, 3000);
-            }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetAbsorberSumSpectrumByTime(ref eCount, time);
             List<HistoEnergy> histoEnergy = new List<HistoEnergy>();

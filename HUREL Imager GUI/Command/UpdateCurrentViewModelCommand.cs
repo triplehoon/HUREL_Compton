@@ -27,21 +27,34 @@ namespace HUREL_Imager_GUI.Command
 
         public void Execute(object? parameter)
         {
+            if (!IsVewModelsLoaded)
+            {
+                homeViewModel = new HomeViewModel();
+                settingViewModel = new SettingViewModel();
+
+                IsVewModelsLoaded = true;
+            }
             if (parameter is ViewType)
             {
-                _navigator.CurrentViewModel?.Unhandle();
+                //_navigator.CurrentViewModel?.Unhandle();
 
                 ViewType viewType = (ViewType)parameter;
                 switch (viewType)
                 {
                     case ViewType.HOME_VIEW:
-                        _navigator.CurrentViewModel = new HomeViewModel();                        
+                        _navigator.CurrentViewModel = homeViewModel;
+                        //OnPropertyChanged(nameof(_navigator.CurrentViewModel));
                         break;
                     case ViewType.SETTING_VIEW:
-                        _navigator.CurrentViewModel = new SettingViewModel();
+                        _navigator.CurrentViewModel = settingViewModel;
+                        //OnPropertyChanged(nameof(_navigator.CurrentViewModel));
                         break;
                 }
             }
         }
+
+        static bool IsVewModelsLoaded = false;
+        static private HomeViewModel? homeViewModel;
+        static private SettingViewModel? settingViewModel;
     }
 }

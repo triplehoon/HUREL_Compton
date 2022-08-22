@@ -71,7 +71,8 @@ void HUREL::Compton::ReconPointCloud::CalculateReconPoint(ListModeData lmData, d
 
 	size_t size = points_.size();
 	maxReoconValue = -DBL_MAX;
-	for (size_t i = 0; i < size; ++i)
+#pragma omp parallel for
+	for (int i = 0; i < size; ++i)
 	{
 #pragma omp atomic
 		reconValues_[i] += calcFunc(lmData, points_[i]);
@@ -132,6 +133,9 @@ void HUREL::Compton::ReconPointCloud::CalculateReconPointHybrid(RadiationImage& 
 
 double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint)
 {
+	double ScatterEnergy = lmData.Scatter.InteractionEnergy;
+	double AbsorberEnergy = lmData.Absorber.InteractionEnergy;
+	double TotalEnergy = ScatterEnergy + AbsorberEnergy;
 	if (lmData.Type != eInterationType::COMPTON)
 	{
 		return 0;
@@ -141,23 +145,25 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData
 	{
 		return 0;
 	}
-	double comptonScatteringAngle = acos(comptonCal) / EIGEN_PI * 180;
-	Eigen::Vector3d effectToScatterVector = (imgPoint.head<3>() - lmData.Scatter.TransformedInteractionPoint.head<3>());
-	Eigen::Vector3d scatterToAbsorberVector = (lmData.Scatter.TransformedInteractionPoint.head<3>() - lmData.Absorber.TransformedInteractionPoint.head<3>());
-	effectToScatterVector.normalize();
-	scatterToAbsorberVector.normalize();
-	double positionDotPord = effectToScatterVector.dot(scatterToAbsorberVector);
 
-	double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
+   double comptonScatteringAngle = acos(comptonCal) / EIGEN_PI * 180;
+   Eigen::Vector3d effectToScatterVector = (imgPoint.head<3>() - lmData.Scatter.TransformedInteractionPoint.head<3>());
+   Eigen::Vector3d scatterToAbsorberVector = (lmData.Scatter.TransformedInteractionPoint.head<3>() - lmData.Absorber.TransformedInteractionPoint.head<3>());
+   effectToScatterVector.normalize();
+   scatterToAbsorberVector.normalize();
+   double positionDotPord = effectToScatterVector.dot(scatterToAbsorberVector);
+   double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
+   double sigmacomptonScatteringAngle = 511 / sin(comptonScatteringAngle) * sqrt(1 / pow(AbsorberEnergy, 2)) - 1 / pow(TotalEnergy, 2) * pow(0.08 / 2.35 * sqrt(AbsorberEnergy), 2) + 1 / pow(TotalEnergy, 4) * pow(0.08 / 2.35 * sqrt(ScatterEnergy), 2);
+   double BP_sig_thres = 1.5;
 
-	if (abs(effectedAngle - comptonScatteringAngle) < 5)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
+   if (abs(effectedAngle - comptonScatteringAngle) < BP_sig_thres* sigmacomptonScatteringAngle)
+   {
+      return 1;
+   }
+   else
+   {
+      return 0;
+   }
 }
 
 

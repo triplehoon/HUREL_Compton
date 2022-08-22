@@ -3,20 +3,20 @@
 
 using namespace HUREL;
 
-void HUREL::Logger::InvokeLog(std::string className, std::string msg)
+void HUREL::Logger::InvokeLog(std::string className, std::string msg, eLoggerType type)
 {
 	for (auto var : handledFunc)
 	{
-		var(className, msg);
+		var(className, msg, type);
 	}
 }
 
-void HUREL::Logger::Handle(void(*func)(std::string, std::string))
+void HUREL::Logger::Handle(void(*func)(std::string, std::string, eLoggerType))
 {
 	handledFunc.push_back(func);
 }
 
-void HUREL::Logger::Unhandle(void(*func)(std::string, std::string))
+void HUREL::Logger::Unhandle(void(*func)(std::string, std::string, eLoggerType))
 {
 	int i = 0;
 	int findIndex = -1;

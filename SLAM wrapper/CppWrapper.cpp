@@ -19,6 +19,7 @@ LahgiCppWrapper& HUREL::Compton::LahgiCppWrapper::instance()
 	if (!isLogHandled)
 	{
 		HUREL::Logger::Instance().Handle(HUREL::Compton::WrapperCaller::Logging);
+		isLogHandled = true;
 	}
 	return inst;
 }
@@ -128,7 +129,7 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 	EnergySpectrum spectClass = EnergySpectrum(5, 3000);;
 	for (int i = lmData.size(); i--; i >= 0)
 	{
-		if (t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time))
+		if (time != 0 && t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time))
 		{
 			break;
 		}
@@ -243,6 +244,58 @@ bool HUREL::Compton::RtabmapCppWrapper::GetCurrentVideoFrame(uint8_t* outImgPtr,
 	return false;
 }
 
+std::vector<ReconPointCppWrapper>  HUREL::Compton::RtabmapCppWrapper::GetReconSLAMPointCloud(double time, eReconCppWrapper reconType, double voxelSize, bool useLoaded)
+{
+	open3d::geometry::PointCloud reconPC;
+	if (useLoaded)
+	{
+		reconPC = RtabmapSlamControl::instance().GetLoadedPointCloud();
+	}
+	else
+	{
+		reconPC = RtabmapSlamControl::instance().GetSlamPointCloud();
+	}
+
+	open3d::geometry::PointCloud reconPcDownSampled = *reconPC.VoxelDownSample(voxelSize);
+	
+	ReconPointCloud o3dPc = LahgiControl::instance().GetReconRealtimePointCloudCompton(reconPcDownSampled, time);
+
+	
+	std::vector<ReconPointCppWrapper> pc;
+
+	int pcSize = 0;
+	if (o3dPc.points_.size() > o3dPc.colors_.size())
+	{
+		pcSize = o3dPc.colors_.size();
+	}
+	else
+	{
+		pcSize = o3dPc.points_.size();
+	}
+	pc.reserve(pcSize);
+	for (int i = 0; i < pcSize; ++i)
+	{
+		ReconPointCppWrapper tmpPoint;
+		tmpPoint.pointX = o3dPc.points_[i][0];
+		tmpPoint.pointY = o3dPc.points_[i][1];
+		tmpPoint.pointZ = o3dPc.points_[i][2];
+
+
+		RGBA_t rgb = ReconPointCloud::ColorScaleJet(o3dPc.reconValues_[i], 0, o3dPc.maxReoconValue);
+
+		tmpPoint.colorR = rgb.R;
+
+		tmpPoint.colorG = rgb.G;
+		tmpPoint.colorB = rgb.B;
+		tmpPoint.colorA = rgb.A;
+		pc.push_back(tmpPoint);
+	}
+
+	return pc;
+
+}
+
+
 std::vector<ReconPointCppWrapper> HUREL::Compton::RtabmapCppWrapper::GetLoadedPointCloud()
 {
 	std::vector<ReconPointCppWrapper> pc;
@@ -265,10 +318,10 @@ std::vector<ReconPointCppWrapper> HUREL::Compton::RtabmapCppWrapper::GetLoadedPo
 		tmpPoint.pointY = o3dPc.points_[i][1];
 		tmpPoint.pointZ = o3dPc.points_[i][2];
 		
-		tmpPoint.colorR = o3dPc.colors_[i][2];
+		tmpPoint.colorR = o3dPc.colors_[i][0];
 
 		tmpPoint.colorG = o3dPc.colors_[i][1];
-		tmpPoint.colorB = o3dPc.colors_[i][0];
+		tmpPoint.colorB = o3dPc.colors_[i][2];
 		tmpPoint.colorA = 1;
 		pc.push_back(tmpPoint);
 	}

@@ -110,12 +110,28 @@ namespace HUREL_Imager_GUI.ViewModel
             
             if (dlg.ShowDialog() == true)
             {
-                LahgiApi.LoadPlyFile(dlg.FileName);
+                await Task.Run(()=> LahgiApi.LoadPlyFile(dlg.FileName));
             }
             else
             {
                 return;
             }
+            LahgiApi.StatusUpdateInvoke(null, new LahgiApiEnvetArgs(eLahgiApiEnvetArgsState.Loading));
+
+            dlg = new OpenFileDialog();
+            dlg.Filter = "csv files(*.csv)| *.csv";
+            dlg.Multiselect = false;
+            dlg.Title = "Select list mode data file";
+
+            if (dlg.ShowDialog() == true)
+            {
+                await Task.Run(() => LahgiApi.LoadListModeData(dlg.FileName));
+            }
+            else
+            {
+                return;
+            }
+
 
             LahgiApi.StatusUpdateInvoke(null, new LahgiApiEnvetArgs(eLahgiApiEnvetArgsState.Loading));
             

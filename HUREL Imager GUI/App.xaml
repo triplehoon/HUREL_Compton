@@ -20,7 +20,7 @@
                 <views:SettingView/>
             </DataTemplate>
 
- 
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

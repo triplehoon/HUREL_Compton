@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HUREL_Imager_GUI.ViewModel
@@ -35,13 +36,11 @@ namespace HUREL_Imager_GUI.ViewModel
             SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
 
             Text3d = new BillboardText3D();
-            for (int x = -5; x <= 5; x++)
-            {
-                for (int y = -5; y <= 5; y++)
-                {
-                    Text3d.TextInfo.Add(new TextInfo(string.Format("{0}:{1}", x, y), new Vector3(x, -1, y)));
-                }
-            }
+            TextInfoExt tinfo = new TextInfoExt();
+            tinfo.Text = ("Cs-137");
+            tinfo.Origin = new Vector3(-1, 0.2f, 2.5f);
+            tinfo.Scale = 1f;
+            Text3d.TextInfo.Add(tinfo);
         }
 
         private BillboardText3D text3d = new BillboardText3D();
@@ -65,26 +64,44 @@ namespace HUREL_Imager_GUI.ViewModel
 
                 if(lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Loading)
                 {
-                    UpdataLoadedSlamPointCloud();
+                    UpdateLoadedSlamPointCloud();
                 }
             }
         }
 
-        private void UpdataLoadedSlamPointCloud()
-        {
-            var vc = new Vector3Collection();
-            var cc = new Color4Collection();
-            var tempposeVect = new List<double[]>();
-            var tempColorVect = new List<double[]>();
-            List<float[]> uvs = new List<float[]>();
-            LahgiApi.GetLoadedPointCloud(ref tempposeVect, ref tempColorVect);
-            for (int i = 0; i < tempposeVect.Count; i++)
+        private static Mutex updateLoadDataMutex = new Mutex();
+        private void UpdateLoadedSlamPointCloud()
+        {            
+            Task.Run(() =>
             {
-                vc.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
-                cc.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][2]),0.5f ));
-            }
+                updateLoadDataMutex.WaitOne();
+                var vc = new Vector3Collection();
+                var cc = new Color4Collection();
+                var tempposeVect = new List<double[]>();
+                var tempColorVect = new List<double[]>();
+                List<float[]> uvs = new List<float[]>();
+                LahgiApi.GetLoadedPointCloud(ref tempposeVect, ref tempColorVect);
+                for (int i = 0; i < tempposeVect.Count; i++)
+                {
+                    vc.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
+                    cc.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][2]), Convert.ToSingle(tempColorVect[i][3])));
+                }
 
-            SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
+                SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
+
+                var vc2 = new Vector3Collection();
+                var cc2 = new Color4Collection();
+                LahgiApi.GetReconSLAMPointCloud(0, eReconManaged.COMPTON, ref tempposeVect, ref tempColorVect, 0.01, true);
+                for (int i = 0; i < tempposeVect.Count; i++)
+                {
+                    vc2.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
+                    cc2.Add(new Color4(Convert.ToSingle(tempColorVect[i][0]), Convert.ToSingle(tempColorVect[i][1]), Convert.ToSingle(tempColorVect[i][2]), Convert.ToSingle(tempColorVect[i][3])));
+                }
+                
+                SLAMReconPointCloud = new PointGeometry3D() { Positions = vc2, Colors = cc2 };
+                
+                updateLoadDataMutex.ReleaseMutex();
+            });
         }
 
 
@@ -98,8 +115,7 @@ namespace HUREL_Imager_GUI.ViewModel
                 OnPropertyChanged(nameof(SLAMPointCloud));
             }
         }
-
-
+        
         private PointGeometry3D slamReconPointCloud = new PointGeometry3D();
         public PointGeometry3D SLAMReconPointCloud
         {

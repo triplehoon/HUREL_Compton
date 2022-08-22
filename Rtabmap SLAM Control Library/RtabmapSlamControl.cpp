@@ -21,7 +21,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 		if (devCounts == 0)
 		{
 			*outMessage += "No cameras";
-			HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+			HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage, eLoggerType::ERROR_t);
 			return false;
 		}
 		std::string usbInfo;
@@ -42,7 +42,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	{
 		*outMessage += "RtabmapSlamControl: Camera was disconnected! Please connect it back ";
 		*outMessage += e.what();
-		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage, eLoggerType::ERROR_t);
 
 		return false;
 	}
@@ -51,7 +51,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	{
 		*outMessage += "RtabmapSlamControl: Operation failed, please try again ";
 		*outMessage +=  e.what();
-		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage, eLoggerType::ERROR_t);
 
 		return false;
 	}
@@ -60,7 +60,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	{
 		*outMessage += "RtabmapSlamControl: Some other error occurred! ";
 		*outMessage += e.what();
-		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage, eLoggerType::ERROR_t);
 
 		return false;
 	}
@@ -84,7 +84,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	if (!mCamera->init(".", ""))
 	{
 		*outMessage += "RtabmapSlamControl: Initiate failed";
-		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage, eLoggerType::ERROR_t);
 
 		mIsInitiate = false;
 		return false;
@@ -92,7 +92,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	else
 	{
 		*outMessage += "RtabmapSlamControl: Initiate success";
-		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage);
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage, eLoggerType::INFO);
 		mIsInitiate = true;
 		return true;
 	}	
@@ -115,7 +115,7 @@ static std::future<void> t1;
 void HUREL::Compton::RtabmapSlamControl::StartVideoStream()
 {
 	mIsVideoStreamOn = true;
-	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl start video stream");
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl start video stream", eLoggerType::INFO);
 	
 	auto func = std::bind(&RtabmapSlamControl::VideoStream, this);
 	t1 = std::async(std::launch::async, func);
@@ -125,7 +125,7 @@ void HUREL::Compton::RtabmapSlamControl::StopVideoStream()
 {
 	mIsVideoStreamOn = false;
 	t1.get();
-	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop video stream");
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop video stream", eLoggerType::INFO);
 	
 }
 
@@ -275,16 +275,16 @@ void HUREL::Compton::RtabmapSlamControl::StartSlamPipe()
 {
 	if (!mIsVideoStreamOn || !mIsInitiate)
 	{
-		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl fail to start slam pipe");	}
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl fail to start slam pipe, Initiation failed", eLoggerType::ERROR_t);	}
 
 	if (mIsSlamPipeOn)
 	{
-		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "SLAM Pipe is already on");
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "SLAM Pipe is already on", eLoggerType::INFO);
 		
 		return;
 	}
 	mIsSlamPipeOn = true;
-	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl start slam pipe");
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl start slam pipe", eLoggerType::INFO);
 	auto func = std::bind(&RtabmapSlamControl::SlamPipe, this);
 	t2 = std::async(std::launch::async, func);
 }
@@ -293,7 +293,7 @@ void HUREL::Compton::RtabmapSlamControl::StopSlamPipe()
 {
 	mIsSlamPipeOn = false;
 	t2.get();
-	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop slam pipe");
+	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop slam pipe", eLoggerType::INFO);
 
 }
 
