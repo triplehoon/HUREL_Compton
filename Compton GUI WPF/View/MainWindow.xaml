@@ -483,7 +483,7 @@
                 </Grid>
 
             </syncfusion:TabItemExt>
-            <syncfusion:TabItemExt Header="MLPE Data" Background="White" BorderBrush="#FFEAEAEA" Visibility="Visible">
+            <!--<syncfusion:TabItemExt Header="MLPE Data" Background="White" BorderBrush="#FFEAEAEA" Visibility="Visible">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -515,7 +515,7 @@
 
                 </Grid>
 
-            </syncfusion:TabItemExt>
+            </syncfusion:TabItemExt>-->
         </syncfusion:TabControlExt>
 
         <Grid Grid.Column="1">

@@ -574,7 +574,7 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 	std::vector<ListModeData> lmData = mListedListModeData;
 	mListModeDataMutex.unlock();
 
-	return mListedListModeData;
+	return lmData;
 }
 
 void HUREL::Compton::LahgiControl::ResetListedListModeData()
