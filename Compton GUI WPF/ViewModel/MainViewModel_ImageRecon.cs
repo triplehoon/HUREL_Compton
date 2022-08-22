@@ -21,6 +21,7 @@ using System.Windows.Threading;
 using System.Windows.Interop;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
+using HUREL.Compton.RadioisotopeAnalysis;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -513,6 +514,30 @@ namespace Compton_GUI_WPF.ViewModel
             {
                 postProcessingFileName = value;
                 OnPropertyChanged(nameof(PostProcessingFileName));
+            }
+        }
+
+        public IsotopeInfo SelectedIsotope
+        {
+            set
+            {
+                IsotopeInfo? info = value;
+                if (info == null)
+                {
+                    return;
+                }
+                Isotope? iso = Isotope.GetIsotopeByNameOrNull(info.Name);
+                if (iso != null)
+                {
+                    MinMLPE_Energy = 0;
+                    MaxMLPE_Energy = 0;
+                    Echks.Clear();
+                    foreach (double energy in iso.PeakEnergy)
+                    {
+                        double fwhm = PeakSearching.CalcFWHM(energy, 662, 40, 10);
+                        Echks.Add(new AddListModeDataEchk(energy - fwhm / 2, energy + fwhm / 2));
+                    }
+                }
             }
         }
 

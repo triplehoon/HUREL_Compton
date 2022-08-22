@@ -193,7 +193,7 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged(nameof(MinMLPE_Energy));
             }
         }
-        private int maxMLPE_Energy = 1500;
+        private int maxMLPE_Energy = 0;
         public int MaxMLPE_Energy
         {
             get {

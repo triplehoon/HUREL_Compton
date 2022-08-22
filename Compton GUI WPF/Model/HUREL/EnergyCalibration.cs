@@ -312,9 +312,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
         K40,
         Tl208
     }
-    public record Isotope(IsotopeElement IsotopeElement, List<double> PeakEnergy, string IsotopeName, string IsotopeDescription);
-
-    public static class PeakSearching
+    public record Isotope(IsotopeElement IsotopeElement, List<double> PeakEnergy, string IsotopeName, string IsotopeDescription)
     {
         public static readonly List<Isotope> IsotopeList = new List<Isotope>() {
             //new Isotope(IsotopeElement.Am241, new List<double>(){ 60 }, "Am-241", "Industrial"),
@@ -324,7 +322,25 @@ namespace HUREL.Compton.RadioisotopeAnalysis
             new Isotope(IsotopeElement.Na22, new List<double>(){511, 1275 }, "Na-22", "Industrial"),
             new Isotope(IsotopeElement.K40, new List<double>(){1461 }, "K-40", "Background"),
             new Isotope(IsotopeElement.Tl208, new List<double>(){2615 }, "Tl-208", "Background")
-        };
+        };        
+        public static Isotope? GetIsotopeByNameOrNull(string name)
+        {
+            foreach (var iso in IsotopeList)
+            {
+                if (iso.IsotopeName == name)
+                {
+                    return iso;
+                }
+            }
+            return null;
+        }
+    }
+
+    public static class PeakSearching
+    {
+        
+
+        
 
         private static bool IsPeaksHasIsotope(List<double> peaks, Isotope iso, double sigma, float ref_x, float ref_fwhm, float fwhm_at_0)
         {
@@ -351,7 +367,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
         {
             List<Isotope> isotopes = new();
 
-            foreach (Isotope iso in IsotopeList)
+            foreach (Isotope iso in Isotope.IsotopeList)
             {
                 if (IsPeaksHasIsotope(peaks, iso, sigma, ref_x, ref_fwhm, fwhm_at_0))
                 {
@@ -361,7 +377,10 @@ namespace HUREL.Compton.RadioisotopeAnalysis
 
             return isotopes;
         }
-        private static double CalcFWHM(double x, double ref_x, double ref_fwhm, double fwhm_at_0)
+        
+        
+        
+        public static double CalcFWHM(double x, double ref_x, double ref_fwhm, double fwhm_at_0)
         {
             double f0 = fwhm_at_0;
             double f1 = ref_fwhm;

@@ -62,7 +62,7 @@ namespace Compton_GUI_WPF.ViewModel
 
             InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             TestFunction("").SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
-            
+            IsotopeInfos.Add(new IsotopeInfo("Co-60", "test", "est"));
         }
 
 
