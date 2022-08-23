@@ -183,12 +183,12 @@ bool HUREL::Compton::RtabmapCppWrapper::GetIsSlamPipeOn()
 
 bool HUREL::Compton::RtabmapCppWrapper::GetIsVideoStreamOn()
 {
-	return false;
+	return RtabmapSlamControl::instance().mIsVideoStreamOn;
 }
 
 bool HUREL::Compton::RtabmapCppWrapper::Initiate()
 {
-	return false;
+	return RtabmapSlamControl::instance().Initiate();
 }
 
 std::vector<ReconPointCppWrapper> HUREL::Compton::RtabmapCppWrapper::GetRTPointCloud()
@@ -239,9 +239,30 @@ std::vector<double> HUREL::Compton::RtabmapCppWrapper::getMatrix3DOneLineFromPos
 	return std::vector<double>();
 }
 
-bool HUREL::Compton::RtabmapCppWrapper::GetCurrentVideoFrame(uint8_t* outImgPtr, int* outWidth, int* outHeight, int* outStride, int* outChannelSize)
+bool HUREL::Compton::RtabmapCppWrapper::GetCurrentVideoFrame(uint8_t** outImgPtr, int* outWidth, int* outHeight, int* outStride, int* outChannelSize)
 {
-	return false;
+	static int imagesize = 0;
+	
+	cv::Mat color = RtabmapSlamControl::instance().GetCurrentVideoFrame();
+	if (color.cols == 0)
+	{		
+		return false;
+	}
+	*outWidth = color.cols;
+	*outHeight = color.rows;
+	*outStride = color.step;
+	*outChannelSize = color.channels();
+	if (imagesize != *outWidth * *outHeight * *outChannelSize)
+	{
+		imagesize = *outWidth * *outHeight * *outChannelSize;
+		delete[] mColorImg;
+		mColorImg = new uchar[imagesize];
+	}
+	
+	memcpy(mColorImg, color.data, imagesize);
+	//RtabmapCppWrapper::instance().UnlockVideoFrame();
+	*outImgPtr = mColorImg;
+	return true;
 }
 
 std::vector<ReconPointCppWrapper>  HUREL::Compton::RtabmapCppWrapper::GetReconSLAMPointCloud(double time, eReconCppWrapper reconType, double voxelSize, bool useLoaded)

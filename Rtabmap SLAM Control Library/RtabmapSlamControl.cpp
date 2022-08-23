@@ -10,8 +10,10 @@ HUREL::Compton::RtabmapSlamControl::RtabmapSlamControl()
 
 }
 
-bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
+bool HUREL::Compton::RtabmapSlamControl::Initiate()
 {
+	std::string msg;
+	std::string* outMessage = &msg;
 	try {
 		rs2::context ctx = rs2::context();
 		rs2::device_list devs =  ctx.query_devices();
@@ -93,6 +95,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate(std::string* outMessage)
 	{
 		*outMessage += "RtabmapSlamControl: Initiate success";
 		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage, eLoggerType::INFO);
+		StartVideoStream();
 		mIsInitiate = true;
 		return true;
 	}	

@@ -88,44 +88,28 @@ void HUREL::Compton::RtabmapWrapper::GetRealTimeRGB(int% width, int% height, int
 		data = IntPtr::Zero;
 		return;
 	}
-
-	//
-	////SlamcontrolNative.LockVideoFrame();
-	//cv::Mat color = RtabmapCppWrapper::instance().GetCurrentVideoFrame();
-	//if (color.cols == 0)
-	//{
-	//	//RtabmapCppWrapper::instance().UnlockVideoFrame();
-	//	return;
-	//}
-	//width = color.cols;
-	//height = color.rows;
-	//stride = color.step;
-	//if (imagesize != width * height * color.channels())
-	//{
-	//	Console::WriteLine("size diff");
-	//	imagesize = width * height * color.channels();
-	//	delete[] mColorImg;
-	//	mColorImg = new uchar[imagesize];
-	//}
-	//
-	//memcpy(mColorImg, color.data, imagesize);
-	////RtabmapCppWrapper::instance().UnlockVideoFrame();
-
-
-
-	//if (color.cols > 1) {
-	//	width = color.cols;
-	//	height = color.rows;
-	//	stride = color.step;
-	//	void* ptr = static_cast<void*>(mColorImg);
-
-	//	if (ptr == NULL)
-	//	{
-	//		return;
-	//	}
-
-	//	data = IntPtr(ptr);
-	//}
+	int inWidth = 0;
+	int inHeight = 0;
+	int inStride = 0;
+	int inChannel = 0;
+	uint8_t* inImgPtr = nullptr;
+	if(RtabmapCppWrapper::instance().GetCurrentVideoFrame(&inImgPtr, &inWidth, &inHeight, &inStride, &inChannel))
+	{
+		data = IntPtr(inImgPtr);
+		width = inWidth;
+		height = inHeight;
+		stride = inStride;
+		return;
+	}
+	else
+	{
+		width = 0;
+		height = 0;
+		stride = 0;
+		data = IntPtr::Zero;
+		return;
+	}
+	
 }
 
 

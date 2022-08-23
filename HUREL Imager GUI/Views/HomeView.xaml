@@ -28,15 +28,18 @@
                 <components:ThreeDimensionalView  Grid.Row="0" Margin="10"  DataContext="{Binding ThreeDimensionalViewModel}"/>
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1.2*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Image Grid.Column="0" Stretch="Uniform" Margin="10">
+
+                    <d:Image Grid.Column="0" Stretch="Uniform" Margin="10">
                         <Image.Source>
                             <BitmapImage UriSource="/Resource/RGB image.png" />
                         </Image.Source>
+                    </d:Image>
+                    <Image Grid.Column="0"  Source="{Binding RealtimeRGB}" Stretch="Uniform" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center">
                     </Image>
-                    <Image Grid.Column="1" Stretch="Uniform">
+                    <Image Grid.Column="1" Stretch="Uniform" Margin="10">
                         <Image.Source>
                             <BitmapImage UriSource="/Resource/occupation grid.png" />
                         </Image.Source>

@@ -8,11 +8,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="2*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <syncfusion:SfChart Grid.Row="0" Margin="5" 
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+            
+        </Grid.ColumnDefinitions>
+        <syncfusion:SfChart Grid.Column="0" Margin="5" 
                             Header="Spectrum" 
                             VerticalAlignment="Top" 
                             HorizontalAlignment="Center" 
@@ -42,11 +43,11 @@
                                                                      YBindingPath="Count"
                                                                      syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
         </syncfusion:SfChart>
-        <syncfusion:SfDataGrid Grid.Row="1" Margin="10" ItemsSource="{Binding IsotopeInfos}">
+        <syncfusion:SfDataGrid Grid.Column="1" Margin="10" ItemsSource="{Binding IsotopeInfos}">
             <syncfusion:SfDataGrid.Columns>
-                <syncfusion:GridTextColumn MappingName="Name"/>
-                <syncfusion:GridTextColumn MappingName="Description"/>
-                <syncfusion:GridTextColumn MappingName="Energy"/>
+                <syncfusion:GridTextColumn MappingName="Name" ColumnSizer="Star" />
+                <syncfusion:GridTextColumn MappingName="Description" ColumnSizer="Star"/>
+                <syncfusion:GridTextColumn MappingName="Energy" ColumnSizer="Star"/>
             </syncfusion:SfDataGrid.Columns>
         </syncfusion:SfDataGrid>
     </Grid>

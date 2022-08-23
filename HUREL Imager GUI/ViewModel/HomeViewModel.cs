@@ -1,9 +1,11 @@
-﻿using log4net;
+﻿using HUREL.Compton;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace HUREL_Imager_GUI.ViewModel
 {
@@ -60,6 +62,17 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
+        private BitmapImage realtimeRGB;
+        public BitmapImage RealtimeRGB
+        {
+            get { return realtimeRGB; }
+            set
+            {
+                realtimeRGB = value;
+                OnPropertyChanged(nameof(RealtimeRGB));
+            }
+        }
+
 
         public HomeViewModel()
         {
@@ -77,6 +90,22 @@ namespace HUREL_Imager_GUI.ViewModel
 
             TestValue = "Hello World";
             logger.Info("HomeViewModel Loaded");
+            LoopTask = Task.Run(Loop);
+        }
+
+        private Task LoopTask;
+        private bool RunLoop = true;
+        private void Loop()
+        {
+            while(RunLoop)
+            {
+                BitmapImage? temp = LahgiApi.GetRgbImage();
+                if (temp != null)
+                {
+                    RealtimeRGB = temp;
+                }
+                
+            }
         }
 
         private string _testValue;
@@ -90,6 +119,11 @@ namespace HUREL_Imager_GUI.ViewModel
         {
             SpectrumViewModel.Unhandle();
             TopButtonViewModel.Unhandle();
+            if (LoopTask != null)
+            {
+                RunLoop = false;
+                LoopTask.Wait();
+            }
         }
     }
 }

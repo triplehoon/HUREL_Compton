@@ -250,7 +250,7 @@ namespace HUREL.Compton
                         // Hook up the Elapsed event for the timer. 
                         aTimer.Elapsed += StatusUpdateInvoke;
                         aTimer.Start();
-                        StatusUpdateInvoke(null, EventArgs.Empty);
+                        StatusUpdateInvoke(null, new LahgiApiEnvetArgs(eLahgiApiEnvetArgsState.Slam));
                         isSessionStarting = false;
                         await Task.Run(() => AddListModeData(tokenSource)).ConfigureAwait(false);
 

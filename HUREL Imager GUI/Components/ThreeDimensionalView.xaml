@@ -5,13 +5,32 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+                     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+
              mc:Ignorable="d" 
-             d:DesignHeight="786" d:DesignWidth="576">
-    <StackPanel>
-        <TextBlock Text="3-D view" Margin="5" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold" HorizontalAlignment="Center"/>
-        <hx:Viewport3DX Width="680"
-                        Height="450" ChangeFieldOfViewCursor="ScrollNS" PanCursor="Hand" RotateCursor="SizeAll" ZoomCursor="SizeNS" ZoomRectangleCursor="SizeNWSE"      
-                         InfoBackground="Black" >
+             d:DesignHeight="786" d:DesignWidth="680">
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="3-D view" Margin="5" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <syncfusion:ButtonAdv x:Name="SetupButton" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right" Label="Setting" IsCheckable="True" d:IsChecked="True">
+
+            <Popup x:Name="SetupButtonPopup" d:IsOpen="True"
+                   IsOpen="{Binding Path=IsChecked, ElementName=SetupButton, Mode=OneWay}" 
+                   Placement="Left" PlacementTarget="{Binding ElementName=SetupButton}">
+                <Border BorderThickness="3" Width="200"   BorderBrush="{StaticResource CustomDarkBlue}" Background="White">
+
+                    <StackPanel Margin="5,5,5,5">
+                        <TextBlock Text="3D View Setup" FontSize="{StaticResource FontSize-Large}" FontWeight="Bold"/>
+                        <Button Content="Start SLAM" />
+                    </StackPanel>
+                </Border>
+            </Popup>
+        </syncfusion:ButtonAdv>
+        <hx:Viewport3DX ChangeFieldOfViewCursor="ScrollNS" PanCursor="Hand" RotateCursor="SizeAll" ZoomCursor="SizeNS" ZoomRectangleCursor="SizeNWSE"      
+                         InfoBackground="Black" Grid.Row="1">
             <hx:Viewport3DX.EffectsManager>
                 <hx:DefaultEffectsManager/>
             </hx:Viewport3DX.EffectsManager>
@@ -25,5 +44,6 @@
             <hx:PointGeometryModel3D Geometry="{Binding SLAMReconPointCloud}" Color="White" FixedSize="True" Size="5,5" RenderOrder="5" DepthBias="0">
             </hx:PointGeometryModel3D>
         </hx:Viewport3DX>
-    </StackPanel>
+        
+    </Grid>
 </UserControl>

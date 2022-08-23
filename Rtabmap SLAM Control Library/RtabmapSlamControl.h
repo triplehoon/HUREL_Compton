@@ -84,7 +84,7 @@ namespace HUREL
 			bool mIsSlamPipeOn = false;
 			bool mOdoInit = false;
 
-			bool Initiate(std::string* outMessage);
+			bool Initiate();
 
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			Eigen::Matrix4d GetOdomentry();

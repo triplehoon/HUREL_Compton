@@ -77,7 +77,7 @@ namespace HUREL {
 		{
 		private:
 			RtabmapCppWrapper() {};
-			
+			uint8_t* mColorImg = nullptr;
 		public:
 			
 			bool GetIsSlamPipeOn();
@@ -89,7 +89,7 @@ namespace HUREL {
 			std::vector<ReconPointCppWrapper> GetRTPointCloud();
 			std::vector<ReconPointCppWrapper> GetRTPointCloudTransposed();
 
-			bool GetCurrentVideoFrame(uint8_t* outImgPtr, int* outWidth, int* outHeight, int* outStep, int* outChannelSize);
+			bool GetCurrentVideoFrame(uint8_t** outImgPtr, int* outWidth, int* outHeight, int* outStep, int* outChannelSize);
 
 			void StartVideoStream();
 			void StopVideoStream();
