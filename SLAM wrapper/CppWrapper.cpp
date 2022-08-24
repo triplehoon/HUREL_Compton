@@ -226,7 +226,30 @@ void HUREL::Compton::RtabmapCppWrapper::ResetSlam()
 
 std::vector<ReconPointCppWrapper> HUREL::Compton::RtabmapCppWrapper::GetSlamPointCloud()
 {
-	return std::vector<ReconPointCppWrapper>();
+	open3d::geometry::PointCloud  pc =RtabmapSlamControl::instance().GetSlamPointCloud();
+
+	std::vector<ReconPointCppWrapper> returnPc;
+	returnPc.reserve(pc.colors_.size());
+
+	for (int i = 0; i < pc.colors_.size(); ++i)
+	{
+		ReconPointCppWrapper tmpPoint;
+		tmpPoint.pointX = o3dPc.points_[i][0];
+		tmpPoint.pointY = o3dPc.points_[i][1];
+		tmpPoint.pointZ = o3dPc.points_[i][2];
+
+
+		RGBA_t rgb = ReconPointCloud::ColorScaleJet(o3dPc.reconValues_[i], 0, o3dPc.maxReoconValue);
+
+		tmpPoint.colorR = rgb.R;
+
+		tmpPoint.colorG = rgb.G;
+		tmpPoint.colorB = rgb.B;
+		tmpPoint.colorA = rgb.A;
+		returnPc.push_back(tmpPoint);
+	}
+
+	return returnPc;
 }
 
 bool HUREL::Compton::RtabmapCppWrapper::LoadPlyFile(std::string filePath)

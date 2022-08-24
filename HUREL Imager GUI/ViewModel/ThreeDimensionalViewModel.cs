@@ -42,27 +42,11 @@ namespace HUREL_Imager_GUI.ViewModel
             tinfo.Origin = new Vector3(-1, 0.2f, 2.5f);
             tinfo.Scale = 1f;
             Text3d.TextInfo.Add(tinfo);
-            LoopTask = Task.Run(Loop);
         }
 
 
 
 
-
-        private Task LoopTask;
-        private bool RunLoop = true;
-        private void Loop()
-        {
-            while (RunLoop)
-            {
-                BitmapImage? temp = LahgiApi.GetRgbImage();
-                if (temp != null)
-                {
-                    RealtimeRGB = temp;
-                }
-
-            }
-        }
 
         private BillboardText3D text3d = new BillboardText3D();
         public BillboardText3D Text3d
