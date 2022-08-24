@@ -3,6 +3,7 @@ using HUREL.Compton;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -63,6 +64,8 @@ namespace HUREL_Imager_GUI.ViewModel
 
         private void updateView(object? obj, EventArgs args)
         {
+            Trace.WriteLine("Update");
+
             if (args is LahgiApiEnvetArgs)
             { 
                 LahgiApiEnvetArgs lahgiApiEnvetArgs = (LahgiApiEnvetArgs)args;
@@ -73,7 +76,7 @@ namespace HUREL_Imager_GUI.ViewModel
                 }             
                 else if(lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Slam)
                 {
-
+                    UpdateRealtimeSlamPointCloud();
                 }
             }
         }
@@ -132,7 +135,7 @@ namespace HUREL_Imager_GUI.ViewModel
 
             var vc2 = new Vector3Collection();
             var cc2 = new Color4Collection();
-            LahgiApi.GetReconSLAMPointCloud(0, eReconManaged.COMPTON, ref tempposeVect, ref tempColorVect, 0.01, true);
+            LahgiApi.GetReconSLAMPointCloud(0, eReconManaged.COMPTON, ref tempposeVect, ref tempColorVect, 0.01, false);
             for (int i = 0; i < tempposeVect.Count; i++)
             {
                 vc2.Add(new Vector3(Convert.ToSingle(tempposeVect[i][0]), Convert.ToSingle(tempposeVect[i][1]), Convert.ToSingle(tempposeVect[i][2])));
@@ -142,6 +145,8 @@ namespace HUREL_Imager_GUI.ViewModel
             SLAMReconPointCloud = new PointGeometry3D() { Positions = vc2, Colors = cc2 };
 
             updateLoadDataMutex.ReleaseMutex();
+
+
         }
 
         private PointGeometry3D slamPointCloud = new PointGeometry3D();

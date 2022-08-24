@@ -76,8 +76,8 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate()
 
 		const rtabmap::Transform test(0.006f, 0.0025f, 0.0f, 0.0f, 0.0f, 0.0f);
 		mCamera->setDualMode(true, test);
-		mCamera->setOdomProvided(true, false, true);
-		mCamera->setImagesRectified(true);
+		//mCamera->setOdomProvided(true, false, true);
+		//mCamera->setImagesRectified(true);
 	}
 	catch(int exp)
 	{
@@ -95,7 +95,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate()
 	{
 		*outMessage += "RtabmapSlamControl: Initiate success";
 		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage, eLoggerType::INFO);
-		//StartVideoStream();
+		StartVideoStream();
 		mIsInitiate = true;
 		return true;
 	}	
@@ -365,7 +365,9 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 			rtabmap::Signature node = nodes.find(iter->first)->second;
 			// uncompress data
 			cv::Mat ground, obstacles, empty;
-			node.sensorData().uncompressData(0,0,0,0,&ground,&obstacles,&empty);
+			//node.sensorData().uncompressData(0,0,0,0,&ground,&obstacles,&empty);
+			node.sensorData().uncompressData();
+
 			pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp = rtabmap::util3d::cloudRGBFromSensorData(
 				node.sensorData(),
 				4,           // image decimation before creating the clouds

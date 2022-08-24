@@ -178,7 +178,7 @@ bool HUREL::Compton::LahgiCppWrapper::LoadListedListModeData(std::string filePat
 
 bool HUREL::Compton::RtabmapCppWrapper::GetIsSlamPipeOn()
 {
-	return false;
+	return RtabmapSlamControl::instance().mIsSlamPipeOn;
 }
 
 bool HUREL::Compton::RtabmapCppWrapper::GetIsVideoStreamOn()
