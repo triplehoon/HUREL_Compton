@@ -22,9 +22,10 @@ int main()
     SlamControl.Initiate();
 
     std::cout << outMessage;
-
     SlamControl.StartVideoStream();
+
     SlamControl.StartSlamPipe();
+   
     chrono::system_clock::time_point StartTime = chrono::system_clock::now();
     std::vector<Eigen::Matrix4d> poses;
     std::vector<chrono::system_clock::time_point> timePoints;
@@ -68,10 +69,10 @@ int main()
     open3d::geometry::PointCloud pc = SlamControl.GetSlamPointCloud();
     open3d::io::WritePointCloudOption option;
     open3d::io::WritePointCloudToPLY(FileName + ".ply", pc, option);
-    
-
     SlamControl.StopSlamPipe();
     SlamControl.StopVideoStream();
+
+   
 }
 
 string PrintEigenInOneLine(Eigen::Matrix4d m)

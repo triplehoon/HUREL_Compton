@@ -76,8 +76,8 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate()
 
 		const rtabmap::Transform test(0.006f, 0.0025f, 0.0f, 0.0f, 0.0f, 0.0f);
 		mCamera->setDualMode(true, test);
-		//mCamera->setOdomProvided(true, false, true);
-		//mCamera->setImagesRectified(true);
+		mCamera->setOdomProvided(true, false, true);
+		mCamera->setImagesRectified(true);
 	}
 	catch(int exp)
 	{
@@ -95,7 +95,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate()
 	{
 		*outMessage += "RtabmapSlamControl: Initiate success";
 		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", *outMessage, eLoggerType::INFO);
-		StartVideoStream();
+		//StartVideoStream();
 		mIsInitiate = true;
 		return true;
 	}	
@@ -377,13 +377,13 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 			//grid.addToCache(iter->first, ground, obstacles, empty);
 			// 
 			// 
-			//if (!tmpNoNaN->empty())
+			if (!tmpNoNaN->empty())
 			{
-				*cloud += *rtabmap::util3d::transformPointCloud(tmp, iter->second); // transform the point cloud to its pose
+				*cloud += *rtabmap::util3d::transformPointCloud(tmpNoNaN, iter->second); // transform the point cloud to its pose
 			}
 			++i;
 			//pintf("iter %d \n", i);
-			//tmpNoNaN.reset();
+			tmpNoNaN.reset();
 			//delete test;
 		}
 		//grid.update(optimizedPoses);
