@@ -205,23 +205,28 @@ std::vector<ReconPointCppWrapper> HUREL::Compton::RtabmapCppWrapper::GetRTPointC
 
 void HUREL::Compton::RtabmapCppWrapper::StartVideoStream()
 {
+	RtabmapSlamControl::instance().StartVideoStream();
 }
 
 bool HUREL::Compton::RtabmapCppWrapper::StartSlamPipe()
 {
-	return false;
+	RtabmapSlamControl::instance().StartSlamPipe();
+	return true;
 }
 
 void HUREL::Compton::RtabmapCppWrapper::StopVideoStream()
 {
+	RtabmapSlamControl::instance().StopVideoStream();
 }
 
 void HUREL::Compton::RtabmapCppWrapper::StopSlamPipe()
 {
+	RtabmapSlamControl::instance().StopSlamPipe();
 }
 
 void HUREL::Compton::RtabmapCppWrapper::ResetSlam()
 {
+	RtabmapSlamControl::instance().ResetSlam();
 }
 
 std::vector<ReconPointCppWrapper> HUREL::Compton::RtabmapCppWrapper::GetSlamPointCloud()
@@ -234,18 +239,15 @@ std::vector<ReconPointCppWrapper> HUREL::Compton::RtabmapCppWrapper::GetSlamPoin
 	for (int i = 0; i < pc.colors_.size(); ++i)
 	{
 		ReconPointCppWrapper tmpPoint;
-		tmpPoint.pointX = o3dPc.points_[i][0];
-		tmpPoint.pointY = o3dPc.points_[i][1];
-		tmpPoint.pointZ = o3dPc.points_[i][2];
+		tmpPoint.pointX = pc.points_[i][0];
+		tmpPoint.pointY = pc.points_[i][1];
+		tmpPoint.pointZ = pc.points_[i][2];
 
 
-		RGBA_t rgb = ReconPointCloud::ColorScaleJet(o3dPc.reconValues_[i], 0, o3dPc.maxReoconValue);
-
-		tmpPoint.colorR = rgb.R;
-
-		tmpPoint.colorG = rgb.G;
-		tmpPoint.colorB = rgb.B;
-		tmpPoint.colorA = rgb.A;
+		tmpPoint.colorR = pc.colors_[i][0];
+		tmpPoint.colorG = pc.colors_[i][0];
+		tmpPoint.colorB = pc.colors_[i][0];
+		tmpPoint.colorA = 1;
 		returnPc.push_back(tmpPoint);
 	}
 

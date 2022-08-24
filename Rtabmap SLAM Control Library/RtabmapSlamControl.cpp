@@ -312,7 +312,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 	rtabmap::Rtabmap* rtabmap = new rtabmap::Rtabmap();
 	rtabmap->init();
 	rtabmap::RtabmapThread rtabmapThread(rtabmap); // ownership is transfered
-		// Setup handlers
+	// Setup handlers
 	odomThread.registerToEventsManager();
 	rtabmapThread.registerToEventsManager();
 	UEventsManager::createPipe(mCameraThread, &odomThread, "CameraEvent");
@@ -346,12 +346,14 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		std::map<int, rtabmap::Signature> tmpnodes;
 		std::map<int, rtabmap::Transform> tmpOptimizedPoses;
 		
-		rtabmap->getGraph(tmpOptimizedPoses, links, true, true, &tmpnodes, true, true, true, true);
-		nodes = tmpnodes;
-		optimizedPoses = tmpOptimizedPoses;
+		rtabmap->getGraph(tmpOptimizedPoses, links, true, true, &tmpnodes, true, true, true, false);
+
 		pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 		int i = 0;
 		rtabmap->getStatistics();
+
+		nodes = tmpnodes;
+		optimizedPoses = tmpOptimizedPoses;
 		//https://cpp.hotexamples.com/examples/-/Rtabmap/-/cpp-rtabmap-class-examples.html
 		for (std::map<int, rtabmap::Transform>::iterator iter = optimizedPoses.begin(); iter != optimizedPoses.end(); ++iter)
 		{
@@ -371,11 +373,13 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 				0.3f);
 			pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmpNoNaN(new pcl::PointCloud<pcl::PointXYZRGB>);
 			std::vector<int> index;
-			pcl::removeNaNFromPointCloud(*tmp, *tmpNoNaN, index);
+			pcl::removeNaNFromPointCloud(*tmp,  *tmpNoNaN, index);
 			//grid.addToCache(iter->first, ground, obstacles, empty);
-			if (!tmpNoNaN->empty())
+			// 
+			// 
+			//if (!tmpNoNaN->empty())
 			{
-				*cloud += *rtabmap::util3d::transformPointCloud(tmpNoNaN, iter->second); // transform the point cloud to its pose
+				*cloud += *rtabmap::util3d::transformPointCloud(tmp, iter->second); // transform the point cloud to its pose
 			}
 			++i;
 			//pintf("iter %d \n", i);

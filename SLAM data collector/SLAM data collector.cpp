@@ -19,7 +19,7 @@ int main()
     HUREL::Compton::RtabmapSlamControl& SlamControl = HUREL::Compton::RtabmapSlamControl::instance();
 
     string outMessage;
-    SlamControl.Initiate(&outMessage);
+    SlamControl.Initiate();
 
     std::cout << outMessage;
 

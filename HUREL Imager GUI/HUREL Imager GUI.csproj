@@ -41,6 +41,7 @@
   <ItemGroup>
     <PackageReference Include="AsyncAwaitBestPractices" Version="6.0.5" />
     <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.5" />
+    <PackageReference Include="Cyotek.Drawing.BitmapFont" Version="2.0.4" />
     <PackageReference Include="HelixToolkit" Version="2.21.1" />
     <PackageReference Include="HelixToolkit.Wpf" Version="2.21.1" />
     <PackageReference Include="HelixToolkit.Wpf.SharpDX" Version="2.21.1" />
