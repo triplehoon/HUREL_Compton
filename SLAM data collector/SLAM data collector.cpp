@@ -6,26 +6,37 @@
 #include <vector>
 
 #include "RtabmapSlamControl.h"
+#include "Logger.h"
 
 using namespace HUREL::Compton;
 using namespace std;
 
 string PrintEigenInOneLine(Eigen::Matrix4d);
 
+void ConsoleWrite(string className, string msg, HUREL::eLoggerType type);
+
+
 int main()
 {
-    std::cout << "Hello World!\n";
+    HUREL::Logger::Instance().Handle(ConsoleWrite);
+
+    //std::cout << "Hello World!\n";
 
     HUREL::Compton::RtabmapSlamControl& SlamControl = HUREL::Compton::RtabmapSlamControl::instance();
 
     string outMessage;
     SlamControl.Initiate();
+    if (!SlamControl.mIsInitiate)
+    {
 
+        return 1;
+    }
     std::cout << outMessage;
     SlamControl.StartVideoStream();
 
     SlamControl.StartSlamPipe();
    
+    
     chrono::system_clock::time_point StartTime = chrono::system_clock::now();
     std::vector<Eigen::Matrix4d> poses;
     std::vector<chrono::system_clock::time_point> timePoints;
@@ -44,7 +55,7 @@ int main()
 
 
     //save point Cloud and pose data.
-    std::string FileName = "test";
+    std::string FileName = "reconstructdata";
     Eigen::Matrix4d t265toLACCPosTransform;
     t265toLACCPosTransform << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
         0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
@@ -93,3 +104,31 @@ string PrintEigenInOneLine(Eigen::Matrix4d m)
     return data;
 }
 
+
+void ConsoleWrite(string className, string msg, HUREL::eLoggerType type)
+{
+    string typeString;
+    switch (type)
+    {
+    case HUREL::DEBUG:
+        typeString = "DEBUG";
+        break;
+    case HUREL::INFO:
+        typeString = "INFO";
+        break;
+    case HUREL::WARN:
+        typeString = "WARN";
+        break;
+    case HUREL::ERROR_t:
+        typeString = "ERROR";
+        break;
+    case HUREL::FATAL:
+        typeString = "FATAL";
+        break;
+    default:
+        break;
+    }
+
+    cout << "[" << typeString << "]" << className << ": " << msg << endl;
+
+}

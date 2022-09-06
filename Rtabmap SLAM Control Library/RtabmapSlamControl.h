@@ -24,7 +24,6 @@
 #include "rtabmap/core/OdometryThread.h"
 #include "rtabmap/core/Graph.h"
 #include "rtabmap/utilite/UEventsManager.h"
-
 #include <open3d/geometry/PointCloud.h>
 #include <open3d/pipelines/registration/Registration.h>
 #include <open3d/io/PointCloudIO.h>

@@ -23,9 +23,9 @@ namespace HUREL {
 		class InteractionData
 		{
 		private:
-			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-		public:
 			
+		public:
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			Eigen::Vector4d RelativeInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""), 1);
 			Eigen::Vector4d TransformedInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""),1);
 			double InteractionEnergy = 0;  
@@ -35,9 +35,9 @@ namespace HUREL {
 		class ListModeData
 		{
 		private:
-			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-		public:
 			
+		public:
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			eInterationType Type = eInterationType::NONE;
 			InteractionData Scatter;
 			InteractionData Absorber;
@@ -48,6 +48,12 @@ namespace HUREL {
 			std::string WriteListModeData();
 			bool ReadListModeData(std::string data);
 		};
+
+		class ListModeDataCombine
+		{
+
+		};
+
 
 		class PlaneReconsturctImage
 		{

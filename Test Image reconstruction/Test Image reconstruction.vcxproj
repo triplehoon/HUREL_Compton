@@ -51,6 +51,13 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <UseInteloneMKL>No</UseInteloneMKL>
+    <UseILP64Interfaces1A>false</UseILP64Interfaces1A>
+    <UseIntelIPP1A>false</UseIntelIPP1A>
+    <UseInteloneDAL>false</UseInteloneDAL>
+    <UseInteloneTBB>false</UseInteloneTBB>
+    <InstrumentInteloneTBB>false</InstrumentInteloneTBB>
+    <UseMpiLibrary1A>INTELMPI</UseMpiLibrary1A>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -140,6 +147,9 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Rtabmap SLAM Control Library;$(SolutionDir)\Realsense Control Library;C:\open3d-devel-windows-amd64-0.15.1\include;C:\opencv\build\include;C:\open3d-devel-windows-amd64-0.15.1\include\open3d\3rdparty;C:\RTABMap\CMake\..\include\rtabmap-0.20;C:\Program Files\PCL 1.12.1\include\pcl-1.12;C:\Program Files\PCL 1.12.1\3rdParty\Eigen\eigen3;C:\Program Files\PCL 1.12.1\3rdParty\Boost\include\boost-1_78;C:\Program Files\OpenNI2\Include;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1;C:\Program Files\PCL 1.12.1\3rdParty\VTK\include\vtk-9.1\vtkfreetype\include;C:\Program Files\PCL 1.12.1\3rdParty\FLANN\include;%(AdditionalIncludeDirectories);$(SolutionDir)\Image reconstruction;$(SolutionDir)\Logger</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,6 +165,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Test Image reconstruction.cpp" />
+    <ClCompile Include="TestFuncs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Image reconstruction\Image reconstruction.vcxproj">
@@ -170,6 +181,9 @@
   <ItemGroup>
     <None Include="20220706_DigitalLabScan_100uCi_-1,0,2.4_cpplmdata.csv" />
     <None Include="20220706_DigitalLabScan_100uCi_-1,0,2.4_Pointcloud.ply" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TestFuncs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

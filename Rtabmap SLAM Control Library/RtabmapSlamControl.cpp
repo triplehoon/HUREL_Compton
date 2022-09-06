@@ -76,6 +76,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate()
 
 		const rtabmap::Transform test(0.006f, 0.0025f, 0.0f, 0.0f, 0.0f, 0.0f);
 		mCamera->setDualMode(true, test);
+
 		//mCamera->setOdomProvided(true, false, true);
 		//mCamera->setImagesRectified(true);
 	}
@@ -117,6 +118,10 @@ static std::future<void> t1;
 
 void HUREL::Compton::RtabmapSlamControl::StartVideoStream()
 {
+	if (!mIsInitiate)
+	{
+		return;
+	}
 	mIsVideoStreamOn = true;
 	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl start video stream", eLoggerType::INFO);
 	
@@ -305,9 +310,7 @@ static std::mutex slamPipeMutex;
 void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 {
 	mOdo = rtabmap::Odometry::create();
-
 	rtabmap::OdometryThread odomThread(mOdo);
-
 	// Create RTAB-Map to process OdometryEvent
 	rtabmap::Rtabmap* rtabmap = new rtabmap::Rtabmap();
 	rtabmap->init();
@@ -315,8 +318,8 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 	// Setup handlers
 	odomThread.registerToEventsManager();
 	rtabmapThread.registerToEventsManager();
+	
 	UEventsManager::createPipe(mCameraThread, &odomThread, "CameraEvent");
-
 	// Let's start the threads
 	rtabmapThread.start();
 	odomThread.start();

@@ -33,7 +33,7 @@ namespace HUREL.Compton
         public static EventHandler? StatusUpdate;
         public static void StatusUpdateInvoke(object? obj, EventArgs args)
         {
-            StatusUpdate?.Invoke(null, new LahgiApiEnvetArgs(eLahgiApiEnvetArgsState.Slam));
+            StatusUpdate?.Invoke(obj, args);
 
         }
         private static string statusMsg = "";

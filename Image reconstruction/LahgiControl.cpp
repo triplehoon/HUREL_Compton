@@ -436,6 +436,130 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 	}
 	}
 }
+void HUREL::Compton::LahgiControl::AddListModeDataEigen(const unsigned short(byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk)
+{
+	switch (mModuleType)
+	{
+	case HUREL::Compton::eMouduleType::MONO:
+		break;
+	case HUREL::Compton::eMouduleType::QUAD:
+	{
+		Eigen::Array<double, 1, 9> scatterShorts[4];
+		Eigen::Array<double, 1, 9> absorberShorts[4];
+		//Channel 4 to 8
+		for (int i = 4; i < 8; ++i)
+		{
+			for (int j = 0; j < 9; ++j)
+			{
+				scatterShorts[i - 4][j] = static_cast<double>(byteData[i * 9 + j]);
+			}
+		}
+
+		//Channel 12 to 16
+		for (int i = 12; i < 16; ++i)
+		{
+			for (int j = 0; j < 9; ++j)
+			{
+				absorberShorts[i - 12][j] = static_cast<double>(byteData[i * 9 + j]);
+			}
+		}
+
+
+		double scattersEnergy[4];
+		double absorbersEnergy[4];
+
+		int scatterInteractionCount = 0;
+		int absorberInteractionCount = 0;
+		int scatterInteractModuleNum = 4;
+		int absorberInteractModuleNum = 4;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			scattersEnergy[i] = mScatterModules[i]->GetEcal(scatterShorts[i]);
+			if (!isnan(scattersEnergy[i]))
+			{
+				mScatterModules[i]->GetEnergySpectrum().AddEnergy(scattersEnergy[i]);
+				mSumSpectrum.AddEnergy(scattersEnergy[i]);
+				mScatterSumSpectrum.AddEnergy(scattersEnergy[i]);
+				scatterInteractModuleNum = i;
+				++scatterInteractionCount;
+			}
+			absorbersEnergy[i] = mAbsorberModules[i]->GetEcal(absorberShorts[i]);
+			if (!isnan(absorbersEnergy[i]))
+			{
+				mAbsorberModules[i]->GetEnergySpectrum().AddEnergy(absorbersEnergy[i]);
+				mSumSpectrum.AddEnergy(absorbersEnergy[i]);
+				mAbsorberSumSpectrum.AddEnergy(absorbersEnergy[i]);
+				absorberInteractModuleNum = i;
+				++absorberInteractionCount;
+			}
+		}
+
+		if (scatterInteractionCount == 1)
+		{
+			double sEnergy = scattersEnergy[scatterInteractModuleNum];
+			double aEnergy = absorbersEnergy[absorberInteractModuleNum];
+
+			if (absorberInteractionCount == 1)
+			{
+				//Compton
+				eInterationType type = eInterationType::COMPTON;
+				for (int i = 0; i < eChk.size(); ++i)
+				{
+					if (sEnergy + aEnergy < eChk[i].maxE && sEnergy + aEnergy > eChk[i].minE)
+					{
+
+						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
+						Eigen::Vector4d absorberPoint = mAbsorberModules[absorberInteractModuleNum]->FastMLPosEstimation(scatterShorts[absorberInteractModuleNum]);
+						mListModeDataMutex.lock();
+
+						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
+						mListModeDataMutex.unlock();
+
+					}
+				}
+			}
+			else if (absorberInteractionCount == 0)
+			{
+				//Coded Apature
+				eInterationType type = eInterationType::CODED;
+				for (int i = 0; i < eChk.size(); ++i)
+				{
+					if (sEnergy + aEnergy < eChk[i].maxE && sEnergy + aEnergy > eChk[i].minE)
+					{
+
+						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
+						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
+						mListModeDataMutex.lock();
+
+						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
+						mListModeDataMutex.unlock();
+
+					}
+				}
+
+			}
+		}
+		else
+		{
+			eInterationType type = eInterationType::NONE;
+		}
+
+
+
+		break;
+	}
+	case HUREL::Compton::eMouduleType::QUAD_DUAL:
+	{
+		break;
+	}
+	default:
+	{
+		//Do nothing
+		break;
+	}
+	}
+}
 
 HUREL::Compton::eMouduleType HUREL::Compton::LahgiControl::GetDetectorType()
 {

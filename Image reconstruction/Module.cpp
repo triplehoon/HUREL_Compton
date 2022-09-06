@@ -34,9 +34,15 @@ HUREL::Compton::Module::Module(eMouduleType moduleType,
         double gain[10];
         if (LoadGain(gainFileName, eMouduleType::QUAD, gain))
         {
+            
             for (int i = 0; i < 10; ++i)
             {
                 mGain[i] = gain[i];
+            }
+            for (int i = 0; i < 9; ++i)
+            {
+           
+                mGainEigen(i) = gain[i];
             }
             string msg = "Successfuly to load a gain file : " + moduleName;
             HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::INFO);
@@ -89,7 +95,6 @@ std::tuple<unsigned int, unsigned int> HUREL::Compton::Module::FastMLPosEstimati
         minY = 0;
     }
 
-
     double valMaxChk = -numeric_limits<double>::max();
     std::tuple<unsigned int, unsigned int> maxPoint;
     for (unsigned int x = static_cast<unsigned int>(minX); x <= static_cast<unsigned int>(maxX); x += gridSize)
@@ -123,6 +128,54 @@ std::tuple<unsigned int, unsigned int> HUREL::Compton::Module::FastMLPosEstimati
     
     return maxPoint;
 }
+std::tuple<unsigned int, unsigned int> HUREL::Compton::Module::FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const Eigen::Array<double, 1, 9>& pmtADCValue) const
+{
+    assert(minX < maxX);
+    assert(minX < maxX);
+    
+    if (static_cast<int>(mLutSize) - 1 < maxX)
+    {
+        maxX = mLutSize - 1;
+    }
+    if (static_cast<int>(mLutSize) - 1 < maxY)
+    {
+        maxY = mLutSize - 1;
+    }
+    if (static_cast<int>(minX) < 0)
+    {
+        minX = 0;
+    }
+    if (static_cast<int>(minY) < 0)
+    {
+        minY = 0;
+    }
+
+    double valMaxChk = -numeric_limits<double>::max();
+    std::tuple<unsigned int, unsigned int> maxPoint;
+    for (unsigned int x = static_cast<unsigned int>(minX); x <= static_cast<unsigned int>(maxX); x += gridSize)
+    {
+        for (unsigned int y = static_cast<unsigned int>(minY); y <= static_cast<unsigned int>(maxY); y += gridSize)
+        {
+            double val = 0;
+            if (isnan(mXYSumMu[x][y]))
+            {
+                continue;
+            }
+            Eigen::Array<double, 1, 9> valArray = mXYLogMueEigen[x][y] * pmtADCValue;
+            val = valArray.sum();
+            val += mXYSumMu[x][y];
+
+            if (val > valMaxChk)
+            {
+                valMaxChk = val;
+                get<0>(maxPoint) = x;
+                get<1>(maxPoint) = y;
+            }
+        }
+    }
+
+    return maxPoint;
+}
 
 HUREL::Compton::Module::~Module()
 {
@@ -143,6 +196,7 @@ bool HUREL::Compton::Module::LoadLUT(std::string fileName)
     io.open(fileName.c_str());
     vector<std::array<double, 80>> lutData;
     lutData.reserve(100000);
+
 
     if (!io.is_open())
     {
@@ -179,13 +233,15 @@ bool HUREL::Compton::Module::LoadLUT(std::string fileName)
     
     //Memory alloc
     mXYLogMue = new double**[mLutSize];
+    mXYLogMueEigen = new Eigen::Array<double, 1, 9> * [mLutSize];
     mXYSumMu = new double*[mLutSize];
     for (int i = 0; i < static_cast<int>(mLutSize); ++i)
     {
         mXYLogMue[i] = new double*[mLutSize];
-        mXYSumMu[i] = new double[mLutSize];     
+        mXYSumMu[i] = new double[mLutSize]; 
+        mXYLogMueEigen[i] = new Eigen::Array<double, 1, 9>[mLutSize];
     }
-    
+ 
     
     for (int i = 0; i < lutData.size(); ++i)
     {
@@ -201,6 +257,10 @@ bool HUREL::Compton::Module::LoadLUT(std::string fileName)
         mXYLogMue[indexX][indexY] = new double[9] {lutData[i][3], lutData[i][4], lutData[i][5],
         lutData[i][6],lutData[i][7],lutData[i][8],lutData[i][9],lutData[i][10],lutData[i][11] };
         mXYSumMu[indexX][indexY] = lutData[i][12];
+        for (int iInEigne = 0; iInEigne < 9; ++iInEigne)
+        {
+            mXYLogMueEigen[indexX][indexY](iInEigne) = lutData[i][iInEigne + 3];
+        }
     }
 
     //cout << "Done loading look up table" << endl;
@@ -288,13 +348,13 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
     static_cast<double>(pmtADCValue[7]) * mGain[7],
     static_cast<double>(pmtADCValue[8]) * mGain[8]};
     
-    int gridSize = mLutSize / 3;//45
+    int gridSize = mLutSize / 8;//45
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize, gridSize, mLutSize - 1, gridSize, mLutSize - 1, normalizedPMTValue);
     
-    int gridSize2 = mLutSize / 9;//14
+    int gridSize2 = mLutSize / 20;//14
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize2, get<0>(maxPoint) - gridSize , get<0>(maxPoint) + gridSize, get<1>(maxPoint) - gridSize, get<1>(maxPoint) + gridSize, normalizedPMTValue);
     
-    int gridSize3 = mLutSize / 27 ;//3
+    int gridSize3 = mLutSize / 40 ;//3
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize3, get<0>(maxPoint) - gridSize2, get<0>(maxPoint) + gridSize2, get<1>(maxPoint) - gridSize2, get<1>(maxPoint) + gridSize2, normalizedPMTValue);
     
 
@@ -313,6 +373,40 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const unsigned
     point[2] = mModuleOffsetZ;
     point[3] = 1;
     return point;   
+}
+
+const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const Eigen::Array<double, 1, 9>& pmtADCValue) const
+{
+
+    std::tuple<unsigned int, unsigned int> maxPoint;
+
+    const Eigen::Array<double, 1, 9> normalizedPMTValue = mGainEigen * pmtADCValue;
+
+    int gridSize = mLutSize / 3;//45
+    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize, gridSize, mLutSize - 1, gridSize, mLutSize - 1, normalizedPMTValue);
+
+    int gridSize2 = mLutSize / 9;//14
+    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize2, get<0>(maxPoint) - gridSize * 0.6, get<0>(maxPoint) + gridSize * 0.6, get<1>(maxPoint) - gridSize*0.6, get<1>(maxPoint) + gridSize*0.6, normalizedPMTValue);
+
+    int gridSize3 = mLutSize / 27;//3
+    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize3, get<0>(maxPoint) - gridSize2 * 0.6, get<0>(maxPoint) + gridSize2 * 0.6, get<1>(maxPoint) - gridSize2 * 0.6, get<1>(maxPoint) + gridSize2 * 0.6, normalizedPMTValue);
+
+
+
+
+    int gridSize4 = 1;
+    maxPoint = FastMLPosEstimationFindMaxIndex(gridSize4, get<0>(maxPoint) - gridSize3 * 0.6, get<0>(maxPoint) + gridSize3 * 0.6, get<1>(maxPoint) - gridSize3 * 0.6, get<1>(maxPoint) + gridSize3 * 0.6, normalizedPMTValue);
+
+    ////int gridSize5 = 1;
+    //maxPoint = FastMLPosEstimationFindMaxIndex(gridSize5, get<0>(maxPoint) - gridSize4 - 5, get<0>(maxPoint) + gridSize4 + 5, get<1>(maxPoint) - gridSize4 - 5, get<1>(maxPoint) + gridSize4 + 5, normalizedPMTValue);
+
+    Eigen::Vector4d point;
+
+    point[0] = (static_cast<double>(get<0>(maxPoint)) - static_cast<double>(mLutSize - 1) / 2.0) / 1000 + mModuleOffsetX;
+    point[1] = (static_cast<double>(get<1>(maxPoint)) - static_cast<double>(mLutSize - 1) / 2.0) / 1000 + mModuleOffsetY;
+    point[2] = mModuleOffsetZ;
+    point[3] = 1;
+    return point;
 }
 
 const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const
@@ -335,6 +429,15 @@ const double HUREL::Compton::Module::GetEcal(const unsigned short pmtADCValue[])
         return static_cast<double>(NAN);
     }
     sumEnergy += mGain[9];
+    return mEnergyCalibrationA * sumEnergy * sumEnergy + mEnergyCalibrationB * sumEnergy + mEnergyCalibrationC;
+}
+const double HUREL::Compton::Module::GetEcal(const Eigen::Array<double, 1, 9>& pmtADCValue) const
+{
+    double sumEnergy = (pmtADCValue * mGainEigen).sum();
+    if (sumEnergy == 0)
+    {
+        return static_cast<double>(NAN);
+    }
     return mEnergyCalibrationA * sumEnergy * sumEnergy + mEnergyCalibrationB * sumEnergy + mEnergyCalibrationC;
 }
 

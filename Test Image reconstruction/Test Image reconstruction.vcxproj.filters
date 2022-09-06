@@ -18,6 +18,9 @@
     <ClCompile Include="Test Image reconstruction.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="TestFuncs.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="cat.jpg">
@@ -31,5 +34,10 @@
     <None Include="20220706_DigitalLabScan_100uCi_-1,0,2.4_cpplmdata.csv">
       <Filter>리소스 파일</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TestFuncs.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
