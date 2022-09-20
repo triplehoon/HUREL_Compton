@@ -15,6 +15,7 @@ Boolean HUREL::Compton::RtabmapWrapper::InitiateRtabmap()
 
 	if (mIsInitiated)
 	{
+		RtabmapCppWrapper::instance().StartVideoStream();
 		return true;
 	}
 	else

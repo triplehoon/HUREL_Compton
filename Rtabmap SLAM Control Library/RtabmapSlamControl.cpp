@@ -118,7 +118,7 @@ static std::future<void> t1;
 
 void HUREL::Compton::RtabmapSlamControl::StartVideoStream()
 {
-	if (!mIsInitiate)
+	if (!mIsInitiate || mIsVideoStreamOn)
 	{
 		return;
 	}
@@ -168,7 +168,17 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			{
 				mCurrentDepthFrame = imgDepth;
 			}
-			videoStreamMutex.unlock();
+			if (mOdo != nullptr)
+			{
+				mCurrentOdometry = mOdo->getPose().toEigen4d();
+				videoStreamMutex.unlock();
+			}
+			else
+			{
+				videoStreamMutex.unlock();
+			}
+			
+			
 			//pcMutex.lock();
 			//mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
 			//	6.0f,        // maximum depth of the cloud

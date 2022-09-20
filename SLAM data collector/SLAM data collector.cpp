@@ -1,9 +1,12 @@
 ﻿// SLAM data collector.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+
 #include <iostream>
 #include <chrono>
 #include <vector>
+
+#include <open3d/visualization/utility/DrawGeometry.h>
 
 #include "RtabmapSlamControl.h"
 #include "Logger.h"
@@ -47,6 +50,10 @@ int main()
             break;
         }
         cv::Mat img = SlamControl.GetCurrentVideoFrame();
+        if (img.size == 0)
+        {
+            continue;
+        }
         cv::imshow("img", img);        
         poses.push_back(SlamControl.GetOdomentry());
         timePoints.push_back(chrono::system_clock::now());
@@ -78,6 +85,10 @@ int main()
 
 
     open3d::geometry::PointCloud pc = SlamControl.GetSlamPointCloud();
+   
+
+    
+    open3d::visualization::DrawGeometries({ pc.VoxelDownSample(0.05) });
     open3d::io::WritePointCloudOption option;
     open3d::io::WritePointCloudToPLY(FileName + ".ply", pc, option);
     SlamControl.StopSlamPipe();

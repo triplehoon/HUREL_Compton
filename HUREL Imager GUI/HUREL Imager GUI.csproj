@@ -11,6 +11,7 @@
 	  <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	  <Platforms>AnyCPU;x64</Platforms>
 	  <AnalysisLevel>latest</AnalysisLevel>
+	  <Configurations>Debug;Release;DebugGui</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -19,6 +20,12 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>embedded</DebugType>
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugGui|AnyCPU'">
+    <DebugType>embedded</DebugType>
+    <Optimize>False</Optimize>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -27,6 +34,12 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebugType>embedded</DebugType>
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugGui|x64'">
+    <DebugType>embedded</DebugType>
+    <Optimize>False</Optimize>
   </PropertyGroup>
 
   <ItemGroup>

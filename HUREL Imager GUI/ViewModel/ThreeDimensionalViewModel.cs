@@ -1,4 +1,5 @@
-﻿using HelixToolkit.Wpf.SharpDX;
+﻿using AsyncAwaitBestPractices.MVVM;
+using HelixToolkit.Wpf.SharpDX;
 using HUREL.Compton;
 using SharpDX;
 using System;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
 namespace HUREL_Imager_GUI.ViewModel
@@ -170,6 +172,20 @@ namespace HUREL_Imager_GUI.ViewModel
                 OnPropertyChanged(nameof(SLAMReconPointCloud));
             }
         }
+
+        private AsyncCommand? startSlamCommand = null;
+        public ICommand StartSlamCommand
+        {
+            get { return startSlamCommand ?? (startSlamCommand = new AsyncCommand(StartSlam)); }
+        }
+        private async Task StartSlam()
+        {
+            await Task.Run(() =>
+            {
+                LahgiApi.StartSlam();
+            });
+        }
+
 
         public override void Unhandle()
         {

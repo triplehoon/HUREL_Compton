@@ -351,13 +351,13 @@ namespace HUREL.Compton
             }
             StatusMsg = "Add List Mode Data loop ended";
         }
-        private static void StartSlam()
+        public static void StartSlam()
         {
             string temp = "";
             rtabmapWrapper.StartSLAM();
             StatusMsg = temp;                        
         }
-        private static void StopSlam()
+        public static void StopSlam()
         {
             rtabmapWrapper.StopSLAM();            
         }
