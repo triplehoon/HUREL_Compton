@@ -17,7 +17,7 @@
         <TextBlock Text="3-D view" Margin="5" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         <syncfusion:ButtonAdv x:Name="SetupButton" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right" Label="Setting" IsCheckable="True" d:IsChecked="True">
 
-            <Popup x:Name="SetupButtonPopup" d:IsOpen="True"
+            <Popup x:Name="SetupButtonPopup" d:IsOpen="True" 
                    IsOpen="{Binding Path=IsChecked, ElementName=SetupButton, Mode=OneWay}" 
                    Placement="Left" PlacementTarget="{Binding ElementName=SetupButton}">
                 <Border BorderThickness="3" Width="200"   BorderBrush="{StaticResource CustomDarkBlue}" Background="White">

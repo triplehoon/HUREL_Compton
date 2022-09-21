@@ -1,9 +1,10 @@
-﻿
+﻿using log4net;
 using Python.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace HUREL.Compton.RadioisotopeAnalysis
 {
@@ -236,19 +237,36 @@ namespace HUREL.Compton.RadioisotopeAnalysis
 
     public class SpectrumEnergyNasa : SpectrumEnergy
     {
+        private static bool isPyModuleLoaded = false;
+        private void initiate()
+        {
+            if (!isPyModuleLoaded)
+            {
+                using (Py.GIL())
+                {
+                    dynamic np = Py.Import("numpy");
+                    dynamic nasagamma = Py.Import("nasagamma");
+                }
+                isPyModuleLoaded = true;
+            }
+        }
+
         public SpectrumEnergyNasa(double binSize, double maxEnergy) : base(binSize, maxEnergy)
         {
-            
+            initiate();
         }
+
+            
         public SpectrumEnergyNasa(SpectrumEnergyNasa spectrum) : base(spectrum)
         {
-            
+            initiate();
         }
         public SpectrumEnergyNasa(List<HistoEnergy> histoEnergies) :base(histoEnergies)
         {
-           
 
+            initiate();
         }
+        private static Mutex PyMutex = new Mutex();
         public List<double> FindPeaks(float ref_x, float ref_fwhm, float fwhm_at_0, float min_snr)
         {
             
@@ -262,9 +280,9 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 ernergyBin.Add(HistoEnergies[i].Energy + BinSize / 2);
                 energyBinCount.Add(HistoEnergies[i].Count);
             }
-            PythonEngine.Initialize();
-            //var m_threadState = PythonEngine.BeginAllowThreads(); ;
-
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            PyMutex.WaitOne();                       
             using (Py.GIL())
             {
                 dynamic np = Py.Import("numpy");
@@ -272,10 +290,10 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 dynamic sp = nasagamma.spectrum;
                 dynamic ps = nasagamma.peaksearch;
 
-                
+
                 dynamic cts_np = np.array(energyBinCount);
 
-              
+
                 dynamic erg = np.array(ernergyBin);
 
                 dynamic spect = sp.Spectrum(cts_np, null, erg, "keV");
@@ -290,11 +308,17 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                     {
                         PeakE.Add((double)erg[peakIdx[i] + 2]);
                     }
-                    
+
                 }
             }
+            PyMutex.ReleaseMutex();
+            sw.Stop();
+            LogManager.GetLogger("Energy Spectrum").Info($"Elapsed: {sw.ElapsedMilliseconds} [ms]");
+            
+            
+
             //PythonEngine.EndAllowThreads(m_threadState);
-           // PythonEngine.Shutdown();
+            // PythonEngine.Shutdown();
 
 
             return PeakE;

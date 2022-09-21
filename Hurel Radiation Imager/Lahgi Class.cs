@@ -10,8 +10,12 @@ namespace HUREL.Compton
 {
     public enum eLahgiApiEnvetArgsState
     {
-        Loading,
-        Slam
+        LoadedImages,
+        SlamPoints,
+        SlamRadImage,
+        Spectrum,
+        Massage,
+        Status
     }
     public class LahgiApiEnvetArgs:EventArgs
     {
@@ -19,7 +23,7 @@ namespace HUREL.Compton
         public LahgiApiEnvetArgs(eLahgiApiEnvetArgsState state)
         {
             State = state;
-        }
+        }  
     }
     public static class LahgiApi
     {
@@ -31,11 +35,13 @@ namespace HUREL.Compton
         public static CRUXELLLACC.VariableInfo fpgaVariables;
 
         public static EventHandler? StatusUpdate;
-        public static void StatusUpdateInvoke(object? obj, EventArgs args)
+        
+        public static void StatusUpdateInvoke(object? obj, eLahgiApiEnvetArgsState state)
         {
-            StatusUpdate?.Invoke(obj, args);
+            StatusUpdate?.Invoke(obj, new LahgiApiEnvetArgs(state));
 
-        }
+        }       
+
         private static string statusMsg = "";
         public static string StatusMsg
         {
@@ -49,7 +55,7 @@ namespace HUREL.Compton
                 log = LogManager.GetLogger("LahgiApi");
                 log.Info(value);
                 statusMsg = value;
-                StatusUpdateInvoke(null, EventArgs.Empty);
+                StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Massage);
             }
         }
         public static bool IsSavingBinary
@@ -82,7 +88,6 @@ namespace HUREL.Compton
             rtabmapWrapper = new RtabmapWrapper();
             StatusMsg = "Wrappers loaded";
 
-            StatusUpdateInvoke(null, EventArgs.Empty);
             IsSavingBinary = false;
             UpdateDeviceList(null, EventArgs.Empty);
         }                
@@ -94,14 +99,14 @@ namespace HUREL.Compton
             {
                 StatusMsg = "Successfully initiate Lahgi";
                 IsLahgiInitiate = true;
-                StatusUpdateInvoke(null, EventArgs.Empty);
+                StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
                 return true;
             }
             else
             {
                 StatusMsg = "Fail to initiate Lahgi";
                 IsLahgiInitiate = false;
-                StatusUpdateInvoke(null, EventArgs.Empty);
+                StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
                 return false;
             }
         }
@@ -114,14 +119,14 @@ namespace HUREL.Compton
             {
                 StatusMsg = "Successfully initiate Rtabmap";
                 IsRtabmapInitiate = true;
-                StatusUpdateInvoke(null, EventArgs.Empty);
+                StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
                 return true;
             }
             else
             {
                 StatusMsg = "Fail to initiate Rtabmap";
                 IsRtabmapInitiate = false;
-                StatusUpdateInvoke(null, EventArgs.Empty);
+                StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
                 return false;
             }
         }
@@ -202,20 +207,20 @@ namespace HUREL.Compton
                 StatusMsg = "FPGA usb is unconnected";
                 IsFpgaAvailable = false;
             }
-            StatusUpdateInvoke(null, EventArgs.Empty);
+            StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
         }
         private static bool isSessionStart = false;
         public static bool IsSessionStart
         {
             get { return isSessionStart; }
-            private set { StatusUpdateInvoke(null, EventArgs.Empty); isSessionStart = value; }
+            private set { StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status); isSessionStart = value; }
         }
         private static bool isSessionStarting = false;
 
         public static bool IsSessionStarting
         {
             get { return isSessionStarting; }
-            private set { StatusUpdateInvoke(null, EventArgs.Empty); isSessionStarting = value; }
+            private set { StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status); isSessionStarting = value; }
         }
 
         public static async Task StartSessionAsync(string fileName, CancellationTokenSource tokenSource)
@@ -247,11 +252,8 @@ namespace HUREL.Compton
                     {
                         IsSessionStart = true;
                         StartSlam();
-                        System.Timers.Timer aTimer = new System.Timers.Timer(100);
-                        // Hook up the Elapsed event for the timer. 
-                        aTimer.Elapsed += StatusUpdateInvoke;
-                        aTimer.Start();
-                        StatusUpdateInvoke(null, new LahgiApiEnvetArgs(eLahgiApiEnvetArgsState.Slam));
+                
+                        StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
                         isSessionStarting = false;
                         await Task.Run(() => AddListModeData(tokenSource)).ConfigureAwait(false);
 
@@ -259,8 +261,6 @@ namespace HUREL.Compton
 
                         StatusMsg = await fpga.Stop_usb();
                         await Task.Run(() => StopSlam());
-                        aTimer.Stop();
-                        aTimer.Elapsed -= StatusUpdateInvoke;
                         StatusMsg = "Saving CSV file";
                         string saveFileName = Path.GetDirectoryName(fpga.FileMainPath) + "\\" + fileName;
                         lahgiWrapper.SaveListModeData(saveFileName + "_LMData.csv");
@@ -290,6 +290,9 @@ namespace HUREL.Compton
 
             return;
         }
+
+        
+
         public record AddListModeDataEchk(double MinE, double MaxE);
 
         private static bool isEchksChanged = false;
@@ -353,9 +356,8 @@ namespace HUREL.Compton
         }
         public static void StartSlam()
         {
-            string temp = "";
             rtabmapWrapper.StartSLAM();
-            StatusMsg = temp;                        
+            StatusMsg = "Slam Started";
         }
         public static void StopSlam()
         {
@@ -396,10 +398,7 @@ namespace HUREL.Compton
         public static double SystemPoseZ { get; private set; }
         public static bool GetSLAMPointCloud(ref List<double[]> poseVect, ref List<double[]> colorVect)
         {
-            if (!IsSessionStart)
-            {
-                return false;
-            }
+            
             rtabmapWrapper.GetSLAMPointCloud(ref poseVect, ref colorVect);
             if (poseVect.Count == 0 || colorVect.Count == 0)
             {

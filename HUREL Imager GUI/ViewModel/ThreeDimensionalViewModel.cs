@@ -120,7 +120,10 @@ namespace HUREL_Imager_GUI.ViewModel
 
         private void UpdateRealtimeSlamPointCloud()
         {
-            updateLoadDataMutex.WaitOne();
+            if(!updateLoadDataMutex.WaitOne(100))
+            {
+                return;
+            };
             var vc = new Vector3Collection();
             var cc = new Color4Collection();
             var tempposeVect = new List<double[]>();
