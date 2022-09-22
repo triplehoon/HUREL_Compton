@@ -200,6 +200,8 @@
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="CppWrapper.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="Lahgi wrapper.cpp" />
     <ClCompile Include="LogWrapperCaller.cpp" />

@@ -1,5 +1,8 @@
 #pragma once
+#include <string>
 #include <vector>
+
+#include "Logger.h"
 
 namespace HUREL {
 	namespace Compton {

@@ -10,7 +10,7 @@ namespace HUREL.Compton
 {
     public enum eLahgiApiEnvetArgsState
     {
-        LoadedImages,
+        Loading,
         SlamPoints,
         SlamRadImage,
         Spectrum,
@@ -40,7 +40,26 @@ namespace HUREL.Compton
         {
             StatusUpdate?.Invoke(obj, new LahgiApiEnvetArgs(state));
 
-        }       
+        }
+        
+        private static bool timerBoolSlamPoints = false;
+        private static bool timerBoolSlamRadImage = false;
+        private static bool timerBoolSpectrum = false;
+        private static void UpdateTimerInvoker(object? obj, EventArgs args)
+        {           
+            if (timerBoolSlamPoints)
+            {
+                StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.SlamPoints);
+            }
+            if (timerBoolSlamRadImage)
+            {
+                StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.SlamRadImage);
+            }
+            if (timerBoolSpectrum)
+            {
+                StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
+            }
+        }
 
         private static string statusMsg = "";
         public static string StatusMsg
@@ -90,6 +109,11 @@ namespace HUREL.Compton
 
             IsSavingBinary = false;
             UpdateDeviceList(null, EventArgs.Empty);
+
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Interval = 100;
+            timer.Elapsed += UpdateTimerInvoker;
+            timer.Start();
         }                
         public static bool InitiateLaghi()
         {
@@ -255,8 +279,12 @@ namespace HUREL.Compton
                 
                         StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
                         isSessionStarting = false;
+                        timerBoolSpectrum = true;
+                        timerBoolSlamRadImage = true;
                         await Task.Run(() => AddListModeData(tokenSource)).ConfigureAwait(false);
 
+                        timerBoolSpectrum = false;
+                        timerBoolSlamRadImage = false;
                         IsSessionStarting = false;
 
                         StatusMsg = await fpga.Stop_usb();
@@ -357,11 +385,14 @@ namespace HUREL.Compton
         public static void StartSlam()
         {
             rtabmapWrapper.StartSLAM();
+            timerBoolSlamPoints = true;
             StatusMsg = "Slam Started";
         }
         public static void StopSlam()
         {
-            rtabmapWrapper.StopSLAM();            
+            timerBoolSlamPoints = false;
+            rtabmapWrapper.StopSLAM();    
+            
         }
         private static Matrix3D currentSystemTranformation = Matrix3D.Identity;
         public static Matrix3D CurrentSystemTranformation
@@ -417,6 +448,27 @@ namespace HUREL.Compton
             return true;
         }
         
+        public static bool GetOptimizedPoses(ref List<Matrix3D> matrixes)
+        {
+            matrixes = new List<Matrix3D>();
+            List<double[]> posesMat = new List<double[]>();
+
+            rtabmapWrapper.GetOptimizePoses(ref posesMat);
+            if (posesMat.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (var marix3DElement in posesMat)
+            {
+                Matrix3D pose = new Matrix3D(marix3DElement[0], marix3DElement[1], marix3DElement[2], marix3DElement[3],
+                                            marix3DElement[4], marix3DElement[5], marix3DElement[6], marix3DElement[7],
+                                            marix3DElement[8], marix3DElement[9], marix3DElement[10], marix3DElement[11],
+                                            marix3DElement[12], marix3DElement[13], marix3DElement[14], marix3DElement[15]);
+                matrixes.Add(pose);
+            }
+            return true;
+        }
         public static SpectrumEnergyNasa GetSpectrumEnergy(int channelNumber)
         {
             if (!IsLahgiInitiate)
@@ -453,7 +505,7 @@ namespace HUREL.Compton
         {
             if (!IsLahgiInitiate)
             {
-                return new SpectrumEnergyNasa(5, 3000);
+                return new SpectrumEnergyNasa(10, 3000);
             }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetAbsorberSumSpectrum(ref eCount);
@@ -469,7 +521,7 @@ namespace HUREL.Compton
         {
             if (!IsLahgiInitiate)
             {
-                return new SpectrumEnergyNasa(5, 3000);
+                return new SpectrumEnergyNasa(10, 3000);
             }
             List<double[]> eCount = new List<double[]>();
             lahgiWrapper.GetScatterSumSpectrum(ref eCount);

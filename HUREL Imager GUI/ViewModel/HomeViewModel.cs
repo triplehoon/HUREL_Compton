@@ -1,9 +1,13 @@
 ﻿using HUREL.Compton;
+using HUREL.Compton.RadioisotopeAnalysis;
 using log4net;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -62,6 +66,21 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
+        private DoseRateViewModel _doseRateViewModel;
+        public DoseRateViewModel DoseRateViewModel
+        {
+            get
+            {
+                return _doseRateViewModel;
+            }
+            set
+            {
+                _doseRateViewModel = value;
+                OnPropertyChanged(nameof(DoseRateViewModel));
+            }
+        }
+
+
         private BitmapImage realtimeRGB;
         public BitmapImage RealtimeRGB
         {
@@ -87,12 +106,43 @@ namespace HUREL_Imager_GUI.ViewModel
             SpectrumViewModel = new SpectrumViewModel();
             ThreeDimensionalViewModel = new ThreeDimensionalViewModel();
             SourceDirectionViewModel = new SourceDirectionViewModel();
+            DoseRateViewModel = new DoseRateViewModel();
 
             TestValue = "Hello World";
             logger.Info("HomeViewModel Loaded");
             LoopTask = Task.Run(Loop);
+
+            LahgiApi.StatusUpdate += StatusUpdate;
         }
 
+        private string statusMsg = "test";
+        public string StatusMsg
+        {
+            get { return statusMsg; }
+            set { statusMsg = value; OnPropertyChanged(nameof(StatusMsg)); }
+        }
+
+        Mutex StatusUpdateMutex = new Mutex();
+        public void StatusUpdate(object? obj, EventArgs eventArgs)
+        {
+            if (!StatusUpdateMutex.WaitOne(100))
+            {
+                return;
+            }
+            if (eventArgs is LahgiApiEnvetArgs)
+            {
+                LahgiApiEnvetArgs lahgiApiEnvetArgs = (LahgiApiEnvetArgs)eventArgs;
+
+                if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Massage)
+                {
+                    StatusMsg = LahgiApi.StatusMsg;
+                }
+            }
+            StatusUpdateMutex.ReleaseMutex();
+
+        }
+
+               
         private Task LoopTask;
         private bool RunLoop = true;
         private void Loop()
@@ -119,11 +169,13 @@ namespace HUREL_Imager_GUI.ViewModel
         {
             SpectrumViewModel.Unhandle();
             TopButtonViewModel.Unhandle();
+            DoseRateViewModel.Unhandle();
             if (LoopTask != null)
             {
                 RunLoop = false;
                 LoopTask.Wait();
             }
+            LahgiApi.StatusUpdate -= StatusUpdate;
         }
     }
 }

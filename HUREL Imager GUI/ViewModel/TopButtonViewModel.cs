@@ -116,7 +116,7 @@ namespace HUREL_Imager_GUI.ViewModel
             {
                 return;
             }
-            LahgiApi.StatusUpdateInvoke(null, new LahgiApiEnvetArgs(eLahgiApiEnvetArgsState.Loading));
+            LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Loading);
 
             dlg = new OpenFileDialog();
             dlg.Filter = "csv files(*.csv)| *.csv";
@@ -133,7 +133,7 @@ namespace HUREL_Imager_GUI.ViewModel
             }
 
 
-            LahgiApi.StatusUpdateInvoke(null, new LahgiApiEnvetArgs(eLahgiApiEnvetArgsState.Loading));
+            LahgiApi.StatusUpdateInvoke(null,eLahgiApiEnvetArgsState.Loading);
             
         }
 

@@ -70,9 +70,9 @@ bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 	mListedListModeData.reserve(50000);	
 	mListModeDataMutex.unlock();
 
-	mSumSpectrum = EnergySpectrum(5, 3000);
-	mScatterSumSpectrum = EnergySpectrum(5, 3000);
-	mAbsorberSumSpectrum = EnergySpectrum(5, 3000);
+	mSumSpectrum = EnergySpectrum(10, 3000);
+	mScatterSumSpectrum = EnergySpectrum(10, 3000);
+	mAbsorberSumSpectrum = EnergySpectrum(10, 3000);
 	mModuleType = type;
 	switch (type)
 	{
@@ -636,6 +636,7 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 		if (temp.ReadListModeData(buffer))
 		{
 			mListedListModeData.push_back(temp);
+
 		}
 	}
 
@@ -891,7 +892,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 
 	std::vector<ListModeData> reconLm;
 	reconLm.reserve(tempLMData.size());
-	assert(0, "temp energy search");
+	//assert(0, "temp energy search");
 	for (const auto lm : tempLMData)
 	{
 		if (lm.Absorber.InteractionEnergy + lm.Scatter.InteractionEnergy > 620 && lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 700)

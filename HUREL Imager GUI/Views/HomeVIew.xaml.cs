@@ -24,5 +24,6 @@ namespace HUREL_Imager_GUI.Views
         {
             InitializeComponent();
         }
+
     }
 }

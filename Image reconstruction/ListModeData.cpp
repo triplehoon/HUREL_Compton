@@ -2,7 +2,7 @@
 
 using namespace HUREL::Compton;
 using namespace std;
-
+#include "Logger.h"
 string PrintEigenInOneLine(Eigen::Matrix4d m);
 
 string ListModeData::WriteListModeData()
@@ -39,7 +39,6 @@ bool ListModeData::ReadListModeData(string data)
     this->Scatter.RelativeInteractionPoint[1] = stod(words[2]);
     this->Scatter.RelativeInteractionPoint[2] = stod(words[3]);
     this->Scatter.InteractionEnergy = stod(words[4]);
-
 
     this->Absorber.RelativeInteractionPoint[0] = stod(words[5]);
     if (!isnan(this->Absorber.RelativeInteractionPoint[0]) &&  !(isnan(this->Scatter.RelativeInteractionPoint[0])))

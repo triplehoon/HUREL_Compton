@@ -107,7 +107,7 @@ namespace HUREL {
 			std::vector<double> getMatrix3DOneLineFromPoseData();
 
 			std::vector<ReconPointCppWrapper> GetReconSLAMPointCloud(double time, eReconCppWrapper reconType, double voxelSize, bool useLoaded);
-
+			std::vector<std::vector<double>> GetOptimizedPoses();
 			static RtabmapCppWrapper& instance();
 		};
 

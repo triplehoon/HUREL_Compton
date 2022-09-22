@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="HUREL_Imager_GUI.Components.DoseRateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
+                          xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+        xmlns:globalization="clr-namespace:System.Globalization;assembly=mscorlib" 
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
+            <TextBlock Text="Counting Time: " VerticalAlignment="Center" FontSize="{StaticResource FontSize-Larger}"/>
+            <syncfusion:UpDown VerticalAlignment="Center" HorizontalAlignment="Right"
+                            FontSize="{StaticResource FontSize-Larger}"
+                               MinValue="1" Step="1" Value="{Binding DoseCalcTime}"  Width="100" NumberDecimalDigits="0"                               
+                               TextAlignment="Right" Culture="ko-KP"
+                           IsScrollingOnCircle="True"
+                               >
+            </syncfusion:UpDown>
+            <TextBlock Text=" S" VerticalAlignment="Center" FontSize="{StaticResource FontSize-Larger}"/>
+        </StackPanel>
+       
+
+        <syncfusion:SfCircularGauge Grid.Row="0" HeaderAlignment="Bottom" Margin="0" >
+            <syncfusion:SfCircularGauge.GaugeHeader>
+                <TextBlock Text="Dose rate [Sv/h]" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold"/>
+            </syncfusion:SfCircularGauge.GaugeHeader>
+            <syncfusion:SfCircularGauge.Scales>
+                <syncfusion:CircularScale EndValue="8" Interval="1" LabelCreated="scale_LabelCreated" LabelPosition="Custom" 
+                                          LabelOffset="0.6" MinorTicksPerInterval="0"  LabelStroke="Black" FontSize="{StaticResource FontSize-Normal}" FontWeight="Bold">
+                    <syncfusion:CircularScale.Ranges>
+                        <syncfusion:CircularRange StartValue="0" EndValue="4" 
+                                         Stroke="Green" StrokeThickness ="10"/>
+                        <syncfusion:CircularRange StartValue="4" EndValue="7" 
+                                         Stroke="Yellow" StrokeThickness ="10"/>
+                        <syncfusion:CircularRange StartValue="7" EndValue="8" 
+                                         Stroke="Red" StrokeThickness ="10"/>
+                    </syncfusion:CircularScale.Ranges>
+                    <syncfusion:CircularScale.Pointers>
+                        <syncfusion:CircularPointer Symbol="InvertedTriangle" Value="{Binding DoseLogScale}" 
+                                                    PointerType="SymbolPointer" NeedleLengthFactor="0.5" 
+                                                    SymbolPointerStroke="Black"/>
+                    </syncfusion:CircularScale.Pointers>
+                </syncfusion:CircularScale>
+
+            </syncfusion:SfCircularGauge.Scales>
+
+        </syncfusion:SfCircularGauge>
+    </Grid>
+</UserControl>

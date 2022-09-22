@@ -47,7 +47,7 @@ namespace HUREL {
 
 				bool LoadPlyFile(System::String^ filePath);
 				void GetLoadedPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
-
+				void GetOptimizePoses(List<array<double>^>^% poses);
 				RtabmapWrapper();
 				~RtabmapWrapper();
 				!RtabmapWrapper();

@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 
 namespace HUREL_Imager_GUI.ViewModel
 {
@@ -76,10 +77,14 @@ namespace HUREL_Imager_GUI.ViewModel
                 {
                     UpdateLoadedSlamPointCloud();
                 }             
-                else if(lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Slam)
+                else if(lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.SlamPoints)
                 {
                     UpdateRealtimeSlamPointCloud();
                 }
+                else if(lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.SlamRadImage)
+                {
+                    UpateRealtimeReconSlamPointCloud();
+                }                
             }
         }
 
@@ -138,8 +143,39 @@ namespace HUREL_Imager_GUI.ViewModel
 
             SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
 
+            UpdateRealtimeSlamPoseGraph();
+
+
+            updateLoadDataMutex.ReleaseMutex();
+
+
+        }
+        private void UpdateRealtimeSlamPoseGraph()
+        {
+            var line = new LineBuilder();
+            List<Matrix3D> poses = new List<Matrix3D>();
+            if (LahgiApi.GetOptimizedPoses(ref poses))
+            {
+                
+                line.AddLine(new Vector3(0, 0, 0), new Vector3((float)poses[0].OffsetX, (float)poses[0].OffsetY, (float)poses[0].OffsetZ));
+                for (int i = 1; i < poses.Count; i++)
+                {
+                    line.AddLine(
+                        new Vector3((float)poses[i - 1].OffsetX, (float)poses[i - 1].OffsetY, (float)poses[i - 1].OffsetZ),
+                        new Vector3((float)poses[i].OffsetX, (float)poses[i].OffsetY, (float)poses[i].OffsetZ));
+                }
+                SLAMPoseInfo = line.ToLineGeometry3D();
+            }
+
+        }
+        private static Mutex updateReconSlamPointMutex = new Mutex();
+        private void UpateRealtimeReconSlamPointCloud()
+        {
+            updateReconSlamPointMutex.WaitOne(100);
             var vc2 = new Vector3Collection();
             var cc2 = new Color4Collection();
+            var tempposeVect = new List<double[]>();
+            var tempColorVect = new List<double[]>();
             LahgiApi.GetReconSLAMPointCloud(0, eReconManaged.COMPTON, ref tempposeVect, ref tempColorVect, 0.01, false);
             for (int i = 0; i < tempposeVect.Count; i++)
             {
@@ -148,11 +184,10 @@ namespace HUREL_Imager_GUI.ViewModel
             }
 
             SLAMReconPointCloud = new PointGeometry3D() { Positions = vc2, Colors = cc2 };
-
-            updateLoadDataMutex.ReleaseMutex();
-
-
+            updateReconSlamPointMutex.ReleaseMutex();
         }
+
+
 
         private PointGeometry3D slamPointCloud = new PointGeometry3D();
         public PointGeometry3D SLAMPointCloud
@@ -175,6 +210,13 @@ namespace HUREL_Imager_GUI.ViewModel
                 OnPropertyChanged(nameof(SLAMReconPointCloud));
             }
         }
+        private LineGeometry3D slamPoseInfo;
+        public LineGeometry3D SLAMPoseInfo
+        {
+            get { return slamPoseInfo; }
+            set { slamPoseInfo = value; OnPropertyChanged(nameof(SLAMPoseInfo)); }
+        }
+
 
         private AsyncCommand? startSlamCommand = null;
         public ICommand StartSlamCommand

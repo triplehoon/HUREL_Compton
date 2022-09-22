@@ -4,13 +4,6 @@
 
 using namespace HUREL::Compton;
 
-class test
-{
-public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-};
-
-
 
 LahgiCppWrapper& HUREL::Compton::LahgiCppWrapper::instance()
 {
@@ -122,11 +115,11 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
 
-
+	
 	int reconStartIndex = 0;
 
 
-	EnergySpectrum spectClass = EnergySpectrum(5, 3000);;
+	EnergySpectrum spectClass = EnergySpectrum(10, 3000);;
 	for (int i = lmData.size(); i--; i >= 0)
 	{
 		if (time != 0 && t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time))
@@ -261,7 +254,7 @@ bool HUREL::Compton::RtabmapCppWrapper::LoadPlyFile(std::string filePath)
 
 std::vector<double> HUREL::Compton::RtabmapCppWrapper::getMatrix3DOneLineFromPoseData()
 {
-	return std::vector<double>();
+	return RtabmapSlamControl::instance().getMatrix3DOneLineFromPoseData();;
 }
 
 bool HUREL::Compton::RtabmapCppWrapper::GetCurrentVideoFrame(uint8_t** outImgPtr, int* outWidth, int* outHeight, int* outStride, int* outChannelSize)
@@ -339,6 +332,33 @@ std::vector<ReconPointCppWrapper>  HUREL::Compton::RtabmapCppWrapper::GetReconSL
 
 	return pc;
 
+}
+
+std::vector<std::vector<double>> HUREL::Compton::RtabmapCppWrapper::GetOptimizedPoses()
+{
+	
+	std::vector<Eigen::Matrix4d> poses = RtabmapSlamControl::instance().GetOptimizedPoses();
+	std::vector<std::vector<double>> returnPoses;
+	returnPoses.reserve(poses.size());
+	for (int i = 0; i < poses.size(); ++i)
+	{
+		Eigen::Matrix4d m = poses[i];
+		auto Matrix3Dtype = m.adjoint();
+		std::vector<double> matrix3DOneLine;
+		matrix3DOneLine.reserve(16);
+		int idx = 0;
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				matrix3DOneLine.push_back(Matrix3Dtype(i, j));
+				idx++;
+			}
+		}
+		returnPoses.push_back(matrix3DOneLine);
+	}
+	
+
+
+	return returnPoses;
 }
 
 

@@ -70,7 +70,7 @@ namespace HUREL
 			RtabmapSlamControl();
 
 			open3d::geometry::PointCloud mLoadedPointcloud = open3d::geometry::PointCloud();
-
+			std::vector < Eigen::Matrix4d> mPoses = std::vector<Eigen::Matrix4d>();
 			void LockVideoFrame();
 
 			void UnlockVideoFrame();
@@ -87,6 +87,8 @@ namespace HUREL
 
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			Eigen::Matrix4d GetOdomentry();
+
+			std::vector< Eigen::Matrix4d> GetOptimizedPoses();
 
 			cv::Mat GetCurrentVideoFrame();
 			cv::Mat GetCurrentDepthFrame();

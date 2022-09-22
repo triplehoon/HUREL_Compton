@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HUREL_Imager_GUI.ViewModel
@@ -22,10 +23,23 @@ namespace HUREL_Imager_GUI.ViewModel
         public BottomSatusViewModel()
         {
             LahgiApi.StatusUpdate += UpdateLogMsg;
-            Hierarchy? hierarchy = LogManager.GetRepository() as Hierarchy;
+            LahgiApi.StatusUpdate += StatusUpdate;
+           Hierarchy? hierarchy = LogManager.GetRepository() as Hierarchy;
             mappender = hierarchy?.Root.GetAppender("MemoryAppender") as MemoryAppender;
 
         }
+
+        Mutex StatusUpdateMutex = new Mutex();
+        public void StatusUpdate(object? obj, EventArgs eventArgs)
+        {
+            if (!StatusUpdateMutex.WaitOne(100))
+            {
+                return;
+            }
+
+            StatusUpdateMutex.ReleaseMutex();
+        }
+
         private MemoryAppender? mappender;
         private void UpdateLogMsg(object? obj, EventArgs eventArgs)
         {
@@ -48,7 +62,8 @@ namespace HUREL_Imager_GUI.ViewModel
 
         public override void Unhandle()
         {
-            
+            LahgiApi.StatusUpdate -= UpdateLogMsg;
+            LahgiApi.StatusUpdate -= StatusUpdate;
         }
     }
 }

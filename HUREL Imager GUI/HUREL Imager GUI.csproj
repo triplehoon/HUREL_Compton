@@ -68,6 +68,7 @@
     <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
     <PackageReference Include="Syncfusion.Licensing" Version="19.4.0.47" />
     <PackageReference Include="Syncfusion.SfChart.WPF" Version="19.4.0.47" />
+    <PackageReference Include="Syncfusion.SfGauge.WPF" Version="19.4.0.47" />
     <PackageReference Include="Syncfusion.Shared.Base" Version="19.4.0.47" />
     <PackageReference Include="Syncfusion.Shared.WPF" Version="19.4.0.47" />
     <PackageReference Include="Syncfusion.UI.WPF.NET" Version="19.4.0.47" />

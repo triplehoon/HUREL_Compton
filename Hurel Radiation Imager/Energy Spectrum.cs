@@ -38,9 +38,9 @@ namespace HUREL.Compton.RadioisotopeAnalysis
             BinSize = binSize;
             MaxEnergy = maxEnergy;
             int binCount = (int)(MaxEnergy / binSize);
-            for (int i = 0; i < binCount; ++i)
+            for (int i = 0; i < binCount + 1; ++i)
             {
-                double energy = i * binSize;
+                double energy = i * binSize + binSize / 2;
 
                 EnergyBin.Add(energy);
                 HistoEnergies.Add(new HistoEnergy(energy));
@@ -237,7 +237,11 @@ namespace HUREL.Compton.RadioisotopeAnalysis
 
     public class SpectrumEnergyNasa : SpectrumEnergy
     {
+        private static List<double> GCoeff = new List<double>();
+        private static List<double> KermaCoeff = new List<double>();
+        private static List<double> H10Coeff = new List<double>();
         private static bool isPyModuleLoaded = false;
+        private static bool isGeDataLoaded = false;
         private void initiate()
         {
             if (!isPyModuleLoaded)
@@ -248,6 +252,114 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                     dynamic nasagamma = Py.Import("nasagamma");
                 }
                 isPyModuleLoaded = true;
+            }
+            if (!isGeDataLoaded)
+            {
+                StreamReader sr = new StreamReader("config/DoseData.csv");
+
+
+                string? line = sr.ReadLine();
+                if (line == null)
+                {
+                    return;
+                }
+                string[] data = line.Split(',');
+                foreach (var s in data)
+                {
+                    GCoeff.Add( Convert.ToDouble(s));
+                }
+                
+                line = sr.ReadLine();
+                if (line == null)
+                {
+                    return;
+                }
+                data = line.Split(',');
+                foreach (var s in data)
+                {
+                    H10Coeff.Add(Convert.ToDouble(s));
+                }
+
+                line = sr.ReadLine();
+                if (line == null)
+                {
+                    return;
+                }
+                data = line.Split(',');
+                foreach (var s in data)
+                {
+                    KermaCoeff.Add(Convert.ToDouble(s));
+                }
+
+                sr.Close();
+
+                isGeDataLoaded = true;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>uR/hr</returns>
+        public double GetExposure()
+        {
+            if (isGeDataLoaded && HistoEnergies.Count == 301)
+            {
+                double exp = 0;
+                for (int i = 0; i < HistoEnergies.Count; i++)
+                {
+                    exp += GCoeff[i] * HistoEnergies[i].Count;
+                }
+                return 0.22 * exp;
+            }
+            else
+            {
+                return 0.0;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>uSv/hr//sigma</returns>
+        public (double, double) GetAmbientDose(uint time)
+        {
+            double variance = 0;
+            if (isGeDataLoaded && HistoEnergies.Count == 301)
+            {
+                double exp = 0;
+                for (int i = 0; i < HistoEnergies.Count; i++)
+                {
+                    exp += H10Coeff[i] * HistoEnergies[i].Count / time;
+                    double countRateSigam = HistoEnergies[i].Count / time / time;
+                    variance += H10Coeff[i] * H10Coeff[i] * countRateSigam* countRateSigam;
+                }
+                return (0.19 * exp, Math.Sqrt(variance));
+            }
+            else
+            {
+                return (0.0, 0.0);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>uGy/hr</returns>
+        public double GetAirKerma()
+        {
+            if (isGeDataLoaded && HistoEnergies.Count == 301)
+            {
+                double exp = 0;
+                for (int i = 0; i < HistoEnergies.Count; i++)
+                {
+                    exp += KermaCoeff[i] * HistoEnergies[i].Count;
+                }
+                return 0.22 * exp;
+            }
+            else
+            {
+                return 0.0;
             }
         }
 
@@ -343,7 +455,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
             //new Isotope(IsotopeElement.Am241, new List<double>(){ 60 }, "Am-241", "Industrial"),
             new Isotope(IsotopeElement.Cs137, new List<double>(){ 662 }, "Cs-137", "Industrial"),
             new Isotope(IsotopeElement.Co60, new List<double>(){ 1173, 1332 }, "Co-60", "Industrial"),
-            new Isotope(IsotopeElement.Ba133, new List<double>(){ 276, 356 }, "Ba-133", "Industrial"),
+            new Isotope(IsotopeElement.Ba133, new List<double>(){80, 276, 356 }, "Ba-133", "Industrial"),
             new Isotope(IsotopeElement.Na22, new List<double>(){511, 1275 }, "Na-22", "Industrial"),
             new Isotope(IsotopeElement.K40, new List<double>(){1461 }, "K-40", "Background"),
             new Isotope(IsotopeElement.Tl208, new List<double>(){2615 }, "Tl-208", "Background")

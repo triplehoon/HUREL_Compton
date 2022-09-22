@@ -367,6 +367,8 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 
 		nodes = tmpnodes;
 		optimizedPoses = tmpOptimizedPoses;
+		std::vector < Eigen::Matrix4d> tempPoses;
+		tempPoses.reserve(optimizedPoses.size());
 		//https://cpp.hotexamples.com/examples/-/Rtabmap/-/cpp-rtabmap-class-examples.html
 		for (std::map<int, rtabmap::Transform>::iterator iter = optimizedPoses.begin(); iter != optimizedPoses.end(); ++iter)
 		{
@@ -396,6 +398,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 			{
 				*cloud += *rtabmap::util3d::transformPointCloud(tmpNoNaN, iter->second); // transform the point cloud to its pose
 			}
+			tempPoses.push_back(iter->second.toEigen4d());
 			++i;
 			//pintf("iter %d \n", i);
 			tmpNoNaN.reset();
@@ -405,6 +408,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		
 		slamPipeMutex.lock();
 		mSlamedPointCloud = *cloud;
+		mPoses = tempPoses;
 		slamPipeMutex.unlock();
 		Sleep(0);
 	}
@@ -481,4 +485,12 @@ Eigen::Matrix4d HUREL::Compton::RtabmapSlamControl::GetOdomentry()
 	Eigen::Matrix4d tmp = mCurrentOdometry;
 	videoStreamMutex.unlock();
 	return tmp;
+}
+
+std::vector<Eigen::Matrix4d> HUREL::Compton::RtabmapSlamControl::GetOptimizedPoses()
+{
+	slamPipeMutex.lock();
+	std::vector<Eigen::Matrix4d> tempPoses = mPoses;
+	slamPipeMutex.unlock();
+	return tempPoses;
 }

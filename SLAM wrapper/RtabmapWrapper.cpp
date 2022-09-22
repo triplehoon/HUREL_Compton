@@ -233,6 +233,22 @@ void HUREL::Compton::RtabmapWrapper::GetLoadedPointCloud(List<array<double>^>^% 
 	}
 }
 
+void HUREL::Compton::RtabmapWrapper::GetOptimizePoses(List<array<double>^>^% poses)
+{
+	std::vector<std::vector<double>> cppPoses = RtabmapCppWrapper::instance().GetOptimizedPoses();
+
+	poses = gcnew List< array<double>^>();
+	poses->Capacity = cppPoses.size();
+	for (int i = 0; i < cppPoses.size(); ++i)
+	{
+		array<double, 1>^ mat = gcnew array<double>(16);
+		for (int j = 0; j < 16; j++) {
+			mat[j] = cppPoses[i][j];
+		}
+		poses->Add(mat);
+	}	
+}
+
 HUREL::Compton::RtabmapWrapper::RtabmapWrapper()
 {
 }

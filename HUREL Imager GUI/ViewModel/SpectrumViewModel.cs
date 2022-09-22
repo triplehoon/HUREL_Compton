@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HUREL_Imager_GUI.ViewModel
@@ -36,9 +37,14 @@ namespace HUREL_Imager_GUI.ViewModel
                 EnergySpectrum.Add(new HistoEnergy(i, random.Next(5000)));
             }
         }
+        Mutex StatusUpdateMutex = new Mutex();
         public void StatusUpdate(object? obj, EventArgs eventArgs)
         {
-            
+            if (!StatusUpdateMutex.WaitOne(100))
+            {
+                return;
+            }
+
             var histogram = LahgiApi.GetScatterSumSpectrum();
             EnergySpectrum = new ObservableCollection<HistoEnergy>(histogram.HistoEnergies);
 
@@ -70,8 +76,10 @@ namespace HUREL_Imager_GUI.ViewModel
                         isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy));
                     }
                     IsotopeInfos = isotopeInfos;
+
                 }
             }
+            StatusUpdateMutex.ReleaseMutex();
         }
         private ObservableCollection<HistoEnergy> _energySpetrum = new ObservableCollection<HistoEnergy>();
         
