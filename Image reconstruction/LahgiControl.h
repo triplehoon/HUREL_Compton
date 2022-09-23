@@ -15,6 +15,8 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+#include <concurrent_vector.h>
+
 
 #define ACTIVE_AREA_LENGTH 0.14
 
@@ -36,7 +38,7 @@ namespace HUREL {
 			Module** mScatterModules;  //./Module information/MONOScatter1/Gain.csv, LUT.csv ...
 			Module** mAbsorberModules;	//./Module information/QUADScatter1/Gain.csv, LUT.csv ...
 			eMouduleType mModuleType;
-			std::vector<ListModeData> mListedListModeData;
+			concurrency::concurrent_vector <ListModeData> mListedListModeData;
 			std::vector<RadiationImage> mListModeImage;
 			EnergySpectrum mSumSpectrum;
 			EnergySpectrum mScatterSumSpectrum;

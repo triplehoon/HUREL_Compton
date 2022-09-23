@@ -568,19 +568,27 @@ HUREL::Compton::eMouduleType HUREL::Compton::LahgiControl::GetDetectorType()
 
 const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData() const
 {
-	mListModeDataMutex.lock();
-	std::vector<ListModeData> lmData = mListedListModeData;
-	mListModeDataMutex.unlock();
+	size_t size = mListedListModeData.size();
+	std::vector<ListModeData> lmData;
+	lmData.reserve(size);
+	for (int i = 0; i < size; ++i)
+	{
+		lmData.push_back(mListedListModeData[i]);
+	}
+
 
 	return lmData;
 }
 
 std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData()
 {
-	mListModeDataMutex.lock();
-	std::vector<ListModeData> lmData = mListedListModeData;
-	mListModeDataMutex.unlock();
-
+	size_t size = mListedListModeData.size();
+	std::vector<ListModeData> lmData;
+	lmData.reserve(size);
+	for (int i = 0; i < size; ++i)
+	{
+		lmData.push_back(mListedListModeData[i]);
+	}
 	return lmData;
 }
 
@@ -792,16 +800,13 @@ void HUREL::Compton::LahgiControl::ListModeGenPipe()
 	while (mIsListModeGenOn)
 	{
 		Sleep(mListModeImgInterval);
-		mListModeDataMutex.lock();
-		vector<ListModeData> tmp = mListedListModeData;
+		vector<ListModeData> tmp = GetListedListModeData();
 		if (tmp.size() < startIdx || tmp.size() == 0)
 		{
-			mListModeDataMutex.unlock();
 
 			startIdx = 0;
 			continue;
 		}
-		mListModeDataMutex.unlock();
 		
 		long long timeInMiliStart = tmp[startIdx].InteractionTimeInMili.count();
 
@@ -832,10 +837,8 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudComptonU
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
 
 	time_t t = time(NULL);
-	mListModeDataMutex.lock();
 
-	std::vector<ListModeData> tempLMData = mListedListModeData;
-	mListModeDataMutex.unlock();
+	std::vector<ListModeData> tempLMData = GetListedListModeData();
 
 	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
 	//std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
@@ -866,10 +869,8 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
 
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-	mListModeDataMutex.lock();
 
-	std::vector<ListModeData> tempLMData = mListedListModeData;
-	mListModeDataMutex.unlock();
+	std::vector<ListModeData> tempLMData = GetListedListModeData();
 
 	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
 	//std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
