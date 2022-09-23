@@ -122,7 +122,7 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 	EnergySpectrum spectClass = EnergySpectrum(10, 3000);;
 	for (int i = lmData.size(); i--; i >= 0)
 	{
-		if (time != 0 && t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time))
+		if (time != 0 && t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time*1000))
 		{
 			break;
 		}

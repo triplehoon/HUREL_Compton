@@ -71,6 +71,9 @@
     <PlatformToolset>v143</PlatformToolset>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CLRSupport>NetCore</CLRSupport>
+    <UseIntelIPP1A>Static_Library</UseIntelIPP1A>
+    <UseInteloneMKL>Sequential</UseInteloneMKL>
+    <UseILP64Interfaces1A>true</UseILP64Interfaces1A>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugGui|x64'" Label="Configuration">
     <PlatformToolset>v143</PlatformToolset>
@@ -165,7 +168,8 @@
       <LanguageStandard>stdcpp14</LanguageStandard>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;</PreprocessorDefinitions>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(SolutionDir)\Image reconstruction;$(OutputPath)</AdditionalLibraryDirectories>

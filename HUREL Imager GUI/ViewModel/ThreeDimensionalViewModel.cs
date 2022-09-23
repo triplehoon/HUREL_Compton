@@ -67,7 +67,7 @@ namespace HUREL_Imager_GUI.ViewModel
 
         private void updateView(object? obj, EventArgs args)
         {
-            Trace.WriteLine("Update");
+            //Trace.WriteLine("Update");
 
             if (args is LahgiApiEnvetArgs)
             { 
@@ -171,7 +171,10 @@ namespace HUREL_Imager_GUI.ViewModel
         private static Mutex updateReconSlamPointMutex = new Mutex();
         private void UpateRealtimeReconSlamPointCloud()
         {
-            updateReconSlamPointMutex.WaitOne(100);
+            if(!updateReconSlamPointMutex.WaitOne(100))
+            {
+                return;
+            }
             var vc2 = new Vector3Collection();
             var cc2 = new Color4Collection();
             var tempposeVect = new List<double[]>();

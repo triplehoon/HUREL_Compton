@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Windows.Threading;
 
 namespace HUREL.Compton.RadioisotopeAnalysis
 {
@@ -244,18 +245,29 @@ namespace HUREL.Compton.RadioisotopeAnalysis
         private static bool isGeDataLoaded = false;
         private void initiate()
         {
+            Stopwatch sw = Stopwatch.StartNew();
             if (!isPyModuleLoaded)
             {
+                if (!PythonEngine.IsInitialized)
+                {
+                    PythonEngine.Initialize();
+                    PythonEngine.BeginAllowThreads();
+                }
+
                 using (Py.GIL())
                 {
-                    dynamic np = Py.Import("numpy");
-                    dynamic nasagamma = Py.Import("nasagamma");
+                    dynamic np = PythonEngine.ImportModule("numpy");
+                    dynamic nasagamma = PythonEngine.ImportModule("nasagamma");
                 }
                 isPyModuleLoaded = true;
+
+                LogManager.GetLogger("Energy Spectrum").Info($"PyModule Loaded Elapsed: {sw.ElapsedMilliseconds} [ms]");
+
             }
+            sw.Stop();
             if (!isGeDataLoaded)
             {
-                StreamReader sr = new StreamReader("config/DoseData.csv");
+                StreamReader sr = new StreamReader("DoseData.csv");
 
 
                 string? line = sr.ReadLine();
@@ -334,7 +346,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                     double countRateSigam = HistoEnergies[i].Count / time / time;
                     variance += H10Coeff[i] * H10Coeff[i] * countRateSigam* countRateSigam;
                 }
-                return (0.19 * exp, Math.Sqrt(variance));
+                return (10.5 * exp, 10.5*Math.Sqrt(variance));
             }
             else
             {
@@ -394,11 +406,19 @@ namespace HUREL.Compton.RadioisotopeAnalysis
             }
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            PyMutex.WaitOne();                       
+            PyMutex.WaitOne();
+            if (!PythonEngine.IsInitialized)
+            {
+                PythonEngine.Initialize();
+                PythonEngine.BeginAllowThreads();
+            }
+
+            IntPtr gs = PythonEngine.AcquireLock();
+
             using (Py.GIL())
             {
-                dynamic np = Py.Import("numpy");
-                dynamic nasagamma = Py.Import("nasagamma");
+                dynamic np = PythonEngine.ImportModule("numpy");
+                dynamic nasagamma = PythonEngine.ImportModule("nasagamma");
                 dynamic sp = nasagamma.spectrum;
                 dynamic ps = nasagamma.peaksearch;
 
@@ -423,14 +443,13 @@ namespace HUREL.Compton.RadioisotopeAnalysis
 
                 }
             }
+            PythonEngine.ReleaseLock(gs);
+
             PyMutex.ReleaseMutex();
             sw.Stop();
             LogManager.GetLogger("Energy Spectrum").Info($"Elapsed: {sw.ElapsedMilliseconds} [ms]");
             
             
-
-            //PythonEngine.EndAllowThreads(m_threadState);
-            // PythonEngine.Shutdown();
 
 
             return PeakE;
