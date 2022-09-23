@@ -8,7 +8,7 @@
 	  <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PlatformTarget>x64</PlatformTarget>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <Platforms>AnyCPU;x64</Platforms>
     <Configurations>Debug;Release;DebugGui</Configurations>
   </PropertyGroup>
@@ -31,6 +31,12 @@
       <HintPath>C:\Program Files (x86)\Cypress\EZ-USB FX3 SDK\1.3\bin\CyUSB.dll</HintPath>
       <CopyLocal>True</CopyLocal>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="DoseData.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

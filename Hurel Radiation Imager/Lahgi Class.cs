@@ -111,7 +111,7 @@ namespace HUREL.Compton
             UpdateDeviceList(null, EventArgs.Empty);
 
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 100;
+            timer.Interval = 1000;
             timer.Elapsed += UpdateTimerInvoker;
             timer.Start();
         }                

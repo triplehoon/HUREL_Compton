@@ -168,8 +168,9 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			{
 				mCurrentDepthFrame = imgDepth;
 			}
-			if (mOdo != nullptr)
+			if (mOdo != nullptr && mIsSlamPipeOn == true)
 			{
+			
 				mCurrentOdometry = mOdo->getPose().toEigen4d();
 				videoStreamMutex.unlock();
 			}

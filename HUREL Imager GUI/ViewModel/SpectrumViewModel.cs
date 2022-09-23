@@ -62,7 +62,7 @@ namespace HUREL_Imager_GUI.ViewModel
                         EnergySpectrum.Add(e);
                     }
                     ObservableCollection<IsotopeInfo> isotopeInfos = new ObservableCollection<IsotopeInfo>();
-                    List<Isotope>  DetectedIso =  PeakSearching.GetIsotopesFromPeaks(espect.FindPeaks(662, 40, 10, 10), 1, 662, 40, 10);
+                    List<Isotope>  DetectedIso =  PeakSearching.GetIsotopesFromPeaks(espect.FindPeaks(662, 50, 10, 2), 1, 662, 40, 5);
                     
                     foreach(Isotope iso in DetectedIso)
                     {
@@ -77,6 +77,28 @@ namespace HUREL_Imager_GUI.ViewModel
                     }
                     IsotopeInfos = isotopeInfos;
 
+                }
+
+                if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Spectrum)
+                {
+                    //EnergySpectrum.Clear();
+                    var espect = LahgiApi.GetScatterSumSpectrumByTime(0);
+             
+                    ObservableCollection<IsotopeInfo> isotopeInfos = new ObservableCollection<IsotopeInfo>();
+                    List<Isotope> DetectedIso = PeakSearching.GetIsotopesFromPeaks(espect.FindPeaks(662, 50, 10, 2), 1, 662, 40, 10);
+
+                    foreach (Isotope iso in DetectedIso)
+                    {
+                        string energy = "";
+                        foreach (double e in iso.PeakEnergy)
+                        {
+                            energy += e.ToString("0.");
+                            energy += " ";
+                        }
+
+                        isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy));
+                    }
+                    IsotopeInfos = isotopeInfos;
                 }
             }
             StatusUpdateMutex.ReleaseMutex();

@@ -1,17 +1,9 @@
 ﻿using CyUSB;
-using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Threading.Tasks.Dataflow;
-using System.Threading;
-using System.ComponentModel;
-using System.Windows;
-using System.Collections.Concurrent;
 
 
 namespace HUREL.Compton
@@ -323,7 +315,6 @@ namespace HUREL.Compton
 
             Trace.WriteLine("HY : [Try] Send 0000... ");
             usb_setting(3); // send 00000
-
             // 2. 버퍼 비우기 
             Trace.WriteLine("HY : [Try] XferData reset loop");
             EndPointListSelectIdx = 1;
@@ -1249,7 +1240,11 @@ namespace HUREL.Compton
                                 int check_write = 0;
                                 for (int ii = 0; ii < 16384; ++ii)
                                 {
-                                    if (xBufs[k][i * 16384 + ii] != 0xa5)
+                                    if (1048576 <= i * 16384 + ii)
+                                    {
+                                        break;
+                                    }
+                                    if (xBufs[k][i * 16384 + ii] != 0xa5) 
                                     {
                                         check_write = 1;
                                         break;
@@ -1301,7 +1296,7 @@ namespace HUREL.Compton
                             }
                             else
                             {
-                                Trace.WriteLine($"Successes {Successes} Fail {Failures}");
+                                //Trace.WriteLine($"Successes {Successes} Fail {Failures}");
                                 Failures++;// Failures++;
                             }
                         }
@@ -1348,7 +1343,7 @@ namespace HUREL.Compton
                     
                 }
                 
-                if (Failures > 100 && Variables.CurrentMeasurementMode0x11 != MeasurementMode.Coincidence)
+                if (Failures > 1000 && Variables.CurrentMeasurementMode0x11 != MeasurementMode.Coincidence)
                 {
                     EndPoint.Abort();
                     throw new CyUSBBufferFailException();                    
