@@ -35,7 +35,7 @@ bool HUREL::Compton::LahgiCppWrapper::SetType(eModuleCppWrapper type)
 	default:
 		break;
 	}
-	return LahgiControl::instance().SetType(moduleType);
+	return LahgiControl::instance().SetType(moduleType); 
 }
 
 void HUREL::Compton::LahgiCppWrapper::AddListModeDataWithTransformation(const unsigned short* byteData, std::vector<std::vector<double>>  echks)
