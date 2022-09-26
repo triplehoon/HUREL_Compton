@@ -64,8 +64,9 @@
     <CharacterSet>Unicode</CharacterSet>
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseIntelIPP1A>Static_Library</UseIntelIPP1A>
-    <UseInteloneMKL>Sequential</UseInteloneMKL>
-    <UseILP64Interfaces1A>true</UseILP64Interfaces1A>
+    <UseInteloneMKL>Parallel</UseInteloneMKL>
+    <UseILP64Interfaces1A>false</UseILP64Interfaces1A>
+    <UseInteloneTBB>true</UseInteloneTBB>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PlatformToolset>v143</PlatformToolset>
@@ -73,7 +74,7 @@
     <CLRSupport>NetCore</CLRSupport>
     <UseIntelIPP1A>Static_Library</UseIntelIPP1A>
     <UseInteloneMKL>Parallel</UseInteloneMKL>
-    <UseILP64Interfaces1A>true</UseILP64Interfaces1A>
+    <UseILP64Interfaces1A>false</UseILP64Interfaces1A>
     <UseInteloneTBB>true</UseInteloneTBB>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugGui|x64'" Label="Configuration">
@@ -209,8 +210,14 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">EIGEN_USE_MKL_ALL;%(PreprocessorDefinitions)
       </PreprocessorDefinitions>
+      <OpenMPSupport Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</OpenMPSupport>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EIGEN_USE_MKL_ALL;%(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="Lahgi wrapper.cpp" />
+    <ClCompile Include="Lahgi wrapper.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="LogWrapperCaller.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="RtabmapWrapper.cpp" />

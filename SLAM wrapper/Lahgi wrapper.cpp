@@ -37,13 +37,15 @@ void HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ 
 	unsigned short* adcS = intParamsPtr;
 
 	std::vector<std::vector<double>> eChkUnmanagedVector;
-	eChkUnmanagedVector.resize(echks->Count);
+	eChkUnmanagedVector.reserve(echks->Count);
 	for each (array<double>^ e in echks)
 	{
 		std::vector<double> eChkUnmanaged;
-		eChkUnmanaged.resize(2);
-		eChkUnmanaged.push_back(e[0]);
-		eChkUnmanaged.push_back(e[1]);
+		eChkUnmanaged.reserve(2);
+		double minE = e[0];
+		double maxE = e[1];
+		eChkUnmanaged.push_back(minE);
+		eChkUnmanaged.push_back(maxE);
 
 		eChkUnmanagedVector.push_back(eChkUnmanaged);
 	}

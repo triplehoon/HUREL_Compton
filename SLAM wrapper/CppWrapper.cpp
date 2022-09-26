@@ -41,7 +41,7 @@ bool HUREL::Compton::LahgiCppWrapper::SetType(eModuleCppWrapper type)
 void HUREL::Compton::LahgiCppWrapper::AddListModeDataWithTransformation(const unsigned short* byteData, std::vector<std::vector<double>>  echks)
 {
 	std::vector<sEnergyCheck> eChkUnmanagedVector;
-	eChkUnmanagedVector.resize(echks.size());
+	eChkUnmanagedVector.reserve(echks.size());
 	for(auto echk : echks)
 	{
 		sEnergyCheck eChkUnmanaged;
@@ -110,7 +110,7 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 
 std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectrum(int time)
 {
-	std::vector<ListModeData> lmData = LahgiControl::instance().GetListedListModeData();
+	std::vector<EnergyTime> lmData = LahgiControl::instance().GetScatterSumEnergySpectrum().GetEnergyList();
 
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
@@ -127,7 +127,7 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 			break;
 		}
 
-		spectClass.AddEnergy(lmData[i].Scatter.InteractionEnergy);
+		spectClass.AddEnergy(lmData[i].Energy);
 	}
 
 	return spectClass.GetHistogramEnergy();
@@ -135,7 +135,7 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 
 std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetAbsorberSumSpectrum(int time)
 {
-	std::vector<ListModeData> lmData = LahgiControl::instance().GetListedListModeData();
+	std::vector<EnergyTime> lmData = LahgiControl::instance().GetAbsorberSumEnergySpectrum().GetEnergyList();
 
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
@@ -144,15 +144,15 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetAbsorberSumSpectr
 	int reconStartIndex = 0;
 
 
-	EnergySpectrum spectClass = EnergySpectrum(5, 3000);;
+	EnergySpectrum spectClass = EnergySpectrum(10, 3000);;
 	for (int i = lmData.size(); i--; i >= 0)
 	{
-		if (t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time))
+		if (time != 0 && t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time * 1000))
 		{
 			break;
 		}
 
-		spectClass.AddEnergy(lmData[i].Absorber.InteractionEnergy);
+		spectClass.AddEnergy(lmData[i].Energy);
 	}
 
 	return spectClass.GetHistogramEnergy();

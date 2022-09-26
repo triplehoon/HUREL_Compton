@@ -137,6 +137,27 @@ namespace HUREL_Imager_GUI.ViewModel
             
         }
 
+        private AsyncCommand? _testFuctionCommand;
+        public ICommand TestFunctionCommand
+        {
+            get { return _testFuctionCommand ?? (_testFuctionCommand = new AsyncCommand(TestFunction)); }
+        }
+        private async Task TestFunction()
+        {
+            TestFunctionCommand.CanExecute(false);
+            
+            await Task.Run(() => {
+                LahgiApi.TestAddingListModeData(1000000);
+
+
+            }
+            );
+
+            TestFunctionCommand.CanExecute(true);
+
+        }
+
+
 
     }
 }

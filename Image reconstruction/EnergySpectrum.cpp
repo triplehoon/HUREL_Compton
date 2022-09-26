@@ -23,6 +23,11 @@ std::vector<BinningEnergy> HUREL::Compton::EnergySpectrum::GetHistogramEnergy()
     return mHistogramEnergy;
 }
 
+std::vector<EnergyTime> HUREL::Compton::EnergySpectrum::GetEnergyList()
+{
+    return mEnergyList;
+}
+
 
 void HUREL::Compton::EnergySpectrum::AddEnergy(double energy)
 {

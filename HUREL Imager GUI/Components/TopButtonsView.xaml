@@ -488,6 +488,19 @@
 
 
         </Grid>
+
+        <Grid Width="90">
+            <syncfusion:ButtonAdv x:Name="TestButton" Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" SizeMode="Large" AutomationProperties.IsOffscreenBehavior="Default" IsMultiLine="False"
+                                  Command="{Binding TestFunctionCommand}">
+                <syncfusion:ButtonAdv.Style>
+                    <Style TargetType="syncfusion:ButtonAdv" BasedOn="{StaticResource StyleTopButton}">
+                        <Setter Property="Label" Value="TestButton"/>
+                    </Style>
+                </syncfusion:ButtonAdv.Style>
+            </syncfusion:ButtonAdv>
+       
+
+        </Grid>
         <!--<syncfusion:ButtonAdv  Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" SizeMode="Large" AutomationProperties.IsOffscreenBehavior="Default" IsMultiLine="False">
             <syncfusion:ButtonAdv.Style>
                 <Style TargetType="syncfusion:ButtonAdv" BasedOn="{StaticResource StyleTopButton}">

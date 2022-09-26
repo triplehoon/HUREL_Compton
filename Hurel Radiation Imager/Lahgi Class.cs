@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
@@ -288,11 +289,15 @@ namespace HUREL.Compton
                         IsSessionStarting = false;
 
                         StatusMsg = await fpga.Stop_usb();
+                        IsSessionStarting = true;
+
                         await Task.Run(() => StopSlam());
                         StatusMsg = "Saving CSV file";
                         string saveFileName = Path.GetDirectoryName(fpga.FileMainPath) + "\\" + fileName;
                         lahgiWrapper.SaveListModeData(saveFileName + "_LMData.csv");
                         StatusMsg = "Done saving CSV file";
+                        IsSessionStarting = false;
+                        IsSessionStart = false;
                     }
                     else
                     {
@@ -382,6 +387,75 @@ namespace HUREL.Compton
             }
             StatusMsg = "Add List Mode Data loop ended";
         }
+
+        public static void TestAddingListModeData(int count)
+        {
+            StatusMsg = $"TestAddingListModeData starts (count = {count})";
+            
+            Random rnd = new Random();
+            for (int c = 0; c < count; ++c)
+            {
+                ushort[] shortArray = new ushort[144];
+
+                for (int j = 0; j < 144; ++j)
+                {
+                    shortArray[j] = 0;
+                }
+                //Channel 4 to 8
+                for (int i = 4; i < 5; ++i)
+                {
+                    for (int j = 0; j < 9; ++j)
+                    {
+                        shortArray[i * 9 + j] = (ushort)rnd.Next(300);
+                    }
+                }
+
+                //Channel 12 to 16
+                for (int i = 12; i < 13; ++i)
+                {
+                    for (int j = 0; j < 9; ++j)
+                    {
+                        shortArray[i * 9 + j] = (ushort)rnd.Next(300);
+                    }
+                }
+                fpga.ShortArrayQueue.Add(shortArray);
+            }
+            List<double[]> UnmanagedEcks = new List<double[]>();
+
+            {
+                double[] eckUnmanaged = new double[] { 0, 10000000 };
+                UnmanagedEcks.Add(eckUnmanaged);
+            }
+            lahgiWrapper.ResetListmodeData();
+            for (uint i = 0; i < 16; ++i)
+            {
+                lahgiWrapper.ResetSpectrum(i);
+            }
+
+            StatusMsg = $"TestAddingListModeData loop starts (count = {count})";
+            Stopwatch sw = Stopwatch.StartNew();
+            ushort[] item;
+            while (fpga.ShortArrayQueue.TryTake(out item!))
+            {
+                lahgiWrapper.AddListModeDataWraper(item, UnmanagedEcks);
+                if (isEchksChanged)
+                {
+                    isEchksChanged = false;
+                    UnmanagedEcks.Clear();
+                    foreach (var eck in Echks)
+                    {
+                        double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
+                        UnmanagedEcks.Add(eckUnmanaged);
+                    }
+                }
+                Thread.Sleep(0);
+            }
+            Thread.Sleep(0);
+            sw.Stop();
+
+            StatusMsg = $"TestAddingListModeData took {sw.ElapsedMilliseconds} ms for {count} counts";
+        }
+        
         public static void StartSlam()
         {
             rtabmapWrapper.StartSLAM();
