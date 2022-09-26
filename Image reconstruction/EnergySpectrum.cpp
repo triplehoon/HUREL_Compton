@@ -35,6 +35,9 @@ void HUREL::Compton::EnergySpectrum::AddEnergy(double energy)
             break;
         }
     }
+    EnergyTime etime;
+    etime.Energy = energy;
+    etime.InteractionTimeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
 void HUREL::Compton::EnergySpectrum::Reset()
@@ -43,4 +46,5 @@ void HUREL::Compton::EnergySpectrum::Reset()
     {
         mHistogramEnergy[i].Count = 0;
     }
+    mEnergyList.clear();
 }  

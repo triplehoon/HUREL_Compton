@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "Logger.h"
 
@@ -10,6 +11,10 @@ namespace HUREL {
 			double Energy;
 			int Count;
 		};
+		struct EnergyTime {
+			double Energy;
+			std::chrono::milliseconds InteractionTimeInMili;
+		};
 		
 
 		class EnergySpectrum
@@ -17,6 +22,7 @@ namespace HUREL {
 			private: 
 				std::vector<BinningEnergy> mHistogramEnergy = std::vector<BinningEnergy>();
 				std::vector<double> mEnergyBin = std::vector<double>();
+				std::vector< EnergyTime>mEnergyList = std::vector< EnergyTime>();
 			public:
 				
 				EnergySpectrum() {}; //do nothing

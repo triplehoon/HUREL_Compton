@@ -1,8 +1,8 @@
 #pragma once
-
-#include <opencv2/opencv.hpp>
 #include <Eigen/Dense>
 #include <Eigen/Core>
+#include <opencv2/opencv.hpp>
+
 
 #include <open3d/geometry/Octree.h>
 

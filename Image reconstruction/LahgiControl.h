@@ -66,6 +66,8 @@ namespace HUREL {
 			void AddListModeData(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk);
 			void AddListModeDataEigen(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk);
 			void AddListModeDataWithTransformation(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk);
+			void AddListModeDataWithTransformationVerification(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk);
+
 			eMouduleType GetDetectorType();
 
 			const std::vector<ListModeData> GetListedListModeData() const;

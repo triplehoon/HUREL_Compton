@@ -5,7 +5,6 @@
 #include <time.h>
 #include <ctime>
 #include <vector>
-
 #include <Eigen/Core>
 #include <opencv2/opencv.hpp>
 namespace HUREL {
@@ -41,7 +40,7 @@ namespace HUREL {
 			eInterationType Type = eInterationType::NONE;
 			InteractionData Scatter;
 			InteractionData Absorber;
-			time_t InteractionTime = 0;
+			//time_t InteractionTime = 0;
 			std::chrono::milliseconds InteractionTimeInMili = std::chrono::milliseconds(0);
 			Eigen::Matrix4d DetectorTransformation = Eigen::Matrix4d::Zero();
 

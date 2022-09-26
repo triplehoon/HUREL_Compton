@@ -72,8 +72,9 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CLRSupport>NetCore</CLRSupport>
     <UseIntelIPP1A>Static_Library</UseIntelIPP1A>
-    <UseInteloneMKL>Sequential</UseInteloneMKL>
+    <UseInteloneMKL>Parallel</UseInteloneMKL>
     <UseILP64Interfaces1A>true</UseILP64Interfaces1A>
+    <UseInteloneTBB>true</UseInteloneTBB>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugGui|x64'" Label="Configuration">
     <PlatformToolset>v143</PlatformToolset>
@@ -206,6 +207,8 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">EIGEN_USE_MKL_ALL;%(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="Lahgi wrapper.cpp" />
     <ClCompile Include="LogWrapperCaller.cpp" />
