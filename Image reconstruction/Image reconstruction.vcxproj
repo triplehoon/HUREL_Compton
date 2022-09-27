@@ -240,6 +240,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="EnergySpectrum.h" />
+    <ClInclude Include="EnergySpectrumData.h" />
     <ClInclude Include="LahgiControl.h" />
     <ClInclude Include="ListModeData.h" />
     <ClInclude Include="Module.h" />

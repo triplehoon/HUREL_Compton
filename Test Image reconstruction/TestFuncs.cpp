@@ -118,7 +118,7 @@ void TestFuncs::TestAddingLmData()
 	Eigen::Matrix4d trans = Eigen::Matrix4d::Identity();
 
 	sEnergyCheck echk;
-	echk.minE = 0; echk.maxE = 1000000000;
+	echk.minE = 0; echk.maxE = 0;
 	std::vector<sEnergyCheck> echks;
 	echks.push_back(echk);
 
@@ -140,7 +140,7 @@ void TestFuncs::TestAddingLmData()
 	printf("%d ms \n", milisec);
 
 	start = std::chrono::system_clock::now();
-	for (int i = 0; i < 1000000; ++i)
+	for (int i = 0; i < 10000000; ++i)
 	{
 		//control.AddListModeDataWithTransformationVerification(byteData, echks);
 		//control.AddListModeDataWithTransformation(byteData, echks);

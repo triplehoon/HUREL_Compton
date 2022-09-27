@@ -38,16 +38,10 @@ namespace HUREL {
 			double*** mXYLogMue = nullptr;
 			double** mXYSumMu = nullptr;
 
-			Eigen::Array<double, 1, 9>** mXYLogMueEigen = nullptr;
-			Eigen::Matrix<double, Eigen::Dynamic,9> mXYLogMueIndex;
-			Eigen::VectorXd mXYSumMueIndex;
-			
-			Eigen::MatrixXd mXYPositionIndex;
-
+			Eigen::Array<float, 1, 9>** mXYLogMueEigen = nullptr;
 
 			double mGain[10];
-			Eigen::Array<double, 1, 9> mGainEigen;
-			Eigen::Vector<double, 9> mGainEigenVector;
+			Eigen::Array<float, 1, 9> mGainEigen;
 
 			std::string mModuleName = "";
 			eMouduleType mModuleType = HUREL::Compton::eMouduleType::MONO;
@@ -57,7 +51,7 @@ namespace HUREL {
 			bool LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
 			bool LoadLUT(std::string FileName);
 			std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
-			std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const Eigen::Array<double, 1, 9>& pmtADCValue) const;
+			std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const Eigen::Array<float, 1, 9>& pmtADCValue) const;
 		
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -77,16 +71,13 @@ namespace HUREL {
 			const bool IsModuleSet() const;
 
 			const Eigen::Vector4d FastMLPosEstimation(const unsigned short pmtADCValue[]) const;
-			const Eigen::Vector4d FastMLPosEstimation(const Eigen::Array<double, 1, 9>& pmtADCValue) const;
-			const Eigen::Vector4d FastMLPosEstimation(const Eigen::Vector<double, 9>& pmtADCValue) const;
+			const Eigen::Vector4d FastMLPosEstimation(const Eigen::Array<float, 1, 9>& pmtADCValue) const;
 
 			const Eigen::Vector4d FastMLPosEstimationVerification(const unsigned short pmtADCValue[]) const;
-			const Eigen::Vector4d FastMLPosEstimationVerification(const Eigen::Array<double, 1, 9>& pmtADCValue) const;
 			const Eigen::Vector4d FastMLPosEstimation(unsigned short(&pmtADCValue)[36]) const;
 
 			const double GetEcal(const unsigned short pmtADCValue[]) const;
-			const double GetEcal(const Eigen::Array<double, 1, 9>& pmtADCValue) const;
-			const double GetEcal(const Eigen::Vector<double, 9>& pmtADCValue) const;
+			const double GetEcal(const Eigen::Array<float, 1, 9>& pmtADCValue) const;
 
 
 			EnergySpectrum& GetEnergySpectrum();

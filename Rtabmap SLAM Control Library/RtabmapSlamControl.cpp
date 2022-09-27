@@ -482,9 +482,9 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetLoadedPointC
 
 Eigen::Matrix4d HUREL::Compton::RtabmapSlamControl::GetOdomentry()
 {
-	videoStreamMutex.lock();
+	//videoStreamMutex.lock();
 	Eigen::Matrix4d tmp = mCurrentOdometry;
-	videoStreamMutex.unlock();
+	//videoStreamMutex.unlock();
 	return tmp;
 }
 

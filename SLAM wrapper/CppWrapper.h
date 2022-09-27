@@ -1,7 +1,6 @@
 #pragma once
-
-#include "EnergySpectrum.h"
 #include "LogWrapperCaller.h"
+#include "EnergySpectrumData.h"
 
 namespace HUREL {
 	namespace Compton {
@@ -45,6 +44,7 @@ namespace HUREL {
 
 			double reconValue;
 		};
+
 
 		class LahgiCppWrapper
 		{

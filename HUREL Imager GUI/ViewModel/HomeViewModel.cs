@@ -154,7 +154,7 @@ namespace HUREL_Imager_GUI.ViewModel
                 {
                     RealtimeRGB = temp;
                 }
-                
+                Thread.Sleep(1000);
             }
         }
 
