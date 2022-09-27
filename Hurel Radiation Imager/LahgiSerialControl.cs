@@ -57,7 +57,7 @@ namespace HUREL.Compton
             }
             catch (Exception e)
             {
-                Trace.WriteLine(e.Message);
+                logger.Error(e.Message);
                 
                 return false;
             }
@@ -90,7 +90,7 @@ namespace HUREL.Compton
                     }
                     catch(Exception e)
                     {
-                        Console.WriteLine("Readline Failed:" + e.ToString());
+                        logger.Error("Readline Failed:" + e.ToString());
                     }
                 }                
             }

@@ -310,9 +310,18 @@ void HUREL::Compton::RtabmapSlamControl::StartSlamPipe()
 
 void HUREL::Compton::RtabmapSlamControl::StopSlamPipe()
 {
-	mIsSlamPipeOn = false;
-	t2.get();
-	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop slam pipe", eLoggerType::INFO);
+	if (mIsSlamPipeOn)
+	{
+		mIsSlamPipeOn = false;
+
+		t2.get();
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop slam pipe", eLoggerType::INFO);
+	}
+	else {
+		HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl is alread stop", eLoggerType::INFO);
+
+	}
+	
 
 }
 

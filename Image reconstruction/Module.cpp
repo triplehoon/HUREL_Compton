@@ -26,13 +26,14 @@ HUREL::Compton::Module::Module(eMouduleType moduleType,
 	mIsModuleSet(false),
     mEnergySpectrum(EnergySpectrum(binSize, maxEnergy))
 {
-    std::string lutFileName = configDir + "\\LUT" + "\\" + moduleName + ".csv";
-    std::string gainFileName = configDir + "\\Gain" + "\\" + moduleName + ".csv";
-    
+    mLutFileName = configDir + "\\LUT" + "\\" + moduleName + ".csv";
+    mGainFileName = configDir + "\\Gain" + "\\" + moduleName + ".csv";
+    mEcalFileName = configDir + "\\Ecal" + "\\" + moduleName + ".csv";
+
     if (moduleType == eMouduleType::QUAD)
     {
         double gain[10];
-        if (LoadGain(gainFileName, eMouduleType::QUAD, gain))
+        if (LoadGain(mGainFileName, eMouduleType::QUAD, gain))
         {
             
             for (int i = 0; i < 10; ++i)
@@ -56,7 +57,7 @@ HUREL::Compton::Module::Module(eMouduleType moduleType,
             return;
         }
     }        	
-	if (LoadLUT(lutFileName))
+	if (LoadLUT(mLutFileName))
 	{
 		//cout << "Module.cpp: Successfuly to load a lut file: " << moduleName << endl;
         string msg = "Successfuly to load a lut file: " + moduleName;
@@ -70,7 +71,20 @@ HUREL::Compton::Module::Module(eMouduleType moduleType,
         HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::ERROR_t);
 		assert(false);
 	}	
-
+    if (LoadEcal(mEcalFileName))
+    {
+        //cout << "Module.cpp: Successfuly to load a lut file: " << moduleName << endl;
+        string msg = "Successfuly to load a ecal file: " + moduleName;
+        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::INFO);
+        mIsModuleSet = true;
+    }
+    else
+    {
+        //cout << "Module.cpp: FAIL to load a lut file: " << moduleName << endl;
+        string msg = "FAIL to load a ecal file: " + moduleName;
+        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::ERROR_t);
+        assert(false);
+    }
     assert(mModuleType != eMouduleType::MONO);
 }
 
@@ -275,6 +289,46 @@ bool HUREL::Compton::Module::LoadLUT(std::string fileName)
     //cout << "Done loading look up table" << endl;
 
     io.close();
+    return true;
+}
+
+bool HUREL::Compton::Module::LoadEcal(std::string FileName)
+{
+    std::ifstream io;
+    io.open(FileName);
+
+    if (io.fail())
+    {
+        //cout << "Cannot open a file" << endl;
+        string msg = "Cannot open a file LoadEcal";
+        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::ERROR_t);
+        io.close();
+        return false;
+    }
+
+
+    while (!io.eof())
+    {
+        string line;
+
+        std::getline(io, line);
+
+        /* for each value */
+        string val;
+        vector<double> row;
+        std::stringstream lineStream(line);
+        unsigned int i = 0;
+        std::getline(lineStream, val, ',');
+        mEnergyCalibrationA = stod(val);
+        std::getline(lineStream, val, ',');
+        mEnergyCalibrationB = stod(val);
+        std::getline(lineStream, val, ',');
+        mEnergyCalibrationC = stod(val);
+        break;
+        
+    }
+    io.close();
+
     return true;
 }
 
@@ -511,6 +565,25 @@ void HUREL::Compton::Module::SetEnergyCalibration(double a, double b, double c)
     mEnergyCalibrationA = a;
     mEnergyCalibrationB = b;
     mEnergyCalibrationC = c;
+
+    std::ofstream io;
+    io.open(mEcalFileName);
+
+    if (io.fail())
+    {
+        //cout << "Cannot open a file" << endl;
+        string msg = "Cannot open a file SetEnergyCalibration";
+        HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::Module", msg, eLoggerType::ERROR_t);
+        io.close();
+	}
+
+	string line;
+	io << mEnergyCalibrationA << "," << mEnergyCalibrationB << "," << mEnergyCalibrationC << ",";
+
+    io.close();
+
+
+
 }
 
 std::tuple<double, double, double>  HUREL::Compton::Module::GetEnergyCalibration()

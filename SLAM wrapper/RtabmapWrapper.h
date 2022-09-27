@@ -41,6 +41,8 @@ namespace HUREL {
 				void StopSLAM();
 				void ResetSLAM();
 
+				void StopVideoStream();
+
 				void GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors);
 
 				void GetPoseFrame(array<double>^% mat);

@@ -70,7 +70,7 @@ namespace HUREL.Compton
                 return statusMsg;
             }
        
-            private set
+             set
             {
                 log = LogManager.GetLogger("LahgiApi");
                 log.Info(value);
@@ -112,7 +112,7 @@ namespace HUREL.Compton
             UpdateDeviceList(null, EventArgs.Empty);
 
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 1000;
+            timer.Interval = 500;
             timer.Elapsed += UpdateTimerInvoker;
             timer.Start();
         }                
@@ -122,7 +122,10 @@ namespace HUREL.Compton
             
             if (lahgiWrapper.Initiate(eModuleManagedType.QUAD))
             {
-                StatusMsg = "Successfully initiate Lahgi";
+                StatusMsg = "Successfully initiate Lahgi Software";
+
+                LahgiSerialControl.StartCommunication();
+
                 IsLahgiInitiate = true;
                 StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
                 return true;
@@ -156,6 +159,11 @@ namespace HUREL.Compton
             }
         }
        
+        public static void StopAll()
+        {
+            StopSlam();
+            rtabmapWrapper.StopVideoStream();
+        }
         public static BitmapImage? GetRgbImage()
         {
             
@@ -234,6 +242,8 @@ namespace HUREL.Compton
             }
             StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
         }
+
+        static public Stopwatch SessionStopwatch = new Stopwatch();
         private static bool isSessionStart = false;
         public static bool IsSessionStart
         {
@@ -245,7 +255,7 @@ namespace HUREL.Compton
         public static bool IsSessionStarting
         {
             get { return isSessionStarting; }
-            private set { StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status); isSessionStarting = value; }
+            set { StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status); isSessionStarting = value; }
         }
 
         public static async Task StartSessionAsync(string fileName, CancellationTokenSource tokenSource)
@@ -282,7 +292,9 @@ namespace HUREL.Compton
                         isSessionStarting = false;
                         timerBoolSpectrum = true;
                         timerBoolSlamRadImage = true;
+                        SessionStopwatch.Restart();
                         await Task.Run(() => AddListModeData(tokenSource)).ConfigureAwait(false);
+                        SessionStopwatch.Stop();
 
                         timerBoolSpectrum = false;
                         timerBoolSlamRadImage = false;

@@ -50,9 +50,14 @@ namespace HUREL {
 
 			bool LoadGain(std::string fileName, eMouduleType moduleType, double* outEGain);
 			bool LoadLUT(std::string FileName);
+			bool LoadEcal(std::string FileName);
+			
 			std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const double(&normalizePMTValue)[9]) const;
 			std::tuple<unsigned int, unsigned int> FastMLPosEstimationFindMaxIndex(const unsigned int gridSize, int minX, int maxX, int minY, int maxY, const Eigen::Array<float, 1, 9>& pmtADCValue) const;
-		
+			std::string mLutFileName;
+			std::string mGainFileName;
+			std::string mEcalFileName;
+
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 				double mModuleOffsetX;

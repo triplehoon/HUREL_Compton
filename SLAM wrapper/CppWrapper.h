@@ -2,6 +2,8 @@
 #include "LogWrapperCaller.h"
 #include "EnergySpectrumData.h"
 
+#include <tuple>
+
 namespace HUREL {
 	namespace Compton {
 		enum class eModuleCppWrapper
@@ -50,14 +52,17 @@ namespace HUREL {
 		{
 		private:
 			LahgiCppWrapper() {};
-			
 		public:
 			
 			bool SetType(eModuleCppWrapper type);
 			void AddListModeDataWithTransformation(const unsigned short* byteData, std::vector<std::vector<double>> echks);
 			std::vector< ListModeDataCppWrapper> GetRelativeListModeData();
-			void RestListedListModeData();
+			void ResetListedListModeData();
 			void RestEnergySpectrum(int channelNumber);
+
+			std::tuple<double, double, double> GetEcalValue(int fpgaChannelNumber);
+			void SetEcalValue(int fpgaChannelNumber, std::tuple<double, double, double> ecal);
+
 
 			std::vector<BinningEnergy> GetSpectrum(int channelNumber);
 			std::vector<BinningEnergy> GetSumSpectrum();

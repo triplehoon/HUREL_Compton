@@ -336,7 +336,7 @@
     <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
         <d:CheckBox x:Name="IsRunning" IsChecked="True" Visibility="Collapsed"/>
         <d:CheckBox x:Name="IsAbled" IsChecked="True" Visibility="Collapsed"/>
-        <syncfusion:ButtonAdv Template="{DynamicResource ButtonAdvTemplateTopButtons}" IsEnabled="{Binding StartButtonEnabled}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}">
+        <syncfusion:ButtonAdv Template="{DynamicResource ButtonAdvTemplateTopButtons}" IsEnabled="{Binding StartButtonEnabled}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" Cursor="Hand">
             <syncfusion:ButtonAdv.Style>
                 <Style TargetType="syncfusion:ButtonAdv" BasedOn="{StaticResource StyleTopButton}">
                     <Style.Triggers>

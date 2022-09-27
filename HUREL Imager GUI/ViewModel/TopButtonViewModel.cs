@@ -48,6 +48,7 @@ namespace HUREL_Imager_GUI.ViewModel
         public override void Unhandle()
         {
             LahgiApi.StatusUpdate -= updateSatus;
+            StopSession();
             logger.Info("Unhandle StatusUpdate");
         }
 
@@ -81,7 +82,8 @@ namespace HUREL_Imager_GUI.ViewModel
         }
         private async Task StopSession()
         {
-            await Task.Run(() => { _sessionCancle?.Cancel(); });
+            
+            await Task.Run(() => { LahgiApi.IsSessionStarting = false; _sessionCancle?.Cancel(); });
         }
     
         private bool _isSaveBinary;

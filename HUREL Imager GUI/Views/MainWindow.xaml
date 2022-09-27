@@ -13,8 +13,13 @@
         xmlns:nav ="clr-namespace:HUREL_Imager_GUI.State.Navigator"
         syncfusion:SfSkinManager.Theme="{syncfusionskin:SkinManagerExtension ThemeName=FluentLight}"
         Icon="/Views/hanynagicon.ico"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         >
-    
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding ClosingCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel>
         <views:BottomStatusView DockPanel.Dock="Bottom" Panel.ZIndex="99" DataContext="{Binding BottomStatusViewModel}"/>
         <syncfusion:SfNavigationDrawer

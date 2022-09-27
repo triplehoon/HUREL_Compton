@@ -125,7 +125,7 @@ namespace HUREL_Imager_GUI.ViewModel
         Mutex StatusUpdateMutex = new Mutex();
         public void StatusUpdate(object? obj, EventArgs eventArgs)
         {
-            if (!StatusUpdateMutex.WaitOne(100))
+            if (!StatusUpdateMutex.WaitOne(0))
             {
                 return;
             }
@@ -154,7 +154,7 @@ namespace HUREL_Imager_GUI.ViewModel
                 {
                     RealtimeRGB = temp;
                 }
-                Thread.Sleep(1000);
+                Thread.Sleep(0);
             }
         }
 
@@ -177,5 +177,6 @@ namespace HUREL_Imager_GUI.ViewModel
             }
             LahgiApi.StatusUpdate -= StatusUpdate;
         }
+        
     }
 }

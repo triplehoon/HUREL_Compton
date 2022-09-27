@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
              xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
              mc:Ignorable="d" 
+             d:Background="White"
              d:DesignHeight="600" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -33,7 +34,7 @@
                 <syncfusion:NumericalAxis Minimum="0" Maximum="3000" ShowTrackBallInfo="True" Header="Energy [keV]"/>
             </syncfusion:SfChart.PrimaryAxis>
             <syncfusion:SfChart.SecondaryAxis>
-                <syncfusion:LogarithmicAxis Header="Counts [#]"/>
+                <syncfusion:LogarithmicAxis Minimum="1" Header="Counts [#]"/>
             </syncfusion:SfChart.SecondaryAxis>
             <syncfusion:FastColumnBitmapSeries Interior="Black"
                                                                      ListenPropertyChange="True"
@@ -42,13 +43,38 @@
                                                                      XBindingPath="Energy" 
                                                                      YBindingPath="Count"
                                                                      syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
+            <syncfusion:FastLineBitmapSeries Interior="Orange"
+                                                                     ListenPropertyChange="True"
+                                                                     Label="Snr"
+                                                                     ItemsSource="{Binding SnrSpetrum}" 
+                                                                     XBindingPath="X" 
+                                                                     YBindingPath="Y"
+                                                                     syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
+        
         </syncfusion:SfChart>
-        <syncfusion:SfDataGrid Grid.Column="1" Margin="10" ItemsSource="{Binding IsotopeInfos}">
-            <syncfusion:SfDataGrid.Columns>
-                <syncfusion:GridTextColumn MappingName="Name" ColumnSizer="Star" />
-                <syncfusion:GridTextColumn MappingName="Description" ColumnSizer="Star"/>
-                <syncfusion:GridTextColumn MappingName="Energy" ColumnSizer="Star"/>
-            </syncfusion:SfDataGrid.Columns>
-        </syncfusion:SfDataGrid>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+                
+            <syncfusion:SfDataGrid Grid.Row="0" Margin="10" ItemsSource="{Binding IsotopeInfos}">
+                <syncfusion:SfDataGrid.Columns>
+                    <syncfusion:GridTextColumn MappingName="Name" ColumnSizer="Star" />
+                    <syncfusion:GridTextColumn MappingName="Description" ColumnSizer="Star"/>
+                    <syncfusion:GridTextColumn MappingName="Energy" ColumnSizer="Star"/>
+                    <syncfusion:GridTextColumn MappingName="Dose" ColumnSizer="Star"/>
+                </syncfusion:SfDataGrid.Columns>
+            </syncfusion:SfDataGrid>
+            <Grid Grid.Row="1">
+                <StackPanel Grid.Row="0">
+                    <CheckBox Content="Show Peak Analysis" IsChecked="{Binding IsSpectrumAnalysisShow}"/>
+                    <RadioButton Content="Scatter" GroupName="Spectrum" IsChecked="True"/>
+                    <RadioButton Content="Absorber" GroupName="Spectrum"/>
+                    <RadioButton Content="All" GroupName="Spectrum"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+       
     </Grid>
 </UserControl>

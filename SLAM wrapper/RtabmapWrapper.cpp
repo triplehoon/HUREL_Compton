@@ -166,6 +166,11 @@ void HUREL::Compton::RtabmapWrapper::ResetSLAM()
 	RtabmapCppWrapper::instance().ResetSlam();
 }
 
+void HUREL::Compton::RtabmapWrapper::StopVideoStream()
+{
+	RtabmapCppWrapper::instance().StopVideoStream();
+}
+
 void HUREL::Compton::RtabmapWrapper::GetSLAMPointCloud(List<array<double>^>^% vectors, List<array<double>^>^% colors)
 {
 	vectors = gcnew List< array<double>^>();

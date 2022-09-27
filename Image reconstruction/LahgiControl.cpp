@@ -714,13 +714,13 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelNu
 		break;
 
 	case eMouduleType::QUAD:
-		if (fpgaChannelNumber >= 0 && fpgaChannelNumber < 4)
+		if (fpgaChannelNumber >= 4 && fpgaChannelNumber < 8)
 		{
-			return mScatterModules[fpgaChannelNumber]->GetEnergySpectrum();
+			return mScatterModules[fpgaChannelNumber - 4]->GetEnergySpectrum();
 		}
-		else if (fpgaChannelNumber >= 8 && fpgaChannelNumber < 12)
+		else if (fpgaChannelNumber >= 12 && fpgaChannelNumber < 16)
 		{
-			return mAbsorberModules[fpgaChannelNumber - 8]->GetEnergySpectrum();
+			return mAbsorberModules[fpgaChannelNumber - 12]->GetEnergySpectrum();
 		}
 		break;
 	case eMouduleType::QUAD_DUAL:
@@ -828,6 +828,87 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetScatterSumEnergySpectrum()
 	return spect;
 }
 
+std::tuple<double, double, double> HUREL::Compton::LahgiControl::GetEcalValue(int fpgaChannelNumber)
+{
+	switch (mModuleType)
+	{
+	case eMouduleType::MONO:
+		if (fpgaChannelNumber == 0)
+		{
+			return mScatterModules[0]->GetEnergyCalibration();
+		}
+		else if (fpgaChannelNumber == 8)
+		{
+			return mAbsorberModules[0]->GetEnergyCalibration();
+		}
+		break;
+
+	case eMouduleType::QUAD:
+		if (fpgaChannelNumber >= 4 && fpgaChannelNumber < 8)
+		{
+			return mScatterModules[fpgaChannelNumber - 4]->GetEnergyCalibration();
+		}
+		else if (fpgaChannelNumber >= 12 && fpgaChannelNumber < 16)
+		{
+			return mAbsorberModules[fpgaChannelNumber - 12]->GetEnergyCalibration();
+		}
+		break;
+	case eMouduleType::QUAD_DUAL:
+		if (fpgaChannelNumber >= 0 && fpgaChannelNumber < 8)
+		{
+			return mScatterModules[fpgaChannelNumber]->GetEnergyCalibration();
+		}
+		else if (fpgaChannelNumber >= 8 && fpgaChannelNumber < 16)
+		{
+			return mAbsorberModules[fpgaChannelNumber - 8]->GetEnergyCalibration();
+		}
+		break;
+	default:
+		break;
+	}
+	return tuple<double, double, double>();
+}
+
+void HUREL::Compton::LahgiControl::SetEcalValue(int fpgaChannelNumber, std::tuple<double, double, double> ecal)
+{
+	switch (mModuleType)
+	{
+	case eMouduleType::MONO:
+		if (fpgaChannelNumber == 0)
+		{
+			mScatterModules[0]->SetEnergyCalibration(get<0>(ecal), get<1>(ecal), get<2>(ecal));
+		}
+		else if (fpgaChannelNumber == 8)
+		{
+			mAbsorberModules[0]->SetEnergyCalibration(get<0>(ecal), get<1>(ecal), get<2>(ecal));
+		}
+		break;
+
+	case eMouduleType::QUAD:
+		if (fpgaChannelNumber >= 4 && fpgaChannelNumber < 8)
+		{
+			mScatterModules[fpgaChannelNumber - 4]->SetEnergyCalibration(get<0>(ecal), get<1>(ecal), get<2>(ecal));
+		}
+		else if (fpgaChannelNumber >= 12 && fpgaChannelNumber < 16)
+		{
+			mAbsorberModules[fpgaChannelNumber - 12]->SetEnergyCalibration(get<0>(ecal), get<1>(ecal), get<2>(ecal));
+		}
+		break;
+	case eMouduleType::QUAD_DUAL:
+		if (fpgaChannelNumber >= 0 && fpgaChannelNumber < 8)
+		{
+			mScatterModules[fpgaChannelNumber]->SetEnergyCalibration(get<0>(ecal), get<1>(ecal), get<2>(ecal));
+		}
+		else if (fpgaChannelNumber >= 8 && fpgaChannelNumber < 16)
+		{
+			mAbsorberModules[fpgaChannelNumber - 8]->SetEnergyCalibration(get<0>(ecal), get<1>(ecal), get<2>(ecal));
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 void HUREL::Compton::LahgiControl::ResetEnergySpectrum(int fpgaChannelNumber)
 {	
 	switch (mModuleType)
@@ -844,13 +925,13 @@ void HUREL::Compton::LahgiControl::ResetEnergySpectrum(int fpgaChannelNumber)
 		break;
 
 	case eMouduleType::QUAD:
-		if (fpgaChannelNumber >= 0 && fpgaChannelNumber < 4)
+		if (fpgaChannelNumber >= 4 && fpgaChannelNumber < 8)
 		{
-			mScatterModules[fpgaChannelNumber]->GetEnergySpectrum().Reset();
+			mScatterModules[fpgaChannelNumber - 4]->GetEnergySpectrum().Reset();
 		}
-		else if (fpgaChannelNumber >= 8 && fpgaChannelNumber < 12)
+		else if (fpgaChannelNumber >= 12 && fpgaChannelNumber < 16)
 		{
-			mAbsorberModules[fpgaChannelNumber - 8]->GetEnergySpectrum().Reset();
+			mAbsorberModules[fpgaChannelNumber - 12]->GetEnergySpectrum().Reset();
 		}
 		break;
 	case eMouduleType::QUAD_DUAL:
@@ -1016,7 +1097,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 	{
 		reconPC.CalculateReconPoint(reconLm[i], ReconPointCloud::SimpleComptonBackprojection);
 	}
-	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "GetReconRealtimePointCloudCompton End Recon: " + reconLm.size(), eLoggerType::INFO);
+	//HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "GetReconRealtimePointCloudCompton End Recon: " + reconLm.size(), eLoggerType::INFO);
 
 
 	return reconPC;

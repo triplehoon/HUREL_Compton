@@ -1,4 +1,5 @@
-﻿using HUREL.Compton;
+﻿using AsyncAwaitBestPractices.MVVM;
+using HUREL.Compton;
 using HUREL_Imager_GUI.State.Navigator;
 using log4net;
 using System;
@@ -7,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace HUREL_Imager_GUI.ViewModel
 {
@@ -33,6 +35,18 @@ namespace HUREL_Imager_GUI.ViewModel
             Navigator.UpdateCurrentViewModelCommand.Execute(ViewType.HOME_VIEW);
             logger.Info("MainViewModel loaded");
             BottomStatusViewModel = new BottomSatusViewModel();
+        }
+
+        private AsyncCommand? closingCommand = null;
+        public ICommand ClosingCommand
+        {
+            get { return closingCommand ?? (closingCommand = new AsyncCommand(Closing)); }
+        }
+        private async Task Closing()
+        {
+            Navigator?.CurrentViewModel?.Unhandle();
+            LahgiApi.StopAll();
+            Unhandle();
         }
 
         public override void Unhandle()

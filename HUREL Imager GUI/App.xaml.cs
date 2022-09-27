@@ -21,14 +21,13 @@ namespace HUREL_Imager_GUI
         private static readonly ILog logger = LogManager.GetLogger(typeof(App));
         public App()
         {
-
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
             //NativeMethods.AllocConsole();
             logger.Info("Start application");
 
             logger.Info("Console loaded");
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTcxMjAyQDMxMzkyZTM0MmUzMEw2eUs1OURYTGswSnNaZ3p5WjlIcWdPQTcrM2UxWEdSbWd6TW9iUnRlcjA9");
-
-
+            
         }
         protected override void OnStartup(StartupEventArgs e)
         {

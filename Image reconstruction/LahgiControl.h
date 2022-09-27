@@ -80,8 +80,8 @@ namespace HUREL {
 			EnergySpectrum GetAbsorberSumEnergySpectrum();
 			EnergySpectrum GetScatterSumEnergySpectrum();
 
-
-
+			std::tuple<double, double, double> GetEcalValue(int fpgaChannelNumber);
+			void SetEcalValue(int fpgaChannelNumber, std::tuple<double, double, double> ecal);
 
 			void ResetEnergySpectrum(int fpgaChannelNumber);
 

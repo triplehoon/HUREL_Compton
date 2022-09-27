@@ -43,12 +43,18 @@ namespace HUREL {
 
 			void GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount);
 
+			void GetEcal(unsigned int channelNumer, double% ecalA, double% ecalB, double% ecalC);
+			void SetEcal(unsigned int channelNumer, double ecalA, double ecalB, double ecalC);
+
+
 
 			void GetSumSpectrum(List<array<double>^>^% energyCount);
 			void GetAbsorberSumSpectrum(List<array<double>^>^% energyCount);
 			void GetScatterSumSpectrum(List<array<double>^>^% energyCount);
 			void GetScatterSumSpectrumByTime(List<array<double>^>^% energyCount, unsigned int time);
 			void GetAbsorberSumSpectrumByTime(List<array<double>^>^% energyCount, unsigned int time);
+
+
 
 			void ResetSpectrum(unsigned int channelNumber);
 

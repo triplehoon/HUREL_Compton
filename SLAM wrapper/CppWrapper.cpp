@@ -74,7 +74,7 @@ std::vector<ListModeDataCppWrapper> HUREL::Compton::LahgiCppWrapper::GetRelative
 	return cppLists;
 }
 
-void HUREL::Compton::LahgiCppWrapper::RestListedListModeData()
+void HUREL::Compton::LahgiCppWrapper::ResetListedListModeData()
 {
 	LahgiControl::instance().ResetListedListModeData();
 	for (int i = 0; i < 16; ++i)
@@ -86,6 +86,16 @@ void HUREL::Compton::LahgiCppWrapper::RestListedListModeData()
 void HUREL::Compton::LahgiCppWrapper::RestEnergySpectrum(int channelNumber)
 {
 	LahgiControl::instance().ResetEnergySpectrum(channelNumber);
+}
+
+std::tuple<double, double, double> HUREL::Compton::LahgiCppWrapper::GetEcalValue(int fpgaChannelNumber)
+{
+	return LahgiControl::instance().GetEcalValue(fpgaChannelNumber);
+}
+
+void HUREL::Compton::LahgiCppWrapper::SetEcalValue(int fpgaChannelNumber, std::tuple<double, double, double> ecal)
+{
+	LahgiControl::instance().SetEcalValue(fpgaChannelNumber, ecal);
 }
 
 std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetSpectrum(int channelNumber)

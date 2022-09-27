@@ -83,7 +83,7 @@ void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^
 void HUREL::Compton::LahgiWrapper::ResetListmodeData()
 {
 	WrapperLogger::Log::Info("C++CLR::UREL::Compton::LahgiWrapper", "Reset list mode data");
-	LahgiCppWrapper::instance().RestListedListModeData();	
+	LahgiCppWrapper::instance().ResetListedListModeData();	
 }
 
 void HUREL::Compton::LahgiWrapper::GetSpectrum(unsigned int channelNumer, List<array<double>^>^% energyCount)
@@ -98,6 +98,21 @@ void HUREL::Compton::LahgiWrapper::GetSpectrum(unsigned int channelNumer, List<a
 		array<double, 1>^ tempECount = gcnew array<double>{eSpect[i].Energy, static_cast<double>(eSpect[i].Count)};
 		energyCount->Add(tempECount);
 	}
+}
+
+void HUREL::Compton::LahgiWrapper::GetEcal(unsigned int channelNumer, double% ecalA, double% ecalB, double% ecalC)
+{
+	std::tuple<double, double, double> ecals = LahgiCppWrapper::instance().GetEcalValue(channelNumer);
+
+	ecalA = std::get<0>(ecals);
+	ecalB = std::get<1>(ecals);
+	ecalC = std::get<2>(ecals);
+}
+
+void HUREL::Compton::LahgiWrapper::SetEcal(unsigned int channelNumer, double ecalA, double ecalB, double ecalC)
+{
+	std::tuple<double, double, double> ecals = std::make_tuple(static_cast<double>(ecalA), static_cast<double>(ecalB), static_cast<double>(ecalC));
+	LahgiCppWrapper::instance().SetEcalValue(channelNumer, ecals);
 }
 
 void HUREL::Compton::LahgiWrapper::GetSumSpectrum(List<array<double>^>^% energyCount)

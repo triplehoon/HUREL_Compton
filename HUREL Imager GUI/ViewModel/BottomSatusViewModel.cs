@@ -22,7 +22,6 @@ namespace HUREL_Imager_GUI.ViewModel
 
         public BottomSatusViewModel()
         {
-            LahgiApi.StatusUpdate += UpdateLogMsg;
             LahgiApi.StatusUpdate += StatusUpdate;
            Hierarchy? hierarchy = LogManager.GetRepository() as Hierarchy;
             mappender = hierarchy?.Root.GetAppender("MemoryAppender") as MemoryAppender;
@@ -32,14 +31,15 @@ namespace HUREL_Imager_GUI.ViewModel
         Mutex StatusUpdateMutex = new Mutex();
         public void StatusUpdate(object? obj, EventArgs eventArgs)
         {
-            if (!StatusUpdateMutex.WaitOne(100))
-            {
-                return;
-            }
+
             if (eventArgs is LahgiApiEnvetArgs)
             {
                 LahgiApiEnvetArgs lahgiApiEnvetArgs = (LahgiApiEnvetArgs)eventArgs;
-
+                ElapsedTime = LahgiApi.SessionStopwatch.Elapsed.ToString(@"mm\:ss");
+                if (!StatusUpdateMutex.WaitOne(0))
+                {
+                    return;
+                }
                 if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Spectrum)
                 {
                     var espect = LahgiApi.GetScatterSumSpectrumByTime(5);
@@ -47,9 +47,40 @@ namespace HUREL_Imager_GUI.ViewModel
                     DoseRateText = new string($"{dose:F3} ± {1.96 * std:F3} µSv/h");
 
                 }
+                if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Status)
+                {
+                    var events = mappender?.PopAllEvents();
+
+                    if (events == null)
+                    {
+                        return;
+                    }
+                    foreach (var e in events)
+                    {
+                        if (e.MessageObject is string)
+                        {
+                            logMsg += e.Level + " " + e.TimeStamp.ToString("HH:mm::ss") + " [" + e.LoggerName + "]" + ": " + (string)e.MessageObject + "\n";
+                        }
+
+                    }
+                    OnPropertyChanged(nameof(LogMsg));
+                }
             }
 
             StatusUpdateMutex.ReleaseMutex();
+        }
+        private string elapsedTime = LahgiApi.SessionStopwatch.Elapsed.ToString(@"mm\:ss");
+        public string ElapsedTime
+        {
+            get
+            {
+                return elapsedTime;
+            }
+            set
+            {
+                elapsedTime = value;
+                OnPropertyChanged(nameof(ElapsedTime));
+            }
         }
 
         private string doseRateText = new string($"{0.11615:F3} ± {1.96 * 0.123:F3} µSv/h");
@@ -61,28 +92,11 @@ namespace HUREL_Imager_GUI.ViewModel
         }
 
         private MemoryAppender? mappender;
-        private void UpdateLogMsg(object? obj, EventArgs eventArgs)
-        {
-            var events = mappender?.PopAllEvents();
-            
-            if (events == null)
-            {
-                return;
-            }
-            foreach (var e in events)
-            {
-                if (e.MessageObject is string)
-                {
-                    LogMsg += e.Level + " " + e.TimeStamp.ToString("HH:mm::ss") + " [" + e.LoggerName + "]" + ": " + (string)e.MessageObject + "\n";
-                }
-                
-            }
-        }
+     
 
 
         public override void Unhandle()
         {
-            LahgiApi.StatusUpdate -= UpdateLogMsg;
             LahgiApi.StatusUpdate -= StatusUpdate;
         }
     }
