@@ -158,12 +158,12 @@ namespace HUREL.Compton
        
         public static BitmapImage? GetRgbImage()
         {
-            BitmapImage? img = null; 
+            
             if (!IsRtabmapInitiate)
             {
-                return img;
+                return null;
             }
-
+            BitmapImage? img = null;
             int width = 1;
             int height = 1;
             int stride = 1;
@@ -423,7 +423,7 @@ namespace HUREL.Compton
             List<double[]> UnmanagedEcks = new List<double[]>();
 
             {
-                double[] eckUnmanaged = new double[] { 0, 10000000 };
+                double[] eckUnmanaged = new double[] { 0, 0 };
                 UnmanagedEcks.Add(eckUnmanaged);
             }
             lahgiWrapper.ResetListmodeData();
@@ -448,10 +448,10 @@ namespace HUREL.Compton
                         UnmanagedEcks.Add(eckUnmanaged);
                     }
                 }
-                Thread.Sleep(0);
+                //Thread.Sleep(0);
             }
-            Thread.Sleep(0);
             sw.Stop();
+            Thread.Sleep(0);
 
             StatusMsg = $"TestAddingListModeData took {sw.ElapsedMilliseconds} ms for {count} counts";
         }

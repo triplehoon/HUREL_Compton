@@ -33,6 +33,9 @@
     <ClInclude Include="RadiationImage.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="EnergySpectrumData.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LahgiControl.cpp">

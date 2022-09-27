@@ -34,23 +34,24 @@ void HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ 
 {
 	pin_ptr<unsigned short> intParamsPtr = &adcData[0];
 
-	unsigned short* adcS = intParamsPtr;
+	//unsigned short* adcS = intParamsPtr;
 
 	std::vector<std::vector<double>> eChkUnmanagedVector;
-	eChkUnmanagedVector.reserve(echks->Count);
-	for each (array<double>^ e in echks)
-	{
-		std::vector<double> eChkUnmanaged;
-		eChkUnmanaged.reserve(2);
-		double minE = e[0];
-		double maxE = e[1];
-		eChkUnmanaged.push_back(minE);
-		eChkUnmanaged.push_back(maxE);
+	//eChkUnmanagedVector.reserve(echks->Count);
+	//for each (array<double>^ e in echks)
+	//{
+	//	std::vector<double> eChkUnmanaged;
+	//	eChkUnmanaged.reserve(2);
+	//	double minE = e[0];
+	//	double maxE = e[1];
+	//	eChkUnmanaged.push_back(minE);
+	//	eChkUnmanaged.push_back(maxE);
 
-		eChkUnmanagedVector.push_back(eChkUnmanaged);
-	}
+	//	eChkUnmanagedVector.push_back(eChkUnmanaged);
+	//}
 
-	LahgiCppWrapper::instance().AddListModeDataWithTransformation(adcS, eChkUnmanagedVector);
+	LahgiCppWrapper::instance().AddListModeDataWithTransformation(intParamsPtr, eChkUnmanagedVector);
+	
 }
 
 void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE)

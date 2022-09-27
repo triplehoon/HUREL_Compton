@@ -34,18 +34,16 @@ namespace HUREL {
 		class LahgiControl
 		{
 		private:		
-			
+			Eigen::Matrix4d t265toLACCPosTransform;
 			Module** mScatterModules;  //./Module information/MONOScatter1/Gain.csv, LUT.csv ...
 			Module** mAbsorberModules;	//./Module information/QUADScatter1/Gain.csv, LUT.csv ...
 			eMouduleType mModuleType;
 			concurrency::concurrent_vector <ListModeData> mListedListModeData;
 			std::vector<RadiationImage> mListModeImage;
-			EnergySpectrum mSumSpectrum;
-			EnergySpectrum mScatterSumSpectrum;
-			EnergySpectrum mAbsorberSumSpectrum;
-			LahgiControl();
-			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation);
 
+			LahgiControl();
+			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds timeInMili);
+			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation);
 			//CodeMaks Setting
 			double mMaskThickness = 0.006;
 		
