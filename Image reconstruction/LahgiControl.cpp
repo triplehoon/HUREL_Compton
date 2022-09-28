@@ -186,6 +186,10 @@ bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 	}
 	case HUREL::Compton::eMouduleType::TEST:
 	{
+		mScatterModules = new Module * [1];
+		mAbsorberModules = new Module * [1];
+		mScatterModules[0] = new Module();
+		mAbsorberModules[0] = new Module();
 		break;
 	}
 	default:
@@ -220,6 +224,8 @@ HUREL::Compton::LahgiControl::~LahgiControl()
 		}*/
 		break;
 	case HUREL::Compton::eMouduleType::TEST:
+		delete mScatterModules[0];
+		delete mAbsorberModules[0];
 		break;
 	default:
 		assert(false);
@@ -673,6 +679,8 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 		return false;
 	}
 	mListedListModeData.clear();
+	mScatterModules[0]->GetEnergySpectrum().Reset();
+	mAbsorberModules[0]->GetEnergySpectrum().Reset();
 	string buffer;
 	char line[2048];
 	while (loadFile.good())
@@ -682,7 +690,15 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 		if (temp.ReadListModeData(buffer))
 		{
 			mListedListModeData.push_back(temp);
-
+			if (temp.Scatter.InteractionEnergy > 0)
+			{
+				mScatterModules[0]->GetEnergySpectrum().AddEnergy(temp.Scatter.InteractionEnergy);
+			}
+			if (temp.Absorber.InteractionEnergy > 0)
+			{
+				mAbsorberModules[0]->GetEnergySpectrum().AddEnergy(temp.Absorber.InteractionEnergy);
+			}
+			
 		}
 	}
 

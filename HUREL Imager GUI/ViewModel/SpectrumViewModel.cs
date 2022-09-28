@@ -3,6 +3,7 @@ using HUREL.Compton.RadioisotopeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -76,48 +77,36 @@ namespace HUREL_Imager_GUI.ViewModel
                 {
                     LahgiApiEnvetArgs lahgiApiEnvetArgs = (LahgiApiEnvetArgs)eventArgs;
 
-                    if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Loading)
+                    if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Loading || lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Spectrum)
                     {
-                        EnergySpectrum.Clear();
-                        var espect = spectrum;
-
-                        foreach (var e in espect.HistoEnergies)
-                        {
-                            EnergySpectrum.Add(e);
-                        }
-                        ObservableCollection<IsotopeInfo> isotopeInfos = new ObservableCollection<IsotopeInfo>();
-                        List<Isotope> DetectedIso = PeakSearching.GetIsotopesFromPeaks(espect.FindPeaks(662, 50, 10, 2), 1, 662, 40, 5);
-
-                        foreach (Isotope iso in DetectedIso)
-                        {
-                            string energy = "";
-                            foreach (double e in iso.PeakEnergy)
-                            {
-                                energy += e.ToString("0.");
-                                energy += " ";
-                            }
-
-                            isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy));
-                        }
-                        IsotopeInfos = isotopeInfos;
-
-                    }
-
-                    if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Spectrum)
-                    {
-                        //EnergySpectrum.Clear();
                         var espect = spectrum;
 
                         ObservableCollection<IsotopeInfo> isotopeInfos = new ObservableCollection<IsotopeInfo>();
-                        List<Isotope> DetectedIso = PeakSearching.GetIsotopesFromPeaks(espect.FindPeaks(662, 50, 10, 2), 1, 662, 40, 10);
+                        List<Isotope> DetectedIso = PeakSearching.GetIsotopesFromPeaks(espect.FindPeaks(Ref_x, Ref_fwhm, Ref_at_0, Min_snr), 1, Ref_x, Ref_fwhm, Ref_at_0);
+
+
                         if (IsSpectrumAnalysisShow)
                         {
                             SnrSpetrum = new ObservableCollection<GraphData>(espect.SnrData);
+                            
+                            List<GraphData> graphDatas = new List<GraphData>();
+                            for (int i = 0; i < espect.SnrData.Count; i++)
+                            {
+                                GraphData graphData = espect.SnrData[i];
+                                graphData.Y = min_snr;
+                                graphDatas.Add(graphData);
+                            }
+                            MinSnrLine = new ObservableCollection<GraphData>(graphDatas);
+
+                            PeakLine = new ObservableCollection<GraphData>(espect.PeakData);
                         }
                         else
                         {
                             SnrSpetrum = new ObservableCollection<GraphData>();
+                            MinSnrLine = new ObservableCollection<GraphData>();
+                            PeakLine = new ObservableCollection<GraphData>();
                         }
+
                         foreach (Isotope iso in DetectedIso)
                         {
                             string energy = "";
@@ -130,7 +119,10 @@ namespace HUREL_Imager_GUI.ViewModel
                             isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy));
                         }
                         IsotopeInfos = isotopeInfos;
+
                     }
+
+                    
                 }
 
             }
@@ -161,6 +153,18 @@ namespace HUREL_Imager_GUI.ViewModel
                 OnPropertyChanged(nameof(IsotopeInfos));
             }
         }
+        private ObservableCollection<GraphData> _minSnrLine = new ObservableCollection<GraphData>();
+
+        public ObservableCollection<GraphData> MinSnrLine
+        {
+            get { return _minSnrLine; }
+            set
+            {
+                _minSnrLine = value;
+                OnPropertyChanged(nameof(MinSnrLine));
+            }
+        }
+
         private ObservableCollection<GraphData> _snrSpectrum = new ObservableCollection<GraphData>();
 
         public ObservableCollection<GraphData> SnrSpetrum
@@ -172,6 +176,19 @@ namespace HUREL_Imager_GUI.ViewModel
                 OnPropertyChanged(nameof(SnrSpetrum));
             }
         }
+
+        private ObservableCollection<GraphData> _peakLine = new ObservableCollection<GraphData>();
+
+        public ObservableCollection<GraphData> PeakLine
+        {
+            get { return _peakLine; }
+            set
+            {
+                _peakLine = value;
+                OnPropertyChanged(nameof(PeakLine));
+            }
+        }
+
         private eSpectrumCases _spectrumCases = eSpectrumCases.Scatter;
         public eSpectrumCases SpectrumCases
         {
@@ -179,6 +196,7 @@ namespace HUREL_Imager_GUI.ViewModel
             set
             {
                 _spectrumCases = value;
+                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
                 OnPropertyChanged(nameof(SpectrumCases));
             }
         }
@@ -192,8 +210,73 @@ namespace HUREL_Imager_GUI.ViewModel
                 {
                     fpgaChannelNumber = value;
                 }
+                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
                 OnPropertyChanged(nameof(FpgaChannelNumber));
             }
+        }
+
+        private float ref_x = Convert.ToSingle(ConfigurationManager.AppSettings.Get(nameof(ref_x)));
+        public float Ref_x
+        {
+            get { return ref_x; }
+            set { ref_x = value;
+
+                var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                var appSetting = configFile.AppSettings.Settings;
+                appSetting[nameof(ref_x)].Value = value.ToString();
+
+                configFile.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
+                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
+
+                OnPropertyChanged(nameof(Ref_x)); }
+        }
+
+        private float ref_fwhm = Convert.ToSingle(ConfigurationManager.AppSettings.Get(nameof(ref_fwhm)));
+        public float Ref_fwhm
+        {
+            get { return ref_fwhm; }
+            set { 
+                ref_fwhm = value;
+
+                var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                var appSetting = configFile.AppSettings.Settings;
+                appSetting[nameof(ref_fwhm)].Value = value.ToString();
+
+                configFile.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
+
+                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
+                OnPropertyChanged(nameof(Ref_fwhm)); }
+        }
+        private float ref_at_0 = Convert.ToSingle(ConfigurationManager.AppSettings.Get(nameof(ref_at_0)));
+        public float Ref_at_0
+        {
+            get { return ref_at_0; }
+            set { ref_at_0 = value;
+                var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                var appSetting = configFile.AppSettings.Settings;
+                appSetting[nameof(ref_at_0)].Value = value.ToString();
+
+                configFile.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
+
+                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
+                OnPropertyChanged(nameof(Ref_at_0)); }
+        }
+        private float min_snr = Convert.ToSingle(ConfigurationManager.AppSettings.Get(nameof(min_snr)));
+        public float Min_snr
+        {
+            get { return min_snr; }
+            set { min_snr = value;
+                var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                var appSetting = configFile.AppSettings.Settings;
+                appSetting[nameof(min_snr)].Value = value.ToString();
+
+                configFile.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
+                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
+                OnPropertyChanged(nameof(Min_snr)); }
         }
 
         private bool isSpectrumAnalysisShow = false;
@@ -201,7 +284,10 @@ namespace HUREL_Imager_GUI.ViewModel
         {
             get { return isSpectrumAnalysisShow; }
             set { 
-                isSpectrumAnalysisShow = value; OnPropertyChanged(nameof(IsSpectrumAnalysisShow)); }
+                isSpectrumAnalysisShow = value;
+                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
+                OnPropertyChanged(nameof(IsSpectrumAnalysisShow));
+            }
         }
 
         public override void Unhandle()

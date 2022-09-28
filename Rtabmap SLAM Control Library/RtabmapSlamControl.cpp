@@ -131,7 +131,12 @@ void HUREL::Compton::RtabmapSlamControl::StartVideoStream()
 
 void HUREL::Compton::RtabmapSlamControl::StopVideoStream()
 {
+	if (!mIsVideoStreamOn)
+	{
+		return;
+	}
 	mIsVideoStreamOn = false;
+	
 	t1.get();
 	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop video stream", eLoggerType::INFO);
 	

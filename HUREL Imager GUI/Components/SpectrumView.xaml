@@ -5,9 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
              xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             xmlns:converter="clr-namespace:HUREL_Imager_GUI.Converters"
              mc:Ignorable="d" 
              d:Background="White"
              d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converter:EspectModeConverter x:Key="ConvEspectMode"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
@@ -50,15 +54,144 @@
                                                                      XBindingPath="X" 
                                                                      YBindingPath="Y"
                                                                      syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
-        
+            <syncfusion:FastLineBitmapSeries Interior="Green"
+                                                                     ListenPropertyChange="True"
+                                                                     Label="MinSnr"
+                                                                     ItemsSource="{Binding MinSnrLine}" 
+                                                                     XBindingPath="X" 
+                                                                     YBindingPath="Y"
+                                                                     syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
+            <syncfusion:FastColumnBitmapSeries Interior="Red"    
+                                                                     ListenPropertyChange="True"
+                                                                     Label="Peak"
+                                                                     ItemsSource="{Binding PeakLine}" 
+                                                                     XBindingPath="X" 
+                                                                     YBindingPath="Y"
+                                                                     syncfusion:ChartSeriesBase.Spacing="0.5" Margin="0,12,0,-12" />
         </syncfusion:SfChart>
+        <ToggleButton  x:Name="SetupButton" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right" 
+                              Margin="5"
+                      Style="{StaticResource ToggleButtonDesignNormal}"
+                              d:IsChecked="true"
+                                   Content="Setting"
+                       
+                              >
+
+
+        </ToggleButton>
+        <Popup x:Name="SetupButtonPopup" d:IsOpen="True" 
+                   IsOpen="{Binding Path=IsChecked, ElementName=SetupButton, Mode=OneWay}" 
+                   Placement="Left" PlacementTarget="{Binding ElementName=SetupButton}">
+            <Border BorderThickness="3" Width="300" Grid.Row="1" BorderBrush="{StaticResource CustomDarkBlue}" Background="White" Height="130" Panel.ZIndex="300">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Margin="5,5,5,5" Grid.Column="0">
+                        <CheckBox Content="Show Peak Analysis" IsChecked="{Binding IsSpectrumAnalysisShow}"/>
+
+                        <RadioButton Content="Scatter" Margin="0,10,0,0"
+                                     IsChecked="{Binding Path=SpectrumCases, Converter={StaticResource ConvEspectMode}, ConverterParameter=Scatter}"/>
+                        <RadioButton Content="Absorber" 
+                                     IsChecked="{Binding Path=SpectrumCases, Converter={StaticResource ConvEspectMode}, ConverterParameter=Absorber}"/>
+                        <RadioButton Content="All" 
+                                     IsChecked="{Binding Path=SpectrumCases, Converter={StaticResource ConvEspectMode}, ConverterParameter=All}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="By Channel"  VerticalAlignment="Center" x:Name="ByChannel"
+                                         IsChecked="{Binding Path=SpectrumCases, Converter={StaticResource ConvEspectMode}, ConverterParameter=ByChannel}"/>
+                            <syncfusion:UpDown VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0" 
+                                               IsEnabled="{Binding ElementName=ByChannel, Path=IsChecked}"
+                                                   Value="{Binding FpgaChannelNumber}"
+                                               MinValue="0" MaxValue="15" NumberDecimalDigits="0"
+                                               Foreground="Black" Width="40"
+                                               TextAlignment="Right"
+                                               ZeroColor="Black"
+                                               />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="5,5,5,5" Grid.Column="1">
+                        <TextBlock Text="Peak Setting" FontSize="13" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text="ref_x: " Width="65"/>
+                            <syncfusion:DoubleTextBox PositiveForeground="Black" MinimumNumberDecimalDigits="0" Width="50" Value="{Binding Ref_x}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text="ref_fwhm: " Width="65"/>
+                            <syncfusion:DoubleTextBox Width="50" Value="{Binding Ref_fwhm}"  PositiveForeground="Black" MinimumNumberDecimalDigits="0"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text="fwhm_at_0: " Width="65"/>
+                            <syncfusion:DoubleTextBox Width="50" Value="{Binding Ref_at_0}" PositiveForeground="Black" MinimumNumberDecimalDigits="0" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text="min_snr: " Width="65"/>
+                            <syncfusion:DoubleTextBox Width="50" Value="{Binding Min_snr}" PositiveForeground="Black" MinimumNumberDecimalDigits="0" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+
+            </Border>
+
+        </Popup>
+
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="3*"/>
+                <RowDefinition Height="40"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-                
-            <syncfusion:SfDataGrid Grid.Row="0" Margin="10" ItemsSource="{Binding IsotopeInfos}">
+            <TextBlock Text="Isotopes" Margin="5" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+            <d:Border  BorderThickness="3" Width="300" Grid.Row="1" BorderBrush="{StaticResource CustomDarkBlue}" Background="White" Height="130" Panel.ZIndex="300">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Margin="5,5,5,5" Grid.Column="0">
+                        <CheckBox Content="Show Peak Analysis" IsChecked="{Binding IsSpectrumAnalysisShow}"/>
+                        
+                        <RadioButton Content="Scatter" GroupName="Spectrum" IsChecked="True" Margin="0,10,0,0"
+                                     />
+                        <RadioButton Content="Absorber" GroupName="Spectrum"
+                                     />
+                        <RadioButton Content="All" GroupName="Spectrum"
+                                     />
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="By Channel" GroupName="Spectrum" VerticalAlignment="Center" x:Name="dByChannel"
+                                     />
+                            <syncfusion:UpDown VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0" 
+                                               IsEnabled="{Binding ElementName=dByChannel, Path=IsChecked}"
+                                               MinValue="0" MaxValue="15" NumberDecimalDigits="0"
+                                               Foreground="Black" Width="40"
+                                               TextAlignment="Right"
+                                               ZeroColor="Black"
+                                               />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="5,5,5,5" Grid.Column="1">
+                        <TextBlock Text="Peak Setting" FontSize="13" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text="ref_x: " Width="65"/>
+                            <syncfusion:DoubleTextBox Width="50"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text="ref_fwhm: " Width="65"/>
+                            <syncfusion:DoubleTextBox Width="50"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text="fwhm_at_0: " Width="65"/>
+                            <syncfusion:DoubleTextBox Width="50"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text="min_snr: " Width="65"/>
+                            <syncfusion:DoubleTextBox Width="50"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+               
+            </d:Border>
+            <syncfusion:SfDataGrid Grid.Row="1" Margin="10" ItemsSource="{Binding IsotopeInfos}">
                 <syncfusion:SfDataGrid.Columns>
                     <syncfusion:GridTextColumn MappingName="Name" ColumnSizer="Star" />
                     <syncfusion:GridTextColumn MappingName="Description" ColumnSizer="Star"/>
@@ -66,14 +199,7 @@
                     <syncfusion:GridTextColumn MappingName="Dose" ColumnSizer="Star"/>
                 </syncfusion:SfDataGrid.Columns>
             </syncfusion:SfDataGrid>
-            <Grid Grid.Row="1">
-                <StackPanel Grid.Row="0">
-                    <CheckBox Content="Show Peak Analysis" IsChecked="{Binding IsSpectrumAnalysisShow}"/>
-                    <RadioButton Content="Scatter" GroupName="Spectrum" IsChecked="True"/>
-                    <RadioButton Content="Absorber" GroupName="Spectrum"/>
-                    <RadioButton Content="All" GroupName="Spectrum"/>
-                </StackPanel>
-            </Grid>
+            
         </Grid>
        
     </Grid>

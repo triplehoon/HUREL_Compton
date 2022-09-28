@@ -126,7 +126,7 @@
                         <TextBlock Text="Real-time Reconstruction Setting" Style="{StaticResource TextBlockTitle}" Margin="5" />
                         <StackPanel Orientation="Horizontal" >
 
-                            <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_NEAR}" 
+                            <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_NEAR}"                                         
                                          Content="Near-field mode" 
                                          FontSize="15" Margin="5" Style="{StaticResource MahApps.Styles.RadioButton.Win10}"/>
                             <RadioButton IsChecked="{Binding Path=RealtimeReconMode, Converter={StaticResource ConvRTReconModeToBoolean}, ConverterParameter=RTRECONMODE_FAR}" 

@@ -24,10 +24,11 @@ namespace HUREL_Imager_GUI
             ShutdownMode = ShutdownMode.OnLastWindowClose;
             //NativeMethods.AllocConsole();
             logger.Info("Start application");
-
+            
             logger.Info("Console loaded");
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("NTcxMjAyQDMxMzkyZTM0MmUzMEw2eUs1OURYTGswSnNaZ3p5WjlIcWdPQTcrM2UxWEdSbWd6TW9iUnRlcjA9");
-            
+            logger.Info("Config Setting");
+            InitialLizeConfigFile();
         }
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -39,6 +40,35 @@ namespace HUREL_Imager_GUI
             LahgiApi.InititateRtabmap();
             base.OnStartup(e);
 
+        }
+
+        private void InitialLizeConfigFile()
+        {
+            var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var appSetting = configFile.AppSettings.Settings;
+            if(appSetting["Test"] ==null)
+            {
+                appSetting.Add("Test", "0");
+            }
+            if (appSetting["ref_x"] == null)
+            {
+                appSetting.Add("ref_x", "662");
+            }
+            if (appSetting["ref_fwhm"] == null)
+            {
+                appSetting.Add("ref_fwhm", "50");
+            }
+            if (appSetting["ref_at_0"] == null)
+            {
+                appSetting.Add("ref_at_0", "10");
+            }
+            if (appSetting["min_snr"] == null)
+            {
+                appSetting.Add("min_snr", "5");
+            }
+
+            configFile.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
         }
     }
     static class NativeMethods

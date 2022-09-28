@@ -401,6 +401,8 @@ namespace HUREL.Compton.RadioisotopeAnalysis
             initiate();
         }
         public List<GraphData> SnrData = new List<GraphData>();
+        public List<GraphData> PeakData = new List<GraphData>();
+
         private static Mutex PyMutex = new Mutex();
         public List<double> FindPeaks(float ref_x, float ref_fwhm, float fwhm_at_0, float min_snr)
         {
@@ -447,12 +449,13 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 
                  dynamic snr = search.snr;
 
-
+                PeakData.Clear();
                 for (int i = 0; i < (int)np.size(peakIdx); ++i)
                 {
-                    if (peakIdx[i] + 2 < (int)np.size(erg))
+                    if (peakIdx[i] < (int)np.size(erg))
                     {
-                        PeakE.Add((double)erg[peakIdx[i] + 2]);
+                        PeakE.Add((double)erg[peakIdx[i]]);
+                        PeakData.Add(new GraphData(((double)erg[peakIdx[i]]), 1000));
                     }
 
                 }
@@ -460,6 +463,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 for (int i = 0; i < (int)np.size(erg); ++i)
                 {
                     SnrData.Add(new GraphData((double)erg[i], (double)snr[i]));
+
                 }
             }
             PythonEngine.ReleaseLock(gs);

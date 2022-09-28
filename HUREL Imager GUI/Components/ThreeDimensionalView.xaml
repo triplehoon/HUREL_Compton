@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
-                     xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
 
              mc:Ignorable="d" 
              d:DesignHeight="786" d:DesignWidth="680">
@@ -15,20 +15,27 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TextBlock Text="3-D view" Margin="5" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <syncfusion:ButtonAdv x:Name="SetupButton" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right" Label="Setting" IsCheckable="True" d:IsChecked="True">
-
-            <Popup x:Name="SetupButtonPopup" d:IsOpen="True" 
+        <ToggleButton  x:Name="SetupButton" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" 
+                              Margin="5"
+                      Style="{StaticResource ToggleButtonDesignNormal}"
+                              d:IsChecked="true"
+                                   Content="Setting"
+                              >
+            
+            
+        </ToggleButton>
+        <Popup x:Name="SetupButtonPopup" d:IsOpen="True" 
                    IsOpen="{Binding Path=IsChecked, ElementName=SetupButton, Mode=OneWay}" 
                    Placement="Left" PlacementTarget="{Binding ElementName=SetupButton}">
-                <Border BorderThickness="3" Width="200"   BorderBrush="{StaticResource CustomDarkBlue}" Background="White">
+            <Border BorderThickness="3" Width="200"   BorderBrush="{StaticResource CustomDarkBlue}" Background="White">
 
-                    <StackPanel Margin="5,5,5,5">
-                        <TextBlock Text="3D View Setup" FontSize="{StaticResource FontSize-Large}" FontWeight="Bold"/>
-                        <Button Content="Start SLAM" Command="{Binding StartSlamCommand}"/>
-                    </StackPanel>
-                </Border>
-            </Popup>
-        </syncfusion:ButtonAdv>
+                <StackPanel Margin="5,5,5,5">
+                    <TextBlock Text="3D View Setup" FontSize="{StaticResource FontSize-Large}" FontWeight="Bold"/>
+                    <Button Content="Start SLAM" Command="{Binding StartSlamCommand}"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+     
         <Grid Grid.Row="1"  Background="Black" >
             <hx:Viewport3DX ChangeFieldOfViewCursor="ScrollNS" PanCursor="Hand" RotateCursor="SizeAll" ZoomCursor="SizeNS" ZoomRectangleCursor="SizeNWSE" EnableSwapChainRendering="False"     
                        BackgroundColor="Black" Background="Black"  InfoBackground="Black" Grid.Row="1" OpacityMask="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}">

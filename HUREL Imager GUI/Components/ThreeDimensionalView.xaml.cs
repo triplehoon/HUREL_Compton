@@ -23,6 +23,22 @@ namespace HUREL_Imager_GUI.Components
         public ThreeDimensionalView()
         {
             InitializeComponent();
+            this.Loaded += new RoutedEventHandler(View1_Loaded);
+        }
+        void View1_Loaded(object sender, RoutedEventArgs e)
+        {
+            Window w = Window.GetWindow(SetupButtonPopup);
+            if (null != w)
+            {
+                w.LocationChanged += SaveButtonMove;
+            }
+        }
+
+        void SaveButtonMove(object? sender, EventArgs args)
+        {
+            var offset = SetupButtonPopup.HorizontalOffset;
+            SetupButtonPopup.HorizontalOffset = offset + 1;
+            SetupButtonPopup.HorizontalOffset = offset;           
         }
     }
 }
