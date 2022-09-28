@@ -16,6 +16,21 @@
                 <Setter Property="Padding" Value="0.5,3,5,3"/>
             </Style>
         </Style.Resources>
+    </Style>
 
+
+    <Style TargetType="{x:Type Button}" x:Key="ButtonDesignNormal">
+        <Setter Property="Background" Value="#FF00457E"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Style.Resources>
+            <Style TargetType="Border">
+                <Setter Property="CornerRadius" Value="5"/>
+                <Setter Property="Padding" Value="0.5,3,5,3"/>
+            </Style>
+        </Style.Resources>
     </Style>
 </ResourceDictionary>

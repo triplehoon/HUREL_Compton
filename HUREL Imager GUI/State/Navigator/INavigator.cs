@@ -11,6 +11,7 @@ namespace HUREL_Imager_GUI.State.Navigator
     public enum ViewType
     {
         HOME_VIEW,
+        CALIBRATION_VIEW,
         SETTING_VIEW
     }
     internal interface INavigator

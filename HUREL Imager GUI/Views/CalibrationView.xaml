@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="HUREL_Imager_GUI.Views.CalibrationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HUREL_Imager_GUI.Views"
+             xmlns:components="clr-namespace:HUREL_Imager_GUI.Components" 
+             xmlns:viewmodel="clr-namespace:HUREL_Imager_GUI.ViewModel"
+              xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="1200">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <components:EnergyCalibrationView Grid.Column="0" DataContext="{Binding EnergyCalibrationViewModel}" Padding="15"/>
+    </Grid>
+</UserControl>

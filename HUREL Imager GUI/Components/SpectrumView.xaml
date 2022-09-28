@@ -168,6 +168,7 @@
                                                ZeroColor="Black"
                                                />
                         </StackPanel>
+                        
                     </StackPanel>
                     <StackPanel Margin="5,5,5,5" Grid.Column="1">
                         <TextBlock Text="Peak Setting" FontSize="13" FontWeight="Bold"/>

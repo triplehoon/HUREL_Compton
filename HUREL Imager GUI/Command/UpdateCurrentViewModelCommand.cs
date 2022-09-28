@@ -31,7 +31,7 @@ namespace HUREL_Imager_GUI.Command
             {
                 homeViewModel = new HomeViewModel();
                 settingViewModel = new SettingViewModel();
-
+                calibrationViewModel = new CalibrationViewModel();
                 IsVewModelsLoaded = true;
             }
             if (parameter is ViewType)
@@ -49,6 +49,9 @@ namespace HUREL_Imager_GUI.Command
                         _navigator.CurrentViewModel = settingViewModel;
                         //OnPropertyChanged(nameof(_navigator.CurrentViewModel));
                         break;
+                    case ViewType.CALIBRATION_VIEW:
+                        _navigator.CurrentViewModel = calibrationViewModel;
+                        break;
                 }
             }
         }
@@ -56,5 +59,7 @@ namespace HUREL_Imager_GUI.Command
         static bool IsVewModelsLoaded = false;
         static private HomeViewModel? homeViewModel;
         static private SettingViewModel? settingViewModel;
+        static private CalibrationViewModel? calibrationViewModel;
+
     }
 }
