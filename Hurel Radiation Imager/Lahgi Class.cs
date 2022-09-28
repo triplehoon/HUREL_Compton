@@ -183,7 +183,6 @@ namespace HUREL.Compton
             }
         }
 
-
         private static float ref_fwhm = Convert.ToSingle(ConfigurationManager.AppSettings.Get(nameof(ref_fwhm)));
         public static float Ref_fwhm
         {
@@ -888,6 +887,21 @@ namespace HUREL.Compton
                
             }
             StatusMsg = "Ecal Done";
+
+
+
+            var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var appSetting = configFile.AppSettings.Settings;
+            
+            for (int i = 0; i < 8; i++)
+            {
+                appSetting[nameof(eEcalStates) + i.ToString()].Value = eEcalState.Unknown.ToString();
+            }
+            configFile.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
+            LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
+
+
             StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
         }
 
