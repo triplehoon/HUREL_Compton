@@ -57,6 +57,10 @@ namespace HUREL_Imager_GUI.ViewModel
         }
         private void UpdateStates()
         {
+            if (LahgiApi.eEcalStates.Count() != 8)
+            {
+                return;
+            }
             IsScatter0EcalOk = LahgiApi.eEcalStates[0] == eEcalState.Success;
             IsScatter0EcalUnknown = LahgiApi.eEcalStates[0] == eEcalState.Unknown;
             IsScatter0EcalChecking = LahgiApi.eEcalStates[0] != eEcalState.Success && !IsCalibrationReady;

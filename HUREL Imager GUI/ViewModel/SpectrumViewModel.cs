@@ -16,12 +16,13 @@ namespace HUREL_Imager_GUI.ViewModel
         public string Name { get; set; }
         public string Description { get; set; }
         public string Energy { get; set; }
-
-        public IsotopeInfo(string name, string description, string energy)
+        public string Dose { get; set; }
+        public IsotopeInfo(string name, string description, string energy, string dose)
         {
             Name = name;
             Description = description;
             Energy = energy;
+            Dose = dose;
         }
     }
     public enum eSpectrumCases
@@ -116,7 +117,7 @@ namespace HUREL_Imager_GUI.ViewModel
                                 energy += " ";
                             }
 
-                            isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy));
+                            isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy, ""));
                         }
                         IsotopeInfos = isotopeInfos;
 
@@ -196,7 +197,6 @@ namespace HUREL_Imager_GUI.ViewModel
             set
             {
                 _spectrumCases = value;
-                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
                 OnPropertyChanged(nameof(SpectrumCases));
             }
         }
@@ -221,7 +221,6 @@ namespace HUREL_Imager_GUI.ViewModel
             set
             {
                 LahgiApi.Ref_x = value;
-                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
                 OnPropertyChanged(nameof(Ref_x));
             }
         }
@@ -232,7 +231,6 @@ namespace HUREL_Imager_GUI.ViewModel
             set
             {
                 LahgiApi.Ref_fwhm = value;
-                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
                 OnPropertyChanged(nameof(Ref_fwhm));
             }
         }
@@ -243,7 +241,6 @@ namespace HUREL_Imager_GUI.ViewModel
             {
                 LahgiApi.Ref_at_0 = value;
                 
-                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
                 OnPropertyChanged(nameof(Ref_at_0));
             }
         }
@@ -253,7 +250,6 @@ namespace HUREL_Imager_GUI.ViewModel
             set
             {
                 LahgiApi.Min_snr = value;
-                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
                 OnPropertyChanged(nameof(Min_snr));
             }
         }

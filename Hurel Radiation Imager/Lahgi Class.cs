@@ -244,7 +244,7 @@ namespace HUREL.Compton
         public static bool InitiateLaghi()
         {
             StatusMsg = "Initiating LAHGI";
-
+           echks.Add(new AddListModeDataEchk(600, 601));
             if (lahgiWrapper.Initiate(eModuleManagedType.QUAD))
             {
                 StatusMsg = "Successfully initiate Lahgi Software";
@@ -539,13 +539,17 @@ namespace HUREL.Compton
                     {
                         break;
                     }
-                    Thread.Sleep(0);
                 }
                 if (tokenSource.IsCancellationRequested)
                 {
                     break;
                 }
                 Thread.Sleep(0);
+            }
+            while (fpga.ShortArrayQueue.Count > 0)
+            {
+                ushort[] item;
+                fpga.ShortArrayQueue.TryTake(out item);
             }
             StatusMsg = "Add List Mode Data loop ended";
         }

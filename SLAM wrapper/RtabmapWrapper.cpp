@@ -189,7 +189,7 @@ void HUREL::Compton::RtabmapWrapper::GetSLAMPointCloud(List<array<double>^>^% ve
 	vectors->Capacity = count;
 	colors->Capacity = count;
 
-	Trace::WriteLine("SLAM points: " + count);
+	//Trace::WriteLine("SLAM points: " + count);
 	for (int i = 0; i < count - 1; i++) {
 		array<double, 1>^ poseVector = gcnew array<double>{pose[i].pointX, pose[i].pointY, pose[i].pointZ};
 		vectors->Add(poseVector);

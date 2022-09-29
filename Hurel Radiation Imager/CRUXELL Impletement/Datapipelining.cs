@@ -55,6 +55,7 @@ namespace HUREL.Compton
             Int64 dataInCount = 0;
             Debug.WriteLine("HY : ParsingThread start");
             BinaryWriter writer = new BinaryWriter(File.Open(FileMainPath!, FileMode.Append));
+            Stopwatch stopwatch = Stopwatch.StartNew();
             while (IsParsing)
             {
                 Thread.Sleep(0);
@@ -98,9 +99,10 @@ namespace HUREL.Compton
                                 
                                 //dataBuffer.CopyTo(chk2,0);
 
-                                if(dataInCount % 100000 ==0)
+                                if(dataInCount % 1000000 ==0)
                                 {
-                                    Trace.WriteLine("Data in count is " + dataInCount + " DataQueue Count: " + ParsedQueue.Count + " ShortArrayBuffer Count: " +ShortArrayQueue.Count);
+                                    Trace.WriteLine("Data in count is " + dataInCount + "(" + $"{ 1000000.0 / stopwatch.ElapsedMilliseconds:.00}" +" kHz)" + " DataQueue Count: " + ParsedQueue.Count + " ShortArrayBuffer Count: " +ShortArrayQueue.Count);
+                                    stopwatch.Restart();
                                 }
                                 dataBuffer = new byte[296];
                                 countflag = 0;
@@ -131,6 +133,11 @@ namespace HUREL.Compton
                         }
                     }             
                 }              
+            }
+            while (DataInQueue.Count > 0)
+            {
+                byte[] item;
+                DataInQueue.TryTake(out item);
             }
             writer.Flush();
             writer.Close();
@@ -232,6 +239,8 @@ namespace HUREL.Compton
             binaryCheck[14] = 0b0100_0000_0000_0000;
             binaryCheck[15] = 0b1000_0000_0000_0000;
             #endregion
+            ushort[] shortArray = new ushort[148];
+
             while (IsGenerateShortArrayBuffer)
             {
                 Thread.Sleep(0);
@@ -242,19 +251,18 @@ namespace HUREL.Compton
 
                 while (ParsedQueue.TryTake(out item!))
                 {
-                    Thread.Sleep(0);
-                    ushort[] shortArray = new ushort[148];
-                    ushort[] shortArray2 = new ushort[144];
+                   
+                    //ushort[] shortArray2 = new ushort[144];
 
 
                     
                     Buffer.BlockCopy(item, 0, shortArray, 0, 296);
                     ushort check = shortArray[144];
-                    //ushort[] test = new ushort[8] { shortArray[0], shortArray[9], shortArray[18], shortArray[27], shortArray[72], shortArray[81], shortArray[90], shortArray[99] };
                     int i = 0;
                     foreach (var b in binaryCheck)
                     {
-                        if ((b & check) == 0) {
+                        if ((b & check) == 0)
+                        {
                             for (int j = 0; j < 9; ++j)
                             {
                                 shortArray[j + 9 * (i)] = 0;
