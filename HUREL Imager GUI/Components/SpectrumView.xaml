@@ -34,12 +34,18 @@
             <syncfusion:SfChart.Behaviors>
                 <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
             </syncfusion:SfChart.Behaviors>
+            <syncfusion:SfChart.Legend>
+                <syncfusion:ChartLegend ToggleSeriesVisibility="True" DockPosition="Bottom">
+                    
+                </syncfusion:ChartLegend>
+            </syncfusion:SfChart.Legend>
             <syncfusion:SfChart.PrimaryAxis>
                 <syncfusion:NumericalAxis Minimum="0" Maximum="3000" ShowTrackBallInfo="True" Header="Energy [keV]"/>
             </syncfusion:SfChart.PrimaryAxis>
             <syncfusion:SfChart.SecondaryAxis>
                 <syncfusion:LogarithmicAxis Minimum="1" Header="Counts [#]"/>
             </syncfusion:SfChart.SecondaryAxis>
+          
             <syncfusion:FastColumnBitmapSeries Interior="Black"
                                                                      ListenPropertyChange="True"
                                                                      Label="Energy"
@@ -47,27 +53,30 @@
                                                                      XBindingPath="Energy" 
                                                                      YBindingPath="Count"
                                                                      syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
-            <syncfusion:FastLineBitmapSeries Interior="Orange"
+
+            <syncfusion:FastLineBitmapSeries Interior="Green"   VisibilityOnLegend="{Binding Path=IsSpectrumAnalysisShow, Converter={StaticResource ConvBoolToVisibility} }"
                                                                      ListenPropertyChange="True"
-                                                                     Label="Snr"
-                                                                     ItemsSource="{Binding SnrSpetrum}" 
-                                                                     XBindingPath="X" 
-                                                                     YBindingPath="Y"
-                                                                     syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
-            <syncfusion:FastLineBitmapSeries Interior="Green"
-                                                                     ListenPropertyChange="True"
-                                                                     Label="MinSnr"
+                                                                     Label="Min Snr"
                                                                      ItemsSource="{Binding MinSnrLine}" 
                                                                      XBindingPath="X" 
                                                                      YBindingPath="Y"
                                                                      syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
-            <syncfusion:FastColumnBitmapSeries Interior="Red"    
+            <syncfusion:FastLineBitmapSeries Interior="Orange" VisibilityOnLegend="{Binding Path=IsSpectrumAnalysisShow, Converter={StaticResource ConvBoolToVisibility} }"
+                                                                     Label="Snr"
+                                                                     ItemsSource="{Binding SnrSpectrum}" 
+                                                                     XBindingPath="X" 
+                                                                     YBindingPath="Y"
+                                                                     />
+
+            <syncfusion:FastColumnBitmapSeries Interior="Red"    VisibilityOnLegend="{Binding Path=IsSpectrumAnalysisShow, Converter={StaticResource ConvBoolToVisibility} }"
                                                                      ListenPropertyChange="True"
                                                                      Label="Peak"
                                                                      ItemsSource="{Binding PeakLine}" 
                                                                      XBindingPath="X" 
                                                                      YBindingPath="Y"
+
                                                                      syncfusion:ChartSeriesBase.Spacing="0.5" Margin="0,12,0,-12" />
+          
         </syncfusion:SfChart>
         <ToggleButton  x:Name="SetupButton" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right" 
                               Margin="5"
@@ -81,7 +90,7 @@
         </ToggleButton>
         <Popup x:Name="SetupButtonPopup" d:IsOpen="True" 
                    IsOpen="{Binding Path=IsChecked, ElementName=SetupButton, Mode=OneWay}" 
-                   Placement="Left" PlacementTarget="{Binding ElementName=SetupButton}">
+                   Placement="Bottom" PlacementTarget="{Binding ElementName=SetupButton}">
             <Border BorderThickness="3" Width="300" Grid.Row="1" BorderBrush="{StaticResource CustomDarkBlue}" Background="White" Height="130" Panel.ZIndex="300">
                 <Grid>
                     <Grid.ColumnDefinitions>

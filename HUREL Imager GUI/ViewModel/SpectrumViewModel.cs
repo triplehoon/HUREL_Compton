@@ -88,22 +88,30 @@ namespace HUREL_Imager_GUI.ViewModel
 
                         if (IsSpectrumAnalysisShow)
                         {
-                            SnrSpetrum = new ObservableCollection<GraphData>(espect.SnrData);
 
                             List<GraphData> graphDatas = new List<GraphData>();
                             for (int i = 0; i < espect.SnrData.Count; i++)
                             {
                                 GraphData graphData = espect.SnrData[i];
-                                graphData.Y = Min_snr;
                                 graphDatas.Add(graphData);
                             }
-                            MinSnrLine = new ObservableCollection<GraphData>(graphDatas);
+                            SnrSpectrum = new ObservableCollection<GraphData>(graphDatas);
+
+                            List<GraphData> graphDatas2 = new List<GraphData>();
+
+                            for (int i = 0; i < espect.SnrData.Count; i++)
+                            {
+                                GraphData graphData = new GraphData(espect.SnrData[i].X, espect.SnrData[i].Y);
+                                graphData.Y = Min_snr;
+                                graphDatas2.Add(graphData);
+                            }
+                            MinSnrLine = new ObservableCollection<GraphData>(graphDatas2);
 
                             PeakLine = new ObservableCollection<GraphData>(espect.PeakData);
                         }
                         else
                         {
-                            SnrSpetrum = new ObservableCollection<GraphData>();
+                            SnrSpectrum = new ObservableCollection<GraphData>();
                             MinSnrLine = new ObservableCollection<GraphData>();
                             PeakLine = new ObservableCollection<GraphData>();
                         }
@@ -168,13 +176,13 @@ namespace HUREL_Imager_GUI.ViewModel
 
         private ObservableCollection<GraphData> _snrSpectrum = new ObservableCollection<GraphData>();
 
-        public ObservableCollection<GraphData> SnrSpetrum
+        public ObservableCollection<GraphData> SnrSpectrum
         {
             get { return _snrSpectrum; }
             set
             {
                 _snrSpectrum = value;
-                OnPropertyChanged(nameof(SnrSpetrum));
+                OnPropertyChanged(nameof(SnrSpectrum));
             }
         }
 
@@ -197,6 +205,7 @@ namespace HUREL_Imager_GUI.ViewModel
             set
             {
                 _spectrumCases = value;
+                LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
                 OnPropertyChanged(nameof(SpectrumCases));
             }
         }

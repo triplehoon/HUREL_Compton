@@ -118,18 +118,31 @@ void TestFuncs::TestAddingLmData()
 	Eigen::Matrix4d trans = Eigen::Matrix4d::Identity();
 
 	sEnergyCheck echk;
-	echk.minE = 0; echk.maxE = 0;
+	echk.minE = 0; echk.maxE = 1000000;
 	std::vector<sEnergyCheck> echks;
 	echks.push_back(echk);
+	control.SetEchk(echks);
+
+	control.ResetListedListModeData();
+	for (int i = 0; i < 16; ++i)
+	{
+		control.ResetEnergySpectrum(0);
+	}
 
 	std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
-	#pragma omp parallel for
-	for (int i = 0; i < 100; ++i)
+
+	for (int iter = 0; iter < 1; ++iter)
 	{
-		control.AddListModeDataWithTransformationVerification(byteData, echks);
-		//control.AddListModeDataWithTransformation(byteData, echks);
-		//control.AddListModeDataEigen(byteData, Eigen::Matrix4d::Identity(), echks);
+		#pragma omp parallel for
+		for (int i = 0; i < 10000000; ++i)
+		{
+			//control.AddListModeDataWithTransformationVerification(byteData, echks);
+			//control.AddListModeDataWithTransformation(byteData, echks);
+			control.AddListModeDataWithTransformation(byteData);
+			//control.AddListModeDataEigen(byteData, Eigen::Matrix4d::Identity(), echks);
+		}
 	}
+	
 
 	std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
 
@@ -137,14 +150,20 @@ void TestFuncs::TestAddingLmData()
 	std::chrono::milliseconds milisec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
 	auto listmodeDataFirst = control.GetListedListModeData();
-	printf("%d ms \n", milisec);
-
+	printf("%d ms [%f kHz, %d] \n", milisec.count(), (float)control.GetListedListModeData().size() / milisec.count(), control.GetListedListModeData().size());
+	control.ResetListedListModeData();
+	for (int i = 0; i < 16; ++i)
+	{
+		control.ResetEnergySpectrum(0);
+	}
 	start = std::chrono::system_clock::now();
+	
+	//#pragma omp parallel for
 	for (int i = 0; i < 10000000; ++i)
 	{
 		//control.AddListModeDataWithTransformationVerification(byteData, echks);
 		//control.AddListModeDataWithTransformation(byteData, echks);
-		control.AddListModeDataWithTransformation(byteData, echks);
+		control.AddListModeDataWithTransformation(byteData);
 		//control.AddListModeDataEigen(byteData, Eigen::Matrix4d::Identity(), echks);
 	}
 
@@ -152,68 +171,9 @@ void TestFuncs::TestAddingLmData()
 
 	// 초 단위 (소수점으로 표현)
 	milisec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-	//
-
-	//Eigen::Matrix<float, Eigen::Dynamic, 9> mXYLogMueIndex;
-	//Eigen::Matrix<float, Eigen::Dynamic, 1> mXYSumMueIndex;
-	//Eigen::Matrix<float, 9, 1> mGainEigenVector;
-	//Eigen::Matrix<float, 9, 1> pmtADCValue;
-
-	//mXYLogMueIndex.resize(145 * 145, 9);
-	//mXYSumMueIndex.resize(145 * 145, 1);
-	//mXYLogMueIndex.setRandom();
-	//mXYLogMueIndex.setRandom();
-	//mGainEigenVector.setRandom();
-
-	//start = std::chrono::system_clock::now();
-
-	//for (int i = 0; i < 100000; ++i)
-	//{
-	//	int maxIdx;
-	//	Eigen::Matrix<float, Eigen::Dynamic, 1> mXYSumMueIndexCalc;
-	//	//mXYSumMueIndexCalc.resize(mLutSize * mLutSize);
-	//	const Eigen::Vector<float, 9> normalizedPMTValue = mGainEigenVector.cwiseProduct(pmtADCValue);
-
-	//	mXYSumMueIndexCalc = mXYLogMueIndex * normalizedPMTValue + mXYSumMueIndex;
-
-	//	maxIdx = mXYSumMueIndexCalc.maxCoeff<Eigen::PropagateNumbers>(&maxIdx);
-	//}
-	////mXYSumMueIndexCalc.resize(5);
-	//end = std::chrono::system_clock::now();
-	//milisec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-	//printf("%d ms \n", milisec);
-	//
-	//Eigen::Matrix<float, 9, 1> mGainEigenVectors;
-	//Eigen::Matrix<float, 9, Eigen::Dynamic> pmtADCValues;
 
 
-	//mXYLogMueIndex.resize(145 * 145, 9);
-	//mXYSumMueIndex.resize(145 * 145, 1);
-	//mXYLogMueIndex.setRandom();
-	//mXYLogMueIndex.setRandom();
-
-	//int blockSize = 100000;
-
-	//pmtADCValues.resize(9, blockSize);
-	//pmtADCValues.setRandom();
-	//start = std::chrono::system_clock::now();
-
-	//for (int i = 0; i < 1; ++i)
-	//{
-	//	Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> poses;
-
-
-	//	int maxIdx;
-	//	Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> mXYSumMueIndexCalc;
-	//	//mXYSumMueIndexCalc.resize(mLutSize * mLutSize);
-	//	mXYSumMueIndexCalc.noalias() = mXYLogMueIndex * pmtADCValues + mXYSumMueIndex;
-	//	
-
-	//}
-	////mXYSumMueIndexCalc.resize(5);
-	//end = std::chrono::system_clock::now();
-	//milisec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-	printf("%d ms \n", milisec);
+	printf("%d ms [%f kHz, %d] \n", milisec.count(), (float)control.GetListedListModeData().size() / milisec.count(), control.GetListedListModeData().size());
 }
 
 
@@ -260,12 +220,13 @@ void TestFuncs::TestAddingLmDataVerification(int counts)
 		echk.minE = 0; echk.maxE = 1000000000;
 		std::vector<sEnergyCheck> echks;
 		echks.push_back(echk);
+		control.SetEchk(echks);
 
 		std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 		//#pragma omp parallel for
 		for (int i = 0; i < 1; ++i)
 		{
-			control.AddListModeDataWithTransformation(byteData, echks);
+			control.AddListModeDataWithTransformation(byteData);
 			//control.AddListModeDataEigen(byteData, Eigen::Matrix4d::Identity(), echks);
 		}
 
@@ -280,7 +241,7 @@ void TestFuncs::TestAddingLmDataVerification(int counts)
 
 		for (int i = 0; i < 1; ++i)
 		{
-			control.AddListModeDataWithTransformationVerification(byteData, echks);
+			control.AddListModeDataWithTransformationVerification(byteData);
 		}
 
 		auto listmodeDataSecond = control.GetListedListModeData();

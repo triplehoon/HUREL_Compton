@@ -55,7 +55,10 @@ namespace HUREL {
 		public:
 			
 			bool SetType(eModuleCppWrapper type);
-			void AddListModeDataWithTransformation(const unsigned short* byteData, std::vector<std::vector<double>> echks);
+			
+			void SetEchks(std::vector<std::vector<double>>  echks);
+			void AddListModeDataWithTransformation(const unsigned short* byteData);
+
 			std::vector< ListModeDataCppWrapper> GetRelativeListModeData();
 			void ResetListedListModeData();
 			void RestEnergySpectrum(int channelNumber);

@@ -149,7 +149,7 @@ namespace HUREL_Imager_GUI.ViewModel
             TestFunctionCommand.CanExecute(false);
             
             await Task.Run(() => {
-                LahgiApi.TestAddingListModeData(10000000);
+                LahgiApi.TestAddingListModeData(1_000_000);
 
 
             }

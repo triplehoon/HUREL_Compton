@@ -63,7 +63,7 @@ namespace HUREL_Imager_GUI.ViewModel
             StatusUpdateMutex.ReleaseMutex();
         }
 
-        private double doseLogScale = Math.Log10(225 * 100);
+        private double doseLogScale = Math.Log10(30 * 100);
         public double DoseLogScale
         {
             get { return doseLogScale; }

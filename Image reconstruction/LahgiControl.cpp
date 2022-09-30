@@ -2,6 +2,7 @@
 #include <future>
 #include <mutex>
 #include <open3d/visualization/utility/DrawGeometry.h>
+#include <thread>
 
 static std::mutex mListModeDataMutex;
 static std::mutex mListModeImageMutex;
@@ -11,7 +12,7 @@ using namespace HUREL;
 using namespace Compton;
 
 
-ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds timeInMili)
+ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds& timeInMili)
 {
 	InteractionData scatter;
 	InteractionData absorber;
@@ -108,6 +109,17 @@ HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
 {
 	static LahgiControl& instance = *(new LahgiControl());
 	return instance;
+}
+
+std::mutex eChksMutex;
+
+void HUREL::Compton::LahgiControl::SetEchk(std::vector<sEnergyCheck> eChksInput)
+{
+	eChksMutex.lock();
+
+	eChk = eChksInput;
+
+	eChksMutex.unlock();
 }
 
 bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
@@ -235,7 +247,7 @@ HUREL::Compton::LahgiControl::~LahgiControl()
 	delete[] mAbsorberModules;
 }
 
-void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk)
+void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsigned short byteData[])
 {
 	std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	Eigen::Matrix4d deviceTransformation = RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransform;
@@ -248,7 +260,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 	{
 		Eigen::Array<float, 1, 9> scatterShorts[4];
 		Eigen::Array<float, 1, 9> absorberShorts[4];
-		
+
 		//Channel 4 to 7
 		for (int i = 4; i < 8; ++i)
 		{
@@ -297,6 +309,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 			}
 		}
 
+
 		if (scatterInteractionCount == 1)
 		{
 			double sEnergy = scattersEnergy[scatterInteractModuleNum];
@@ -304,21 +317,34 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 
 			if (absorberInteractionCount == 1)
 			{
+				/*if (!eChksMutex.try_lock())
+				{
+					return;
+				}*/
 				//Compton
 				for (int i = 0; i < eChk.size(); ++i)
 				{
 					if (sEnergy + aEnergy < eChk[i].maxE && sEnergy + aEnergy > eChk[i].minE)
 					{
 						eInterationType type = eInterationType::COMPTON;
+
+						
+						
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
 						Eigen::Vector4d absorberPoint = mAbsorberModules[absorberInteractModuleNum]->FastMLPosEstimation(absorberShorts[absorberInteractModuleNum]);
 
 						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
 					}					
 				}
+
+				//eChksMutex.unlock();
 			}
 			else if (absorberInteractionCount == 0)
 			{
+				/*if (!eChksMutex.try_lock())
+				{
+					return;
+				}*/
 				//Coded Apature
 				for (int i = 0; i < eChk.size(); ++i)
 				{
@@ -335,6 +361,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 					}
 					
 				}
+				//eChksMutex.unlock();
 
 			}
 		}
@@ -361,7 +388,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 	}
 }
 
-void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationVerification(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk)
+void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationVerification(const unsigned short byteData[])
 {
 	Eigen::Matrix4d t265toLACCPosTransform;
 	t265toLACCPosTransform << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
@@ -480,7 +507,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationVerification
 	}
 }
 
-void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk)
+void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData)[144], Eigen::Matrix4d deviceTransformation)
 {
 	switch (mModuleType)
 	{
@@ -600,7 +627,7 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 	}
 	}
 }
-void HUREL::Compton::LahgiControl::AddListModeDataEigen(const unsigned short(byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk)
+void HUREL::Compton::LahgiControl::AddListModeDataEigen(const unsigned short(byteData)[144], Eigen::Matrix4d deviceTransformation)
 {
 	
 }
@@ -639,8 +666,8 @@ std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData()
 void HUREL::Compton::LahgiControl::ResetListedListModeData()
 {
 	mListModeDataMutex.lock();
-
 	mListedListModeData.clear();
+	mListedListModeData.shrink_to_fit();
 	mListedListModeData.reserve(50000);
 	mListModeDataMutex.unlock();
 

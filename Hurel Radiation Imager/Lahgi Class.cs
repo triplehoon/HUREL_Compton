@@ -47,7 +47,7 @@ namespace HUREL.Compton
 
         public static void StatusUpdateInvoke(object? obj, eLahgiApiEnvetArgsState state)
         {
-            StatusUpdate?.Invoke(obj, new LahgiApiEnvetArgs(state));
+            Task.Run(()=> { StatusUpdate?.Invoke(obj, new LahgiApiEnvetArgs(state)); });
 
         }
 
@@ -244,7 +244,9 @@ namespace HUREL.Compton
         public static bool InitiateLaghi()
         {
             StatusMsg = "Initiating LAHGI";
-           echks.Add(new AddListModeDataEchk(600, 601));
+            var tempEchks = new List<AddListModeDataEchk>();
+            tempEchks.Add(new AddListModeDataEchk(0, 1000000));
+            Echks = tempEchks;
             if (lahgiWrapper.Initiate(eModuleManagedType.QUAD))
             {
                 StatusMsg = "Successfully initiate Lahgi Software";
@@ -490,7 +492,6 @@ namespace HUREL.Compton
 
         public record AddListModeDataEchk(double MinE, double MaxE);
 
-        private static bool isEchksChanged = false;
         private static List<AddListModeDataEchk> echks = new List<AddListModeDataEchk>();
         public static List<AddListModeDataEchk> Echks
         {
@@ -500,18 +501,22 @@ namespace HUREL.Compton
             }
             set
             {
-                isEchksChanged = true;
-                echks = Echks;
+
+                List<double[]> UnmanagedEcks = new List<double[]>();
+
+                UnmanagedEcks.Clear();
+                foreach (var eck in value)
+                {
+                    double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
+                    UnmanagedEcks.Add(eckUnmanaged);
+                }
+                lahgiWrapper.SetEchks(UnmanagedEcks);
+
+                echks = value;
             }
         }
         private static void AddListModeData(CancellationTokenSource tokenSource)
-        {
-            List<double[]> UnmanagedEcks = new List<double[]>();
-            foreach (var eck in Echks)
-            {
-                double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
-                UnmanagedEcks.Add(eckUnmanaged);
-            }
+        {          
             lahgiWrapper.ResetListmodeData();
             for (uint i = 0; i < 16; ++i)
             {
@@ -523,18 +528,8 @@ namespace HUREL.Compton
                 ushort[] item;
                 while (fpga.ShortArrayQueue.TryTake(out item!))
                 {
-                    lahgiWrapper.AddListModeDataWraper(item, UnmanagedEcks);
-                    if (isEchksChanged)
-                    {
-                        isEchksChanged = false;
-                        UnmanagedEcks.Clear();
-                        foreach (var eck in Echks)
-                        {
-                            double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
-                            UnmanagedEcks.Add(eckUnmanaged);
-                        }
-                    }
-
+                    lahgiWrapper.AddListModeDataWraper(item);
+                   
                     if (tokenSource.IsCancellationRequested)
                     {
                         break;
@@ -586,12 +581,6 @@ namespace HUREL.Compton
                 }
                 fpga.ShortArrayQueue.Add(shortArray);
             }
-            List<double[]> UnmanagedEcks = new List<double[]>();
-
-            {
-                double[] eckUnmanaged = new double[] { 0, 0 };
-                UnmanagedEcks.Add(eckUnmanaged);
-            }
             lahgiWrapper.ResetListmodeData();
             for (uint i = 0; i < 16; ++i)
             {
@@ -603,18 +592,7 @@ namespace HUREL.Compton
             ushort[] item;
             while (fpga.ShortArrayQueue.TryTake(out item!))
             {
-                lahgiWrapper.AddListModeDataWraper(item, UnmanagedEcks);
-                if (isEchksChanged)
-                {
-                    isEchksChanged = false;
-                    UnmanagedEcks.Clear();
-                    foreach (var eck in Echks)
-                    {
-                        double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
-                        UnmanagedEcks.Add(eckUnmanaged);
-                    }
-                }
-                //Thread.Sleep(0);
+                lahgiWrapper.AddListModeDataWraper(item);
             }
             sw.Stop();
             Thread.Sleep(0);

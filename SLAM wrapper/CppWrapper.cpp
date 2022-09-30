@@ -38,11 +38,11 @@ bool HUREL::Compton::LahgiCppWrapper::SetType(eModuleCppWrapper type)
 	return LahgiControl::instance().SetType(moduleType); 
 }
 
-void HUREL::Compton::LahgiCppWrapper::AddListModeDataWithTransformation(const unsigned short* byteData, std::vector<std::vector<double>>  echks)
+void HUREL::Compton::LahgiCppWrapper::SetEchks(std::vector<std::vector<double>> echks)
 {
 	std::vector<sEnergyCheck> eChkUnmanagedVector;
 	eChkUnmanagedVector.reserve(echks.size());
-	for(auto echk : echks)
+	for (auto echk : echks)
 	{
 		sEnergyCheck eChkUnmanaged;
 		eChkUnmanaged.minE = echk[0];
@@ -50,8 +50,13 @@ void HUREL::Compton::LahgiCppWrapper::AddListModeDataWithTransformation(const un
 
 		eChkUnmanagedVector.push_back(eChkUnmanaged);
 	}
+	LahgiControl::instance().SetEchk(eChkUnmanagedVector);
+}
 
-	LahgiControl::instance().AddListModeDataWithTransformation(byteData, eChkUnmanagedVector);
+void HUREL::Compton::LahgiCppWrapper::AddListModeDataWithTransformation(const unsigned short* byteData)
+{
+
+	LahgiControl::instance().AddListModeDataWithTransformation(byteData);
 }
 
 std::vector<ListModeDataCppWrapper> HUREL::Compton::LahgiCppWrapper::GetRelativeListModeData()

@@ -30,15 +30,23 @@ bool HUREL::Compton::LahgiWrapper::Initiate(eModuleManagedType type)
 	return LahgiCppWrapper::instance().SetType(moduleType);
 }
 
-void HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ adcData, List<array<double>^>^ echks)
+void HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ adcData)
 {
 	pin_ptr<unsigned short> intParamsPtr = &adcData[0];
 
 	//unsigned short* adcS = intParamsPtr;
 
+
+	LahgiCppWrapper::instance().AddListModeDataWithTransformation(intParamsPtr);
+	
+}
+
+void HUREL::Compton::LahgiWrapper::SetEchks(List<array<double>^>^ echks)
+{
+
 	std::vector<std::vector<double>> eChkUnmanagedVector;
 	eChkUnmanagedVector.reserve(echks->Count);
-	for each (array<double>^ e in echks)
+	for each (array<double> ^ e in echks)
 	{
 		std::vector<double> eChkUnmanaged;
 		eChkUnmanaged.reserve(2);
@@ -50,8 +58,7 @@ void HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ 
 		eChkUnmanagedVector.push_back(eChkUnmanaged);
 	}
 
-	LahgiCppWrapper::instance().AddListModeDataWithTransformation(intParamsPtr, eChkUnmanagedVector);
-	
+	LahgiCppWrapper::instance().SetEchks(eChkUnmanagedVector);
 }
 
 void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE)

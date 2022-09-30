@@ -56,7 +56,7 @@ void HUREL::Compton::EnergySpectrum::AddEnergy(double energy)
     mEnergyList.push_back(etime);
 }
 
-void HUREL::Compton::EnergySpectrum::AddEnergy(double energy, std::chrono::milliseconds timeInMili)
+void HUREL::Compton::EnergySpectrum::AddEnergy(double energy, std::chrono::milliseconds& timeInMili)
 {
     if (energy >= mMaxEnergy || energy < 0)
     {
@@ -77,6 +77,7 @@ void HUREL::Compton::EnergySpectrum::Reset()
         mHistogramEnergy[i].Count = 0;
     }
     mEnergyList.clear();
+    mEnergyList.shrink_to_fit();
 }  
 
 EnergySpectrum HUREL::Compton::EnergySpectrum::operator+(EnergySpectrum rhs)

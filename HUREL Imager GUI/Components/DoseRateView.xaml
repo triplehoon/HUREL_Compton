@@ -28,23 +28,25 @@
 
         <syncfusion:SfCircularGauge Grid.Row="0" HeaderAlignment="Bottom" Margin="0" >
             <syncfusion:SfCircularGauge.GaugeHeader>
-                <TextBlock Text="Dose rate [Sv/h]" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold"/>
+                <TextBlock Text="Dose rate [Sv/h]" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold" />
             </syncfusion:SfCircularGauge.GaugeHeader>
             <syncfusion:SfCircularGauge.Scales>
-                <syncfusion:CircularScale EndValue="8" Interval="1" LabelCreated="scale_LabelCreated" LabelPosition="Custom" 
-                                          LabelOffset="0.6" MinorTicksPerInterval="0"  LabelStroke="Black" FontSize="{StaticResource FontSize-Normal}" FontWeight="Bold">
+                <syncfusion:CircularScale EndValue="4.3" Interval="1" LabelCreated="scale_LabelCreated" LabelPosition="Custom" 
+                                          LabelOffset="0.6" MinorTicksPerInterval="0"   FontSize="{StaticResource FontSize-Normal}" FontWeight="Bold">
                     <syncfusion:CircularScale.Ranges>
-                        <syncfusion:CircularRange StartValue="0" EndValue="4" 
+                        <syncfusion:CircularRange StartValue="0" EndValue="1.3" 
                                          Stroke="Green" StrokeThickness ="10"/>
-                        <syncfusion:CircularRange StartValue="4" EndValue="7" 
+                        <syncfusion:CircularRange StartValue="1.3" EndValue="2.7" 
                                          Stroke="Yellow" StrokeThickness ="10"/>
-                        <syncfusion:CircularRange StartValue="7" EndValue="8" 
+                        <syncfusion:CircularRange StartValue="2.7" EndValue="4" 
+                                         Stroke="Orange" StrokeThickness ="10"/>
+                        <syncfusion:CircularRange StartValue="4" EndValue="5" 
                                          Stroke="Red" StrokeThickness ="10"/>
                     </syncfusion:CircularScale.Ranges>
                     <syncfusion:CircularScale.Pointers>
                         <syncfusion:CircularPointer Symbol="InvertedTriangle" Value="{Binding DoseLogScale}" 
                                                     PointerType="SymbolPointer" NeedleLengthFactor="0.5" 
-                                                    SymbolPointerStroke="Black"/>
+                                                    SymbolPointerStroke="LightGray"/>
                     </syncfusion:CircularScale.Pointers>
                 </syncfusion:CircularScale>
 

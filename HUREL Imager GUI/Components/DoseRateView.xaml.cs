@@ -57,15 +57,6 @@ namespace HUREL_Imager_GUI.Components
                 case "5":
                     e.LabelText = "1 m";
                     break;
-                case "6":
-                    e.LabelText = "10 m";
-                    break;
-                case "7":
-                    e.LabelText = "100 m";
-                    break;
-                case "8":
-                    e.LabelText = "1000 m";
-                    break;
             }
         }
 

@@ -17,7 +17,7 @@ namespace HUREL {
 			std::vector<BinningEnergy> GetHistogramEnergy();
 			std::vector<EnergyTime> GetEnergyList();
 			void AddEnergy(double Energy);
-			void AddEnergy(double Energy, std::chrono::milliseconds timeInMili);
+			void AddEnergy(double Energy, std::chrono::milliseconds& timeInMili);
 			void Reset();
 			EnergySpectrum operator+(EnergySpectrum rhs);
 

@@ -42,7 +42,7 @@ namespace HUREL {
 			std::vector<RadiationImage> mListModeImage;
 
 			LahgiControl();
-			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds timeInMili);
+			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds& timeInMili);
 			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation);
 			//CodeMaks Setting
 			double mMaskThickness = 0.006;
@@ -53,18 +53,23 @@ namespace HUREL {
 			void ListModeGenPipe();
 
 			double mListModeImgInterval;
+
+			std::vector<sEnergyCheck> eChk;
+
+
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			static LahgiControl& instance();
 
+			void SetEchk(std::vector<sEnergyCheck> eChksInput);
 
 			bool SetType(eMouduleType type);
 			
 			~LahgiControl();
-			void AddListModeData(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk);
-			void AddListModeDataEigen(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation, std::vector<sEnergyCheck> eChk);
-			void AddListModeDataWithTransformation(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk);
-			void AddListModeDataWithTransformationVerification(const unsigned short byteData[], std::vector<sEnergyCheck>& eChk);
+			void AddListModeData(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation);
+			void AddListModeDataEigen(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation);
+			void AddListModeDataWithTransformation(const unsigned short byteData[]);
+			void AddListModeDataWithTransformationVerification(const unsigned short byteData[]);
 
 			eMouduleType GetDetectorType();
 
