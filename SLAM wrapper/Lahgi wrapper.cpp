@@ -34,9 +34,6 @@ void HUREL::Compton::LahgiWrapper::AddListModeDataWraper(array<unsigned short>^ 
 {
 	pin_ptr<unsigned short> intParamsPtr = &adcData[0];
 
-	//unsigned short* adcS = intParamsPtr;
-
-
 	LahgiCppWrapper::instance().AddListModeDataWithTransformation(intParamsPtr);
 	
 }
