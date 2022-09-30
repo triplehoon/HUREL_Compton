@@ -101,7 +101,7 @@ namespace HUREL.Compton
 
                                 if(dataInCount % 1000000 ==0)
                                 {
-                                    Trace.WriteLine("Data in count is " + dataInCount + "(" + $"{ 1000000.0 / stopwatch.ElapsedMilliseconds:.00}" +" kHz)" + " DataQueue Count: " + ParsedQueue.Count + " ShortArrayBuffer Count: " +ShortArrayQueue.Count);
+                                    LahgiApi.StatusMsg = "Data in count is " + dataInCount + "(" + $"{ 1000000.0 / stopwatch.ElapsedMilliseconds:.00}" +" kHz)" + " DataQueue Count: " + ParsedQueue.Count + " ShortArrayBuffer Count: " +ShortArrayQueue.Count; ;
                                     stopwatch.Restart();
                                 }
                                 dataBuffer = new byte[296];
