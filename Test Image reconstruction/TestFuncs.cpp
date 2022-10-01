@@ -118,7 +118,7 @@ void TestFuncs::TestAddingLmData()
 	Eigen::Matrix4d trans = Eigen::Matrix4d::Identity();
 
 	sEnergyCheck echk;
-	echk.minE = 0; echk.maxE = 1000000;
+	echk.minE = 0; echk.maxE = 10000000000000;
 	std::vector<sEnergyCheck> echks;
 	echks.push_back(echk);
 	control.SetEchk(echks);
@@ -128,9 +128,19 @@ void TestFuncs::TestAddingLmData()
 	{
 		control.ResetEnergySpectrum(0);
 	}
+	std::array<unsigned short, 144> pushData;
 
+
+	memcpy(&pushData.front(), byteData, 144 * sizeof(unsigned short));
 	std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+	for (int i = 0; i < 10000000; ++i)
+	{
+		control.AddListModeDataWithTransformationLoop(pushData);
+	}
+	while (control.GetListedListModeDataSize() < 10000000 * 0.9999)
+	{
 
+	}
 
 
 	std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
@@ -151,7 +161,7 @@ void TestFuncs::TestAddingLmData()
 	{
 		control.AddListModeDataWithTransformation(byteData);
 	}
-	while (control.GetListedListModeDataSize() < 10000000 * 0.9999)
+	while (control.GetListedListModeDataSize() < 10000000 * 0.99)
 	{
 
 	}
