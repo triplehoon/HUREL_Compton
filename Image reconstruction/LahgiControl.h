@@ -16,7 +16,10 @@
 #include <algorithm>
 #include <numeric>
 #include <concurrent_vector.h>
-
+#include <concurrent_queue.h>
+#include <thread>
+#include <future>
+#include <array>
 
 #define ACTIVE_AREA_LENGTH 0.14
 
@@ -47,6 +50,12 @@ namespace HUREL {
 			//CodeMaks Setting
 			double mMaskThickness = 0.006;
 		
+			concurrency::concurrent_queue<std::array<unsigned short, 144>> mShortByteDatas;
+			std::future<void> ListModeDataListeningThread;
+			bool mIsListModeDataListeningThreadStart = false;
+
+			void ListModeDataListening();
+
 			bool IsOnActiveArea(double x, double y, Module& module);
 
 			bool mIsListModeGenOn = false;
@@ -55,7 +64,7 @@ namespace HUREL {
 			double mListModeImgInterval;
 
 			std::vector<sEnergyCheck> eChk;
-
+			void AddListModeDataWithTransformationLoop(std::array<unsigned short, 144> byteData);
 
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -68,13 +77,14 @@ namespace HUREL {
 			~LahgiControl();
 			void AddListModeData(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation);
 			void AddListModeDataEigen(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation);
-			void AddListModeDataWithTransformation(const unsigned short byteData[]);
+			void AddListModeDataWithTransformation(const unsigned short byteData[144]);
 			void AddListModeDataWithTransformationVerification(const unsigned short byteData[]);
 
 			eMouduleType GetDetectorType();
 
 			const std::vector<ListModeData> GetListedListModeData() const;
 			std::vector<ListModeData> GetListedListModeData();
+			size_t GetListedListModeDataSize();
 
 			void ResetListedListModeData();
 			void SaveListedListModeData(std::string filePath);			

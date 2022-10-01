@@ -36,6 +36,7 @@ namespace HUREL {
 			void SetEchks(List<array<double>^>^ echks);
 
 			void GetRelativeListModeData(List<array<double>^>^% scatterXYZE, List<array<double>^>^% absorberXYZE);
+			Int64 GetListedListModeDataSize();
 
 			void ResetListmodeData();
 

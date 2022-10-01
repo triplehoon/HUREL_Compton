@@ -87,6 +87,12 @@ void HUREL::Compton::LahgiWrapper::GetRelativeListModeData(List<array<double>^>^
 	}
 }
 
+Int64 HUREL::Compton::LahgiWrapper::GetListedListModeDataSize()
+{
+	return LahgiCppWrapper::instance().GetListedListModeDataSize();
+}
+
+
 void HUREL::Compton::LahgiWrapper::ResetListmodeData()
 {
 	WrapperLogger::Log::Info("C++CLR::UREL::Compton::LahgiWrapper", "Reset list mode data");

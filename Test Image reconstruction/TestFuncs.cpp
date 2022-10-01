@@ -131,18 +131,7 @@ void TestFuncs::TestAddingLmData()
 
 	std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
-	for (int iter = 0; iter < 1; ++iter)
-	{
-		#pragma omp parallel for
-		for (int i = 0; i < 10000000; ++i)
-		{
-			//control.AddListModeDataWithTransformationVerification(byteData, echks);
-			//control.AddListModeDataWithTransformation(byteData, echks);
-			control.AddListModeDataWithTransformation(byteData);
-			//control.AddListModeDataEigen(byteData, Eigen::Matrix4d::Identity(), echks);
-		}
-	}
-	
+
 
 	std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
 
@@ -158,15 +147,14 @@ void TestFuncs::TestAddingLmData()
 	}
 	start = std::chrono::system_clock::now();
 	
-	//#pragma omp parallel for
 	for (int i = 0; i < 10000000; ++i)
 	{
-		//control.AddListModeDataWithTransformationVerification(byteData, echks);
-		//control.AddListModeDataWithTransformation(byteData, echks);
 		control.AddListModeDataWithTransformation(byteData);
-		//control.AddListModeDataEigen(byteData, Eigen::Matrix4d::Identity(), echks);
 	}
+	while (control.GetListedListModeDataSize() < 10000000 * 0.9999)
+	{
 
+	}
 	end = std::chrono::system_clock::now();
 
 	// 초 단위 (소수점으로 표현)
@@ -229,13 +217,21 @@ void TestFuncs::TestAddingLmDataVerification(int counts)
 			control.AddListModeDataWithTransformation(byteData);
 			//control.AddListModeDataEigen(byteData, Eigen::Matrix4d::Identity(), echks);
 		}
+		while (control.GetListedListModeData().size() != 1)
+		{
+
+		}
 
 		std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+
+
+		
+		auto listmodeDataFirst = control.GetListedListModeData();
 
 		// 초 단위 (소수점으로 표현)
 		std::chrono::milliseconds milisec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-		auto listmodeDataFirst = control.GetListedListModeData();
+		
 
 		control.ResetListedListModeData();
 
@@ -243,7 +239,10 @@ void TestFuncs::TestAddingLmDataVerification(int counts)
 		{
 			control.AddListModeDataWithTransformationVerification(byteData);
 		}
+		while (control.GetListedListModeData().size() != 1)
+		{
 
+		}
 		auto listmodeDataSecond = control.GetListedListModeData();
 
 		if (listmodeDataFirst[0].Scatter.RelativeInteractionPoint[0] - listmodeDataSecond[0].Scatter.RelativeInteractionPoint[0] < 0.002 &&

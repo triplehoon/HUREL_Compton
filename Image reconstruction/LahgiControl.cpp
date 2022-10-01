@@ -2,7 +2,6 @@
 #include <future>
 #include <mutex>
 #include <open3d/visualization/utility/DrawGeometry.h>
-#include <thread>
 
 static std::mutex mListModeDataMutex;
 static std::mutex mListModeImageMutex;
@@ -102,7 +101,45 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
 		0, 0, 0, 1;
 	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Logger loaded in cpp!", eLoggerType::INFO);
+
+	ListModeDataListeningThread = std::async([this] 
+		{ 
+			this->ListModeDataListening(); 
+		});
+
+
 	//this->LoadListedListModeData("20220706_DigitalLabScan_100uCi_-1,0,2.4_cpplmdata.csv");
+}
+
+void HUREL::Compton::LahgiControl::ListModeDataListening()
+{
+	mIsListModeDataListeningThreadStart = true;
+
+	std::vector<std::array<unsigned short, 144>> tempVector;
+	tempVector.reserve(1000000);
+	while (mIsListModeDataListeningThreadStart)
+	{
+		std::array<unsigned short, 144> out;
+		while (mShortByteDatas.try_pop(out) && tempVector.size() < 1000000)
+		{
+			tempVector.push_back(out);
+		}
+		if (tempVector.size() == 0)
+		{
+			continue;
+		}
+		mListModeDataMutex.lock();
+
+		#pragma omp parallel for
+		for (int i = 0; i < tempVector.size(); ++i)
+		{
+			AddListModeDataWithTransformationLoop(tempVector[i]);
+		}
+
+		mListModeDataMutex.unlock();
+		//printf("done\n");
+		tempVector.clear();
+	}
 }
 
 HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
@@ -245,10 +282,16 @@ HUREL::Compton::LahgiControl::~LahgiControl()
 	}
 	delete[] mScatterModules;
 	delete[] mAbsorberModules;
+
+	mIsListModeDataListeningThreadStart = false;
+	ListModeDataListeningThread.get();
+
 }
 
-void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsigned short byteData[])
+void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::array<unsigned short, 144> byteData)
 {
+
+
 	std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	Eigen::Matrix4d deviceTransformation = RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransform;
 
@@ -328,13 +371,13 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 					{
 						eInterationType type = eInterationType::COMPTON;
 
-						
-						
+
+
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
 						Eigen::Vector4d absorberPoint = mAbsorberModules[absorberInteractModuleNum]->FastMLPosEstimation(absorberShorts[absorberInteractModuleNum]);
 
 						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
-					}					
+					}
 				}
 
 				//eChksMutex.unlock();
@@ -359,7 +402,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 							mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
 						}
 					}
-					
+
 				}
 				//eChksMutex.unlock();
 
@@ -368,7 +411,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 		else
 		{
 			eInterationType type = eInterationType::NONE;
-			
+
 
 		}
 
@@ -386,6 +429,17 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 		break;
 	}
 	}
+}
+
+
+void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsigned short byteData[144])
+{
+	std::array<unsigned short, 144> pushData;
+
+
+	memcpy(&pushData.front(), byteData, 144 * sizeof(unsigned short));
+	mShortByteDatas.push(pushData);
+
 }
 
 void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationVerification(const unsigned short byteData[])
@@ -650,6 +704,11 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 
 	return lmData;
 }
+
+size_t  HUREL::Compton::LahgiControl::GetListedListModeDataSize() {
+	return mListedListModeData.size();
+}
+
 
 std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData()
 {

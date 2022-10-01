@@ -79,6 +79,12 @@ std::vector<ListModeDataCppWrapper> HUREL::Compton::LahgiCppWrapper::GetRelative
 	return cppLists;
 }
 
+size_t HUREL::Compton::LahgiCppWrapper::GetListedListModeDataSize()
+{
+	return LahgiControl::instance().GetListedListModeDataSize();
+}
+
+
 void HUREL::Compton::LahgiCppWrapper::ResetListedListModeData()
 {
 	LahgiControl::instance().ResetListedListModeData();

@@ -593,7 +593,13 @@ namespace HUREL.Compton
             while (fpga.ShortArrayQueue.TryTake(out item!))
             {
                 lahgiWrapper.AddListModeDataWraper(item);
+                //Thread.Sleep(0);
             }
+            while (lahgiWrapper.GetListedListModeDataSize() != count)
+            {
+
+            }
+            
             sw.Stop();
             Thread.Sleep(0);
 

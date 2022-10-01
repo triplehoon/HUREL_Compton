@@ -101,6 +101,8 @@ namespace HUREL_Imager_GUI.ViewModel
             _testValue = null!;
             _threeDimensionalViewModel = null!;
             _sourceDirectionViewModel = null!;
+            _doseRateViewModel= null!;
+            realtimeRGB = new BitmapImage();
 
             TopButtonViewModel = new TopButtonViewModel();
             SpectrumViewModel = new SpectrumViewModel();
@@ -154,7 +156,6 @@ namespace HUREL_Imager_GUI.ViewModel
                 {
                     RealtimeRGB = temp;
                 }
-                Thread.Sleep(0);
             }
         }
 

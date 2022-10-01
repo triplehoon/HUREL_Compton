@@ -66,6 +66,7 @@ namespace HUREL {
 			std::tuple<double, double, double> GetEcalValue(int fpgaChannelNumber);
 			void SetEcalValue(int fpgaChannelNumber, std::tuple<double, double, double> ecal);
 
+			size_t GetListedListModeDataSize();
 
 			std::vector<BinningEnergy> GetSpectrum(int channelNumber);
 			std::vector<BinningEnergy> GetSumSpectrum();
