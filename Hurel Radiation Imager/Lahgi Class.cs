@@ -83,6 +83,7 @@ namespace HUREL.Compton
                 log = LogManager.GetLogger("LahgiApi");
                 log.Info(value);
                 statusMsg = value;
+                Trace.WriteLine(value);
                 StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Massage);
             }
         }
@@ -244,9 +245,7 @@ namespace HUREL.Compton
         public static bool InitiateLaghi()
         {
             StatusMsg = "Initiating LAHGI";
-            var tempEchks = new List<AddListModeDataEchk>();
-            tempEchks.Add(new AddListModeDataEchk(0, 1000000));
-            Echks = tempEchks;
+   
             if (lahgiWrapper.Initiate(eModuleManagedType.QUAD))
             {
                 StatusMsg = "Successfully initiate Lahgi Software";
@@ -450,7 +449,7 @@ namespace HUREL.Compton
 
                         timerBoolSpectrum = false;
                         timerBoolSlamRadImage = false;
-                        IsSessionStarting = false;
+                        IsSessionStarting = true;
 
                         StatusMsg = await fpga.Stop_usb();
                         IsSessionStarting = true;
@@ -539,8 +538,10 @@ namespace HUREL.Compton
                 {
                     break;
                 }
-                Thread.Sleep(0);
+                //Thread.Sleep(0);
             }
+            IsSessionStarting = true;
+
             while (fpga.ShortArrayQueue.Count > 0)
             {
                 ushort[] item;

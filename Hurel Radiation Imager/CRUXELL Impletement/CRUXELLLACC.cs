@@ -400,12 +400,12 @@ namespace HUREL.Compton
                 return "Have to start usb";
             }
             IsStart = false;
+            IsParsing = false;
             Debug.WriteLine("wait for ListenUBSAsync");
             IsListening = false;
             ListenUBSTask!.GetAwaiter().GetResult();
             ListenUBSTask = null;
             
-            IsParsing = false;
             Debug.WriteLine("wait for tParsing");
             await ParsingUSBAsync!;
             ParsingUSBAsync = null;

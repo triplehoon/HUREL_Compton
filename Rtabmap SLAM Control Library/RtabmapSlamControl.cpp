@@ -173,7 +173,7 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			{
 				mCurrentDepthFrame = imgDepth;
 			}
-			if (mOdo != nullptr && mIsSlamPipeOn == true)
+			if (mOdo != nullptr && &mOdo->getPose() != nullptr && mIsSlamPipeOn == true )
 			{
 			
 				mCurrentOdometry = mOdo->getPose().toEigen4d();
@@ -307,10 +307,10 @@ void HUREL::Compton::RtabmapSlamControl::StartSlamPipe()
 		
 		return;
 	}
-	mIsSlamPipeOn = true;
 	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl start slam pipe", eLoggerType::INFO);
 	auto func = std::bind(&RtabmapSlamControl::SlamPipe, this);
 	t2 = std::async(std::launch::async, func);
+
 }
 
 void HUREL::Compton::RtabmapSlamControl::StopSlamPipe()
@@ -355,6 +355,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		1, 0, 0, 0,
 		0, 0, 0, 1;
 	rtabmap::OccupancyGrid grid;
+	mIsSlamPipeOn = true;
 
 	while (mIsSlamPipeOn)
 	{

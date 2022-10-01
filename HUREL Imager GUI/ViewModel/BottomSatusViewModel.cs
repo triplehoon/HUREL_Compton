@@ -47,7 +47,7 @@ namespace HUREL_Imager_GUI.ViewModel
                     DoseRateText = new string($"{dose:F3} µSv/h");
 
                 }
-                if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Status)
+                if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Massage)
                 {
                     var events = mappender?.PopAllEvents();
 
