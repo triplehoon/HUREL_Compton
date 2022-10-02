@@ -64,7 +64,6 @@ namespace HUREL {
 			double mListModeImgInterval;
 
 			std::vector<sEnergyCheck> eChk;
-			void AddListModeDataWithTransformationLoop(std::array<unsigned short, 144> byteData);
 
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -79,6 +78,8 @@ namespace HUREL {
 			void AddListModeDataEigen(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation);
 			void AddListModeDataWithTransformation(const unsigned short byteData[144]);
 			void AddListModeDataWithTransformationVerification(const unsigned short byteData[]);
+			void AddListModeDataWithTransformationLoop(std::array<unsigned short, 144> byteData);
+			void AddListModeDataWithTransformationLoop(std::array<unsigned short, 144> byteData, std::chrono::milliseconds& timeInMili, Eigen::Matrix4d& deviceTransformation);
 
 			eMouduleType GetDetectorType();
 
