@@ -245,7 +245,9 @@ namespace HUREL.Compton
         public static bool InitiateLaghi()
         {
             StatusMsg = "Initiating LAHGI";
-   
+            var tempEchk = new List<AddListModeDataEchk>();
+            tempEchk.Add(new AddListModeDataEchk(0, 10000000));
+            Echks = tempEchk;
             if (lahgiWrapper.Initiate(eModuleManagedType.QUAD))
             {
                 StatusMsg = "Successfully initiate Lahgi Software";
@@ -347,16 +349,18 @@ namespace HUREL.Compton
             {
                 tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
 
-                BitmapImage bitMapimg = new BitmapImage();
-                bitMapimg.BeginInit();
+                img = new BitmapImage();
+                img.BeginInit();
                 ms.Seek(0, SeekOrigin.Begin);
-                bitMapimg.StreamSource = ms;
-                bitMapimg.CacheOption = BitmapCacheOption.OnLoad;
-                bitMapimg.EndInit();
-                bitMapimg.Freeze();
-                img = bitMapimg;
+                img.StreamSource = ms;
+                img.CacheOption = BitmapCacheOption.OnLoad;
+                img.EndInit();
+                img.Freeze();
+                //img = bitMapimg;
             }
             
+
+            //tempBitmap.Dispose();
 
             return img;
         }
