@@ -356,6 +356,7 @@ namespace HUREL.Compton
                 bitMapimg.Freeze();
                 img = bitMapimg;
             }
+            
 
             return img;
         }

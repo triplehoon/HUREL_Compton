@@ -4,6 +4,28 @@
 
 using namespace HUREL::Compton;
 
+std::tuple<uint8_t*, int, int, int, int> GetCvToPointers(cv::Mat color)
+{
+	uint8_t* outImgPtr = nullptr, int outWidth = 0, int outHeight = 0, int outStride = 0, int outChannelSize = 0;
+
+	int imagesize = 0;
+
+	if (color.cols == 0)
+	{
+		return std::make_tuple(outImgPtr, outWidth, outHeight, outStride, outChannelSize);
+	}
+	outWidth = color.cols;
+	outHeight = color.rows;
+	outStride = color.step;
+	outChannelSize = color.channels();
+	imagesize = outWidth * outHeight * outChannelSize;
+	
+	//RtabmapCppWrapper::instance().UnlockVideoFrame();
+	outImgPtr = new uchar[imagesize];
+	memcpy(outImgPtr, color.data, imagesize);
+
+	return std::make_tuple(outImgPtr, outWidth, outHeight, outStride, outChannelSize);
+}
 
 LahgiCppWrapper& HUREL::Compton::LahgiCppWrapper::instance()
 {

@@ -8,7 +8,7 @@
 #include <random>
 #include <stdio.h>
 #include <open3d/visualization/utility/DrawGeometry.h>
-
+#include <zlib.h>
 
 class TestFuncs
 {
@@ -17,5 +17,7 @@ public:
 	static void TestImageRecon();
 	static void TestAddingLmData();
 	static void TestAddingLmDataVerification(int counts);
+	static void GetFloodImage();
+	static void TestZlib();
 };
 

@@ -19,16 +19,12 @@ namespace HUREL {
 		/// <summary>
 		/// meter and keV
 		/// </summary>
-		class InteractionData
+		struct InteractionData
 		{
-		private:
-			
-		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			Eigen::Vector4d RelativeInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""), 1);
 			Eigen::Vector4d TransformedInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""),1);
 			double InteractionEnergy = 0;  
-			
 		};
 
 		class ListModeData

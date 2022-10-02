@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="HUREL_Imager_GUI.Components.InteractionPointView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
+             mc:Ignorable="d" 
+             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             d:DesignHeight="450" d:DesignWidth="1200">
+    <Grid>
+        <Grid.Resources>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.1*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <syncfusion:ChartSeriesPanel Grid.Column="1">
+
+        </syncfusion:ChartSeriesPanel>
+    </Grid>
+</UserControl>

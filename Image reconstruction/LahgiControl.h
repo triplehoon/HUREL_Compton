@@ -15,8 +15,8 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
-#include <concurrent_vector.h>
-#include <concurrent_queue.h>
+#include <tbb/concurrent_vector.h>
+#include <tbb/concurrent_queue.h>
 #include <thread>
 #include <future>
 #include <array>
@@ -41,7 +41,7 @@ namespace HUREL {
 			Module** mScatterModules;  //./Module information/MONOScatter1/Gain.csv, LUT.csv ...
 			Module** mAbsorberModules;	//./Module information/QUADScatter1/Gain.csv, LUT.csv ...
 			eMouduleType mModuleType;
-			concurrency::concurrent_vector <ListModeData> mListedListModeData;
+			tbb::concurrent_vector <ListModeData> mListedListModeData;
 			std::vector<RadiationImage> mListModeImage;
 
 			LahgiControl();
@@ -50,8 +50,9 @@ namespace HUREL {
 			//CodeMaks Setting
 			double mMaskThickness = 0.006;
 		
-			concurrency::concurrent_queue<std::array<unsigned short, 144>> mShortByteDatas;
+			tbb::concurrent_queue<std::array<unsigned short, 144>> mShortByteDatas;
 			std::future<void> ListModeDataListeningThread;
+			std::mutex eChksMutex;
 			bool mIsListModeDataListeningThreadStart = false;
 
 			void ListModeDataListening();
@@ -85,6 +86,8 @@ namespace HUREL {
 
 			const std::vector<ListModeData> GetListedListModeData() const;
 			std::vector<ListModeData> GetListedListModeData();
+			const std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds) const;
+		    std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds);
 			size_t GetListedListModeDataSize();
 
 			void ResetListedListModeData();
@@ -111,6 +114,8 @@ namespace HUREL {
 			cv::Mat GetListModeImageCoded(double time);
 			cv::Mat GetListModeImageCompton(double time);
 			cv::Mat GetListModeImageHybrid(double time);
+
+			cv::Mat GetResponseImage(int imgSize, int pixelCount = 80, double timeInSeconds = 0, bool isScatter = true);
 
 			void StartListModeGenPipe(double milliseconds = 500);
 			void StopListModeGenPipe();

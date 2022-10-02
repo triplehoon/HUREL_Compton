@@ -78,6 +78,8 @@ namespace HUREL {
 			bool SaveListedListModeData(std::string filePath);
 			bool LoadListedListModeData(std::string filePath);
 
+			void GetResponseImage(uint8_t** outImgPtr, int* outWidth, int* outHeight, int* outStep, int* outChannelSize, int imgSize, int pixelCount, double timeInSeconds, bool isScatter);
+
 
 			static LahgiCppWrapper& instance();
 		};

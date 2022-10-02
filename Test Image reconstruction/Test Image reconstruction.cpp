@@ -14,9 +14,10 @@ void ConsoleWrite(string className, string msg, eLoggerType type);
 
 int main()
 {
-
+	
 	Logger::Instance().Handle(ConsoleWrite);
-	TestFuncs::TestAddingLmData();
+	TestFuncs::GetFloodImage();
+	//TestFuncs::TestAddingLmData();
 	
 }
 

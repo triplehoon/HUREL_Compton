@@ -133,15 +133,12 @@ void TestFuncs::TestAddingLmData()
 
 	memcpy(&pushData.front(), byteData, 144 * sizeof(unsigned short));
 	std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
+	
+	#pragma omp parallel for
 	for (int i = 0; i < 10000000; ++i)
 	{
 		control.AddListModeDataWithTransformationLoop(pushData);
 	}
-	while (control.GetListedListModeDataSize() < 10000000 * 0.9999)
-	{
-
-	}
-
 
 	std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
 
@@ -175,6 +172,90 @@ void TestFuncs::TestAddingLmData()
 }
 
 
+inline int findIndex(double value, double min, double pixelSize)
+{
+	if (value - min <= 0)
+	{
+		return -1;
+	}
+	return static_cast<int>(floor((value - min) / pixelSize));
+}
+
+void TestFuncs::GetFloodImage()
+{
+	LahgiControl& control = HUREL::Compton::LahgiControl::instance();
+	control.SetType(eMouduleType::QUAD);
+
+
+	srand(0);
+	unsigned short byteData[144];
+	for (int j = 0; j < 144; ++j)
+	{
+		byteData[j] = 0;
+	}
+	
+
+	Eigen::Matrix4d trans = Eigen::Matrix4d::Identity();
+
+	sEnergyCheck echk;
+	echk.minE = 0; echk.maxE = 10000000000000;
+	std::vector<sEnergyCheck> echks;
+	echks.push_back(echk);
+	control.SetEchk(echks);
+	control.ResetListedListModeData();
+	for (int i = 0; i < 16; ++i)
+	{
+
+	
+		control.ResetEnergySpectrum(0);
+	}
+	std::chrono::system_clock::time_point  start = std::chrono::system_clock::now();
+
+	for (int iter = 0; iter < 1000000; ++iter)
+	{
+		for (int j = 0; j < 144; ++j)
+		{
+			byteData[j] = 0;
+		}
+
+		int index = floor((double)rand() / RAND_MAX * 4);
+
+		//Channel 4 to 8
+		for (int i = 4 + index; i < 5 + index; ++i)
+		{
+			for (int j = 0; j < 9; ++j)
+			{
+				byteData[i * 9 + j] = (unsigned char)rand();
+			}
+		}
+		index = floor((double)rand() / RAND_MAX * 4);
+		//Channel 12 to 16
+		for (int i = 12 + index; i < 13 + index; ++i)
+		{
+			for (int j = 0; j < 9; ++j)
+			{
+				byteData[i * 9 + j] = (unsigned char)rand();
+			}
+		}
+		control.AddListModeDataWithTransformation(byteData);
+	}
+	while (control.GetListedListModeDataSize() < 1000000*0.99)
+	{
+
+	}
+	std::chrono::system_clock::time_point  end = std::chrono::system_clock::now();
+
+	// 초 단위 (소수점으로 표현)
+	std::chrono::milliseconds milisec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+
+	printf("%d ms [%f kHz, %d] \n", milisec.count(), (float)control.GetListedListModeData().size() / milisec.count(), control.GetListedListModeData().size());
+
+	cv::Mat img = control.GetResponseImage(1000, 100);
+
+	cv::imshow("img", img);
+	cv::waitKey(0);
+}
 
 void TestFuncs::TestAddingLmDataVerification(int counts)
 {
@@ -285,5 +366,85 @@ void TestFuncs::TestAddingLmDataVerification(int counts)
 		std::cout << "Fail rate is " << (double)failCount / counts * 100 << " %" << std::endl;
 		std::cout << "error distance is " << errorDistSum / failCount * 1000 << " mm" << std::endl;
 	}
+	
+}
+
+struct InteractionDataTest
+{
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	Eigen::Vector4f RelativeInteractionPoint = Eigen::Vector4f(nan(""), nan(""), nan(""), 1);
+	Eigen::Vector4f TransformedInteractionPoint = Eigen::Vector4f(nan(""), nan(""), nan(""), 1);
+	float InteractionEnergy = 0;
+};
+
+
+class ListModeDataTest
+{
+private:
+
+public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		eInterationType Type = eInterationType::NONE;
+	InteractionDataTest Scatter;
+	InteractionDataTest Absorber;
+	//time_t InteractionTime = 0;
+	std::chrono::milliseconds InteractionTimeInMili = std::chrono::milliseconds(0);
+	Eigen::Matrix4f DetectorTransformation = Eigen::Matrix4f::Zero();
+
+};
+
+
+
+void TestFuncs::TestZlib()
+{
+	ListModeData i[1000];
+	for (int iter = 0; iter < 1000; ++iter)
+	{
+	}
+	uchar* dataBuffer = new uchar[sizeof(i) * 1.01 + 12];
+	unsigned long dataBufferSize = sizeof(i) * 1.01 + 12;
+	int test = compress(dataBuffer, &dataBufferSize, (uchar*)(& i), sizeof(i));
+
+	switch (test)
+	{
+	case Z_OK:
+		printf("%lu to %lu \n", sizeof(i), dataBufferSize);
+		break;
+	case Z_MEM_ERROR:
+		printf("Memory Error \n");
+		break;
+	case Z_BUF_ERROR:
+		printf("Buff Error \n");
+		break;
+	}
+	uchar* dataCompress = new uchar[dataBufferSize];
+	memcpy(dataCompress, dataBuffer, dataBufferSize);
+	delete dataBuffer;
+
+	uchar* dataBufferUncompress = new uchar[sizeof(i)];
+	
+	unsigned long dataBufferUncompressSize = sizeof(i);
+	test = uncompress(dataBufferUncompress, &dataBufferUncompressSize, dataCompress, dataBufferSize);
+	delete dataCompress;
+
+	switch (test)
+	{
+	case Z_OK:
+		printf("%lu to %lu \n", dataBufferSize, dataBufferUncompressSize);
+		break;
+	case Z_MEM_ERROR:
+		printf("Memory Error \n");
+		break;
+	case Z_BUF_ERROR:
+		printf("Buff Error \n");
+		break;
+	}
+	for (int iter = 0; iter < 1000; ++iter)
+	{
+		i[iter] = *(ListModeData*)(dataBufferUncompress + iter*sizeof(ListModeData));
+		std::cout << i[iter].WriteListModeData() << std::endl;
+	}
+
+	delete dataBufferUncompress;
 	
 }

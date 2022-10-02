@@ -89,7 +89,9 @@ namespace HUREL {
 			Mat mComptonImage;
 			Mat mCodedImage;
 			Mat mHybridImage;
-			
+		    static void ShowCV_32SAsJet(cv::Mat img, int size);
+			static cv::Mat GetCV_32SAsJet(cv::Mat img, int size);
+
 			RadiationImage(std::vector<ListModeData> data);			
 
 			double OverlayValue(Eigen::Vector3d point, eRadiationImagingMode mode);

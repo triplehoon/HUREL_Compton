@@ -102,6 +102,8 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 		0, 0, 0, 1;
 	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Logger loaded in cpp!", eLoggerType::INFO);
 
+	
+
 	ListModeDataListeningThread = std::async([this] 
 		{ 
 			this->ListModeDataListening(); 
@@ -114,13 +116,13 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 void HUREL::Compton::LahgiControl::ListModeDataListening()
 {
 	mIsListModeDataListeningThreadStart = true;
-
+	size_t bufferSize = 1000000;
 	std::vector<std::array<unsigned short, 144>> tempVector;
-	tempVector.reserve(1000000);
+	tempVector.reserve(bufferSize);
 	while (mIsListModeDataListeningThreadStart)
 	{
 		std::array<unsigned short, 144> out;
-		while (mShortByteDatas.try_pop(out) && tempVector.size() < 1000000)
+		while (mShortByteDatas.try_pop(out) && tempVector.size() < bufferSize)
 		{
 			tempVector.push_back(out);
 		}
@@ -153,7 +155,6 @@ HUREL::Compton::LahgiControl& HUREL::Compton::LahgiControl::instance()
 	return instance;
 }
 
-std::mutex eChksMutex;
 
 void HUREL::Compton::LahgiControl::SetEchk(std::vector<sEnergyCheck> eChksInput)
 {
@@ -844,6 +845,37 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 	return lmData;
 }
 
+const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(long long timeInMililseconds) const
+{
+	if (timeInMililseconds == 0)
+	{
+		return GetListedListModeData();
+	}
+	size_t size = mListedListModeData.size();
+	std::vector<ListModeData> lmData;
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	size_t getIndexStart = 0;
+	for (int i = size; i > 0; --i)
+	{
+		if ((t - mListedListModeData[i].InteractionTimeInMili).count() > timeInMililseconds)
+		{
+			getIndexStart = i;
+			break;
+		}
+	}
+
+	int reconStartIndex = 0;
+	
+	lmData.reserve(size - getIndexStart);
+	for (int i = getIndexStart; i < size; ++i)
+	{
+		lmData.push_back(mListedListModeData[i]);
+	}
+
+
+	return lmData;
+}
+
 size_t  HUREL::Compton::LahgiControl::GetListedListModeDataSize() {
 	return mListedListModeData.size();
 }
@@ -860,6 +892,38 @@ std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData()
 	}
 	return lmData;
 }
+
+std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(long long timeInMililseconds)
+{
+	if (timeInMililseconds == 0)
+	{
+		return GetListedListModeData();
+	}
+	size_t size = mListedListModeData.size();
+	std::vector<ListModeData> lmData;
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	size_t getIndexStart = 0;
+	for (int i = size; i > 0; --i)
+	{
+		if ((t - mListedListModeData[i].InteractionTimeInMili).count() > timeInMililseconds)
+		{
+			getIndexStart = i;
+			break;
+		}
+	}
+
+	int reconStartIndex = 0;
+
+	lmData.reserve(size - getIndexStart);
+	for (int i = getIndexStart; i < size; ++i)
+	{
+		lmData.push_back(mListedListModeData[i]);
+	}
+
+
+	return lmData;
+}
+
 
 void HUREL::Compton::LahgiControl::ResetListedListModeData()
 {
@@ -1525,6 +1589,71 @@ cv::Mat HUREL::Compton::LahgiControl::GetListModeImageHybrid(double time)
 		img + tempLMData[i].mHybridImage;
 	}
 	return img;
+}
+
+inline int findIndex(double value, double min, double pixelSize)
+{
+	if (value - min <= 0)
+	{
+		return -1;
+	}
+	return static_cast<int>(floor((value - min) / pixelSize));
+}
+
+cv::Mat HUREL::Compton::LahgiControl::GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter)
+{
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+	std::vector<ListModeData> tempLMData = GetListedListModeData(timeInSeconds * 1000);
+	
+	constexpr double Det_W = 0.400;
+	Mat responseImg(pixelCount, pixelCount, CV_32S, Scalar(0));
+	__int32* responseImgPtr = static_cast<__int32*>(static_cast<void*>(responseImg.data));
+
+	for (ListModeData lm : tempLMData)
+	{
+
+		double interactionPoseX = -999999;
+		double interactionPoseY = -999999;
+
+		switch (lm.Type)	
+		{
+		case eInterationType::COMPTON:
+			if (isScatter)
+			{
+				interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
+				interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
+			}
+			else 
+			{
+				interactionPoseX = lm.Absorber.RelativeInteractionPoint[0];
+				interactionPoseY = lm.Absorber.RelativeInteractionPoint[1];
+			}
+
+			break;
+		case eInterationType::CODED:
+			if (isScatter)
+			{
+				interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
+				interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
+			}
+			break;
+		default:
+			continue;
+			break;
+		}
+
+
+		int iX = findIndex(interactionPoseX, -Det_W / 2, Det_W / pixelCount);
+		int iY = findIndex(interactionPoseY, -Det_W / 2, Det_W / pixelCount);
+		if (iX >= 0 && iY >= 0 && iX < pixelCount && iY < pixelCount)
+		{
+			++responseImgPtr[pixelCount * iY + iX];
+		}
+	}
+	
+
+	return HUREL::Compton::RadiationImage::GetCV_32SAsJet(responseImg, imgSize);
 }
 
 bool HUREL::Compton::LahgiControl::IsOnActiveArea(double x, double y, Module& module)

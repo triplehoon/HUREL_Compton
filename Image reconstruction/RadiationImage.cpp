@@ -54,7 +54,7 @@ static cv::Mat CodedMaskMat()
 	}
 }
 
-void ShowCV_32SAsJet(cv::Mat img, int size)
+void HUREL::Compton::RadiationImage::ShowCV_32SAsJet(cv::Mat img, int size)
 {
 	if (img.type() != CV_32S)
 	{
@@ -78,6 +78,33 @@ void ShowCV_32SAsJet(cv::Mat img, int size)
 	cv::resize(colorImg, showImg, cv::Size(size, size), 0, 0, cv::INTER_NEAREST_EXACT);
 	cv::imshow("img", showImg);
 	cv::waitKey(0);
+}
+cv::Mat HUREL::Compton::RadiationImage::GetCV_32SAsJet(cv::Mat img, int size)
+{
+	cv::Mat showImg;
+	if (img.type() != CV_32S)
+	{
+		return showImg;
+	}
+	cv::Mat normImg(img.rows, img.cols, CV_8UC1, cv::Scalar(0));
+	double minValue;
+	double maxValue;
+	cv::minMaxIdx(img, &minValue, &maxValue);
+	for (int i = 0; i < img.rows; i++)
+	{
+		for (int j = 0; j < img.cols; j++)
+		{
+			normImg.at<uchar>(i, j) = static_cast<uchar>((static_cast<double>(img.at<int>(i, j)) - minValue) / (maxValue - minValue) * 255);
+		}
+	}
+	cv::Mat colorImg;
+	cv::applyColorMap(normImg, colorImg, cv::COLORMAP_JET);
+
+
+	cv::resize(colorImg, showImg, cv::Size(size, size), 0, 0, cv::INTER_NEAREST_EXACT);
+	
+	return showImg;
+
 }
 
 HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
