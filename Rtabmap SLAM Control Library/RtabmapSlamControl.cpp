@@ -215,17 +215,17 @@ void HUREL::Compton::RtabmapSlamControl::ResetSlam()
 
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentVideoFrame()
 {
-	videoStreamMutex.lock();
-	cv::Mat tmp = mCurrentVideoFrame.clone();
-	videoStreamMutex.unlock();
+	//videoStreamMutex.lock();
+	cv::Mat tmp = mCurrentVideoFrame;
+	//videoStreamMutex.unlock();
 	return tmp;
 }
 
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentDepthFrame()
 {
-	videoStreamMutex.lock();
-	cv::Mat tmp = mCurrentDepthFrame.clone();
-	videoStreamMutex.unlock();
+	//videoStreamMutex.lock();
+	cv::Mat tmp = mCurrentDepthFrame;
+	//videoStreamMutex.unlock();
 	return tmp;
 }
 

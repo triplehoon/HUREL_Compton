@@ -317,6 +317,53 @@ namespace HUREL.Compton
             StopSlam();
             rtabmapWrapper.StopVideoStream();
         }
+
+        public static Mutex GetResponseImageMutex = new Mutex();
+        public static BitmapImage? GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter)
+        {
+            BitmapImage? img = null;
+            int width = 1;
+            int height = 1;
+            int stride = 1;
+            GetResponseImageMutex.WaitOne();
+            IntPtr data = IntPtr.Zero;
+            var outData = lahgiWrapper.GetResponseImage(imgSize, pixelCount, timeInSeconds, isScatter);
+            //tempBitmap.Save("E:\\OneDrive - 한양대학교\\01.Hurel\\01.현재작업\\20201203 Comtpon GUI\\Compton GUI Main\\HUREL Compton\\RealsensWrapperTest\\bin\\Debug\\net5.0-windows\\test.png");
+            // Bitmap 담을 메모리스트림 
+            data = outData.Item1;
+
+            if (data == IntPtr.Zero)
+            {
+                GetResponseImageMutex.ReleaseMutex();
+                return img;
+            }
+
+            width = outData.Item2;
+            height = outData.Item3;
+            stride = outData.Item4;
+            Bitmap tempBitmap = new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format24bppRgb, data);
+
+            if (tempBitmap.Width == 1)
+            {
+                GetResponseImageMutex.ReleaseMutex();
+                return img;
+            }
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                //tempBitmap.Save("test.png");
+                img = new BitmapImage();
+                img.BeginInit();
+                ms.Seek(0, SeekOrigin.Begin);
+                img.StreamSource = ms;
+                img.CacheOption = BitmapCacheOption.OnLoad;
+                img.EndInit();
+                img.Freeze();
+            }
+            GetResponseImageMutex.ReleaseMutex();
+            return img;
+        }
         public static BitmapImage? GetRgbImage()
         {
 
@@ -608,6 +655,8 @@ namespace HUREL.Compton
             
             sw.Stop();
             Thread.Sleep(0);
+
+            GetResponseImage(500, 200, 0, true);
 
             StatusMsg = $"TestAddingListModeData took {sw.ElapsedMilliseconds} ms for {count} counts";
         }

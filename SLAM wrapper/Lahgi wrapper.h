@@ -61,6 +61,11 @@ namespace HUREL {
 
 			void ResetSpectrum(unsigned int channelNumber);
 
+
+			//ptr, width, height, stride
+			Tuple<IntPtr, int, int, int>^ GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter);
+
+
 			void GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data);
 			static void Logging(std::string className, std::string msg);
 		};

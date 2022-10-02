@@ -249,6 +249,14 @@ void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, eReconType
 	//}
 }
 
+Tuple<IntPtr,int, int, int>^ HUREL::Compton::LahgiWrapper::GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter)
+{
+	auto data = LahgiCppWrapper::instance().GetResponseImage(imgSize, pixelCount, timeInSeconds, isScatter);
+
+	return gcnew Tuple<IntPtr, int, int, int >(IntPtr(std::get<0>(data)), std::get<1>(data), std::get<2>(data), std::get<3>(data));
+}
+
+
 void HUREL::Compton::LahgiWrapper::Logging(std::string className, std::string msg)
 {
 	System::String^ classNameManage = gcnew System::String(className.c_str());

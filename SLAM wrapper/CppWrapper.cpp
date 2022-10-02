@@ -6,7 +6,16 @@ using namespace HUREL::Compton;
 
 std::tuple<uint8_t*, int, int, int, int> GetCvToPointers(cv::Mat color)
 {
-	uint8_t* outImgPtr = nullptr, int outWidth = 0, int outHeight = 0, int outStride = 0, int outChannelSize = 0;
+	static uint8_t* outImgPtr = nullptr;
+	int outWidth = 0;
+	int outHeight = 0;
+	int outStride = 0;
+	int outChannelSize = 0;
+
+	if (outImgPtr != nullptr)
+	{
+		delete[] outImgPtr;
+	}
 
 	int imagesize = 0;
 
@@ -211,6 +220,17 @@ bool HUREL::Compton::LahgiCppWrapper::LoadListedListModeData(std::string filePat
 {
 	return LahgiControl::instance().LoadListedListModeData(filePath);
 }
+
+std::tuple<uint8_t*, int, int, int, int>  HUREL::Compton::LahgiCppWrapper::GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter)
+{
+	return GetCvToPointers(LahgiControl::instance().GetResponseImage(imgSize, pixelCount, timeInSeconds, isScatter));
+}
+
+
+
+
+
+
 
 bool HUREL::Compton::RtabmapCppWrapper::GetIsSlamPipeOn()
 {

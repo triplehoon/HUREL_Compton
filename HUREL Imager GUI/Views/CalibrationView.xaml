@@ -15,6 +15,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <components:EnergyCalibrationView Grid.Column="0" DataContext="{Binding EnergyCalibrationViewModel}" Padding="15"/>
-        <components:InteractionPointView Grid.Row="1" />
+        <components:InteractionPointView Grid.Row="1" DataContext="{Binding InteractionPointViewModel}"/>
     </Grid>
 </UserControl>

@@ -29,8 +29,6 @@ namespace HUREL {
 			std::vector<double> mEnergyBin = std::vector<double>();
 			double mBinSize = 0;
 			double mMaxEnergy = 0;
-			
-			
 		};
 	}
 }

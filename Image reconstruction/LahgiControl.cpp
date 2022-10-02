@@ -1597,7 +1597,7 @@ inline int findIndex(double value, double min, double pixelSize)
 	{
 		return -1;
 	}
-	return static_cast<int>(floor((value - min) / pixelSize));
+	return static_cast<int>(floor((value + 0.00001 - min) / pixelSize));
 }
 
 cv::Mat HUREL::Compton::LahgiControl::GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter)

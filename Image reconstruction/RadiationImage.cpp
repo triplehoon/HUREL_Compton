@@ -17,11 +17,11 @@ int pixelCount = static_cast<int>(round(Dproj * ResImprov));
 
 inline int findIndex(double value, double min, double pixelSize)
 {
-	if (value - min <= 0)
+	if (value + 0.00001 - min <= 0)
 	{
 		return -1;
 	}
-	return static_cast<int>(floor((value - min) / pixelSize));
+	return static_cast<int>(floor((value + 0.00001 - min) / pixelSize));
 }
 
 static cv::Mat CodedMaskMat()
