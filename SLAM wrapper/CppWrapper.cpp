@@ -281,7 +281,8 @@ std::vector<double> HUREL::Compton::RtabmapCppWrapper::getMatrix3DOneLineFromPos
 bool HUREL::Compton::RtabmapCppWrapper::GetCurrentVideoFrame(uint8_t** outImgPtr, int* outWidth, int* outHeight, int* outStride, int* outChannelSize)
 {
 	static int imagesize = 0;
-	
+	static uchar* currentImg;
+	delete[] currentImg;
 	cv::Mat color = RtabmapSlamControl::instance().GetCurrentVideoFrame();
 	if (color.cols == 0)
 	{		
@@ -295,12 +296,12 @@ bool HUREL::Compton::RtabmapCppWrapper::GetCurrentVideoFrame(uint8_t** outImgPtr
 	{
 		imagesize = *outWidth * *outHeight * *outChannelSize;
 		delete[] mColorImg;
-		mColorImg = new uchar[imagesize];
+		
 	}
-	
-	memcpy(mColorImg, color.data, imagesize);
+	currentImg = new uchar[imagesize];
+	memcpy(currentImg, color.data, imagesize);
 	//RtabmapCppWrapper::instance().UnlockVideoFrame();
-	*outImgPtr = mColorImg;
+	*outImgPtr = currentImg;
 	return true;
 }
 
