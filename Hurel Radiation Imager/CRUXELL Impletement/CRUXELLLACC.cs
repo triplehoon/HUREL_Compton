@@ -355,17 +355,17 @@ namespace HUREL.Compton
 
             IsListening = true;
             FlagFinalCall = 0;
-            Debug.WriteLine("HY : [Try] Start XferThread");
+            Trace.WriteLine("HY : [Try] Start XferThread");
             //ListenUSBThread = new Thread(new ThreadStart( XferThread));
             //ListenUSBThread.Start();
             ListenUBSTask = Task.Run(() => XferThread());
 
             IsParsing = true;
-            Debug.WriteLine("HY : [Try] Start ParsingThread");
+            Trace.WriteLine("HY : [Try] Start ParsingThread");
             ParsingUSBAsync = Task.Run(() => ParsingCyusbBuffer());
 
             IsGenerateShortArrayBuffer = true;
-            Debug.WriteLine("HY : [Try] Start Generate Short Array Buffer");
+            Trace.WriteLine("HY : [Try] Start Generate Short Array Buffer");
 
             switch (Variables.CurrentMeasurementMode0x11)
             {
@@ -390,7 +390,7 @@ namespace HUREL.Compton
             IsStart = true;
 
             
-            Debug.WriteLine("HY: FPGA Start Setup Done");
+            Trace.WriteLine("HY: FPGA Start Setup Done");
             return true;
         }
         public async Task<string> Stop_usb()
@@ -401,12 +401,13 @@ namespace HUREL.Compton
             }
             IsStart = false;
             IsParsing = false;
-            Debug.WriteLine("wait for ListenUBSAsync");
             IsListening = false;
+            Trace.WriteLine("wait for ListenUBSAsync");
+
             ListenUBSTask!.GetAwaiter().GetResult();
             ListenUBSTask = null;
             
-            Debug.WriteLine("wait for tParsing");
+            Trace.WriteLine("wait for tParsing");
             await ParsingUSBAsync!;
             ParsingUSBAsync = null;
 
@@ -1063,7 +1064,7 @@ namespace HUREL.Compton
             }
             catch (CyUSBBufferFailException e)
             {
-                Debug.WriteLine(e.Message);
+                Trace.WriteLine(e.Message);
                 Trace.WriteLine("XferData Fail, Restart UBS");
                 unsafe
                 {
@@ -1074,7 +1075,7 @@ namespace HUREL.Compton
                         if (testBuffcount != 0)
                         {
                             Thread.Sleep(0);
-                            //Debug.WriteLine("Remaining test_buffer count is " + testBuffcount);
+                            //Trace.WriteLine("Remaining test_buffer count is " + testBuffcount);
                         }
                         else
                             break;
@@ -1147,7 +1148,7 @@ namespace HUREL.Compton
 
                 
                 FlagFinalCall = 0;
-                Debug.WriteLine("HY : [Try] Start XferThread");
+                Trace.WriteLine("HY : [Try] Start XferThread");
                 //ListenUSBThread = new Thread(new ThreadStart( XferThread));
                 //ListenUSBThread.Start();
                 ListenUBSTask = Task.Run(() => XferThread());
@@ -1155,7 +1156,7 @@ namespace HUREL.Compton
                 return;
             }            
 
-            Debug.WriteLine("XferData Done!!!");
+            Trace.WriteLine("XferData Done!!!");
             unsafe
             {
                 //Trace.WriteLine("HY : [Try] TryTake loop(test_buffer reset)");
@@ -1164,8 +1165,10 @@ namespace HUREL.Compton
                     int testBuffcount = DataInQueue.Count;
                     if (testBuffcount != 0)
                     {
+                        byte[] item;
+                        DataInQueue.TryTake(out item);
                         Thread.Sleep(0);
-                        //Debug.WriteLine("Remaining test_buffer count is " + testBuffcount);
+                        //Trace.WriteLine("Remaining test_buffer count is " + testBuffcount);
                     }
                     else
                         break;

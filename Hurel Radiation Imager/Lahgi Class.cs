@@ -246,7 +246,7 @@ namespace HUREL.Compton
         {
             StatusMsg = "Initiating LAHGI";
             var tempEchk = new List<AddListModeDataEchk>();
-            tempEchk.Add(new AddListModeDataEchk(0, 10000000));
+            tempEchk.Add(new AddListModeDataEchk(600, 720));
             Echks = tempEchk;
             if (lahgiWrapper.Initiate(eModuleManagedType.QUAD))
             {
@@ -586,6 +586,7 @@ namespace HUREL.Compton
                         timerBoolSpectrum = false;
                         timerBoolSlamRadImage = false;
                         IsSessionStarting = true;
+                        StatusMsg = "Stopping usb";
 
                         StatusMsg = await fpga.Stop_usb();
                         IsSessionStarting = true;

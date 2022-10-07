@@ -234,7 +234,7 @@ void HUREL::Compton::RtabmapSlamControl::ResetSlam()
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentVideoFrame()
 {
 	cv::Mat img;
-	if (mIsVideoStreamOn)
+	if (mIsVideoStreamOn && mCamera != nullptr)
 	{
 		rtabmap::SensorData data = mCamera->takeImage();
 		if (data.isValid())
@@ -249,7 +249,7 @@ cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentVideoFrame()
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentDepthFrame()
 {
 	cv::Mat img;
-	if (mIsVideoStreamOn)
+	if (mIsVideoStreamOn && mCamera != nullptr)
 	{
 		rtabmap::SensorData data = mCamera->takeImage();
 		if (data.isValid())

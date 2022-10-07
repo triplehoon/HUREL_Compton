@@ -53,7 +53,7 @@ namespace HUREL.Compton
             byte[] chk2 = new byte[296];
 
             Int64 dataInCount = 0;
-            Debug.WriteLine("HY : ParsingThread start");
+            Trace.WriteLine("HY : ParsingThread start");
             BinaryWriter writer = new BinaryWriter(File.Open(FileMainPath!, FileMode.Append));
             Stopwatch stopwatch = Stopwatch.StartNew();
             while (IsParsing)
@@ -117,28 +117,36 @@ namespace HUREL.Compton
                         {
                             if (b == 0xFE && flag == 0)
                             {
-                                Debug.WriteLine("flag is 1");
+                                Trace.WriteLine("flag is 1");
                                 flag = 1;
                             }
                             else if (b == 0xFE && flag == 1)
                             {
-                                Debug.WriteLine("flag is 2");
+                                Trace.WriteLine("flag is 2");
                                 flag = 2;
                             }
                             else
                             {
                                 flag = 0;
-                                Debug.WriteLine("flag is 0");
+                                Trace.WriteLine("flag is 0");
                             }
                         }
                     }             
                 }              
             }
-            while (DataInQueue.Count > 0)
+
+            Trace.WriteLine("Start dataInQueue emptying");
+            while (true)
             {
                 byte[] item;
                 DataInQueue.TryTake(out item);
+                if (DataInQueue.Count == 0)
+                {
+                    break;
+                }
             }
+
+            Trace.WriteLine("DataInQueue empty");
             writer.Flush();
             writer.Close();
             writer.Dispose();

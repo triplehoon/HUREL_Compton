@@ -4,6 +4,7 @@
 #include <open3d/visualization/utility/DrawGeometry.h>
 
 static std::mutex mListModeDataMutex;
+static std::mutex mResetListModeDataMutex;
 static std::mutex mListModeImageMutex;
 
 using namespace std;
@@ -833,6 +834,7 @@ HUREL::Compton::eMouduleType HUREL::Compton::LahgiControl::GetDetectorType()
 
 const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData() const
 {
+	mResetListModeDataMutex.lock();
 	size_t size = mListedListModeData.size();
 	std::vector<ListModeData> lmData;
 	lmData.reserve(size);
@@ -842,15 +844,19 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 	}
 
 
+	mResetListModeDataMutex.unlock();
 	return lmData;
 }
 
 const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(long long timeInMililseconds) const
 {
+
 	if (timeInMililseconds == 0)
 	{
 		return GetListedListModeData();
 	}
+
+	mResetListModeDataMutex.lock();
 	size_t size = mListedListModeData.size();
 	std::vector<ListModeData> lmData;
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
@@ -872,6 +878,7 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 		lmData.push_back(mListedListModeData[i]);
 	}
 
+	mResetListModeDataMutex.unlock();
 
 	return lmData;
 }
@@ -890,6 +897,7 @@ std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData()
 	{
 		lmData.push_back(mListedListModeData[i]);
 	}
+
 	return lmData;
 }
 
@@ -927,12 +935,14 @@ std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(lo
 
 void HUREL::Compton::LahgiControl::ResetListedListModeData()
 {
+
+	mResetListModeDataMutex.lock();
 	mListModeDataMutex.lock();
 	mListedListModeData.clear();
 	mListedListModeData.shrink_to_fit();
 	mListedListModeData.reserve(50000);
 	mListModeDataMutex.unlock();
-
+	mResetListModeDataMutex.unlock();
 }
 
 void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)

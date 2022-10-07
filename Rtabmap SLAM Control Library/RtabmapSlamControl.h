@@ -35,12 +35,12 @@
 
 #include "Logger.h"
 
-#define T265_TO_LAHGI_OFFSET_X (-0.00)
-#define T265_TO_LAHGI_OFFSET_Y (-0.35)
-#define T265_TO_LAHGI_OFFSET_Z (-0.00)
+#define T265_TO_LAHGI_OFFSET_X (-0.080)
+#define T265_TO_LAHGI_OFFSET_Y (0.35)
+#define T265_TO_LAHGI_OFFSET_Z (-0.05)
 #define T265_To_Mask_OFFSET_X (T265_TO_LAHGI_OFFSET_X)
 #define T265_To_Mask_OFFSET_Y (T265_TO_LAHGI_OFFSET_Y)
-#define T265_To_Mask_OFFSET_Z (0.025)
+#define T265_To_Mask_OFFSET_Z (0.00)
 
 namespace HUREL
 {
