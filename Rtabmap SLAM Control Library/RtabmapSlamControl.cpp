@@ -122,11 +122,22 @@ void HUREL::Compton::RtabmapSlamControl::StartVideoStream()
 	{
 		return;
 	}
-	mIsVideoStreamOn = true;
 	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl start video stream", eLoggerType::INFO);
 	
-	auto func = std::bind(&RtabmapSlamControl::VideoStream, this);
-	t1 = std::async(std::launch::async, func);
+	Eigen::Matrix4d t265toLACCAxisTransform;
+	t265toLACCAxisTransform << 0, 1, 0, 0,
+		0, 0, 1, 0,
+		1, 0, 0, 0,
+		0, 0, 0, 1;
+
+
+	mCameraThread = new rtabmap::CameraThread(mCamera);
+	mCameraThread->start();
+	mIsVideoStreamOn = true;
+
+
+	//auto func = std::bind(&RtabmapSlamControl::VideoStream, this);
+	//t1 = std::async(std::launch::async, func);
 }
 
 void HUREL::Compton::RtabmapSlamControl::StopVideoStream()
@@ -137,8 +148,13 @@ void HUREL::Compton::RtabmapSlamControl::StopVideoStream()
 	}
 	mIsVideoStreamOn = false;
 	
-	t1.get();
-	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop video stream", eLoggerType::INFO);
+	mCameraThread->join(true);
+	mCameraThread->kill();
+	delete mCameraThread;
+	mCameraThread = nullptr;
+
+	//t1.get();
+	//HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::RtabmapSlamControl", "RtabmapSlamControl stop video stream", eLoggerType::INFO);
 	
 }
 
@@ -156,6 +172,8 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 
 	mCameraThread = new rtabmap::CameraThread(mCamera);
 	mCameraThread->start();
+	mIsVideoStreamOn = true;
+
 	while (mIsVideoStreamOn)
 	{
 		rtabmap::SensorData data = mCamera->takeImage();
@@ -215,18 +233,32 @@ void HUREL::Compton::RtabmapSlamControl::ResetSlam()
 
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentVideoFrame()
 {
-	//videoStreamMutex.lock();
-	cv::Mat tmp = mCurrentVideoFrame;
-	//videoStreamMutex.unlock();
-	return tmp;
+	cv::Mat img;
+	if (mIsVideoStreamOn)
+	{
+		rtabmap::SensorData data = mCamera->takeImage();
+		if (data.isValid())
+		{
+
+			img = data.imageRaw();
+		}
+	}
+	return img;
 }
 
 cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentDepthFrame()
 {
-	//videoStreamMutex.lock();
-	cv::Mat tmp = mCurrentDepthFrame;
-	//videoStreamMutex.unlock();
-	return tmp;
+	cv::Mat img;
+	if (mIsVideoStreamOn)
+	{
+		rtabmap::SensorData data = mCamera->takeImage();
+		if (data.isValid())
+		{
+
+			img = data.depthRaw();
+		}
+	}
+	return img;
 }
 
 void HUREL::Compton::RtabmapSlamControl::LockVideoFrame()
@@ -497,10 +529,15 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetLoadedPointC
 
 Eigen::Matrix4d HUREL::Compton::RtabmapSlamControl::GetOdomentry()
 {
+	Eigen::Matrix4d odo = Eigen::Matrix4d::Identity();;
+	
 	//videoStreamMutex.lock();
-	Eigen::Matrix4d tmp = mCurrentOdometry;
+	if (mOdo != nullptr && &mOdo->getPose() != nullptr && mIsSlamPipeOn == true)
+	{
+		odo = mOdo->getPose().toEigen4d();
+	}
 	//videoStreamMutex.unlock();
-	return tmp;
+	return odo;
 }
 
 std::vector<Eigen::Matrix4d> HUREL::Compton::RtabmapSlamControl::GetOptimizedPoses()

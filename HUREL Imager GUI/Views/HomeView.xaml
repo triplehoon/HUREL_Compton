@@ -32,13 +32,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <d:Image Grid.Column="0" Stretch="Uniform" Margin="10">
-                        <Image.Source>
-                            <BitmapImage UriSource="/Resource/RGB image.png" />
-                        </Image.Source>
-                    </d:Image>
-                    <Image Grid.Column="0"  Source="{Binding RealtimeRGB}" Stretch="Uniform" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    </Image>
+                    <components:ReconstructImageView Grid.Column="0" Margin="0,0,0,5"  DataContext="{Binding ReconstructionImageViewModel}"/>
+
                     <Image Grid.Column="1" Stretch="Uniform" Margin="10">
                         <Image.Source>
                             <BitmapImage UriSource="/Resource/occupation grid.png" />

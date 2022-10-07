@@ -80,18 +80,20 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
-
-        private BitmapImage realtimeRGB;
-        public BitmapImage RealtimeRGB
+        private ReconstructionImageViewModel _reconstructionImageViewModel;
+        public ReconstructionImageViewModel ReconstructionImageViewModel
         {
-            get { return realtimeRGB; }
+            get
+            {
+                return _reconstructionImageViewModel;
+            }
             set
             {
-                realtimeRGB = value;
-                OnPropertyChanged(nameof(RealtimeRGB));
+                _reconstructionImageViewModel = value;
+                OnPropertyChanged(nameof(ReconstructionImageViewModel));
             }
         }
-
+        
 
         public HomeViewModel()
         {
@@ -102,17 +104,16 @@ namespace HUREL_Imager_GUI.ViewModel
             _threeDimensionalViewModel = null!;
             _sourceDirectionViewModel = null!;
             _doseRateViewModel= null!;
-            realtimeRGB = new BitmapImage();
 
             TopButtonViewModel = new TopButtonViewModel();
             SpectrumViewModel = new SpectrumViewModel();
             ThreeDimensionalViewModel = new ThreeDimensionalViewModel();
             SourceDirectionViewModel = new SourceDirectionViewModel();
             DoseRateViewModel = new DoseRateViewModel();
+            ReconstructionImageViewModel= new ReconstructionImageViewModel();
 
             TestValue = "Hello World";
             logger.Info("HomeViewModel Loaded");
-            LoopTask = Task.Run(Loop);
 
             LahgiApi.StatusUpdate += StatusUpdate;
         }
@@ -144,20 +145,7 @@ namespace HUREL_Imager_GUI.ViewModel
 
         }
 
-               
-        private Task LoopTask;
-        private bool RunLoop = true;
-        private void Loop()
-        {
-            while(RunLoop)
-            {
-                BitmapImage? temp = LahgiApi.GetRgbImage();
-                if (temp != null)
-                {
-                    RealtimeRGB = temp;
-                }
-            }
-        }
+      
 
         private string _testValue;
         public string TestValue
@@ -171,11 +159,9 @@ namespace HUREL_Imager_GUI.ViewModel
             SpectrumViewModel.Unhandle();
             TopButtonViewModel.Unhandle();
             DoseRateViewModel.Unhandle();
-            if (LoopTask != null)
-            {
-                RunLoop = false;
-                LoopTask.Wait();
-            }
+            ThreeDimensionalViewModel.Unhandle();
+            ReconstructionImageViewModel.Unhandle();
+
             LahgiApi.StatusUpdate -= StatusUpdate;
         }
         

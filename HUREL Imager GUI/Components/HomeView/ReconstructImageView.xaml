@@ -4,9 +4,92 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
+             xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="500" d:DesignWidth="300">
     <Grid>
-            
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="2-D view" Margin="5" FontSize="{StaticResource FontSize-Larger}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <ToggleButton  x:Name="SetupButton" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5"
+                       Style="{StaticResource ToggleButtonDesignNormal}"
+                       d:IsChecked="true"
+                       Content="Setting"/>
+
+        <Popup x:Name="SetupButtonPopup" d:IsOpen="True" 
+                   IsOpen="{Binding Path=IsChecked, ElementName=SetupButton, Mode=OneWay}" 
+                   Placement="Right" PlacementTarget="{Binding ElementName=SetupButton}">
+            <Border BorderThickness="3" Width="250"   BorderBrush="{StaticResource CustomDarkBlue}" Background="White">
+
+                <StackPanel Margin="5,5,5,5">
+                    <TextBlock Text="2D View Setup" FontSize="{StaticResource FontSize-Large}" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <CheckBox Content="Show RGB Image" x:Name="IsShowRgb" IsChecked="True"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Radiation Image" FontWeight="Black" Margin="0,5,0,5"  VerticalAlignment="Center"/>
+                        <ComboBox Margin="10,5,0,5">
+                            <ComboBoxItem Content="Simple BP" IsSelected="True"/>
+                            <ComboBoxItem Content="ML-EM"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <RadioButton Content="None" GroupName="Recon" IsChecked="True"/>
+                    <RadioButton Content="Compton Image" Name="IsComptonImgShow" GroupName="Recon"/>
+                    <RadioButton Content="Coded Image" Name="IsCodedImgShow" GroupName="Recon"/>
+                    <RadioButton Content="Hybrid Image" Name="IsHybridImgShow" GroupName="Recon"/>
+                    <Line X1="0" X2="230"  Y1="0" Y2="0" StrokeThickness="1" Margin="5,5,5,5" Stroke="Black"/>
+                    <StackPanel Orientation="Horizontal">
+                    <RadioButton Content="On Plane" GroupName="ReconSpace" IsChecked="True" Margin="0,0,10,10"/>
+                    <RadioButton Content="On Pointcloud" GroupName="ReconSpace" Margin="10,0,0,10"/>
+                    </StackPanel>   
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Plane Distance" FontWeight="Black" Margin="0,5,0,5"/>
+                        <TextBlock Text=": " FontWeight="Black" Margin="0,5,0,5"/>
+                        <TextBlock Text="{Binding ElementName=PlaneDistance, Path=Value, StringFormat={}{0:0.0}}"  FontWeight="Black" Margin="0,5,0,5"/>
+                        <TextBlock Text=" m" FontWeight="Black" Margin="0,5,0,5"/>
+                        <CheckBox Content="Auto" Margin="10,5,0,5"/>
+                    </StackPanel>
+
+                    <Slider Minimum="0" Maximum="10" Value="{Binding S2M}" AutoToolTipPlacement="TopLeft" Name="PlaneDistance"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Radiation Image Opacity" FontWeight="Black" Margin="0,5,0,5"/>
+                        <TextBlock Text=": " FontWeight="Black" Margin="0,5,0,5"/>
+                        <TextBlock Text="{Binding ElementName=OpacitySlider, Path=Value, StringFormat={}{0:P0}}"  FontWeight="Black" Margin="0,5,0,5"/>
+                        
+                    </StackPanel>
+                    <Slider Minimum="0" Maximum="1" Value="80" AutoToolTipPlacement="TopLeft" Name="OpacitySlider" Ticks="1"  TickFrequency="1"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Min Value Percent" FontWeight="Black" Margin="0,5,0,5"/>
+                        <TextBlock Text=": " FontWeight="Black" Margin="0,5,0,5"/>
+                        <TextBlock Text="{Binding ElementName=MinValuePercent, Path=Value, StringFormat={}{0:P0}}"  FontWeight="Black" Margin="0,5,0,5"/>
+                    </StackPanel>
+
+                    <Slider Minimum="0" Maximum="1" Value="{Binding MinValuePortion}" AutoToolTipPlacement="TopLeft" Name="MinValuePercent"  Ticks="1" TickFrequency="1"/>
+                    
+                    
+                    <TextBlock Text="ResImprov" FontWeight="Black" Margin="0,5,0,5"/>
+                    <syncfusion:DoubleTextBox Value="{Binding ResImprov}" MinValue="0.1" MaxHeight="30" NumberDecimalDigits="1"/>
+
+                </StackPanel>
+            </Border>
+        </Popup>
+    
+        <d:Image Grid.Row="1" Stretch="Uniform" Margin="0
+                 ">
+            <Image.Source>
+                <BitmapImage UriSource="/Resource/RGB image.png" />
+            </Image.Source>
+        </d:Image>
+        <Image Grid.Row="1"  Source="{Binding HybridImgRGB}" Visibility="{Binding ElementName=IsHybridImgShow, Converter={StaticResource ConvBoolToVisibility}, Path=IsChecked}"
+               Opacity="{Binding ElementName=OpacitySlider, Path=Value}" Stretch="Uniform" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Image Grid.Row="1"  Source="{Binding CodedImgRGB}" Visibility="{Binding ElementName=IsCodedImgShow, Converter={StaticResource ConvBoolToVisibility}, Path=IsChecked}"
+               Opacity="{Binding ElementName=OpacitySlider, Path=Value}" Stretch="Uniform" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Image Grid.Row="1"  Source="{Binding ComptonImgRGB}" Visibility="{Binding ElementName=IsComptonImgShow, Converter={StaticResource ConvBoolToVisibility}, Path=IsChecked}"
+               Opacity="{Binding ElementName=OpacitySlider, Path=Value}" Stretch="Uniform" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Image Grid.Row="1" Panel.ZIndex="-3" Source="{Binding RealtimeRGB}" Visibility="{Binding ElementName=IsShowRgb, Converter={StaticResource ConvBoolToVisibility}, Path=IsChecked}" 
+               Stretch="Uniform" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
     </Grid>
 </UserControl>

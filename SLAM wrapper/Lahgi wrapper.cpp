@@ -213,6 +213,12 @@ void HUREL::Compton::LahgiWrapper::ResetSpectrum(unsigned int channelNumber)
 	LahgiCppWrapper::instance().RestEnergySpectrum(channelNumber);
 }
 
+Tuple<sBitmapWrapper^, sBitmapWrapper^, sBitmapWrapper^>^ HUREL::Compton::LahgiWrapper::Get2dRadationImage(int timeInMiliSeconds, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov, int imgSize, double minValuePortion)
+{
+	auto data = LahgiCppWrapper::instance().GetRadiation2dImage(timeInMiliSeconds, s2M, det_W, resImprov,m2D,hFov,wFov, imgSize, minValuePortion);
+	return gcnew Tuple<sBitmapWrapper^, sBitmapWrapper^, sBitmapWrapper^>(gcnew sBitmapWrapper(std::get<0>(data)), gcnew sBitmapWrapper(std::get<1>(data)), gcnew sBitmapWrapper(std::get<2>(data)));
+}
+
 void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data)
 {
 	//cv::Mat color = cv::Mat();
@@ -249,11 +255,11 @@ void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, eReconType
 	//}
 }
 
-Tuple<IntPtr,int, int, int>^ HUREL::Compton::LahgiWrapper::GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter)
+sBitmapWrapper^ HUREL::Compton::LahgiWrapper::GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter)
 {
 	auto data = LahgiCppWrapper::instance().GetResponseImage(imgSize, pixelCount, timeInSeconds, isScatter);
 
-	return gcnew Tuple<IntPtr, int, int, int >(IntPtr(std::get<0>(data)), std::get<1>(data), std::get<2>(data), std::get<3>(data));
+	return gcnew sBitmapWrapper(data);
 }
 
 

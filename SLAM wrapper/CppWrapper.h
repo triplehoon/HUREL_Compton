@@ -47,6 +47,15 @@ namespace HUREL {
 			double reconValue;
 		};
 
+		typedef struct BitmapUnmanaged
+		{
+			uint8_t* ptr;
+			int width; 
+			int height;
+			int step;
+			int channelSize;
+		}sBitMapUnmanged;
+
 
 		class LahgiCppWrapper
 		{
@@ -82,8 +91,13 @@ namespace HUREL {
 			/// uint8_t* outImgPtr, int outWidth, int outHeight, int outStep, int outChannelSize
 			/// </summary>
 			/// <returns>uint8_t* outImgPtr, int outWidth, int outHeight, int outStep, int outChannelSize</returns>
-			std::tuple<uint8_t*, int, int, int, int>  GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter);
+			sBitMapUnmanged GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter);
 
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <returns>Coded Compton Hybrid</returns>
+			std::tuple<sBitMapUnmanged, sBitMapUnmanged, sBitMapUnmanged>  GetRadiation2dImage(int timeInMiliSeconds, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov, int imgSize, double minValuePortion);
 
 			static LahgiCppWrapper& instance();
 		};

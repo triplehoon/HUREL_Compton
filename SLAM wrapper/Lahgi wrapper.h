@@ -25,6 +25,29 @@ namespace HUREL {
 			COMPTON,
 			HYBRID,
 		};
+
+		public ref struct sBitmapWrapper
+		{
+			IntPtr ptr;
+			int width;
+			int height;
+			int stride;
+			sBitmapWrapper(IntPtr _ptr, int _width, int _height, int _stride)
+			{
+				ptr = _ptr;
+				width = _width;
+				height = _height;
+				stride = _stride;
+			}
+			sBitmapWrapper(sBitMapUnmanged data)
+			{
+				ptr = IntPtr(data.ptr);
+				width = data.width;
+				height = data.height;
+				stride = data.step;
+			}
+		};
+
 		public ref class LahgiWrapper
 		{
 		private:
@@ -62,9 +85,10 @@ namespace HUREL {
 			void ResetSpectrum(unsigned int channelNumber);
 
 
-			//ptr, width, height, stride
-			Tuple<IntPtr, int, int, int>^ GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter);
+			sBitmapWrapper^ GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter);
+				
 
+			Tuple< sBitmapWrapper^, sBitmapWrapper^, sBitmapWrapper^>^ Get2dRadationImage(int timeInMiliSeconds, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov, int imgSize, double minValuePortion);
 
 			void GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data);
 			static void Logging(std::string className, std::string msg);

@@ -81,6 +81,10 @@ namespace HUREL_Imager_GUI.ViewModel
 
                 var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 var appSetting = configFile.AppSettings.Settings;
+                if (appSetting[nameof(InteractionPointViewModel) + nameof(ImageSize)] == null)
+                {
+                    return;
+                }
                 appSetting[nameof(InteractionPointViewModel) + nameof(ImageSize)].Value = value.ToString();
 
                 configFile.Save(ConfigurationSaveMode.Modified);
@@ -97,6 +101,10 @@ namespace HUREL_Imager_GUI.ViewModel
 
                 var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 var appSetting = configFile.AppSettings.Settings;
+                if (appSetting[nameof(InteractionPointViewModel) + nameof(PixelCount)] == null)
+                {
+                    return;
+                }
                 appSetting[nameof(InteractionPointViewModel) + nameof(PixelCount)].Value = value.ToString();
 
                 configFile.Save(ConfigurationSaveMode.Modified);
@@ -112,6 +120,10 @@ namespace HUREL_Imager_GUI.ViewModel
             set { timeInSecond = value;
                 var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 var appSetting = configFile.AppSettings.Settings;
+                if (appSetting[nameof(InteractionPointViewModel) + nameof(TimeInSecond)] == null)
+                {
+                    return;
+                }
                 appSetting[nameof(InteractionPointViewModel) + nameof(TimeInSecond)].Value = value.ToString();
 
                 configFile.Save(ConfigurationSaveMode.Modified);

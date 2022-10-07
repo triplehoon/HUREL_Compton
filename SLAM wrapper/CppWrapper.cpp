@@ -4,37 +4,37 @@
 
 using namespace HUREL::Compton;
 
-std::tuple<uint8_t*, int, int, int, int> GetCvToPointers(cv::Mat color)
+sBitMapUnmanged GetCvToPointers(cv::Mat color, uint8_t** outPoint)
 {
-	static uint8_t* outImgPtr = nullptr;
-	int outWidth = 0;
-	int outHeight = 0;
-	int outStride = 0;
-	int outChannelSize = 0;
 
-	if (outImgPtr != nullptr)
+	sBitMapUnmanged outStruct{ *outPoint, 0, 0 , 0, 0 };
+
+
+	if (outStruct.ptr != nullptr)
 	{
-		delete[] outImgPtr;
+		delete[] outStruct.ptr;
 	}
 
 	int imagesize = 0;
 
+
 	if (color.cols == 0)
 	{
-		return std::make_tuple(outImgPtr, outWidth, outHeight, outStride, outChannelSize);
+		return outStruct;
 	}
-	outWidth = color.cols;
-	outHeight = color.rows;
-	outStride = color.step;
-	outChannelSize = color.channels();
-	imagesize = outWidth * outHeight * outChannelSize;
-	
-	//RtabmapCppWrapper::instance().UnlockVideoFrame();
-	outImgPtr = new uchar[imagesize];
-	memcpy(outImgPtr, color.data, imagesize);
+	outStruct.width = color.cols;
+	outStruct.height = color.rows;
+	outStruct.step = color.step;
+	outStruct.channelSize = color.channels();
+	imagesize = outStruct.width * outStruct.height * outStruct.channelSize;
 
-	return std::make_tuple(outImgPtr, outWidth, outHeight, outStride, outChannelSize);
+	//RtabmapCppWrapper::instance().UnlockVideoFrame();
+	outStruct.ptr = new uchar[imagesize];
+	memcpy(outStruct.ptr, color.data, imagesize);
+
+	return outStruct;
 }
+
 
 LahgiCppWrapper& HUREL::Compton::LahgiCppWrapper::instance()
 {
@@ -66,7 +66,7 @@ bool HUREL::Compton::LahgiCppWrapper::SetType(eModuleCppWrapper type)
 	default:
 		break;
 	}
-	return LahgiControl::instance().SetType(moduleType); 
+	return LahgiControl::instance().SetType(moduleType);
 }
 
 void HUREL::Compton::LahgiCppWrapper::SetEchks(std::vector<std::vector<double>> echks)
@@ -167,14 +167,14 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
 
-	
+
 	int reconStartIndex = 0;
 
 
 	EnergySpectrum spectClass = EnergySpectrum(10, 3000);;
 	for (int i = lmData.size(); i--; i >= 0)
 	{
-		if (time != 0 && t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time*1000))
+		if (time != 0 && t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time * 1000))
 		{
 			break;
 		}
@@ -221,15 +221,26 @@ bool HUREL::Compton::LahgiCppWrapper::LoadListedListModeData(std::string filePat
 	return LahgiControl::instance().LoadListedListModeData(filePath);
 }
 
-std::tuple<uint8_t*, int, int, int, int>  HUREL::Compton::LahgiCppWrapper::GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter)
+sBitMapUnmanged  HUREL::Compton::LahgiCppWrapper::GetResponseImage(int imgSize, int pixelCount, double timeInSeconds, bool isScatter)
 {
-	return GetCvToPointers(LahgiControl::instance().GetResponseImage(imgSize, pixelCount, timeInSeconds, isScatter));
+	static uint8_t* ptr = nullptr;
+
+	return GetCvToPointers(LahgiControl::instance().GetResponseImage(imgSize, pixelCount, timeInSeconds, isScatter), &ptr);
 }
 
+std::tuple<sBitMapUnmanged, sBitMapUnmanged, sBitMapUnmanged>  HUREL::Compton::LahgiCppWrapper::GetRadiation2dImage(int timeInMiliSeconds, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov, int imgSize, double minValuePortion)
+{
+	static uint8_t* ptrCoded = nullptr;
+	static uint8_t* ptrCompton = nullptr;
+	static uint8_t* ptrHybrid = nullptr;
 
+	RadiationImage radimage(LahgiControl::instance().GetListedListModeData(timeInMiliSeconds), s2M, det_W, resImprov, m2D, hFov, wFov);
 
+	return std::make_tuple(GetCvToPointers(RadiationImage::GetCV_32SAsJet(radimage.mCodedImage, imgSize, minValuePortion), &ptrCoded), 
+		GetCvToPointers(RadiationImage::GetCV_32SAsJet(radimage.mComptonImage, imgSize, minValuePortion), &ptrCompton),
+		GetCvToPointers(RadiationImage::GetCV_32SAsJet(radimage.mHybridImage, imgSize, minValuePortion), &ptrHybrid));
 
-
+}
 
 
 bool HUREL::Compton::RtabmapCppWrapper::GetIsSlamPipeOn()
@@ -287,7 +298,7 @@ void HUREL::Compton::RtabmapCppWrapper::ResetSlam()
 
 std::vector<ReconPointCppWrapper> HUREL::Compton::RtabmapCppWrapper::GetSlamPointCloud()
 {
-	open3d::geometry::PointCloud  pc =RtabmapSlamControl::instance().GetSlamPointCloud();
+	open3d::geometry::PointCloud  pc = RtabmapSlamControl::instance().GetSlamPointCloud();
 
 	std::vector<ReconPointCppWrapper> returnPc;
 	returnPc.reserve(pc.colors_.size());
@@ -327,7 +338,7 @@ bool HUREL::Compton::RtabmapCppWrapper::GetCurrentVideoFrame(uint8_t** outImgPtr
 	delete[] currentImg;
 	cv::Mat color = RtabmapSlamControl::instance().GetCurrentVideoFrame();
 	if (color.cols == 0)
-	{		
+	{
 		return false;
 	}
 	*outWidth = color.cols;
@@ -338,7 +349,7 @@ bool HUREL::Compton::RtabmapCppWrapper::GetCurrentVideoFrame(uint8_t** outImgPtr
 	{
 		imagesize = *outWidth * *outHeight * *outChannelSize;
 		delete[] mColorImg;
-		
+
 	}
 	currentImg = new uchar[imagesize];
 	memcpy(currentImg, color.data, imagesize);
@@ -360,10 +371,10 @@ std::vector<ReconPointCppWrapper>  HUREL::Compton::RtabmapCppWrapper::GetReconSL
 	}
 
 	open3d::geometry::PointCloud reconPcDownSampled = *reconPC.VoxelDownSample(voxelSize);
-	
+
 	ReconPointCloud o3dPc = LahgiControl::instance().GetReconRealtimePointCloudCompton(reconPcDownSampled, time);
 
-	
+
 	std::vector<ReconPointCppWrapper> pc;
 
 	int pcSize = 0;
@@ -400,7 +411,7 @@ std::vector<ReconPointCppWrapper>  HUREL::Compton::RtabmapCppWrapper::GetReconSL
 
 std::vector<std::vector<double>> HUREL::Compton::RtabmapCppWrapper::GetOptimizedPoses()
 {
-	
+
 	std::vector<Eigen::Matrix4d> poses = RtabmapSlamControl::instance().GetOptimizedPoses();
 	std::vector<std::vector<double>> returnPoses;
 	returnPoses.reserve(poses.size());
@@ -419,7 +430,7 @@ std::vector<std::vector<double>> HUREL::Compton::RtabmapCppWrapper::GetOptimized
 		}
 		returnPoses.push_back(matrix3DOneLine);
 	}
-	
+
 
 
 	return returnPoses;
@@ -447,7 +458,7 @@ std::vector<ReconPointCppWrapper> HUREL::Compton::RtabmapCppWrapper::GetLoadedPo
 		tmpPoint.pointX = o3dPc.points_[i][0];
 		tmpPoint.pointY = o3dPc.points_[i][1];
 		tmpPoint.pointZ = o3dPc.points_[i][2];
-		
+
 		tmpPoint.colorR = o3dPc.colors_[i][0];
 
 		tmpPoint.colorG = o3dPc.colors_[i][1];

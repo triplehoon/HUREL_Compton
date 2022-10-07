@@ -170,6 +170,9 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData
 double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed(ListModeData lmData, Eigen::Vector3d imgPoint)
 {
 	
+	double ScatterEnergy = lmData.Scatter.InteractionEnergy;
+	double AbsorberEnergy = lmData.Absorber.InteractionEnergy;
+	double TotalEnergy = ScatterEnergy + AbsorberEnergy;
 	if (lmData.Type != eInterationType::COMPTON)
 	{
 		return 0;
@@ -179,16 +182,18 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed
 	{
 		return 0;
 	}
+
 	double comptonScatteringAngle = acos(comptonCal) / EIGEN_PI * 180;
 	Eigen::Vector3d effectToScatterVector = (imgPoint.head<3>() - lmData.Scatter.RelativeInteractionPoint.head<3>());
 	Eigen::Vector3d scatterToAbsorberVector = (lmData.Scatter.RelativeInteractionPoint.head<3>() - lmData.Absorber.RelativeInteractionPoint.head<3>());
-	scatterToAbsorberVector.normalize();
 	effectToScatterVector.normalize();
+	scatterToAbsorberVector.normalize();
 	double positionDotPord = effectToScatterVector.dot(scatterToAbsorberVector);
-
 	double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
+	double sigmacomptonScatteringAngle = 511 / sin(comptonScatteringAngle) * sqrt(1 / pow(AbsorberEnergy, 2)) - 1 / pow(TotalEnergy, 2) * pow(0.08 / 2.35 * sqrt(AbsorberEnergy), 2) + 1 / pow(TotalEnergy, 4) * pow(0.08 / 2.35 * sqrt(ScatterEnergy), 2);
+	double BP_sig_thres = 1.5;
 
-	if (abs(effectedAngle - comptonScatteringAngle) < 15)
+	if (abs(effectedAngle - comptonScatteringAngle) < BP_sig_thres * sigmacomptonScatteringAngle)
 	{
 		return 1;
 	}
