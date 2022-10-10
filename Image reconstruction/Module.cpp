@@ -134,7 +134,7 @@ std::tuple<unsigned int, unsigned int> HUREL::Compton::Module::FastMLPosEstimati
                 val += mXYLogMue[x][y][i] * normalizePMTValue[i];
 
             }
-            val += mXYSumMu[x][y];
+            val -= mXYSumMu[x][y];
 
             if (val > valMaxChk)
             {
@@ -186,7 +186,7 @@ std::tuple<unsigned int, unsigned int> HUREL::Compton::Module::FastMLPosEstimati
             }
             Eigen::Array < float , 1, 9 > valArray = mXYLogMueEigen[x][y] * pmtADCValue;
             val = valArray.sum();
-            val += mXYSumMu[x][y];
+            val -= mXYSumMu[x][y];
 
             if (val > valMaxChk)
             {
@@ -457,7 +457,8 @@ const Eigen::Vector4d HUREL::Compton::Module::FastMLPosEstimation(const Eigen::A
 
     std::tuple<unsigned int, unsigned int> maxPoint;
 
-    const Eigen::Array<float, 1, 9> normalizedPMTValue = mGainEigen * pmtADCValue;
+    Eigen::Array<float, 1, 9> normalizedPMTValue = (mGainEigen * pmtADCValue);
+    normalizedPMTValue = normalizedPMTValue / normalizedPMTValue.sum();
     constexpr double gridShrink = 1.1;
     int gridSize = 36;//45
     maxPoint = FastMLPosEstimationFindMaxIndex(gridSize, 0, mLutSize - 1, 0, mLutSize - 1, normalizedPMTValue);
