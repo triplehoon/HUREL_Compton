@@ -34,16 +34,16 @@ namespace HUREL
 			std::vector<double> reconValues_;
 			double maxReoconValue = 0;
 
-			void CalculateReconPoint(ListModeData lmData, double(*calcFunc)(ListModeData, Eigen::Vector3d));
+			void CalculateReconPoint(ListModeData lmData, double(*calcFunc)(ListModeData&, Eigen::Vector3d&));
 			void CalculateReconPointCoded(RadiationImage& lmImage);
 			void CalculateReconPointCompton(RadiationImage& lmImage);
 			void CalculateReconPointHybrid(RadiationImage& lmImage);
 
 
 
-			static double SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint);
+			static double SimpleComptonBackprojection(ListModeData& lmData, Eigen::Vector3d& imgPoint);
 
-			static double SimpleComptonBackprojectionUntransformed(ListModeData lmData, Eigen::Vector3d imgPoint);
+			static double SimpleComptonBackprojectionUntransformed(ListModeData& lmData, Eigen::Vector3d& imgPoint);
 
 
 			static RGBA_t ColorScaleJet(double v, double vmin, double vmax);

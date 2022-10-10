@@ -35,22 +35,22 @@ static cv::Mat CodedMaskMat()
 	else
 	{
 		mask = cv::Mat(37, 37, CV_32S);
-for (int i = 0; i < 37; ++i)
-{
-	for (int j = 0; j < 37; ++j)
-	{
-		if (HUREL::Compton::mCodeMask[i][j])
+		for (int i = 0; i < 37; ++i)
 		{
-			mask.at<int>(i, j) = -1;
+			for (int j = 0; j < 37; ++j)
+			{
+				if (HUREL::Compton::mCodeMask[i][j])
+				{
+					mask.at<int>(i, j) = -1;
+				}
+				else
+				{
+					mask.at<int>(i, j) = 1;
+				}
+			}
 		}
-		else
-		{
-			mask.at<int>(i, j) = 1;
-		}
-	}
-}
-isMaskMade = true;
-return mask;
+		isMaskMade = true;
+		return mask;
 	}
 }
 
@@ -226,8 +226,8 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 			{
 				for (int j = 0; j < PixelCount; ++j)
 				{
-					double imagePlaneX = ReconPlaneWidth / PixelCount * i + ReconPlaneWidth / PixelCount - ReconPlaneWidth / 2;
-					double imagePlaneY = ReconPlaneWidth / PixelCount * j + ReconPlaneWidth / PixelCount - ReconPlaneWidth / 2;
+					double imagePlaneX = ReconPlaneWidth / PixelCount * i + ReconPlaneWidth / PixelCount * 0.5 - ReconPlaneWidth / 2;
+					double imagePlaneY = ReconPlaneWidth / PixelCount * j + ReconPlaneWidth / PixelCount * 0.5 - ReconPlaneWidth / 2;
 					double imagePlaneZ = S2M + M2D + 0.02;
 					Eigen::Vector3d imgPoint;
 					imgPoint[0] = imagePlaneX;
@@ -291,7 +291,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 	int comptonImageCount = 0;
 	
 	#pragma omp parallel for
-	for (int i =0; i < data.size(); ++i)
+	for (int i = 0; i < data.size(); ++i)
 	{
 		ListModeData& lm = data[i];
 		if (lm.Type == eInterationType::COMPTON)
@@ -320,8 +320,8 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 			{
 				for (int j = 0; j < pixelCount; ++j)
 				{
-					double imagePlaneX = reconPlaneWidth / pixelCount * i + reconPlaneWidth / pixelCount - reconPlaneWidth / 2;
-					double imagePlaneY = reconPlaneWidth / pixelCount * j + reconPlaneWidth / pixelCount - reconPlaneWidth / 2;
+					double imagePlaneX = reconPlaneWidth / pixelCount * i + reconPlaneWidth / pixelCount * 0.5 - reconPlaneWidth / 2;
+					double imagePlaneY = reconPlaneWidth / pixelCount * j + reconPlaneWidth / pixelCount * 0.5 - reconPlaneWidth / 2;
 					double imagePlaneZ = s2M + m2D + 0.02;
 					Eigen::Vector3d imgPoint;
 					imgPoint[0] = imagePlaneX;
