@@ -890,6 +890,8 @@ size_t  HUREL::Compton::LahgiControl::GetListedListModeDataSize() {
 
 std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData()
 {
+	mResetListModeDataMutex.lock();
+
 	size_t size = mListedListModeData.size();
 	std::vector<ListModeData> lmData;
 	lmData.reserve(size);
@@ -897,6 +899,8 @@ std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData()
 	{
 		lmData.push_back(mListedListModeData[i]);
 	}
+	mResetListModeDataMutex.unlock();
+
 
 	return lmData;
 }
