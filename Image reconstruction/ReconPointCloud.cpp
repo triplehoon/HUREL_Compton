@@ -204,6 +204,64 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed
 }
 
 
+
+double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed(ListModeData& lmData, Eigen::Vector3d& imgPoint, double* outComptonScatterAngle, double* outSigmacomptonScatteringAngle, Eigen::Vector3d* outScatterToAbsorberVector)
+{
+	double BP_sig_thres = 1.5;
+
+	if (isnan(*outSigmacomptonScatteringAngle) && isnan(*outComptonScatterAngle))
+	{
+		double ScatterEnergy = lmData.Scatter.InteractionEnergy;
+		double AbsorberEnergy = lmData.Absorber.InteractionEnergy;
+		double TotalEnergy = ScatterEnergy + AbsorberEnergy;
+		if (lmData.Type != eInterationType::COMPTON)
+		{
+			return 0;
+		}
+		double comptonCal = 1 - 511 * lmData.Scatter.InteractionEnergy / lmData.Absorber.InteractionEnergy / (lmData.Scatter.InteractionEnergy + lmData.Absorber.InteractionEnergy);
+		if (comptonCal >= 1 || comptonCal <= -1)
+		{
+			return 0;
+		}
+
+		*outComptonScatterAngle = acos(comptonCal) / EIGEN_PI * 180;
+		Eigen::Vector3d effectToScatterVector = (imgPoint.head<3>() - lmData.Scatter.RelativeInteractionPoint.head<3>());
+		*outScatterToAbsorberVector = (lmData.Scatter.RelativeInteractionPoint.head<3>() - lmData.Absorber.RelativeInteractionPoint.head<3>());
+		effectToScatterVector.normalize();
+		outScatterToAbsorberVector->normalize();
+		double positionDotPord = effectToScatterVector.dot(*outScatterToAbsorberVector);
+		double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
+		*outSigmacomptonScatteringAngle = 511 / sin(*outComptonScatterAngle) * sqrt(1 / pow(AbsorberEnergy, 2)) - 1 / pow(TotalEnergy, 2) * pow(0.08 / 2.35 * sqrt(AbsorberEnergy), 2) + 1 / pow(TotalEnergy, 4) * pow(0.08 / 2.35 * sqrt(ScatterEnergy), 2);
+
+		if (abs(effectedAngle - *outComptonScatterAngle) < BP_sig_thres * *outSigmacomptonScatteringAngle)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		Eigen::Vector3d effectToScatterVector = (imgPoint.head<3>() - lmData.Scatter.RelativeInteractionPoint.head<3>());
+		effectToScatterVector.normalize();
+		double positionDotPord = effectToScatterVector.dot(*outScatterToAbsorberVector);
+		double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
+		if (abs(effectedAngle - *outComptonScatterAngle) < BP_sig_thres * *outSigmacomptonScatteringAngle)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+
+	}
+	
+}
+
+
 HUREL::Compton::RGBA_t HUREL::Compton::ReconPointCloud::ColorScaleJet(double v, double vmin, double vmax)
 {
 	double dv;

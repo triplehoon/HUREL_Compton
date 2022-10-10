@@ -44,7 +44,7 @@ namespace HUREL
 			static double SimpleComptonBackprojection(ListModeData& lmData, Eigen::Vector3d& imgPoint);
 
 			static double SimpleComptonBackprojectionUntransformed(ListModeData& lmData, Eigen::Vector3d& imgPoint);
-
+			static double SimpleComptonBackprojectionUntransformed(ListModeData& lmData, Eigen::Vector3d& imgPoint, double* outComptonScatterAngle, double* outSigmacomptonScatteringAngle, Eigen::Vector3d* outScatterToAbsorberVector);
 
 			static RGBA_t ColorScaleJet(double v, double vmin, double vmax);
 

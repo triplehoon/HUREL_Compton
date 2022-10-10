@@ -316,18 +316,22 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 				continue;
 			}
 			++comptonImageCount;
+			double comptonScatterAngle = nan("");
+			double sigmacomptonScatteringAngle = nan("");
+			Eigen::Vector3d sToAVector;
+			double imagePlaneZ = s2M + m2D + 0.02;
+
 			for (int i = 0; i < pixelCount; ++i)
 			{
 				for (int j = 0; j < pixelCount; ++j)
 				{
 					double imagePlaneX = reconPlaneWidth / pixelCount * i + reconPlaneWidth / pixelCount * 0.5 - reconPlaneWidth / 2;
 					double imagePlaneY = reconPlaneWidth / pixelCount * j + reconPlaneWidth / pixelCount * 0.5 - reconPlaneWidth / 2;
-					double imagePlaneZ = s2M + m2D + 0.02;
 					Eigen::Vector3d imgPoint;
 					imgPoint[0] = imagePlaneX;
 					imgPoint[1] = imagePlaneY;
 					imgPoint[2] = imagePlaneZ;
-					comptonImgPtr[pixelCount * (pixelCount - j - 1) + pixelCount - i - 1] += ReconPointCloud::SimpleComptonBackprojectionUntransformed(lm, imgPoint);
+					comptonImgPtr[pixelCount * (pixelCount - j - 1) + pixelCount - i - 1] += ReconPointCloud::SimpleComptonBackprojectionUntransformed(lm, imgPoint, &comptonScatterAngle, &sigmacomptonScatteringAngle, &sToAVector);
 				}
 			}
 
