@@ -140,7 +140,7 @@
                 ShowRange="True"
                 ShowValueLabels="True"
                 Foreground="Black"
-                Minimum="1100" Maximum="1700"
+                Minimum="1100" Maximum="2000"
                 RangeStart="{Binding MinRange, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 RangeEnd="{Binding MaxRange, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 TickFrequency="100" 
