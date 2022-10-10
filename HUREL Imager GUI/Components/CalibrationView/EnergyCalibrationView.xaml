@@ -36,6 +36,7 @@
             <TextBlock Text="*Energy calibation only use background"  Margin="5,0,5,0" FontSize="{StaticResource FontSize-Smallest}" FontWeight="Bold"/>
             <Button Style="{StaticResource ButtonDesignNormal}" Content="Start Calbration" Margin="10" Command="{Binding StartCalibrationCommand}"
                     IsEnabled="{Binding IsCalibrationReady}"/>
+            <Button Style="{StaticResource ButtonDesignNormal}" Content="Reset Calbration" Margin="10" Command="{Binding ResetCalibrationCommand}"/>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

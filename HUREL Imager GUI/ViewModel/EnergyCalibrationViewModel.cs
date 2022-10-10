@@ -105,6 +105,27 @@ namespace HUREL_Imager_GUI.ViewModel
             });
         }
 
+        private AsyncCommand? resetCalibrationCommand = null;
+        public ICommand ResetCalibrationCommand
+        {
+            get { return resetCalibrationCommand ?? (resetCalibrationCommand = new AsyncCommand(ResetCalibration)); }
+        }
+        private async Task ResetCalibration()
+        {
+            await Task.Run(() =>
+            {
+                IsCalibrationReady = false;
+                for (int i =0; i < 8; ++i)
+                {
+                    LahgiApi.eEcalStates[i] = eEcalState.Unknown;
+                }
+                
+                IsCalibrationReady = true;
+                UpdateStates();
+            });
+        }
+
+
         private bool isCalibrationReady = true;
         public bool IsCalibrationReady
         {
