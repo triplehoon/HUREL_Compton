@@ -66,7 +66,7 @@ HUREL::Compton::ReconPointCloud::ReconPointCloud(open3d::geometry::PointCloud& p
 
 }
 
-void HUREL::Compton::ReconPointCloud::CalculateReconPoint(ListModeData lmData, double(*calcFunc)(ListModeData, Eigen::Vector3d))
+void HUREL::Compton::ReconPointCloud::CalculateReconPoint(ListModeData lmData, double(*calcFunc)(ListModeData&, Eigen::Vector3d&))
 {
 
 	size_t size = points_.size();
@@ -131,7 +131,7 @@ void HUREL::Compton::ReconPointCloud::CalculateReconPointHybrid(RadiationImage& 
 	}
 }
 
-double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData lmData, Eigen::Vector3d imgPoint)
+double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData& lmData, Eigen::Vector3d& imgPoint)
 {
 	double ScatterEnergy = lmData.Scatter.InteractionEnergy;
 	double AbsorberEnergy = lmData.Absorber.InteractionEnergy;
@@ -167,7 +167,7 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojection(ListModeData
 }
 
 
-double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed(ListModeData lmData, Eigen::Vector3d imgPoint)
+double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed(ListModeData& lmData, Eigen::Vector3d& imgPoint)
 {
 	
 	double ScatterEnergy = lmData.Scatter.InteractionEnergy;
