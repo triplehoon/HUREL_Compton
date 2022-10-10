@@ -34,7 +34,7 @@ namespace HUREL_Imager_GUI.ViewModel
             if (eventArgs is LahgiApiEnvetArgs)
             {
                 LahgiApiEnvetArgs lahgiApiEnvetArgs = (LahgiApiEnvetArgs)eventArgs;
-                if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Status)
+                if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Status || lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.SlamRadImage)
                 {
                     BitmapImage? tmpCode;
                     BitmapImage? tmpCompton;
@@ -107,7 +107,7 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
-        private double minValuePortion = 0.5;
+        private double minValuePortion = 0.75;
         public double MinValuePortion
         {
             get { return minValuePortion; }

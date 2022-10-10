@@ -59,7 +59,7 @@
                         <TextBlock Text="{Binding ElementName=OpacitySlider, Path=Value, StringFormat={}{0:P0}}"  FontWeight="Black" Margin="0,5,0,5"/>
                         
                     </StackPanel>
-                    <Slider Minimum="0" Maximum="1" Value="80" AutoToolTipPlacement="TopLeft" Name="OpacitySlider" Ticks="1"  TickFrequency="1"/>
+                    <Slider Minimum="0" Maximum="1" Value="0.7" AutoToolTipPlacement="TopLeft" Name="OpacitySlider" Ticks="1"  TickFrequency="1"/>
 
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Min Value Percent" FontWeight="Black" Margin="0,5,0,5"/>

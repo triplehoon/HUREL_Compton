@@ -592,12 +592,12 @@ namespace HUREL.Compton
                         IsSessionStarting = true;
 
                         await Task.Run(() => StopSlam());
-                        StatusMsg = "Saving CSV file";
+                        StatusMsg = "Saving CSV and ply file";
                         string saveFileName = Path.GetDirectoryName(fpga.FileMainPath) + "\\" + fileName;
                         lahgiWrapper.SaveListModeData(saveFileName + "_LMData.csv");
                         rtabmapWrapper.SavePlyFile(saveFileName + "_SlamData.ply");
 
-                        StatusMsg = "Done saving CSV file";
+                        StatusMsg = "Done saving CSV and ply file";
                         IsSessionStarting = false;
                         IsSessionStart = false;
                     }
