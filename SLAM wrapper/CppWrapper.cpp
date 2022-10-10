@@ -326,6 +326,14 @@ bool HUREL::Compton::RtabmapCppWrapper::LoadPlyFile(std::string filePath)
 	return RtabmapSlamControl::instance().LoadPlyFile(filePath);
 }
 
+void HUREL::Compton::RtabmapCppWrapper::SavePlyFile(std::string filePath)
+{
+	open3d::geometry::PointCloud  pc = RtabmapSlamControl::instance().GetSlamPointCloud();
+	open3d::io::WritePointCloudOption option;
+
+	open3d::io::WritePointCloudToPLY(filePath, pc, option);
+}
+
 std::vector<double> HUREL::Compton::RtabmapCppWrapper::getMatrix3DOneLineFromPoseData()
 {
 	return RtabmapSlamControl::instance().getMatrix3DOneLineFromPoseData();;

@@ -128,6 +128,8 @@ namespace HUREL {
 			void ResetSlam();
 
 			bool LoadPlyFile(std::string filePath);
+			void SavePlyFile(std::string filePath);
+			
 
 			std::vector<ReconPointCppWrapper> GetSlamPointCloud();
 

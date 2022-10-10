@@ -595,6 +595,8 @@ namespace HUREL.Compton
                         StatusMsg = "Saving CSV file";
                         string saveFileName = Path.GetDirectoryName(fpga.FileMainPath) + "\\" + fileName;
                         lahgiWrapper.SaveListModeData(saveFileName + "_LMData.csv");
+                        rtabmapWrapper.SavePlyFile(saveFileName + "_SlamData.ply");
+
                         StatusMsg = "Done saving CSV file";
                         IsSessionStarting = false;
                         IsSessionStart = false;
