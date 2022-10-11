@@ -194,7 +194,7 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			if (mOdo != nullptr && &mOdo->getPose() != nullptr && mIsSlamPipeOn == true )
 			{
 			
-				mCurrentOdometry = mOdo->getPose().toEigen4d();
+				//mCurrentOdometry = mOdo->getPose().toEigen4d() * t265toLACCAxisTransform;
 				videoStreamMutex.unlock();
 			}
 			else
@@ -399,7 +399,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		{
 			videoStreamMutex.lock();
 			rtabmap->resetMemory();
-			mInitOdo = t265toLACCAxisTransform * mOdo->getPose().toEigen4d();
+			mInitOdo = t265toLACCAxisTransform* mOdo->getPose().toEigen4d() ;
 			mOdoInit = true;
 			videoStreamMutex.unlock();
 			continue;
@@ -446,7 +446,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 			{
 				*cloud += *rtabmap::util3d::transformPointCloud(tmpNoNaN, iter->second); // transform the point cloud to its pose
 			}
-			tempPoses.push_back(iter->second.toEigen4d());
+			tempPoses.push_back(t265toLACCAxisTransform * iter->second.toEigen4d()  );
 			++i;
 			//pintf("iter %d \n", i);
 			tmpNoNaN.reset();
@@ -461,7 +461,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		Sleep(0);
 	}
 	mOdoInit = false;
-	mCurrentOdometry = Eigen::Matrix4d::Identity();
+	//mCurrentOdometry = Eigen::Matrix4d::Identity();
 	mInitOdo = Eigen::Matrix4d::Identity();
 	odomThread.join(true);
 	rtabmapThread.join(true);
@@ -490,7 +490,7 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointClo
 		Eigen::Vector3d color(tmp[i].r/255.0, tmp[i].g / 255.0, tmp[i].b / 255.0);
 		Eigen::Vector4d point(tmp[i].x, tmp[i].y, tmp[i].z, 1);
 		Eigen::Vector4d transFormedpoint = t265toLACCAxisTransform * point;
-		if (transFormedpoint.y() > 0.7)
+		if (transFormedpoint.y() > 1.5)
 		{
 			continue;
 		}
@@ -530,11 +530,11 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetLoadedPointC
 Eigen::Matrix4d HUREL::Compton::RtabmapSlamControl::GetOdomentry()
 {
 	Eigen::Matrix4d odo = Eigen::Matrix4d::Identity();;
-	
+
 	//videoStreamMutex.lock();
 	if (mOdo != nullptr && &mOdo->getPose() != nullptr && mIsSlamPipeOn == true)
 	{
-		odo = mOdo->getPose().toEigen4d();
+		odo =  mOdo->getPose().toEigen4d() ;
 	}
 	//videoStreamMutex.unlock();
 	return odo;
@@ -542,6 +542,7 @@ Eigen::Matrix4d HUREL::Compton::RtabmapSlamControl::GetOdomentry()
 
 std::vector<Eigen::Matrix4d> HUREL::Compton::RtabmapSlamControl::GetOptimizedPoses()
 {
+
 	slamPipeMutex.lock();
 	std::vector<Eigen::Matrix4d> tempPoses = mPoses;
 	slamPipeMutex.unlock();

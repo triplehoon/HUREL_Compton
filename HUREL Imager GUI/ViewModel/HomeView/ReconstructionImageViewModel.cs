@@ -39,8 +39,9 @@ namespace HUREL_Imager_GUI.ViewModel
                     BitmapImage? tmpCode;
                     BitmapImage? tmpCompton;
                     BitmapImage? tmpHybrid;
-
-                    (tmpCode, tmpCompton, tmpHybrid) = LahgiApi.GetRadation2dImage(timeInMiliSeconds, s2M, det_W, resImprov, m2S, 50, 90, imgSize, minValuePortion);
+                    
+                    //848 480 90 60    51 90  48 85
+                    (tmpCode, tmpCompton, tmpHybrid) = LahgiApi.GetRadation2dImage(timeInMiliSeconds, s2M, det_W, resImprov, m2D, 60, 90, imgSize, minValuePortion);
 
                     if (tmpCode == null || tmpCompton == null || tmpHybrid == null)
                     {
@@ -77,7 +78,7 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
-        private double s2M = 1;
+        private double s2M = 2;
         public double S2M
         {
             get
@@ -92,22 +93,22 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
-        private double m2S = 0.06;
-        public double M2S
+        private double m2D = 0.060;
+        public double M2D
         {
             get
             {
-                return m2S;
+                return m2D;
             }
             set
             {
-                m2S = value;
+                m2D = value;
                 LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status);
-                OnPropertyChanged(nameof(M2S));
+                OnPropertyChanged(nameof(M2D));
             }
         }
 
-        private double minValuePortion = 0.75;
+        private double minValuePortion = 0.70;
         public double MinValuePortion
         {
             get { return minValuePortion; }
@@ -119,14 +120,14 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
-        private double det_W = 0.3;
+        private double det_W = 0.4;
         public double Det_W
         {
             get { return det_W; }
             set { det_W = value; OnPropertyChanged(nameof(Det_W)); }
         }
 
-        private double resImprov = 5;
+        private double resImprov = 10;
         public double ResImprov
         {
             get

@@ -72,6 +72,9 @@
                     
                     <TextBlock Text="ResImprov" FontWeight="Black" Margin="0,5,0,5"/>
                     <syncfusion:DoubleTextBox Value="{Binding ResImprov}" MinValue="0.1" MaxHeight="30" NumberDecimalDigits="1"/>
+                    <TextBlock Text="M2D" FontWeight="Black" Margin="0,5,0,5"/>
+
+                    <syncfusion:DoubleTextBox Value="{Binding M2D}" MinValue="0.01" MaxHeight="30" NumberDecimalDigits="3"/>
 
                 </StackPanel>
             </Border>

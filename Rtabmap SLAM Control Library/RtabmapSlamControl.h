@@ -35,7 +35,7 @@
 
 #include "Logger.h"
 
-#define T265_TO_LAHGI_OFFSET_X (-0.10)
+#define T265_TO_LAHGI_OFFSET_X (-0.0)
 #define T265_TO_LAHGI_OFFSET_Y (0.35)
 #define T265_TO_LAHGI_OFFSET_Z (-0.05)
 #define T265_To_Mask_OFFSET_X (T265_TO_LAHGI_OFFSET_X)
@@ -64,7 +64,7 @@ namespace HUREL
 
 			pcl::PointCloud<pcl::PointXYZRGB> mRealtimePointCloud = pcl::PointCloud<pcl::PointXYZRGB>();
 			pcl::PointCloud<pcl::PointXYZRGB> mSlamedPointCloud = pcl::PointCloud<pcl::PointXYZRGB>();
-			Eigen::Matrix4d mCurrentOdometry = Eigen::Matrix4d::Identity();
+			//Eigen::Matrix4d mCurrentOdometry = Eigen::Matrix4d::Identity();
 			void SlamPipe();
 
 			RtabmapSlamControl();

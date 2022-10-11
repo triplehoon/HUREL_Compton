@@ -257,6 +257,7 @@ void HUREL::Compton::RtabmapWrapper::GetOptimizePoses(List<array<double>^>^% pos
 void HUREL::Compton::RtabmapWrapper::SavePlyFile(System::String^ filePath)
 {
 	IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(filePath);
+	RtabmapCppWrapper::instance().SavePlyFile(static_cast<char*>(ptrToNativeString.ToPointer()));
 }
 
 HUREL::Compton::RtabmapWrapper::RtabmapWrapper()

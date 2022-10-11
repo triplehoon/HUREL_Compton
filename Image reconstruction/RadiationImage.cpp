@@ -17,11 +17,11 @@ int PixelCount = static_cast<int>(round(Dproj * ResImprov));
 
 inline int findIndex(double value, double min, double pixelSize)
 {
-	if (value + 0.00001 - min <= 0)
+	if (value - min <= 0)
 	{
 		return -1;
 	}
-	return static_cast<int>(floor((value + 0.00001 - min) / pixelSize));
+	return static_cast<int>(floor((value - min) / pixelSize));
 }
 
 static cv::Mat CodedMaskMat()
@@ -41,11 +41,11 @@ static cv::Mat CodedMaskMat()
 			{
 				if (HUREL::Compton::mCodeMask[i][j])
 				{
-					mask.at<int>(i, j) = -1;
+					mask.at<int>(j, i) = -1;
 				}
 				else
 				{
-					mask.at<int>(i, j) = 1;
+					mask.at<int>(j, i) = 1;
 				}
 			}
 		}
@@ -139,6 +139,10 @@ cv::Mat HUREL::Compton::RadiationImage::GetCV_32SAsJet(cv::Mat img, int size, do
 	if (img.type() != CV_32S)
 	{
 		return showImg;
+	}
+	if (img.rows == 0)
+	{
+		return cv::Mat();
 	}
 	cv::Mat normImg(img.rows, img.cols, CV_8UC1, cv::Scalar(0));
 	double minValue;
@@ -294,7 +298,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 	for (int i = 0; i < data.size(); ++i)
 	{
 		ListModeData& lm = data[i];
-		if (lm.Type == eInterationType::COMPTON)
+		if (lm.Type == eInterationType::CODED)
 		{
 			double& interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
 			double& interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
@@ -315,11 +319,15 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 			{
 				continue;
 			}
+			if (lm.Scatter.InteractionEnergy < 50)
+			{
+				continue;
+			}
 			++comptonImageCount;
 			double comptonScatterAngle = nan("");
 			double sigmacomptonScatteringAngle = nan("");
 			Eigen::Vector3d sToAVector;
-			double imagePlaneZ = s2M + m2D + 0.02;
+			double imagePlaneZ = s2M;
 
 			for (int i = 0; i < pixelCount; ++i)
 			{
@@ -334,7 +342,6 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 					comptonImgPtr[pixelCount * (pixelCount - j - 1) + pixelCount - i - 1] += ReconPointCloud::SimpleComptonBackprojectionUntransformed(lm, imgPoint, &comptonScatterAngle, &sigmacomptonScatteringAngle, &sToAVector);
 				}
 			}
-
 		}
 	}
 	//std::cout << "Lm Count: " << data.size() << " Coded count: " << codedImageCount << " Compton count: " << comptonImageCount << std::endl;
@@ -343,12 +350,12 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 	Mat reconImg;
 	cv::filter2D(responseImg, reconImg, CV_32S, scaleG);
 
-	reconImg = -reconImg;
+	//reconImg = -reconImg;
 	double maxValue;
-	cv::minMaxLoc(reconImg, nullptr, &maxValue);
-	Mat idxImg(pixelCount, pixelCount, CV_32S, Scalar(maxValue * 0.01));
-
-	cv::max(reconImg, idxImg, mCodedImage);
+	//cv::minMaxLoc(reconImg, nullptr, &maxValue);
+	//Mat idxImg(pixelCount, pixelCount, CV_32S, Scalar(maxValue * 0.01));
+	mCodedImage = reconImg;
+	//cv::max(reconImg, idxImg, mCodedImage);
 
 	
 	double fovHeight = 2 * tan((hFov / 2) * M_PI / 180.0) * (s2M + m2D + 0.02);

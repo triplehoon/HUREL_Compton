@@ -1,8 +1,10 @@
 #include "EnergySpectrum.h"
 #include <cassert>
+#include <mutex>
 
 using namespace HUREL::Compton;
 
+std::mutex resetMutex;
 
 HUREL::Compton::EnergySpectrum::EnergySpectrum(unsigned int binSize, double maxEnergy)
 {

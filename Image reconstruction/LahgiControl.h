@@ -21,7 +21,7 @@
 #include <future>
 #include <array>
 
-#define ACTIVE_AREA_LENGTH 0.14
+#define ACTIVE_AREA_LENGTH 0.15
 
 namespace HUREL {
 	namespace Compton {	

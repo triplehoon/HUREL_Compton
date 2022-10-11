@@ -135,7 +135,7 @@ void HUREL::Compton::LahgiControl::ListModeDataListening()
 		eChksMutex.lock();
 		
 		std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-		Eigen::Matrix4d deviceTransformation = RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransform;
+		Eigen::Matrix4d deviceTransformation = RtabmapSlamControl::instance().GetOdomentry();
 
 		#pragma omp parallel for
 		for (int i = 0; i < tempVector.size(); ++i)
@@ -196,13 +196,13 @@ bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		double gain[10];
 		
 		
-		double offsetZ = -(0.220);
-		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i] , 0);		
+		double offsetZ = -(0.260);
+		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i] , -0.08);		
 		if (!mScatterModules[i]->IsModuleSet())
 		{
 			return false;
 		}
-		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], offsetZ);
+		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], -0.08 + offsetZ);
 		if (!mAbsorberModules[i]->IsModuleSet())
 		{
 			return false;
@@ -540,7 +540,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 
 						if (IsOnActiveArea(scatterPoint[0], scatterPoint[1], *mScatterModules[scatterInteractModuleNum]))
 						{
-							mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
+							mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
 						}
 					}
 
