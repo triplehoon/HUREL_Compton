@@ -494,10 +494,10 @@ namespace HUREL.Compton.RadioisotopeAnalysis
     public static class PeakSearching
     {
         public static readonly List<Isotope> IsotopeList = new List<Isotope>() {
-            //new Isotope(IsotopeElement.Am241, new List<double>(){ 60 }, "Am-241", "Industrial"),
+            new Isotope(IsotopeElement.Am241, new List<double>(){ 60 }, "Am-241", "Industrial"),
             new Isotope(IsotopeElement.Cs137, new List<double>(){ 662 }, "Cs-137", "Industrial"),
             new Isotope(IsotopeElement.Co60, new List<double>(){ 1173, 1332 }, "Co-60", "Industrial"),
-            new Isotope(IsotopeElement.Ba133, new List<double>(){80, 276, 356 }, "Ba-133", "Industrial"),
+            new Isotope(IsotopeElement.Ba133, new List<double>(){80, 356 }, "Ba-133", "Industrial"),
             new Isotope(IsotopeElement.Na22, new List<double>(){511, 1275 }, "Na-22", "Industrial"),
             new Isotope(IsotopeElement.K40, new List<double>(){1461 }, "K-40", "Background"),
             new Isotope(IsotopeElement.Tl208, new List<double>(){2615 }, "Tl-208", "Background")

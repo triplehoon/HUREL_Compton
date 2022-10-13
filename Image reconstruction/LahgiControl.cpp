@@ -135,7 +135,7 @@ void HUREL::Compton::LahgiControl::ListModeDataListening()
 		eChksMutex.lock();
 		
 		std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-		Eigen::Matrix4d deviceTransformation = RtabmapSlamControl::instance().GetOdomentry();
+		Eigen::Matrix4d deviceTransformation = RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransform;
 
 		#pragma omp parallel for
 		for (int i = 0; i < tempVector.size(); ++i)
@@ -586,11 +586,11 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformation(const unsig
 void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationVerification(const unsigned short byteData[])
 {
 	Eigen::Matrix4d t265toLACCPosTransform;
-	t265toLACCPosTransform << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
-		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
-		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
+	t265toLACCPosTransform << 0, 1, 0, T265_TO_LAHGI_OFFSET_X,
+		0, 0, 1, T265_TO_LAHGI_OFFSET_Y,
+		1, 0, 0, T265_TO_LAHGI_OFFSET_Z,
 		0, 0, 0, 1;
-	Eigen::Matrix4d deviceTransformation = RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransform;
+	Eigen::Matrix4d deviceTransformation = t265toLACCPosTransform *  RtabmapSlamControl::instance().GetOdomentry() ;
 
 	switch (mModuleType)
 	{
