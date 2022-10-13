@@ -22,6 +22,7 @@ HUREL::Compton::EnergySpectrum::EnergySpectrum(unsigned int binSize, double maxE
 
 }
 
+
 std::vector<BinningEnergy> HUREL::Compton::EnergySpectrum::GetHistogramEnergy()
 {
     return mHistogramEnergy;
@@ -55,7 +56,10 @@ void HUREL::Compton::EnergySpectrum::AddEnergy(double energy)
     EnergyTime etime;
     etime.Energy = energy;
     etime.InteractionTimeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    ResetEnergyListMutex.lock();
     mEnergyList.push_back(etime);
+    ResetEnergyListMutex.unlock();
+
 }
 
 void HUREL::Compton::EnergySpectrum::AddEnergy(double energy, std::chrono::milliseconds& timeInMili)
@@ -69,7 +73,9 @@ void HUREL::Compton::EnergySpectrum::AddEnergy(double energy, std::chrono::milli
     EnergyTime etime;
     etime.Energy = energy;
     etime.InteractionTimeInMili = timeInMili;
+    ResetEnergyListMutex.lock();
     mEnergyList.push_back(etime);
+    ResetEnergyListMutex.unlock();
 }
 
 void HUREL::Compton::EnergySpectrum::Reset()
@@ -78,8 +84,10 @@ void HUREL::Compton::EnergySpectrum::Reset()
     {
         mHistogramEnergy[i].Count = 0;
     }
+    ResetEnergyListMutex.lock();
     mEnergyList.clear();
     mEnergyList.shrink_to_fit();
+    ResetEnergyListMutex.unlock();
 }  
 
 EnergySpectrum HUREL::Compton::EnergySpectrum::operator+(EnergySpectrum rhs)
@@ -98,4 +106,23 @@ EnergySpectrum HUREL::Compton::EnergySpectrum::operator+(EnergySpectrum rhs)
     }
     
     return result;    
+}
+
+EnergySpectrum HUREL::Compton::EnergySpectrum::operator=(EnergySpectrum rhs)
+{
+    this->mEnergyList = rhs.mEnergyList;
+    this->mHistogramEnergy = rhs.mHistogramEnergy;
+    this->mEnergyBin = rhs.mEnergyBin;
+    this->mBinSize = rhs.mBinSize;
+    this->mMaxEnergy = rhs.mMaxEnergy;
+    return *this;
+}
+
+HUREL::Compton::EnergySpectrum::EnergySpectrum(const EnergySpectrum& copy)
+{
+    this->mEnergyList = copy.mEnergyList;
+    this->mHistogramEnergy = copy.mHistogramEnergy;
+    this->mEnergyBin = copy.mEnergyBin;
+    this->mBinSize = copy.mBinSize;
+    this->mMaxEnergy = copy.mMaxEnergy;
 }
