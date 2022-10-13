@@ -42,8 +42,8 @@ namespace HUREL_Imager_GUI.ViewModel
                 }
                 if (lahgiApiEnvetArgs.State == eLahgiApiEnvetArgsState.Spectrum)
                 {
-                    var espect = LahgiApi.GetScatterSumSpectrumByTime(5);
-                    (double dose, double std) = espect.GetAmbientDose(5);
+                    var espect = LahgiApi.GetScatterSumSpectrumByTime(30);
+                    (double dose, double std) = espect.GetAmbientDose(30);
                     DoseRateText = new string($"{dose:F3} µSv/h");
 
                 }

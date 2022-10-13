@@ -110,19 +110,27 @@ EnergySpectrum HUREL::Compton::EnergySpectrum::operator+(EnergySpectrum rhs)
 
 EnergySpectrum HUREL::Compton::EnergySpectrum::operator=(EnergySpectrum rhs)
 {
+    ResetEnergyListMutex.lock();
     this->mEnergyList = rhs.mEnergyList;
     this->mHistogramEnergy = rhs.mHistogramEnergy;
     this->mEnergyBin = rhs.mEnergyBin;
     this->mBinSize = rhs.mBinSize;
     this->mMaxEnergy = rhs.mMaxEnergy;
+    ResetEnergyListMutex.unlock();
+
     return *this;
 }
 
 HUREL::Compton::EnergySpectrum::EnergySpectrum(const EnergySpectrum& copy)
 {
+    ResetEnergyListMutex.lock();
+
     this->mEnergyList = copy.mEnergyList;
     this->mHistogramEnergy = copy.mHistogramEnergy;
     this->mEnergyBin = copy.mEnergyBin;
     this->mBinSize = copy.mBinSize;
     this->mMaxEnergy = copy.mMaxEnergy;
+
+    ResetEnergyListMutex.unlock();
+
 }
