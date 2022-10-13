@@ -271,7 +271,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 }
                 isPyModuleLoaded = true;
 
-                LogManager.GetLogger("Energy Spectrum").Info($"PyModule Loaded Elapsed: {sw.ElapsedMilliseconds} [ms]");
+                //LogManager.GetLogger("Energy Spectrum").Info($"PyModule Loaded Elapsed: {sw.ElapsedMilliseconds} [ms]");
 
             }
             sw.Stop();
@@ -356,7 +356,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                     double countRateSigam = HistoEnergies[i].Count / time / time;
                     variance += H10Coeff[i] * H10Coeff[i] * countRateSigam* countRateSigam;
                 }
-                return (10.5 * exp, 10.5*Math.Sqrt(variance));
+                return (10.5 * 2.7 * exp, 10.5 * 2.7 *Math.Sqrt(variance));
             }
             else
             {
@@ -494,7 +494,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
     public static class PeakSearching
     {
         public static readonly List<Isotope> IsotopeList = new List<Isotope>() {
-            //new Isotope(IsotopeElement.Am241, new List<double>(){ 60 }, "Am-241", "Industrial"),
+            new Isotope(IsotopeElement.Am241, new List<double>(){ 60 }, "Am-241", "Industrial"),
             new Isotope(IsotopeElement.Cs137, new List<double>(){ 662 }, "Cs-137", "Industrial"),
             new Isotope(IsotopeElement.Co60, new List<double>(){ 1173, 1332 }, "Co-60", "Industrial"),
             new Isotope(IsotopeElement.Ba133, new List<double>(){80, 276, 356 }, "Ba-133", "Industrial"),
