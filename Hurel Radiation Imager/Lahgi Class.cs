@@ -1041,6 +1041,12 @@ namespace HUREL.Compton
 
         public static bool LoadListModeData(string filePath)
         {
+            lahgiWrapper.ResetListmodeData();
+            for (uint i = 0; i < 16; ++i)
+            {
+                lahgiWrapper.ResetSpectrum(i);
+            }
+            StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Loading);
             return lahgiWrapper.LoadListModeData(filePath);
         }
 
@@ -1052,6 +1058,9 @@ namespace HUREL.Compton
                 return false;
             }
             log.Info($"Loading ply file: {filePath}");
+            rtabmapWrapper.ResetSLAM();
+            StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Loading);
+
             if (rtabmapWrapper.LoadPlyFile(filePath))
             {
                 log.Info("Loading seccess");

@@ -271,7 +271,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 }
                 isPyModuleLoaded = true;
 
-                LogManager.GetLogger("Energy Spectrum").Info($"PyModule Loaded Elapsed: {sw.ElapsedMilliseconds} [ms]");
+                //LogManager.GetLogger("Energy Spectrum").Info($"PyModule Loaded Elapsed: {sw.ElapsedMilliseconds} [ms]");
 
             }
             sw.Stop();
@@ -356,7 +356,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                     double countRateSigam = HistoEnergies[i].Count / time / time;
                     variance += H10Coeff[i] * H10Coeff[i] * countRateSigam* countRateSigam;
                 }
-                return (10.5 * exp, 10.5*Math.Sqrt(variance));
+                return (10.5 * 2.7 * exp, 10.5 * 2.7 *Math.Sqrt(variance));
             }
             else
             {
