@@ -225,7 +225,10 @@ void HUREL::Compton::RtabmapSlamControl::ResetSlam()
 		return;
 	}
 	videoStreamMutex.lock();
-	mOdo->reset();
+	if (mOdo != nullptr)
+	{
+		mOdo->reset();
+	}
 	mOdoInit = false;	
 	videoStreamMutex.unlock();
 }
