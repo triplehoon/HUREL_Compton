@@ -246,8 +246,12 @@ namespace HUREL.Compton
         {
             StatusMsg = "Initiating LAHGI";
             var tempEchk = new List<AddListModeDataEchk>();
-            tempEchk.Add(new AddListModeDataEchk(60, 100));
-            tempEchk.Add(new AddListModeDataEchk(330, 370));
+            tempEchk.Add(new AddListModeDataEchk(40, 80));
+            //tempEchk.Add(new AddListModeDataEchk(60, 100));
+            //tempEchk.Add(new AddListModeDataEchk(330, 370));
+            //tempEchk.Add(new AddListModeDataEchk(600, 720));
+            //tempEchk.Add(new AddListModeDataEchk(1173 - 100, 1173 + 100));
+            //tempEchk.Add(new AddListModeDataEchk(1333 - 100, 1333 + 100));
             Echks = tempEchk;
             if (lahgiWrapper.Initiate(eModuleManagedType.QUAD))
             {
