@@ -952,7 +952,7 @@ void HUREL::Compton::LahgiControl::ResetListedListModeData()
 void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 {
 	std::ofstream saveFile;
-	saveFile.open(fileName);
+	saveFile.open(fileName + "_LmData.csv");
 	if (!saveFile.is_open()) 
 	{
 		std::cout << "File is not opened" << endl;
@@ -966,6 +966,13 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 		saveFile << d.WriteListModeData() << std::endl;
 	}
 	saveFile.close();
+
+	for (unsigned int i = 0; i < 16; ++i)
+	{
+		GetEnergySpectrum(i).SaveEnergySpectrum(fileName + "_EnergyList_Channel_" + std::to_string(i) + ".csv");
+	}
+
+
 
 
 	return;
@@ -1017,7 +1024,7 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 	return true;
 }
 
-EnergySpectrum HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelNumber)
+EnergySpectrum& HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelNumber)
 {	
 	switch (mModuleType)
 	{
@@ -1055,10 +1062,11 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelNu
 	default:
 		break;
 	}
-	return EnergySpectrum(5, 3000);
+	EnergySpectrum e = EnergySpectrum(5, 3000);
+	return e;
 }
 
-EnergySpectrum HUREL::Compton::LahgiControl::GetSumEnergySpectrum()
+EnergySpectrum& HUREL::Compton::LahgiControl::GetSumEnergySpectrum()
 {
 	EnergySpectrum spect(5, 3000);
 	switch (mModuleType)
@@ -1088,7 +1096,7 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetSumEnergySpectrum()
 	return spect;
 }
 
-EnergySpectrum HUREL::Compton::LahgiControl::GetAbsorberSumEnergySpectrum()
+EnergySpectrum& HUREL::Compton::LahgiControl::GetAbsorberSumEnergySpectrum()
 {
 	EnergySpectrum spect(5, 3000);
 	switch (mModuleType)
@@ -1117,7 +1125,7 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetAbsorberSumEnergySpectrum()
 	return spect;
 }
 
-EnergySpectrum HUREL::Compton::LahgiControl::GetScatterSumEnergySpectrum()
+EnergySpectrum& HUREL::Compton::LahgiControl::GetScatterSumEnergySpectrum()
 {
 	EnergySpectrum spect(5, 3000);
 	switch (mModuleType)
@@ -1513,11 +1521,10 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudHybrid(op
 		}
 
 	}
-
-	for (int i = reconStartIndex; i < tempLMData.size(); ++i)
-	{
-		reconPC.CalculateReconPointHybrid(tempLMData[i]);
-	}
+	RadiationImage radimg = RadiationImage(GetListedListModeData());
+	//RadiationImage::ShowCV_32SAsJet(radimg.mHybridImage, 800);
+	reconPC.CalculateReconPointHybrid(radimg);
+	
 	//std::cout << "End GetReconOverlayPointCloudHybrid: " << tempLMData.size() << std::endl;
 
 

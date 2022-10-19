@@ -41,7 +41,6 @@ namespace HUREL_Imager_GUI.ViewModel
         {
             StartButtonEnabled = (LahgiApi.IsInitiate && LahgiApi.IsFpgaAvailable) && !LahgiApi.IsSessionStarting;
             IsRunning = LahgiApi.IsSessionStart;
-            FileName = "";
             IsSaveBinary = LahgiApi.IsSavingBinary;
         }        
 
@@ -72,7 +71,7 @@ namespace HUREL_Imager_GUI.ViewModel
         private async Task StartSession()
         {
             _sessionCancle = new CancellationTokenSource();
-            await LahgiApi.StartSessionAsync("", _sessionCancle);
+            await LahgiApi.StartSessionAsync(FileName, _sessionCancle);
         }
         
         private AsyncCommand? _stopSessionCommand = null;

@@ -5,6 +5,7 @@
 #include<memory>
 #include <concurrent_vector.h>
 #include <mutex>
+#include <fstream>
 
 #include "Logger.h"
 #include "EnergySpectrumData.h"
@@ -25,6 +26,8 @@ namespace HUREL {
 			EnergySpectrum operator+(EnergySpectrum rhs);
 			EnergySpectrum operator=(EnergySpectrum rhs);
 			EnergySpectrum(const EnergySpectrum& copy);
+
+			void SaveEnergySpectrum(std::string filePath);
 			
 		private:
 			concurrency::concurrent_vector<EnergyTime> mEnergyList = concurrency::concurrent_vector< EnergyTime>();

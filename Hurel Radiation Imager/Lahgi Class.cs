@@ -595,7 +595,7 @@ namespace HUREL.Compton
                         string saveFileName = Path.GetDirectoryName(fpga.FileMainPath) + "\\" + fileName;
                         rtabmapWrapper.SavePlyFile(saveFileName + "_SlamData.ply");
 
-                        lahgiWrapper.SaveListModeData(saveFileName + "_LMData.csv");
+                        lahgiWrapper.SaveListModeData(saveFileName);
                         StatusMsg = "Done saving CSV and ply file";
 
                         await Task.Run(() => StopSlam());

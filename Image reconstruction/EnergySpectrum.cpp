@@ -126,3 +126,25 @@ HUREL::Compton::EnergySpectrum::EnergySpectrum(const EnergySpectrum& copy)
     this->mBinSize = copy.mBinSize;
     this->mMaxEnergy = copy.mMaxEnergy;
 }
+
+void HUREL::Compton::EnergySpectrum::SaveEnergySpectrum(std::string filePath)
+{
+    std::ofstream saveFile;
+
+    
+    
+    saveFile.open(filePath);
+    if (!saveFile.is_open())
+    {
+        saveFile.close();
+        return;
+    }
+    std::vector<EnergyTime> data = this->GetEnergyList();
+
+    for (unsigned int i = 0; i < data.size(); ++i)
+    {
+        EnergyTime& d = data[i];
+        saveFile << d.InteractionTimeInMili.count() << "," << d.Energy << "\n";
+    }
+    saveFile.close();
+}

@@ -94,10 +94,10 @@ namespace HUREL {
 			void SaveListedListModeData(std::string filePath);			
 			bool LoadListedListModeData(std::string filePath);
 
-			EnergySpectrum GetEnergySpectrum(int fpgaChannelNumber);	
-			EnergySpectrum GetSumEnergySpectrum();
-			EnergySpectrum GetAbsorberSumEnergySpectrum();
-			EnergySpectrum GetScatterSumEnergySpectrum();
+			EnergySpectrum& GetEnergySpectrum(int fpgaChannelNumber);	
+			EnergySpectrum& GetSumEnergySpectrum();
+			EnergySpectrum& GetAbsorberSumEnergySpectrum();
+			EnergySpectrum& GetScatterSumEnergySpectrum();
 
 			std::tuple<double, double, double> GetEcalValue(int fpgaChannelNumber);
 			void SetEcalValue(int fpgaChannelNumber, std::tuple<double, double, double> ecal);

@@ -202,10 +202,28 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 	__int32* comptonImgPtr = static_cast<__int32*>(static_cast<void*>(comptonImg.data));
 	int codedImageCount = 0;
 	int comptonImageCount = 0;
-	for (ListModeData lm : data)
+
+	#pragma omp parallel for
+	for (int i = 0; i < data.size(); ++i)
 	{
+
+		ListModeData& lm = data[i];
+		//if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 600 || lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy > 720)
+		//{
+		//	continue;
+		//}
+		/*if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 1000 || lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy > 1500)
+		{
+			continue;
+		}*/
+
+		if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy > 100 || lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 40)
+		{
+			continue;
+		}
 		if (lm.Type == eInterationType::CODED)
 		{
+			//continue;
 			double& interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
 			double& interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
 
@@ -248,11 +266,10 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 	cv::resize(CodedMaskMat(), scaleG, Size(37 * ResImprov, 37 * ResImprov), 0, 0, INTER_NEAREST_EXACT);
 	Mat reconImg;
 	cv::filter2D(responseImg, reconImg, CV_32S, scaleG);
-	
-	reconImg = -reconImg;	
+
 	double maxValue;
 	cv::minMaxLoc(reconImg, nullptr, &maxValue);
-	Mat idxImg(PixelCount, PixelCount, CV_32S, Scalar(maxValue*0.1));
+	Mat idxImg(PixelCount, PixelCount, CV_32S, Scalar(1));
 
 	cv::max(reconImg, idxImg, mCodedImage);
 	
@@ -311,6 +328,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 				++codedImageCount;
 			}
 		}
+
 
 
 		if (lm.Type == eInterationType::COMPTON)
@@ -393,8 +411,8 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadiationImagingMode mode)
 {
 	Eigen::Matrix4d t265toLACCPosTransform;
-	t265toLACCPosTransform << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
-		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
+	t265toLACCPosTransform << 1, 0, 0, -0.4,
+		0, 1, 0, 0,
 		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
 		0, 0, 0, 1;
 
@@ -411,9 +429,11 @@ double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadi
 	double yPoseOnImgPlane = transformedPoint.y() * imagePlaneZ / transformedPoint.z();
 
 
-	int iX = findIndex(xPoseOnImgPlane, -ReconPlaneWidth / 2, ReconPlaneWidth / PixelCount);
-	int iY = findIndex(yPoseOnImgPlane, -ReconPlaneWidth / 2, ReconPlaneWidth / PixelCount);
-
+	int iY = findIndex(xPoseOnImgPlane, -ReconPlaneWidth / 2, ReconPlaneWidth / PixelCount);
+	int iX = findIndex(yPoseOnImgPlane, -ReconPlaneWidth / 2, ReconPlaneWidth / PixelCount);
+	int tempiY = iY;
+	iY = iX;
+	iX = tempiY;
 
 	if (iX >= 0 && iY >= 0 && iX < PixelCount && iY < PixelCount)
 	{

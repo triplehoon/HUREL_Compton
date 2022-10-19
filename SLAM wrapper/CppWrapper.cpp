@@ -385,7 +385,7 @@ std::vector<ReconPointCppWrapper>  HUREL::Compton::RtabmapCppWrapper::GetReconSL
 
 	open3d::geometry::PointCloud reconPcDownSampled = *reconPC.VoxelDownSample(voxelSize);
 
-	ReconPointCloud o3dPc = LahgiControl::instance().GetReconRealtimePointCloudCompton(reconPcDownSampled, time);
+	ReconPointCloud o3dPc = LahgiControl::instance().GetReconOverlayPointCloudHybrid(reconPcDownSampled, time);
 
 
 	std::vector<ReconPointCppWrapper> pc;
@@ -400,23 +400,39 @@ std::vector<ReconPointCppWrapper>  HUREL::Compton::RtabmapCppWrapper::GetReconSL
 		pcSize = o3dPc.points_.size();
 	}
 	pc.reserve(pcSize);
+
+	std::ofstream fout;						// 파일출력 스트림 객체 생성
+	fout.open("tempReconPc.csv");	// 파일 생성
+
+
 	for (int i = 0; i < pcSize; ++i)
 	{
 		ReconPointCppWrapper tmpPoint;
 		tmpPoint.pointX = o3dPc.points_[i][0];
 		tmpPoint.pointY = o3dPc.points_[i][1];
 		tmpPoint.pointZ = o3dPc.points_[i][2];
+		fout << o3dPc.points_[i][0] << ",";
+		fout << o3dPc.points_[i][1] << ",";
+		fout << o3dPc.points_[i][2] << ",";
 
-
-		RGBA_t rgb = ReconPointCloud::ColorScaleJet(o3dPc.reconValues_[i], 0, o3dPc.maxReoconValue);
+		RGBA_t rgb = ReconPointCloud::ColorScaleJet(o3dPc.reconValues_[i], o3dPc.maxReoconValue*0.7, o3dPc.maxReoconValue);
 
 		tmpPoint.colorR = rgb.R;
 
 		tmpPoint.colorG = rgb.G;
 		tmpPoint.colorB = rgb.B;
 		tmpPoint.colorA = rgb.A;
+
+		fout << rgb.R << ",";
+		fout << rgb.G << ",";
+		fout << rgb.B << ",";
+		fout << rgb.A << std::endl;
+
 		pc.push_back(tmpPoint);
 	}
+
+	fout.close();
+
 
 	return pc;
 
