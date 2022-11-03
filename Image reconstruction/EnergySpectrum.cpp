@@ -156,3 +156,34 @@ void HUREL::Compton::EnergySpectrum::SaveEnergySpectrum(std::string filePath)
     }
     saveFile.close();
 }
+
+void HUREL::Compton::EnergySpectrum::LoadEnergySpectrum(std::string filePath)
+{
+    std::ifstream loadFile;
+    loadFile.open(filePath);
+    if (!loadFile.is_open())
+    {
+        HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::EnergySpectrum", "Fail to open file: " + filePath, eLoggerType::ERROR_t);
+        loadFile.close();
+        return;
+    }
+    std::string buffer;
+
+    std::getline(loadFile, buffer);
+
+    while (loadFile.good())
+    {
+        
+        std::stringstream sstream(buffer);
+        std::string word;
+        std::getline(sstream, word, ',');
+        std::chrono::milliseconds mili = std::chrono::milliseconds(stoll(word));
+        std::getline(sstream, word, ',');
+        double energy = stod(word);
+        std::getline(loadFile, buffer);
+        this->AddEnergy(energy, mili);
+    }
+
+    loadFile.close();
+
+}

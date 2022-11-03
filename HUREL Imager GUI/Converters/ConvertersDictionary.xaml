@@ -7,4 +7,6 @@
     <conv:TimespaneToStringConverter x:Key="ConvTimeSpanToStr"/>
     <conv:BoolToVisibilityConverter x:Key="ConvBoolToVisibility"  TrueValue="Visible" FalseValue="Collapsed"/>
     <conv:BoolToVisibilityConverter x:Key="ConvBoolToVisibilityReverse"  TrueValue="Collapsed" FalseValue="Visible"/>
+    <conv:BooleanToReverseConverter x:Key="BooleanToReverseConverter"/>
+
 </ResourceDictionary>
