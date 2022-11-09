@@ -379,12 +379,25 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 	double fovHeight = 2 * tan((hFov / 2) * M_PI / 180.0) * (s2M + m2D + 0.02);
 	double fovWidth = 2 * tan((wFov / 2) * M_PI / 180.0) * (s2M + m2D + 0.02);
 
+	//height correction
+	constexpr double heightDiff = 0.28;
+	
+	double heightPixelSize = reconPlaneWidth / pixelCount;
+	int offSetPixelCount = heightDiff / heightPixelSize;
+
 	int heightPixelCount = pixelCount * (fovHeight / reconPlaneWidth);
 	int widthPixelCount = pixelCount * (fovWidth / reconPlaneWidth);
 
-	if (heightPixelCount > pixelCount)
+	int minHeightPixleCount = (pixelCount - heightPixelCount) / 2 + offSetPixelCount;
+	int maxHeightPixleCount = (pixelCount + heightPixelCount) / 2 + offSetPixelCount;
+	
+	if (minHeightPixleCount < 0)
 	{
-		heightPixelCount = pixelCount;
+		minHeightPixleCount = 0;
+	}
+	if (maxHeightPixleCount > pixelCount)
+	{
+		maxHeightPixleCount = pixelCount;
 	}
 	if (widthPixelCount > pixelCount)
 	{
@@ -392,9 +405,9 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 	}
 
 	mDetectorResponseImage = responseImg;
-	mCodedImage = mCodedImage(Range((pixelCount - heightPixelCount) / 2, (pixelCount + heightPixelCount) / 2), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
+	mCodedImage = mCodedImage(Range(minHeightPixleCount, maxHeightPixleCount), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
 	
-	mComptonImage = comptonImg(Range((pixelCount - heightPixelCount) / 2, (pixelCount + heightPixelCount) / 2), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
+	mComptonImage = comptonImg(Range(minHeightPixleCount, maxHeightPixleCount), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
 	mHybridImage = mCodedImage.mul(mComptonImage);
 
 	

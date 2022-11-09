@@ -246,12 +246,15 @@ namespace HUREL.Compton
         {
             StatusMsg = "Initiating LAHGI";
             var tempEchk = new List<AddListModeDataEchk>();
-            tempEchk.Add(new AddListModeDataEchk(40, 80));
+            //tempEchk.Add(new AddListModeDataEchk(30, 90));
             //tempEchk.Add(new AddListModeDataEchk(60, 100));
             //tempEchk.Add(new AddListModeDataEchk(330, 370));
-            //tempEchk.Add(new AddListModeDataEchk(600, 720));
-            //tempEchk.Add(new AddListModeDataEchk(1173 - 100, 1173 + 100));
-            //tempEchk.Add(new AddListModeDataEchk(1333 - 100, 1333 + 100));
+            //tempEchk.Add(new AddListModeDataEchk(450, 570));
+            //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
+            
+            tempEchk.Add(new AddListModeDataEchk(600, 720));
+            //tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
+            //tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
             Echks = tempEchk;
             if (lahgiWrapper.Initiate(eModuleManagedType.QUAD))
             {
@@ -571,7 +574,7 @@ namespace HUREL.Compton
                     StatusMsg = "FPGA setting Start";
 
                     string status = "";
-
+                    fpga.Variables.FileName = fileName;
                     bool isFPGAStart = await Task.Run(() => fpga.Start_usb(out status)).ConfigureAwait(false);
                     StatusMsg = status;
 

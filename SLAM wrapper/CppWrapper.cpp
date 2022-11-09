@@ -332,6 +332,10 @@ void HUREL::Compton::RtabmapCppWrapper::SavePlyFile(std::string filePath)
 	open3d::io::WritePointCloudOption option;
 
 	open3d::io::WritePointCloudToPLY(filePath, pc, option);
+	
+	
+	cv::imwrite(filePath + "_depth.png", RtabmapSlamControl::instance().GetCurrentDepthFrame());
+	cv::imwrite(filePath + "_rgb.png", RtabmapSlamControl::instance().GetCurrentVideoFrame());
 }
 
 std::vector<double> HUREL::Compton::RtabmapCppWrapper::getMatrix3DOneLineFromPoseData()
