@@ -468,11 +468,11 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 
 		double scattersEnergy[4];
 		double absorbersEnergy[4];
-
+		
 		int scatterInteractionCount = 0;
 		int absorberInteractionCount = 0;
-		int scatterInteractModuleNum = 4;
-		int absorberInteractModuleNum = 4;
+		int scatterInteractModuleNum[4];
+		int absorberInteractModuleNum[4];
 
 		for (int i = 0; i < 4; ++i)
 		{
@@ -482,8 +482,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 				mScatterModules[i]->GetEnergySpectrum().AddEnergy(scattersEnergy[i], timeInMili);
 				//mSumSpectrum.AddEnergy(scattersEnergy[i]);
 				//mScatterSumSpectrum.AddEnergy(scattersEnergy[i]);
-				scatterInteractModuleNum = i;
-				++scatterInteractionCount;
+				scatterInteractModuleNum[scatterInteractionCount++] = i;
 			}
 			absorbersEnergy[i] = mAbsorberModules[i]->GetEcal(absorberShorts[i]);
 			if (!isnan(absorbersEnergy[i]))
@@ -491,16 +490,16 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 				mAbsorberModules[i]->GetEnergySpectrum().AddEnergy(absorbersEnergy[i], timeInMili);
 				//mSumSpectrum.AddEnergy(absorbersEnergy[i]);
 				//mAbsorberSumSpectrum.AddEnergy(absorbersEnergy[i]);
-				absorberInteractModuleNum = i;
-				++absorberInteractionCount;
+				scatterInteractModuleNum[absorberInteractionCount++] = i;
+				
 			}
 		}
 
 
 		if (scatterInteractionCount == 1)
 		{
-			double sEnergy = scattersEnergy[scatterInteractModuleNum];
-			double aEnergy = absorbersEnergy[absorberInteractModuleNum];
+			double sEnergy = scattersEnergy[0];
+			double aEnergy = absorbersEnergy[0];
 
 			if (absorberInteractionCount == 1)
 			{
@@ -517,8 +516,8 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 
 
 
-						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
-						Eigen::Vector4d absorberPoint = mAbsorberModules[absorberInteractModuleNum]->FastMLPosEstimation(absorberShorts[absorberInteractModuleNum]);
+						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum[0]]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum[0]]);
+						Eigen::Vector4d absorberPoint = mAbsorberModules[absorberInteractModuleNum[0]]->FastMLPosEstimation(absorberShorts[absorberInteractModuleNum[0]]);
 
 						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
 					}
@@ -535,25 +534,37 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 					if (sEnergy < eChk[i].maxE && sEnergy> eChk[i].minE)
 					{
 						eInterationType type = eInterationType::CODED;
-						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum]);
+						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum[0]]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum[0]]);
 						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
-
-						if (IsOnActiveArea(scatterPoint[0], scatterPoint[1], *mScatterModules[scatterInteractModuleNum]))
-						{
-							mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
-						}
+						aEnergy = nan("");
+						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
 					}
 
 				}
 				//eChksMutex.unlock();
-
 			}
 		}
-		else
+		else if (scatterInteractionCount > 1)
 		{
-			eInterationType type = eInterationType::NONE;
+			eInterationType type = eInterationType::CODED;
+			for (int interDet = 0; interDet < scatterInteractionCount; ++interDet)
+			{
+				double sEnergy = scattersEnergy[interDet];
+				double aEnergy = nan("");
 
+				for (int i = 0; i < eChk.size(); ++i)
+				{
+					if (sEnergy < eChk[i].maxE && sEnergy> eChk[i].minE)
+					{
+						eInterationType type = eInterationType::CODED;
+						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum[interDet]]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum[interDet]]);
+						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
+						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
+					}
 
+				}
+			}
+			
 		}
 
 
@@ -978,6 +989,15 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 	return;
 }
 
+bool replace(std::string& str, const std::string& from, const std::string& to) {
+	size_t start_pos = str.find(from);
+	if (start_pos == std::string::npos)
+		return false;
+	str.replace(start_pos, from.length(), to);
+	return true;
+}
+
+
 bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 {
 	std::ifstream loadFile;
@@ -989,8 +1009,13 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 		return false;
 	}
 	mListedListModeData.clear();
-	mScatterModules[0]->GetEnergySpectrum().Reset();
-	mAbsorberModules[0]->GetEnergySpectrum().Reset();
+	
+	for (int i = 0; i < 4; ++i)
+	{
+		mScatterModules[i]->GetEnergySpectrum().Reset();
+		mAbsorberModules[i]->GetEnergySpectrum().Reset();
+	}
+		
 	string buffer;
 	char line[2048];
 	while (loadFile.good())
@@ -1000,19 +1025,20 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 		if (temp.ReadListModeData(buffer))
 		{
 			mListedListModeData.push_back(temp);
-			if (temp.Scatter.InteractionEnergy > 0)
-			{
-				mScatterModules[0]->GetEnergySpectrum().AddEnergy(temp.Scatter.InteractionEnergy);
-			}
-			if (temp.Absorber.InteractionEnergy > 0)
-			{
-				mAbsorberModules[0]->GetEnergySpectrum().AddEnergy(temp.Absorber.InteractionEnergy);
-			}
+
 			
 		}
 	}
 
 	loadFile.close();
+	for (unsigned int i = 0; i < 16; ++i)
+	{
+		std::string tempFileName = fileName;
+		replace(tempFileName, "_LmData", "_EnergyList_Channel_" + std::to_string(i));
+		GetEnergySpectrum(i).LoadEnergySpectrum(tempFileName);
+	}
+
+
 	if (mListedListModeData.size() == 0)
 	{
 

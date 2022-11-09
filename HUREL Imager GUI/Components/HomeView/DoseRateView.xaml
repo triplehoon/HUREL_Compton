@@ -11,18 +11,18 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10*"/>
-            <RowDefinition Height="*"/>
+            <!--<RowDefinition Height="*"/>-->
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
-            <TextBlock Text="Counting Time: " VerticalAlignment="Center" FontSize="{StaticResource FontSize-Larger}"/>
-            <syncfusion:UpDown VerticalAlignment="Center" HorizontalAlignment="Right"
+            <!--<TextBlock Text="Counting Time: " VerticalAlignment="Center" FontSize="{StaticResource FontSize-Larger}"/>-->
+            <!--<syncfusion:UpDown VerticalAlignment="Center" HorizontalAlignment="Right"
                             FontSize="{StaticResource FontSize-Larger}"
                                MinValue="1" Step="1" Value="{Binding DoseCalcTime}"  Width="100" NumberDecimalDigits="0"                               
                                TextAlignment="Right" Culture="ko-KP"
                            IsScrollingOnCircle="True"
                                >
             </syncfusion:UpDown>
-            <TextBlock Text=" S" VerticalAlignment="Center" FontSize="{StaticResource FontSize-Larger}"/>
+            <TextBlock Text=" S" VerticalAlignment="Center" FontSize="{StaticResource FontSize-Larger}"/>-->
         </StackPanel>
        
 

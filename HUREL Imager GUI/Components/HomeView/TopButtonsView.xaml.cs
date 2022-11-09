@@ -31,21 +31,21 @@ namespace HUREL_Imager_GUI.Components
 
         void View1_Loaded(object sender, RoutedEventArgs e)
         {
-            Window w = Window.GetWindow(SaveButton);
-            if (null != w)
-            {
-                w.LocationChanged += SaveButtonMove;
-            }
+            //Window w = Window.GetWindow(SaveButton);
+            //if (null != w)
+            //{
+            //    w.LocationChanged += SaveButtonMove;
+            //}
         }
 
         void SaveButtonMove(object? sender, EventArgs args)
         {
-            var offset = SaveButtonPopup.HorizontalOffset;
-            SaveButtonPopup.HorizontalOffset = offset + 1;
-            SaveButtonPopup.HorizontalOffset = offset;
+            //var offset = SaveButtonPopup.HorizontalOffset;
+            //SaveButtonPopup.HorizontalOffset = offset + 1;
+            //SaveButtonPopup.HorizontalOffset = offset;
 
-            TimeSetupButtonPopup.HorizontalOffset = offset + 1;
-            TimeSetupButtonPopup.HorizontalOffset = offset;
+            //TimeSetupButtonPopup.HorizontalOffset = offset + 1;
+            //TimeSetupButtonPopup.HorizontalOffset = offset;
         }
 
         
