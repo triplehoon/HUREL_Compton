@@ -19,5 +19,6 @@ public:
 	static void TestAddingLmDataVerification(int counts);
 	static void GetFloodImage();
 	static void TestZlib();
+	static void LoadSystemMatrix();
 };
 

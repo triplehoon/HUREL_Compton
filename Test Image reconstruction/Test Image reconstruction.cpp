@@ -16,7 +16,7 @@ int main()
 {
 	
 	Logger::Instance().Handle(ConsoleWrite);
-	TestFuncs::GetFloodImage();
+	TestFuncs::LoadSystemMatrix();
 	//TestFuncs::TestAddingLmData();
 	
 }

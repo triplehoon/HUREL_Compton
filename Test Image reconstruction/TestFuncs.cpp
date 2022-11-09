@@ -448,3 +448,63 @@ void TestFuncs::TestZlib()
 	delete dataBufferUncompress;
 	
 }
+
+
+void TestFuncs::LoadSystemMatrix()
+{
+	MatrixXd systemMatrix;
+	std::string filePath = "E:\\OneDrive - 한양대학교\\01.Hurel\\01.현재작업\\20211209 쿼드 시뮬레이션 논문 작성\\codes\\SimulationMlem\\data\\AngleInteractionProbData(NaIScatter,130,1,300,5,dist,3m).bin";
+	FILE* pFile = fopen(filePath.c_str() , "rb"); //read mode 
+	if (pFile == NULL)
+	{
+		printf("Nofile");
+		return;
+	}
+
+	////10, 30, 50, 100, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000 keV 
+
+	int energyIndex = 6;
+
+	double buffer[23];
+	systemMatrix = MatrixXd(17161, 3600);
+	//						detetor pos(i, j)
+	//			  (-0.16, -0.16) (-0.12, -0.16) (-0.08, -0.16) ......
+	// (azm, alt) --------------------------------------------------
+	// (-65, -65) |
+	// (-60, -65) | System Matrix
+	// (-55, -65) |
+	
+	int indexIazm = 0;
+	for (double azm = -65; azm <= 65; ++azm)
+	{
+		int indexIalt = 0;
+		for (double alt = -65; alt <= 65; ++alt)
+		{
+			int indexIx = 0;
+			for (double x = -147.5; x <= 147.5; x += 5)
+			{
+				int indexIy = 0;
+				for (double y = -147.5; y <= 147.5; y += 5)
+				{
+					int test = fread(buffer, sizeof(double), 23, pFile);
+					double value =  buffer[energyIndex + 3];
+					int i = indexIazm + indexIalt * 131;
+					int j = indexIx + indexIy * 60;
+					systemMatrix(i, j) = value;
+					++indexIy;
+				}
+				++indexIx;
+			}
+			++indexIalt;
+		}
+		++indexIazm;
+	}
+	
+	MatrixXd sensitivityMatrix = systemMatrix.rowwise().sum();
+
+	
+
+	fclose(pFile);          //파일 닫기
+	return;
+
+}
