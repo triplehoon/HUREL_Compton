@@ -21,7 +21,7 @@
 #include <future>
 #include <array>
 
-#define ACTIVE_AREA_LENGTH 0.13
+#define ACTIVE_AREA_LENGTH 0.14
 
 namespace HUREL {
 	namespace Compton {	
@@ -95,9 +95,9 @@ namespace HUREL {
 			bool LoadListedListModeData(std::string filePath);
 
 			EnergySpectrum& GetEnergySpectrum(int fpgaChannelNumber);	
-			EnergySpectrum& GetSumEnergySpectrum();
-			EnergySpectrum& GetAbsorberSumEnergySpectrum();
-			EnergySpectrum& GetScatterSumEnergySpectrum();
+			EnergySpectrum GetSumEnergySpectrum();
+			EnergySpectrum GetAbsorberSumEnergySpectrum();
+			EnergySpectrum GetScatterSumEnergySpectrum();
 
 			std::tuple<double, double, double> GetEcalValue(int fpgaChannelNumber);
 			void SetEcalValue(int fpgaChannelNumber, std::tuple<double, double, double> ecal);

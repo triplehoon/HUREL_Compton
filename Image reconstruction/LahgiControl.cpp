@@ -1066,7 +1066,7 @@ EnergySpectrum& HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelN
 	return e;
 }
 
-EnergySpectrum& HUREL::Compton::LahgiControl::GetSumEnergySpectrum()
+EnergySpectrum HUREL::Compton::LahgiControl::GetSumEnergySpectrum()
 {
 	EnergySpectrum spect(5, 3000);
 	switch (mModuleType)
@@ -1096,7 +1096,7 @@ EnergySpectrum& HUREL::Compton::LahgiControl::GetSumEnergySpectrum()
 	return spect;
 }
 
-EnergySpectrum& HUREL::Compton::LahgiControl::GetAbsorberSumEnergySpectrum()
+EnergySpectrum HUREL::Compton::LahgiControl::GetAbsorberSumEnergySpectrum()
 {
 	EnergySpectrum spect(5, 3000);
 	switch (mModuleType)
@@ -1125,7 +1125,7 @@ EnergySpectrum& HUREL::Compton::LahgiControl::GetAbsorberSumEnergySpectrum()
 	return spect;
 }
 
-EnergySpectrum& HUREL::Compton::LahgiControl::GetScatterSumEnergySpectrum()
+EnergySpectrum HUREL::Compton::LahgiControl::GetScatterSumEnergySpectrum()
 {
 	EnergySpectrum spect(5, 3000);
 	switch (mModuleType)

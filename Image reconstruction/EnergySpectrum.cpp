@@ -28,7 +28,7 @@ std::vector<BinningEnergy> HUREL::Compton::EnergySpectrum::GetHistogramEnergy()
     return mHistogramEnergy;
 }
 
-std::vector<EnergyTime> HUREL::Compton::EnergySpectrum::GetEnergyList()
+std::vector<EnergyTime> HUREL::Compton::EnergySpectrum::GetEnergyList() const
 {
     size_t size = mEnergyList.size();
     std::vector<EnergyTime> returnValue;
@@ -110,29 +110,35 @@ EnergySpectrum HUREL::Compton::EnergySpectrum::operator+(EnergySpectrum rhs)
 
 EnergySpectrum HUREL::Compton::EnergySpectrum::operator=(EnergySpectrum rhs)
 {
-    ResetEnergyListMutex.lock();
-    this->mEnergyList = rhs.mEnergyList;
     this->mHistogramEnergy = rhs.mHistogramEnergy;
     this->mEnergyBin = rhs.mEnergyBin;
     this->mBinSize = rhs.mBinSize;
     this->mMaxEnergy = rhs.mMaxEnergy;
-    ResetEnergyListMutex.unlock();
+    std::vector<EnergyTime> et = rhs.GetEnergyList();
+    this->mEnergyList.reserve(et.size());
+   
+
+    for (int i = 0; i < et.size(); ++i)
+    {
+        this->mEnergyList.push_back(et[i]);
+    }
 
     return *this;
 }
 
 HUREL::Compton::EnergySpectrum::EnergySpectrum(const EnergySpectrum& copy)
 {
-    ResetEnergyListMutex.lock();
-
-    this->mEnergyList = copy.mEnergyList;
     this->mHistogramEnergy = copy.mHistogramEnergy;
     this->mEnergyBin = copy.mEnergyBin;
     this->mBinSize = copy.mBinSize;
     this->mMaxEnergy = copy.mMaxEnergy;
+    std::vector<EnergyTime> et = copy.GetEnergyList();
+    this->mEnergyList.reserve(et.size());
 
-    ResetEnergyListMutex.unlock();
-
+    for (int i = 0; i < et.size(); ++i)
+    {
+        this->mEnergyList.push_back(et[i]);
+    }
 }
 
 void HUREL::Compton::EnergySpectrum::SaveEnergySpectrum(std::string filePath)

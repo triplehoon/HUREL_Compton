@@ -470,7 +470,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
 
             PyMutex.ReleaseMutex();
             sw.Stop();
-            LogManager.GetLogger("Energy Spectrum").Info($"Elapsed: {sw.ElapsedMilliseconds} [ms]");
+            //LogManager.GetLogger("Energy Spectrum").Info($"Elapsed: {sw.ElapsedMilliseconds} [ms]");
             
             
 
