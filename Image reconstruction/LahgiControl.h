@@ -42,6 +42,10 @@ namespace HUREL {
 			Module** mAbsorberModules;	//./Module information/QUADScatter1/Gain.csv, LUT.csv ...
 			eMouduleType mModuleType;
 			tbb::concurrent_vector <ListModeData> mListedListModeData;
+			tbb::concurrent_vector <EnergyTimeData> mListedEnergyTimeData;
+
+			
+
 			std::vector<RadiationImage> mListModeImage;
 
 			LahgiControl();
@@ -79,7 +83,6 @@ namespace HUREL {
 			void AddListModeDataEigen(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation);
 			void AddListModeDataWithTransformation(const unsigned short byteData[144]);
 			void AddListModeDataWithTransformationVerification(const unsigned short byteData[]);
-			void AddListModeDataWithTransformationLoop(std::array<unsigned short, 144> byteData);
 			void AddListModeDataWithTransformationLoop(std::array<unsigned short, 144> byteData, std::chrono::milliseconds& timeInMili, Eigen::Matrix4d& deviceTransformation);
 
 			eMouduleType GetDetectorType();
@@ -88,6 +91,12 @@ namespace HUREL {
 			std::vector<ListModeData> GetListedListModeData();
 			const std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds) const;
 		    std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds);
+		
+			const std::vector<EnergyTimeData> GetListedEnergyTimeData(long long timeInMililseconds) const;
+			std::vector<EnergyTimeData> GetListedEnergyTimeData(long long timeInMililseconds);
+
+
+						
 			size_t GetListedListModeDataSize();
 
 			void ResetListedListModeData();
@@ -101,8 +110,18 @@ namespace HUREL {
 
 			std::tuple<double, double, double> GetEcalValue(int fpgaChannelNumber);
 			void SetEcalValue(int fpgaChannelNumber, std::tuple<double, double, double> ecal);
-
+			void ResetEnergySpectrum();
 			void ResetEnergySpectrum(int fpgaChannelNumber);
+
+
+
+
+
+
+
+
+
+
 
 			ReconPointCloud GetReconRealtimePointCloudComptonUntransformed(open3d::geometry::PointCloud& pc, double time);
 			ReconPointCloud GetReconRealtimePointCloudCompton(open3d::geometry::PointCloud& pc, double time);

@@ -10,7 +10,7 @@ HUREL::Compton::Module::Module() :
     mModuleOffsetY(0),
     mModuleOffsetZ(0),
     mIsModuleSet(false),
-    mEnergySpectrum(EnergySpectrum(10, 3000))
+    mEnergySpectrum(EnergySpectrum(5, 3000))
 {
 }
 

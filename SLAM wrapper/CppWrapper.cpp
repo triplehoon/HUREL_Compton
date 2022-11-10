@@ -162,7 +162,7 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 
 std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectrum(int time)
 {
-	std::vector<EnergyTime> lmData = LahgiControl::instance().GetScatterSumEnergySpectrum().GetEnergyList();
+	std::vector<EnergyTimeData> lmData = LahgiControl::instance().GetListedEnergyTimeData(time * 1000);
 
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
@@ -172,14 +172,12 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 
 
 	EnergySpectrum spectClass = EnergySpectrum(10, 3000);;
-	for (int i = lmData.size(); i--; i >= 0)
+	for (int i =0; i < lmData.size(); ++i)
 	{
-		if (time != 0 && t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time * 1000))
+		if (lmData[i].InteractionChannel < 8)
 		{
-			break;
-		}
-
-		spectClass.AddEnergy(lmData[i].Energy);
+			spectClass.AddEnergy(lmData[i].Energy);
+		}		
 	}
 
 	return spectClass.GetHistogramEnergy();
@@ -187,7 +185,7 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetScatterSumSpectru
 
 std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetAbsorberSumSpectrum(int time)
 {
-	std::vector<EnergyTime> lmData = LahgiControl::instance().GetAbsorberSumEnergySpectrum().GetEnergyList();
+	std::vector<EnergyTimeData> lmData = LahgiControl::instance().GetListedEnergyTimeData(time * 1000);
 
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
@@ -197,15 +195,14 @@ std::vector<BinningEnergy> HUREL::Compton::LahgiCppWrapper::GetAbsorberSumSpectr
 
 
 	EnergySpectrum spectClass = EnergySpectrum(10, 3000);;
-	for (int i = lmData.size(); i--; i >= 0)
+	for (int i = 0; i < lmData.size(); ++i)
 	{
-		if (time != 0 && t.count() - lmData[i].InteractionTimeInMili.count() > static_cast<__int64>(time * 1000))
+		if (lmData[i].InteractionChannel >= 8)
 		{
-			break;
+			spectClass.AddEnergy(lmData[i].Energy);
 		}
-
-		spectClass.AddEnergy(lmData[i].Energy);
 	}
+
 
 	return spectClass.GetHistogramEnergy();
 }

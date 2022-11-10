@@ -13,7 +13,8 @@ namespace HUREL {
 			double Energy;
 			int Count;
 		};
-		struct EnergyTime {
+		struct EnergyTimeData {
+			int InteractionChannel;
 			double Energy;
 			std::chrono::milliseconds InteractionTimeInMili;
 		};
