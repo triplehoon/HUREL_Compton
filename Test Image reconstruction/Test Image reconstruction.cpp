@@ -16,7 +16,9 @@ int main()
 {
 	
 	Logger::Instance().Handle(ConsoleWrite);
-	TestFuncs::LoadSystemMatrix();
+	LahgiControl& control = HUREL::Compton::LahgiControl::instance();
+	control.SetType(eMouduleType::QUAD);
+	TestFuncs::TestAddingLmDataVerification(5000);
 	//TestFuncs::TestAddingLmData();
 	
 }

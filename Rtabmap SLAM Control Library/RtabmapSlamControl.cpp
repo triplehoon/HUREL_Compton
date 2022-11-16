@@ -74,7 +74,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate()
 		mCamera->setResolution(848, 480);
 		mCamera->setDepthResolution(848, 480);
 
-		const rtabmap::Transform test(0.006f, 0.0025f, 0.0f, 0.0f, 0.0f, 0.0f);
+		const rtabmap::Transform test(0.000f, 0.13f, 0.0f, 0.0f, 0.0f, 0.0f);
 		mCamera->setDualMode(true, test);
 
 		//mCamera->setOdomProvided(true, false, true);
@@ -493,15 +493,25 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointClo
 		Eigen::Vector3d color(tmp[i].r/255.0, tmp[i].g / 255.0, tmp[i].b / 255.0);
 		Eigen::Vector4d point(tmp[i].x, tmp[i].y, tmp[i].z, 1);
 		Eigen::Vector4d transFormedpoint = t265toLACCAxisTransform * point;
-		if (transFormedpoint.y() > 1.5)
-		{
-			continue;
-		}
+	
 		Eigen::Vector3d inputpoint(transFormedpoint.x(), transFormedpoint.y(), transFormedpoint.z());
 		tmpOpen3dPc.colors_.push_back(color);
 		tmpOpen3dPc.points_.push_back(inputpoint);
 	}
-	return *tmpOpen3dPc.VoxelDownSample(0.05);
+
+	std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	std::string fileName = std::to_string(timeInMili.count());
+	open3d::geometry::PointCloud returnPC = *tmpOpen3dPc.VoxelDownSample(0.05);
+	open3d::io::WritePointCloudOption option;
+	open3d::io::WritePointCloudToPLY(fileName + ".ply", returnPC, option);
+
+
+	cv::imwrite(fileName + "_depth.png", RtabmapSlamControl::instance().GetCurrentDepthFrame());
+	cv::imwrite(fileName + "_rgb.png", RtabmapSlamControl::instance().GetCurrentVideoFrame());
+
+
+
+	return returnPC;
 }
 
 std::vector<double> HUREL::Compton::RtabmapSlamControl::getMatrix3DOneLineFromPoseData()

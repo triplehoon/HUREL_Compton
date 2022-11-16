@@ -188,6 +188,7 @@ namespace HUREL_Imager_GUI.ViewModel
 
             SLAMReconPointCloud = new PointGeometry3D() { Positions = vc2, Colors = cc2 };
             updateReconSlamPointMutex.ReleaseMutex();
+            Thread.Sleep(1000);
         }
 
 

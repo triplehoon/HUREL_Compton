@@ -51,7 +51,7 @@ namespace HUREL_Imager_GUI.ViewModel
             logger.Info("Unhandle StatusUpdate");
         }
 
-        private string _fileName = "";
+        private string _fileName = "Default";
         public string FileName
         {
             get { return _fileName; }

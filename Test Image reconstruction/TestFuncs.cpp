@@ -137,7 +137,7 @@ void TestFuncs::TestAddingLmData()
 	#pragma omp parallel for
 	for (int i = 0; i < 10000000; ++i)
 	{
-		control.AddListModeDataWithTransformationLoop(pushData);
+		//control.AddListModeDataWithTransformationLoop(pushData, std::chrono::duration_cast<std::chrono::milliseconds>(start), Eigen::Matrix4d::Identity);
 	}
 
 	std::chrono::system_clock::time_point end = std::chrono::system_clock::now();

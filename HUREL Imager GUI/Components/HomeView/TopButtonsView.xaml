@@ -362,7 +362,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock FontSize="{StaticResource FontSize-Normal}" Foreground="White" Margin="2"  FontWeight="Bold"> Save Folder Name</TextBlock>
-            <TextBox Grid.Row="1" FontSize="{StaticResource FontSize-Normal}" Margin="2" SelectedText="Enter name"></TextBox>
+            <TextBox Grid.Row="1" FontSize="{StaticResource FontSize-Normal}" Margin="2" SelectedText="Enter name" Text="{Binding FileName}"></TextBox>
             <TextBlock Grid.Row="2" Text="Time Setup" FontSize="{StaticResource FontSize-Normal}"  Foreground="White" FontWeight="Bold" Margin="2"/>
             <CheckBox x:Name="CheckBoxIsInfinite" Grid.Row="2" HorizontalAlignment="Right" Content="Is Infinite" FontSize="{StaticResource FontSize-Normal}" Margin="0,2,0,2" Foreground="White" VerticalAlignment="Center" IsChecked="True"/>
             <syncfusion:UpDown Grid.Row="3" FontSize="{StaticResource FontSize-Normal}" FontWeight="Bold" Margin="2" ZeroColor="Black" MinValue="0" IsEnabled="{Binding ElementName=CheckBoxIsInfinite, Path=IsChecked, Converter={StaticResource BooleanToReverseConverter}}"/>
