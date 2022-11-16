@@ -2,7 +2,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <opencv2/opencv.hpp>
-#include <opencv2/>
 #include <open3d/geometry/Octree.h>
 
 #include "ListModeData.h"
