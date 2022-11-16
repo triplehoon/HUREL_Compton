@@ -161,6 +161,50 @@ void HUREL::Compton::RtabmapSlamControl::StopVideoStream()
 static std::mutex videoStreamMutex;
 static std::mutex pcMutex;
 
+
+cv::Mat ConvertDepthTo3DPoint(cv::Mat& depth, float fx, float fy, float cx, float cy)
+{
+	//float x,y,z
+	cv::Mat points, chans[3];
+
+	static int rows = 0;
+	static int cols = 0;
+	static cv::Mat uMat, vMat;
+	if (rows != depth.rows || cols != depth.cols)
+	{
+		rows = depth.rows;
+		cols = depth.cols;
+		if (rows == 0 || cols == 0)
+		{
+			return;
+		}
+
+		uMat = cv::Mat(depth.rows, depth.cols, CV_32FC1);
+		vMat = cv::Mat(depth.rows, depth.cols, CV_32FC1);
+
+		for (int u = 0; u < cols; ++u)
+		{
+			uMat.col(u).setTo(u);
+		}
+		for (int v = 0; v < rows; ++v)
+		{
+			vMat.row(v).setTo(v);
+		}
+	}
+	
+
+	cv::Mat x_over_z = (cx - uMat) /fx;
+	cv::Mat y_over_z = (cy - vMat) / fy;
+	cv::Mat sqrtVlaue;
+	cv::sqrt(1 + x_over_z * x_over_z + y_over_z * y_over_z, sqrtVlaue);
+	chans[2] = depth / sqrtVlaue;
+	chans[0] = x_over_z * depth;
+	chans[1] = y_over_z * depth;
+	cv::merge(chans, 3, points);
+
+	return points;
+}
+
 void HUREL::Compton::RtabmapSlamControl::VideoStream()
 {
 	Eigen::Matrix4d t265toLACCAxisTransform;
@@ -177,13 +221,17 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 	while (mIsVideoStreamOn)
 	{
 		rtabmap::SensorData data = mCamera->takeImage();
+		
 		if (data.isValid())
 		{
-
+			
 			auto img = data.imageRaw();
 			auto imgDepth = data.depthOrRightRaw();
-			float fx = static_cast<float>(data.cameraModels()[0].fx());
-			float fy = static_cast<float>(data.cameraModels()[0].fy());
+			double fxValue = data.stereoCameraModels()[0].left().fx();
+			double fyValue = data.stereoCameraModels()[0].left().fy();
+			double cxValue = data.stereoCameraModels()[0].left().cx();
+			double cyValue = data.stereoCameraModels()[0].left().cy();
+			
 			videoStreamMutex.lock();
 			if (img.cols > 0)
 			{			
@@ -203,17 +251,13 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			{
 				videoStreamMutex.unlock();
 			}
-			
-			
-			//pcMutex.lock();
-			mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
-				6.0f,        // maximum depth of the cloud
-				0.5f));
-			//pcMutex.unlock();
 
 			
-			//cv::Mat rgb = rtabmap::util3d::rgbFromCloud(rgbaPc);
-		
+			//pcMutex.lock();
+			//mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
+			//	6.0f,        // maximum depth of the cloud
+			//	0.5f));
+			//pcMutex.unlock();
 		}
 	}
 
@@ -546,10 +590,11 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetLoadedPointC
 	return mLoadedPointcloud;
 }
 
+
 Eigen::Matrix4d HUREL::Compton::RtabmapSlamControl::GetOdomentry()
 {
 	Eigen::Matrix4d odo = Eigen::Matrix4d::Identity();;
-
+	
 	//videoStreamMutex.lock();
 	if (mOdo != nullptr && &mOdo->getPose() != nullptr && mIsSlamPipeOn == true)
 	{
