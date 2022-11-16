@@ -182,6 +182,8 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 
 			auto img = data.imageRaw();
 			auto imgDepth = data.depthOrRightRaw();
+			float fx = static_cast<float>(data.cameraModels()[0].fx());
+			float fy = static_cast<float>(data.cameraModels()[0].fy());
 			videoStreamMutex.lock();
 			if (img.cols > 0)
 			{			
@@ -204,10 +206,14 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			
 			
 			//pcMutex.lock();
-			//mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
-			//	6.0f,        // maximum depth of the cloud
-			//	0.5f));
+			mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
+				6.0f,        // maximum depth of the cloud
+				0.5f));
 			//pcMutex.unlock();
+
+			
+			//cv::Mat rgb = rtabmap::util3d::rgbFromCloud(rgbaPc);
+		
 		}
 	}
 
