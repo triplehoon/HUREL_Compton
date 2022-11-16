@@ -21,7 +21,7 @@
 #include <future>
 #include <array>
 
-#define ACTIVE_AREA_LENGTH 0.14
+#define ACTIVE_AREA_LENGTH 0.12
 
 namespace HUREL {
 	namespace Compton {	
@@ -91,7 +91,8 @@ namespace HUREL {
 			std::vector<ListModeData> GetListedListModeData();
 			const std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds) const;
 		    std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds);
-		
+			
+			std::vector<EnergyTimeData> GetListedEnergyTimeData();
 			const std::vector<EnergyTimeData> GetListedEnergyTimeData(long long timeInMililseconds) const;
 			std::vector<EnergyTimeData> GetListedEnergyTimeData(long long timeInMililseconds);
 

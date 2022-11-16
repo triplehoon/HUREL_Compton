@@ -252,7 +252,7 @@ namespace HUREL.Compton
             //tempEchk.Add(new AddListModeDataEchk(450, 570));
             //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
             
-            tempEchk.Add(new AddListModeDataEchk(600, 720));
+            tempEchk.Add(new AddListModeDataEchk(20, 1400));
             //tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
             //tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
             Echks = tempEchk;
@@ -957,6 +957,9 @@ namespace HUREL.Compton
             for (int i =0; i <4; ++i)
             {
                 //Scatter
+
+                StatusMsg = "Ecal " + i + 4 + " Channel";
+
                 var peaks = GetSpectrumEnergy(i + 4).FindPeaks(ref_x, ref_fwhm, ref_at_0, min_snr);
                 bool isEcalSuccessFlag = false;
                 foreach(var e in peaks)
@@ -993,6 +996,8 @@ namespace HUREL.Compton
             for (int i = 0; i < 4; ++i)
             {
                 //Absorber
+                StatusMsg = "Ecal " + i + 12 + " Channel";
+
                 var peaks = GetSpectrumEnergy(i + 12).FindPeaks(ref_x, ref_fwhm, ref_at_0, min_snr);
                 bool isEcalSuccessFlag = false;
 

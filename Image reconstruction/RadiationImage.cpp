@@ -41,11 +41,11 @@ static cv::Mat CodedMaskMat()
 			{
 				if (HUREL::Compton::mCodeMask[i][j])
 				{
-					mask.at<int>(j, i) = -1;
+					mask.at<int>(j, i) = 1;
 				}
 				else
 				{
-					mask.at<int>(j, i) = 1;
+					mask.at<int>(j, i) = -1;
 				}
 			}
 		}
@@ -217,10 +217,6 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 			continue;
 		}*/
 
-		if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy > 100 || lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 40)
-		{
-			continue;
-		}
 		if (lm.Type == eInterationType::CODED)
 		{
 			//continue;
@@ -235,6 +231,8 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 				++codedImageCount;
 			}
 		}
+
+
 		
 		
 		if (lm.Type == eInterationType::COMPTON)
@@ -337,7 +335,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 			{
 				continue;
 			}
-			if (lm.Scatter.InteractionEnergy < 50)
+			if (lm.Scatter.InteractionEnergy < 10)
 			{
 				continue;
 			}
@@ -423,11 +421,6 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 
 double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadiationImagingMode mode)
 {
-	Eigen::Matrix4d t265toLACCPosTransform;
-	t265toLACCPosTransform << 1, 0, 0, -0.4,
-		0, 1, 0, 0,
-		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
-		0, 0, 0, 1;
 
 	constexpr double imagePlaneZ = S2M + M2D + 0.011;
 	Eigen::Vector3d detectorNormalVector(0, 0, 1);

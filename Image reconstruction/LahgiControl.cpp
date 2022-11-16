@@ -98,10 +98,10 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 	test3.normalize();
 
 	
-	t265toLACCPosTransform << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
-		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
-		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
-		0, 0, 0, 1;
+	t265toLACCPosTransform << 0, 1, 0, T265_TO_LAHGI_OFFSET_X,
+						      0, 0, 1, T265_TO_LAHGI_OFFSET_Y,
+						      1, 0, 0, T265_TO_LAHGI_OFFSET_Z,
+							  0, 0, 0, 1;
 	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Logger loaded in cpp!", eLoggerType::INFO);
 
 	
@@ -121,6 +121,14 @@ void HUREL::Compton::LahgiControl::ListModeDataListening()
 	size_t bufferSize = 1000000;
 	std::vector<std::array<unsigned short, 144>> tempVector;
 	tempVector.reserve(bufferSize);
+
+
+	Eigen::Matrix4d t265toLACCPosTranslate;
+	t265toLACCPosTranslate << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
+		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
+		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
+		0, 0, 0, 1;
+	Eigen::Matrix4d t265toLACCPosTransformInv = t265toLACCPosTransform.inverse();
 	while (mIsListModeDataListeningThreadStart)
 	{
 		std::array<unsigned short, 144> out;
@@ -137,7 +145,7 @@ void HUREL::Compton::LahgiControl::ListModeDataListening()
 		eChksMutex.lock();
 		
 		std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-		Eigen::Matrix4d deviceTransformation = RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransform;
+		Eigen::Matrix4d deviceTransformation = t265toLACCPosTransform * RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransformInv * t265toLACCPosTranslate;
 
 		#pragma omp parallel for
 		for (int i = 0; i < tempVector.size(); ++i)
@@ -199,13 +207,13 @@ bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		double gain[10];
 		
 		
-		double offsetZ = -(0.260);
-		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i] , -0.08);		
+		double offsetZ = -(0.245);
+		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i] , -0.055);		
 		if (!mScatterModules[i]->IsModuleSet())
 		{
 			return false;
 		}
-		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], -0.08 + offsetZ);
+		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], -0.055 + offsetZ);
 		if (!mAbsorberModules[i]->IsModuleSet())
 		{
 			return false;
@@ -349,11 +357,11 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 			absorbersEnergy[i] = mAbsorberModules[i]->GetEcal(absorberShorts[i]);
 			if (!isnan(absorbersEnergy[i]))
 			{
-				EnergyTimeData eTime{ i + 12, scattersEnergy[i], timeInMili };
-				mAbsorberModules[i]->GetEnergySpectrum().AddEnergy(scattersEnergy[i]);
+				EnergyTimeData eTime{ i + 12, absorbersEnergy[i], timeInMili };
+				mAbsorberModules[i]->GetEnergySpectrum().AddEnergy(absorbersEnergy[i]);
 
 				mListedEnergyTimeData.push_back(eTime);
-				scatterInteractModuleNum[absorberInteractionCount++] = i;
+				absorberInteractModuleNum[absorberInteractionCount++] = i;
 				
 			}
 		}
@@ -361,15 +369,13 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 
 		if (scatterInteractionCount == 1)
 		{
-			double sEnergy = scattersEnergy[0];
-			double aEnergy = absorbersEnergy[0];
-
+			double sEnergy = scattersEnergy[scatterInteractModuleNum[0]];
+			double aEnergy = nan("");
 			if (absorberInteractionCount == 1)
 			{
-				/*if (!eChksMutex.try_lock())
-				{
-					return;
-				}*/
+				double aEnergy = absorbersEnergy[absorberInteractModuleNum[0]];
+
+	
 				//Compton
 				for (int i = 0; i < eChk.size(); ++i)
 				{
@@ -412,7 +418,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 			eInterationType type = eInterationType::CODED;
 			for (int interDet = 0; interDet < scatterInteractionCount; ++interDet)
 			{
-				double sEnergy = scattersEnergy[interDet];
+				double sEnergy = scattersEnergy[scatterInteractModuleNum[interDet]];
 				double aEnergy = nan("");
 
 				for (int i = 0; i < eChk.size(); ++i)
@@ -728,10 +734,10 @@ size_t  HUREL::Compton::LahgiControl::GetListedListModeDataSize()
 }
 
 
-const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(long long timeInMililseconds) const
+const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(long long timeInMiliSecond) const
 {
 
-	if (timeInMililseconds == 0)
+	if (timeInMiliSecond == 0)
 	{
 		return GetListedListModeData();
 	}
@@ -741,9 +747,9 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 	std::vector<ListModeData> lmData;
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	size_t getIndexStart = 0;
-	for (int i = size; i > 0; --i)
+	for (int i = size - 1; i > 0; --i)
 	{
-		if ((t - mListedListModeData[i].InteractionTimeInMili).count() > timeInMililseconds)
+		if (t.count() - mListedEnergyTimeData[i].InteractionTimeInMili.count() > timeInMiliSecond)
 		{
 			getIndexStart = i;
 			break;
@@ -792,9 +798,11 @@ std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(lo
 	std::vector<ListModeData> lmData;
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	size_t getIndexStart = 0;
-	for (int i = size; i > 0; --i)
+	long long currentTime = t.count();
+	for (int i = size - 1; i > 0; --i)
 	{
-		if ((t - mListedListModeData[i].InteractionTimeInMili).count() > timeInMililseconds)
+		long long interactionTime = mListedListModeData[i].InteractionTimeInMili.count();
+		if (currentTime - interactionTime > timeInMililseconds)
 		{
 			getIndexStart = i;
 			break;
@@ -819,13 +827,13 @@ std::vector<EnergyTimeData> HUREL::Compton::LahgiControl::GetListedEnergyTimeDat
 {
 	mResetListModeDataMutex.lock();
 
-	size_t size = mListedListModeData.size();
+	size_t size = mListedEnergyTimeData.size();
 	std::vector<EnergyTimeData> lmData;
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	size_t getIndexStart = 0;
-	for (int i = size; i > 0; --i)
+	for (int i = size - 1; i > 0; --i)
 	{
-		if ((t - mListedEnergyTimeData[i].InteractionTimeInMili).count() > timeInMiliSecond)
+		if (t.count() - mListedEnergyTimeData[i].InteractionTimeInMili.count() > timeInMiliSecond)
 		{
 			getIndexStart = i;
 			break;
@@ -843,17 +851,33 @@ std::vector<EnergyTimeData> HUREL::Compton::LahgiControl::GetListedEnergyTimeDat
 	return lmData;
 
 }
+std::vector<EnergyTimeData> HUREL::Compton::LahgiControl::GetListedEnergyTimeData()
+{
+	mResetListModeDataMutex.lock();
+	std::vector<EnergyTimeData> lmData;
+
+	size_t size = mListedEnergyTimeData.size();
+
+
+	lmData.reserve(size);
+	for (int i = 0; i < size; ++i)
+	{
+		lmData.push_back(mListedEnergyTimeData[i]);
+	}
+	mResetListModeDataMutex.unlock();
+	return lmData;
+}
 const std::vector<EnergyTimeData> HUREL::Compton::LahgiControl::GetListedEnergyTimeData(long long timeInMiliSecond) const
 {
 	mResetListModeDataMutex.lock();
 
-	size_t size = mListedListModeData.size();
+	size_t size = mListedEnergyTimeData.size();
 	std::vector<EnergyTimeData> lmData;
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	size_t getIndexStart = 0;
-	for (int i = size; i > 0; --i)
+	for (int i = size - 1; i > 0; --i)
 	{
-		if ((t - mListedEnergyTimeData[i].InteractionTimeInMili).count() > timeInMiliSecond)
+		if (t.count() - mListedEnergyTimeData[i].InteractionTimeInMili.count() > timeInMiliSecond)
 		{
 			getIndexStart = i;
 			break;
@@ -909,6 +933,26 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 	}
 	saveFile.close();
 
+	saveFile.open(fileName + "_LmDEnergyData.csv");
+	if (!saveFile.is_open())
+	{
+		std::cout << "File is not opened" << endl;
+		saveFile.close();
+		return;
+	}
+	std::vector<EnergyTimeData> edata = this->GetListedEnergyTimeData();
+	for (unsigned int i = 0; i < edata.size(); ++i)
+	{
+		EnergyTimeData& d = edata[i];
+
+		string line = "";
+		line += std::to_string(d.InteractionTimeInMili.count());	line += ",";
+		line += std::to_string(d.InteractionChannel);	line += ",";
+		line += std::to_string(d.Energy);
+
+		saveFile << line << std::endl;
+	}
+	saveFile.close();
 
 	return;
 }
