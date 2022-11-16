@@ -7,7 +7,7 @@ constexpr double Det_W = 0.300;
 constexpr double Mask_W = 0.370;
 constexpr double Mpix = 37;
 constexpr double S2M = 1;
-constexpr double M2D = 0.06;
+constexpr double M2D = 0.07;
 constexpr double SP = S2M - M2D;// Source to Mask distance(mm)
 constexpr double M = 1 + M2D / S2M; // projection ratio((a + b) / a)
 constexpr double Dproj = Det_W / (Mask_W / Mpix * M); // projection mask to Detector pixel Length(mm)
@@ -291,6 +291,11 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 	//ShowCV_32SAsJet(mCodedImage, 1000);
 	//ShowCV_32SAsJet(mComptonImage, 1000);
 	//ShowCV_32SAsJet(mHybridImage, 1000);
+}
+
+
+HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, cv::Mat depthImg, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov)
+{
 }
 
 HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov)
