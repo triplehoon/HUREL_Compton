@@ -5,6 +5,47 @@
 using namespace HUREL::Compton;
 
 
+
+void ShowCV_32FAsJet(cv::Mat img, int size)
+{
+	if (img.type() != CV_32F)
+	{
+		return;
+	}
+	cv::Mat normImg(img.rows, img.cols, CV_8UC1, cv::Scalar(0));
+	double minValue;
+	double maxValue;
+	cv::minMaxIdx(img, &minValue, &maxValue);
+	for (int i = 0; i < img.rows; i++)
+	{
+		for (int j = 0; j < img.cols; j++)
+		{
+			normImg.at<uchar>(i, j) = static_cast<uchar>((static_cast<double>(img.at<float>(i, j)) - minValue)
+				/ (maxValue - minValue) * 255);
+		}
+	}
+	cv::Mat colorImg;
+	cv::applyColorMap(normImg, colorImg, cv::COLORMAP_JET);
+	cv::Mat showImg;
+
+	int sizeHeight = size;
+	int sizeWidth = size;
+
+	if (colorImg.size().height > colorImg.size().width)
+	{
+		sizeWidth = size * colorImg.size().width / colorImg.size().height;
+	}
+	else
+	{
+		sizeHeight = size * colorImg.size().height / colorImg.size().width;
+	}
+
+	cv::resize(colorImg, showImg, cv::Size(sizeWidth, sizeHeight), 0, 0, cv::INTER_NEAREST_EXACT);
+	cv::imshow("img", showImg);
+	cv::waitKey(0);
+}
+
+
 HUREL::Compton::RtabmapSlamControl::RtabmapSlamControl()
 {
 
@@ -162,7 +203,7 @@ static std::mutex videoStreamMutex;
 static std::mutex pcMutex;
 
 
-cv::Mat ConvertDepthTo3DPoint(cv::Mat& depth, float fx, float fy, float cx, float cy)
+cv::Mat ConvertDepthTo3DPoint(cv::Mat& depthI, float fx, float fy, float cx, float cy)
 {
 	//float x,y,z
 	cv::Mat points, chans[3];
@@ -170,25 +211,28 @@ cv::Mat ConvertDepthTo3DPoint(cv::Mat& depth, float fx, float fy, float cx, floa
 	static int rows = 0;
 	static int cols = 0;
 	static cv::Mat uMat, vMat;
+	cv::Mat depth;
+	depthI.convertTo(depth, CV_32FC1);
+
 	if (rows != depth.rows || cols != depth.cols)
 	{
 		rows = depth.rows;
 		cols = depth.cols;
 		if (rows == 0 || cols == 0)
 		{
-			return;
+			return points;
 		}
 
 		uMat = cv::Mat(depth.rows, depth.cols, CV_32FC1);
 		vMat = cv::Mat(depth.rows, depth.cols, CV_32FC1);
 
-		for (int u = 0; u < cols; ++u)
+		for (int u = 0; u < rows; ++u)
 		{
-			uMat.col(u).setTo(u);
+			uMat.row(u).setTo(u);
 		}
-		for (int v = 0; v < rows; ++v)
+		for (int v = 0; v < cols; ++v)
 		{
-			vMat.row(v).setTo(v);
+			vMat.col(v).setTo(v);
 		}
 	}
 	
@@ -196,10 +240,14 @@ cv::Mat ConvertDepthTo3DPoint(cv::Mat& depth, float fx, float fy, float cx, floa
 	cv::Mat x_over_z = (cx - uMat) /fx;
 	cv::Mat y_over_z = (cy - vMat) / fy;
 	cv::Mat sqrtVlaue;
-	cv::sqrt(1 + x_over_z * x_over_z + y_over_z * y_over_z, sqrtVlaue);
-	chans[2] = depth / sqrtVlaue;
-	chans[0] = x_over_z * depth;
-	chans[1] = y_over_z * depth;
+	ShowCV_32FAsJet(x_over_z, 600);
+	ShowCV_32FAsJet(y_over_z, 600);
+	cv::Mat before = 1 + x_over_z.mul(x_over_z) + y_over_z.mul(y_over_z);
+	cv::sqrt(before, sqrtVlaue);
+	chans[2] = depth.mul(1 / sqrtVlaue);
+	chans[1] = x_over_z .mul(depth);
+	chans[0] = y_over_z.mul(depth);
+
 	cv::merge(chans, 3, points);
 
 	return points;
@@ -227,10 +275,10 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			
 			auto img = data.imageRaw();
 			auto imgDepth = data.depthOrRightRaw();
-			double fxValue = data.stereoCameraModels()[0].left().fx();
-			double fyValue = data.stereoCameraModels()[0].left().fy();
-			double cxValue = data.stereoCameraModels()[0].left().cx();
-			double cyValue = data.stereoCameraModels()[0].left().cy();
+			float fxValue = static_cast<float>(data.stereoCameraModels()[0].left().fx());
+			float fyValue = static_cast<float>(data.stereoCameraModels()[0].left().fy());
+			float cxValue = static_cast<float>(data.stereoCameraModels()[0].left().cx());
+			float cyValue = static_cast<float>(data.stereoCameraModels()[0].left().cy());
 			
 			videoStreamMutex.lock();
 			if (img.cols > 0)
@@ -240,6 +288,7 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			if (imgDepth.cols > 0)
 			{
 				mCurrentDepthFrame = imgDepth;
+				cv::Mat point3 = ConvertDepthTo3DPoint(imgDepth, fxValue, fyValue, cxValue, cyValue);
 			}
 			if (mOdo != nullptr && &mOdo->getPose() != nullptr && mIsSlamPipeOn == true )
 			{
@@ -252,8 +301,11 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 				videoStreamMutex.unlock();
 			}
 
-			
-
+			//pcMutex.lock();
+			//mRealtimePointCloud = *(rtabmap::util3d::cloudRGBFromSensorData(data, 4,           // image decimation before creating the clouds
+			//	6.0f,        // maximum depth of the cloud
+			//	0.5f));
+			//pcMutex.unlock();
 		}
 	}
 
@@ -290,6 +342,17 @@ cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentVideoFrame()
 		{
 
 			img = data.imageRaw();
+
+			float fxValue = static_cast<float>(data.cameraModels()[0].fx());
+			float fyValue = static_cast<float>(data.cameraModels()[0].fy());
+			float cxValue = static_cast<float>(data.cameraModels()[0].cx());
+			float cyValue = static_cast<float>(data.cameraModels()[0].cy());
+			cv::Mat dImg = data.depthRaw();
+
+			if (dImg.cols > 0)
+			{
+				cv::Mat point3 = ConvertDepthTo3DPoint(dImg, fxValue, fyValue, cxValue, cyValue);
+			}
 		}
 	}
 	return img;
@@ -305,6 +368,31 @@ cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentDepthFrame()
 		{
 
 			img = data.depthRaw();
+		}
+	}
+	return img;
+}
+
+cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentPointsFrame()
+{
+	cv::Mat img;
+	if (mIsVideoStreamOn && mCamera != nullptr)
+	{
+		rtabmap::SensorData data = mCamera->takeImage();
+		if (data.isValid())
+		{
+
+
+			float fxValue = static_cast<float>(data.cameraModels()[0].fx());
+			float fyValue = static_cast<float>(data.cameraModels()[0].fy());
+			float cxValue = static_cast<float>(data.cameraModels()[0].cx());
+			float cyValue = static_cast<float>(data.cameraModels()[0].cy());
+			cv::Mat dImg = data.depthRaw();
+
+			if (dImg.cols > 0)
+			{
+				img = ConvertDepthTo3DPoint(dImg, fxValue, fyValue, cxValue, cyValue);
+			}
 		}
 	}
 	return img;
