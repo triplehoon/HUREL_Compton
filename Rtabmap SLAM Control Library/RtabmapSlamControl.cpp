@@ -530,10 +530,11 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetLoadedPointC
 	return mLoadedPointcloud;
 }
 
+
 Eigen::Matrix4d HUREL::Compton::RtabmapSlamControl::GetOdomentry()
 {
 	Eigen::Matrix4d odo = Eigen::Matrix4d::Identity();;
-
+	
 	//videoStreamMutex.lock();
 	if (mOdo != nullptr && &mOdo->getPose() != nullptr && mIsSlamPipeOn == true)
 	{
