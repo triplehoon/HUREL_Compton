@@ -2,7 +2,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <opencv2/opencv.hpp>
-#include <opencv2/>
 #include <open3d/geometry/Octree.h>
 
 #include "ListModeData.h"
@@ -93,7 +92,7 @@ namespace HUREL {
 			static cv::Mat GetCV_32SAsJet(cv::Mat img, int size, double minValuePortion);
 
 			RadiationImage(std::vector<ListModeData> data);			
-			RadiationImage(std::vector<ListModeData> data, cv::Mat depthImg, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov));
+			RadiationImage(std::vector<ListModeData> data, cv::Mat depthImg, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov);
 
 			RadiationImage(std::vector<ListModeData> data, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov);
 			double OverlayValue(Eigen::Vector3d point, eRadiationImagingMode mode);
