@@ -207,7 +207,7 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed
 
 double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed(ListModeData& lmData, Eigen::Vector3d& imgPoint, double* outComptonScatterAngle, double* outSigmacomptonScatteringAngle, Eigen::Vector3d* outScatterToAbsorberVector)
 {
-	double BP_sig_thres = 2;
+	double BP_sig_thres = 2.5;
 
 	if (isnan(*outSigmacomptonScatteringAngle) && isnan(*outComptonScatterAngle))
 	{

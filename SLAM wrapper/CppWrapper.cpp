@@ -267,7 +267,6 @@ sBitMapUnmanged HUREL::Compton::LahgiCppWrapper::GetTransPoseRadiationImage(int 
 
 			Eigen::Matrix4d diffMatrix = data[startIndex].DetectorTransformation * deviceTransformation.inverse();
 			Eigen::Quaterniond quaternino(diffMatrix.topLeftCorner<3, 3>());
-			Eigen::Vector3d angle = diffMatrix.eulerAngles(0, 1, 2);
 			
 
 			std::vector<ListModeData>::const_iterator first = data.begin() + startIndex;
