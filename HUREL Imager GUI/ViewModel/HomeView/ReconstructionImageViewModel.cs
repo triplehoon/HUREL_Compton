@@ -93,7 +93,7 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
-        private double m2D = 0.060;
+        private double m2D = 0.070;
         public double M2D
         {
             get
@@ -127,7 +127,7 @@ namespace HUREL_Imager_GUI.ViewModel
             set { det_W = value; OnPropertyChanged(nameof(Det_W)); }
         }
 
-        private double resImprov = 10;
+        private double resImprov = 20;
         public double ResImprov
         {
             get

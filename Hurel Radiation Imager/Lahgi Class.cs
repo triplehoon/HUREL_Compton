@@ -11,6 +11,8 @@ using Newtonsoft.Json.Linq;
 
 namespace HUREL.Compton
 {
+    public record AddListModeDataEchk(double MinE, double MaxE);
+
     public enum eLahgiApiEnvetArgsState
     {
         Loading,
@@ -252,7 +254,7 @@ namespace HUREL.Compton
             //tempEchk.Add(new AddListModeDataEchk(450, 570));
             //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
             
-            tempEchk.Add(new AddListModeDataEchk(20, 1400));
+            tempEchk.Add(new AddListModeDataEchk(600, 720));
             //tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
             //tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
             Echks = tempEchk;
@@ -639,7 +641,6 @@ namespace HUREL.Compton
 
 
 
-        public record AddListModeDataEchk(double MinE, double MaxE);
 
         private static List<AddListModeDataEchk> echks = new List<AddListModeDataEchk>();
         public static List<AddListModeDataEchk> Echks

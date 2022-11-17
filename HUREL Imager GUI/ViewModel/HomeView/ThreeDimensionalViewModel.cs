@@ -40,12 +40,12 @@ namespace HUREL_Imager_GUI.ViewModel
 
             SLAMPointCloud = new PointGeometry3D() { Positions = vc, Colors = cc };
 
-            Text3d = new BillboardText3D();
-            TextInfoExt tinfo = new TextInfoExt();
-            tinfo.Text = ("Cs-137");
-            tinfo.Origin = new Vector3(-1, 0.2f, 2.5f);
-            tinfo.Scale = 1f;
-            Text3d.TextInfo.Add(tinfo);
+            //Text3d = new BillboardText3D();
+            //TextInfoExt tinfo = new TextInfoExt();
+            //tinfo.Text = ("Cs-137");
+            //tinfo.Origin = new Vector3(-1, 0.2f, 2.5f);
+            //tinfo.Scale = 1f;
+            //Text3d.TextInfo.Add(tinfo);
         }
 
 

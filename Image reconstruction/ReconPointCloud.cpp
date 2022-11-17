@@ -191,7 +191,7 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed
 	double positionDotPord = effectToScatterVector.dot(scatterToAbsorberVector);
 	double effectedAngle = acos(positionDotPord) / EIGEN_PI * 180;
 	double sigmacomptonScatteringAngle = 511 / sin(comptonScatteringAngle) * sqrt(1 / pow(AbsorberEnergy, 2)) - 1 / pow(TotalEnergy, 2) * pow(0.08 / 2.35 * sqrt(AbsorberEnergy), 2) + 1 / pow(TotalEnergy, 4) * pow(0.08 / 2.35 * sqrt(ScatterEnergy), 2);
-	double BP_sig_thres = 3;
+	double BP_sig_thres = 2;
 
 	if (abs(effectedAngle - comptonScatteringAngle) < BP_sig_thres * sigmacomptonScatteringAngle)
 	{
@@ -207,7 +207,7 @@ double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed
 
 double HUREL::Compton::ReconPointCloud::SimpleComptonBackprojectionUntransformed(ListModeData& lmData, Eigen::Vector3d& imgPoint, double* outComptonScatterAngle, double* outSigmacomptonScatteringAngle, Eigen::Vector3d* outScatterToAbsorberVector)
 {
-	double BP_sig_thres = 2.5;
+	double BP_sig_thres = 2;
 
 	if (isnan(*outSigmacomptonScatteringAngle) && isnan(*outComptonScatterAngle))
 	{

@@ -240,8 +240,8 @@ cv::Mat ConvertDepthTo3DPoint(cv::Mat& depthI, float fx, float fy, float cx, flo
 	cv::Mat x_over_z = (cx - uMat) /fx;
 	cv::Mat y_over_z = (cy - vMat) / fy;
 	cv::Mat sqrtVlaue;
-	ShowCV_32FAsJet(x_over_z, 600);
-	ShowCV_32FAsJet(y_over_z, 600);
+	//ShowCV_32FAsJet(x_over_z, 600);
+	//ShowCV_32FAsJet(y_over_z, 600);
 	cv::Mat before = 1 + x_over_z.mul(x_over_z) + y_over_z.mul(y_over_z);
 	cv::sqrt(before, sqrtVlaue);
 	chans[2] = depth.mul(1 / sqrtVlaue);
@@ -342,17 +342,6 @@ cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentVideoFrame()
 		{
 
 			img = data.imageRaw();
-
-			float fxValue = static_cast<float>(data.cameraModels()[0].fx());
-			float fyValue = static_cast<float>(data.cameraModels()[0].fy());
-			float cxValue = static_cast<float>(data.cameraModels()[0].cx());
-			float cyValue = static_cast<float>(data.cameraModels()[0].cy());
-			cv::Mat dImg = data.depthRaw();
-
-			if (dImg.cols > 0)
-			{
-				cv::Mat point3 = ConvertDepthTo3DPoint(dImg, fxValue, fyValue, cxValue, cyValue);
-			}
 		}
 	}
 	return img;
