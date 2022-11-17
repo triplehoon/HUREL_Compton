@@ -194,7 +194,7 @@ cv::Mat HUREL::Compton::RadiationImage::GetCV_32SAsJet(cv::Mat img, int size, do
 	return showImg;
 }
 
-HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
+HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data)
 {
 	Mat responseImg(PixelCount, PixelCount, CV_32S, Scalar(0));
 	Mat comptonImg(PixelCount, PixelCount, CV_32S, Scalar(1));
@@ -293,7 +293,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data)
 	//ShowCV_32SAsJet(mHybridImage, 1000);
 }
 
-HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov)
+HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov)
 {
 	double m = 1 + m2D / s2M;
 	double reconPlaneWidth = s2M / m2D * det_W;
@@ -419,8 +419,10 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 	mListedListModeData = data;
 }
 
-HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, cv::Mat depthImg, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov)
+HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data, cv::Mat& depthImg, Eigen::Matrix4d& currentTransformation, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov)
 {
+	cv::Mat xyz[3];
+	cv::split(depthImg, xyz);
 	double m = 1 + m2D / s2M;
 	double reconPlaneWidth = s2M / m2D * det_W;
 	double dproj = det_W / (Mask_W / Mpix * m); // projection mask to Detector pixel Length(mm)
@@ -434,7 +436,8 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, c
 	__int32* comptonImgPtr = static_cast<__int32*>(static_cast<void*>(comptonImg.data));
 	int codedImageCount = 0;
 	int comptonImageCount = 0;
-	
+	mDetectorTransformation = data[0].DetectorTransformation;
+
 	#pragma omp parallel for
 	for (int i = 0; i < data.size(); ++i)
 	{
@@ -489,14 +492,13 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, c
 	//std::cout << "Lm Count: " << data.size() << " Coded count: " << codedImageCount << " Compton count: " << comptonImageCount << std::endl;
 	Mat scaleG;
 	cv::resize(CodedMaskMat(), scaleG, Size(37 * resImprov, 37 * resImprov), 0, 0, INTER_NEAREST_EXACT);
-	Mat reconImg;
-	cv::filter2D(responseImg, reconImg, CV_32S, scaleG);
+	Mat codedReconImg;
+	cv::filter2D(responseImg, codedReconImg, CV_32S, scaleG);
 
 	//reconImg = -reconImg;
 	double maxValue;
 	//cv::minMaxLoc(reconImg, nullptr, &maxValue);
 	//Mat idxImg(pixelCount, pixelCount, CV_32S, Scalar(maxValue * 0.01));
-	mCodedImage = reconImg;
 	//cv::max(reconImg, idxImg, mCodedImage);
 
 	
@@ -504,35 +506,54 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, c
 	double fovWidth = 2 * tan((wFov / 2) * M_PI / 180.0) * (s2M + m2D + 0.02);
 
 	//height correction
-	constexpr double heightDiff = 0.28;
 	
-	double heightPixelSize = reconPlaneWidth / pixelCount;
-	int offSetPixelCount = heightDiff / heightPixelSize;
 
-	int heightPixelCount = pixelCount * (fovHeight / reconPlaneWidth);
-	int widthPixelCount = pixelCount * (fovWidth / reconPlaneWidth);
-
-	int minHeightPixleCount = (pixelCount - heightPixelCount) / 2 + offSetPixelCount;
-	int maxHeightPixleCount = (pixelCount + heightPixelCount) / 2 + offSetPixelCount;
-	
-	if (minHeightPixleCount < 0)
-	{
-		minHeightPixleCount = 0;
-	}
-	if (maxHeightPixleCount > pixelCount)
-	{
-		maxHeightPixleCount = pixelCount;
-	}
-	if (widthPixelCount > pixelCount)
-	{
-		widthPixelCount = pixelCount;
-	}
 
 	mDetectorResponseImage = responseImg;
-	mCodedImage = mCodedImage(Range(minHeightPixleCount, maxHeightPixleCount), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
+	cv::Mat hybridImage = codedReconImg.mul(comptonImg);
 	
-	mComptonImage = comptonImg(Range(minHeightPixleCount, maxHeightPixleCount), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
-	mHybridImage = mCodedImage.mul(mComptonImage);
+	double imagePlaneZ = s2M + m2D + 0.02;
+	mComptonImage = cv::Mat(depthImg.rows,depthImg.cols , CV_32S);
+	mCodedImage = cv::Mat(depthImg.rows, depthImg.cols, CV_32S);
+	mHybridImage = cv::Mat(depthImg.rows, depthImg.cols, CV_32S);
+	for (int u = 0; u < depthImg.cols ; ++u)
+	{
+		for (int v = 0; v < depthImg.rows ; ++v)
+		{
+			Vector4d pos(static_cast<double>(xyz[0].at<float>(v, u)), static_cast<double>(xyz[1].at<float>(v, u)), static_cast<double>(xyz[2].at<float>(v, u)), 1.0);
+			Vector4d transformedPoint = currentTransformation * pos;
+
+			if (transformedPoint.z() <= imagePlaneZ || transformedPoint.z() >= 5)
+			{
+				continue;
+			}
+			double xPoseOnImgPlane = transformedPoint.x() * imagePlaneZ / transformedPoint.z();
+			double yPoseOnImgPlane = transformedPoint.y() * imagePlaneZ / transformedPoint.z();
+
+
+			int iY = findIndex(xPoseOnImgPlane, -ReconPlaneWidth / 2, ReconPlaneWidth / PixelCount);
+			int iX = findIndex(yPoseOnImgPlane, -ReconPlaneWidth / 2, ReconPlaneWidth / PixelCount);
+			int tempiY = iY;
+			iY = iX;
+			iX = tempiY;
+
+			if (iX >= 0 && iY >= 0 && iX < PixelCount && iY < PixelCount)
+			{
+				__int32 value = 0;
+
+				 = static_cast<__int32*>(static_cast<void*>(codedReconImg.ptr()))[PixelCount * (PixelCount - iY) + PixelCount - iX];
+
+				value = static_cast<__int32*>(static_cast<void*>(comptonImg.ptr()))[PixelCount * (PixelCount - iY) + PixelCount - iX];
+
+				value = static_cast<__int32*>(static_cast<void*>(hybridImage.ptr()))[PixelCount * (PixelCount - iY) + PixelCount - iX];
+
+
+			}
+
+
+		}
+	}
+
 
 	
 
@@ -541,7 +562,6 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, c
 		return;
 	}
 
-	mDetectorTransformation = data[0].DetectorTransformation;
 	mListedListModeData = data;
 }
 
