@@ -127,6 +127,7 @@ namespace HUREL_Imager_GUI.ViewModel
                         }
                         PeakLine = new ObservableCollection<GraphData>();
                         bool isBa133Found = false;
+                        bool isCo60Found = false;
                         foreach (Isotope iso in DetectedIso)
                         {
                             string energy = "";
@@ -136,22 +137,6 @@ namespace HUREL_Imager_GUI.ViewModel
                                 energy += " ";
                             }
 
-                            if (iso.IsotopeElement == IsotopeElement.Ba133)
-                            {
-                                var tempEchk = new List<AddListModeDataEchk>();
-                                //tempEchk.Add(new AddListModeDataEchk(30, 90));
-                                //tempEchk.Add(new AddListModeDataEchk(60, 100));
-                                //tempEchk.Add(new AddListModeDataEchk(330, 370));
-                                //tempEchk.Add(new AddListModeDataEchk(450, 570));
-                                //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
-                                //tempEchk.Add(new AddListModeDataEchk(60, 100));
-
-                                tempEchk.Add(new AddListModeDataEchk(330, 370));
-                                //tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
-                                //tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
-                                LahgiApi.Echks = tempEchk;
-                                isBa133Found = true;
-                            }
 
 
                             isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy, ""));
@@ -159,6 +144,16 @@ namespace HUREL_Imager_GUI.ViewModel
                             {
                                 GraphData peakData = new GraphData(e, maxCount*1.5);
                                 PeakLine.Add(peakData);
+                            }
+
+
+                            if (iso.IsotopeElement == IsotopeElement.Co60)
+                            {
+                                isCo60Found = true;
+                            }
+                            if (iso.IsotopeElement == IsotopeElement.Ba133)
+                            {
+                                isBa133Found = true;
                             }
 
                         }
@@ -182,21 +177,62 @@ namespace HUREL_Imager_GUI.ViewModel
                                 }
                             }
                             ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>(copySpect.HistoEnergies);
+
+
+                            var tempEchk = new List<AddListModeDataEchk>();
+                            //tempEchk.Add(new AddListModeDataEchk(30, 90));
+                            //tempEchk.Add(new AddListModeDataEchk(60, 100));
+                            //tempEchk.Add(new AddListModeDataEchk(330, 370));
+                            //tempEchk.Add(new AddListModeDataEchk(450, 570));
+                            //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
+                            //tempEchk.Add(new AddListModeDataEchk(60, 100));
+
+                            tempEchk.Add(new AddListModeDataEchk(330, 370));
+                            //tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
+                            //tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
+                            LahgiApi.Echks = tempEchk;
                         }
                         else
                         {
-                            for (int i = 0; i < copySpect.HistoEnergies.Count; i++)
+                            if (isCo60Found)
                             {
-                                if ((copySpect.HistoEnergies[i].Energy < 720 && copySpect.HistoEnergies[i].Energy > 600))
+
+                                for (int i = 0; i < copySpect.HistoEnergies.Count; i++)
                                 {
 
+
+                                    if ((copySpect.HistoEnergies[i].Energy < 1173 + 70 && copySpect.HistoEnergies[i].Energy > 1173 - 70) || (copySpect.HistoEnergies[i].Energy < 1333 + 50 && copySpect.HistoEnergies[i].Energy > 1333 - 50))
+                                    {
+
+                                    }
+                                    else
+                                    {
+                                        copySpect.HistoEnergies[i].Count = 0;
+                                    }
                                 }
-                                else
-                                {
-                                    copySpect.HistoEnergies[i].Count = 0;
-                                }
+                                ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>(copySpect.HistoEnergies);
+
+
+
+                                var tempEchk = new List<AddListModeDataEchk>();
+                                //tempEchk.Add(new AddListModeDataEchk(30, 90));
+                                //tempEchk.Add(new AddListModeDataEchk(60, 100));
+                                //tempEchk.Add(new AddListModeDataEchk(330, 370));
+                                //tempEchk.Add(new AddListModeDataEchk(450, 570));
+                                //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
+                                //tempEchk.Add(new AddListModeDataEchk(60, 100));
+
+                                //tempEchk.Add(new AddListModeDataEchk(330, 370));
+                                tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
+                                tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
+                                LahgiApi.Echks = tempEchk;
                             }
-                            ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>(copySpect.HistoEnergies);
+                            else
+                            {
+                                ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>();
+                            }
+
+
                         }
 
                     }

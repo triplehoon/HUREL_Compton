@@ -41,11 +41,11 @@ static cv::Mat CodedMaskMat()
 			{
 				if (HUREL::Compton::mCodeMask[i][j])
 				{
-					mask.at<int>(j, i) = 1;
+					mask.at<int>(j, 36 - i) = -1;
 				}
 				else
 				{
-					mask.at<int>(j, i) = -1;
+					mask.at<int>(j, 36 - i) = 1;
 				}
 			}
 		}
@@ -434,8 +434,20 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data, 
 	cv::GaussianBlur(nonFiltered, Filtered, Size(7, 7), 1.5);
 	Filtered.convertTo(Filtered, CV_32S);
 
-	
 
+	double minVal;
+	double maxVal;
+	Point minLoc;
+	Point maxLoc;
+
+	minMaxLoc(Filtered, &minVal, &maxVal, &minLoc, &maxLoc);
+	if (maxVal > 400)
+	{
+	}
+
+	mHybridImage = Filtered;
+
+	Logger::Instance().InvokeLog("RadImage", "Hybrid Max: " + std::to_string(maxVal), eLoggerType::INFO);
 	if (data.size() == 0)
 	{
 		return;
