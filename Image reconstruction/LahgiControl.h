@@ -21,7 +21,7 @@
 #include <future>
 #include <array>
 
-#define ACTIVE_AREA_LENGTH 0.12
+#define ACTIVE_AREA_LENGTH 0.
 
 namespace HUREL {
 	namespace Compton {	
@@ -37,7 +37,7 @@ namespace HUREL {
 		class LahgiControl
 		{
 		private:		
-			Eigen::Matrix4d t265toLACCPosTransform;
+
 			Module** mScatterModules;  //./Module information/MONOScatter1/Gain.csv, LUT.csv ...
 			Module** mAbsorberModules;	//./Module information/QUADScatter1/Gain.csv, LUT.csv ...
 			eMouduleType mModuleType;
@@ -45,9 +45,6 @@ namespace HUREL {
 			tbb::concurrent_vector <EnergyTimeData> mListedEnergyTimeData;
 
 			
-
-			std::vector<RadiationImage> mListModeImage;
-
 			LahgiControl();
 			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds& timeInMili);
 			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation);
@@ -60,11 +57,6 @@ namespace HUREL {
 			bool mIsListModeDataListeningThreadStart = false;
 
 			void ListModeDataListening();
-
-			bool IsOnActiveArea(double x, double y, Module& module);
-
-			bool mIsListModeGenOn = false;
-			void ListModeGenPipe();
 
 			double mListModeImgInterval;
 
@@ -114,16 +106,6 @@ namespace HUREL {
 			void ResetEnergySpectrum();
 			void ResetEnergySpectrum(int fpgaChannelNumber);
 
-
-
-
-
-
-
-
-
-
-
 			ReconPointCloud GetReconRealtimePointCloudComptonUntransformed(open3d::geometry::PointCloud& pc, double time);
 			ReconPointCloud GetReconRealtimePointCloudCompton(open3d::geometry::PointCloud& pc, double time);
 
@@ -131,16 +113,11 @@ namespace HUREL {
 			ReconPointCloud GetReconOverlayPointCloudCompton(open3d::geometry::PointCloud& pc, double time);
 			ReconPointCloud GetReconOverlayPointCloudHybrid(open3d::geometry::PointCloud& pc, double time);
 
-			cv::Mat GetListModeImageCoded(double time);
-			cv::Mat GetListModeImageCompton(double time);
-			cv::Mat GetListModeImageHybrid(double time);
-
 			cv::Mat GetResponseImage(int imgSize, int pixelCount = 80, double timeInSeconds = 0, bool isScatter = true);
 
-			void StartListModeGenPipe(double milliseconds = 500);
-			void StopListModeGenPipe();
-			void ResetListModeImage();
-
+			Eigen::Matrix4d t265toLACCPosTransform;
+			Eigen::Matrix4d t265toLACCPosTransformInv;
+			Eigen::Matrix4d t265toLACCPosTranslate;
 		};
 	}
 }

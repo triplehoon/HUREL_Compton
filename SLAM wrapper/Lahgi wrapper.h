@@ -90,6 +90,8 @@ namespace HUREL {
 
 			Tuple< sBitmapWrapper^, sBitmapWrapper^, sBitmapWrapper^>^ Get2dRadationImage(int timeInMiliSeconds, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov, int imgSize, double minValuePortion);
 
+			sBitmapWrapper^ GetTransPoseRadiationImage(int timeInMiliSeconds, double minValuePortion, double resolution);
+
 			void GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data);
 			static void Logging(std::string className, std::string msg);
 		};

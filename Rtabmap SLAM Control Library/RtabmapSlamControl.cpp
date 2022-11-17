@@ -362,7 +362,7 @@ cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentDepthFrame()
 	return img;
 }
 
-cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentPointsFrame()
+cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentPointsFrame(double res)
 {
 	cv::Mat img;
 	if (mIsVideoStreamOn && mCamera != nullptr)
@@ -370,13 +370,23 @@ cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentPointsFrame()
 		rtabmap::SensorData data = mCamera->takeImage();
 		if (data.isValid())
 		{
+			cv::Mat dImg = data.depthRaw();
+
+			if (res < 1.0)
+			{
+				res = 1.0;
+			}
+			int newRows = dImg.rows / res;
+			int newCols = dImg.cols / res;
+
+			cv::Mat dImgSmall;
+			cv::resize(dImg, dImgSmall, cv::Size(newCols, newRows));
 
 
 			float fxValue = static_cast<float>(data.cameraModels()[0].fx());
 			float fyValue = static_cast<float>(data.cameraModels()[0].fy());
-			float cxValue = static_cast<float>(data.cameraModels()[0].cx());
-			float cyValue = static_cast<float>(data.cameraModels()[0].cy());
-			cv::Mat dImg = data.depthRaw();
+			float cxValue = static_cast<float>(data.cameraModels()[0].cx() / res);
+			float cyValue = static_cast<float>(data.cameraModels()[0].cy() / res);
 
 			if (dImg.cols > 0)
 			{

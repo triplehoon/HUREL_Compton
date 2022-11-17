@@ -239,6 +239,54 @@ std::tuple<sBitMapUnmanged, sBitMapUnmanged, sBitMapUnmanged>  HUREL::Compton::L
 
 }
 
+sBitMapUnmanged HUREL::Compton::LahgiCppWrapper::GetTransPoseRadiationImage(int timeInMiliSeconds, double minValuePortion, double resolution)
+{
+	static uint8_t* ptrImg = nullptr;
+	
+	Eigen::Matrix4d deviceTransformation = LahgiControl::instance().t265toLACCPosTransform * RtabmapSlamControl::instance().GetOdomentry()
+										   * LahgiControl::instance().t265toLACCPosTransformInv * LahgiControl::instance().t265toLACCPosTranslate;
+
+	cv::Mat p3 = RtabmapSlamControl::instance().GetCurrentPointsFrame(resolution);
+	std::vector<ListModeData> data = LahgiControl::instance().GetListedListModeData(timeInMiliSeconds);
+	cv::Mat radImg = cv::Mat::zeros(p3.rows, p3.cols, CV_32S);
+	
+	if (data.size() == 0)
+	{
+		return GetCvToPointers(radImg, &ptrImg);
+	}
+
+	long long startTime = data[0].InteractionTimeInMili.count();
+
+	int startIndex = 0;
+	int endIndex = 0;
+	for (int i = 0; i < data.size(); ++i)
+	{
+		if (startTime != data[i].InteractionTimeInMili.count())
+		{
+			endIndex = i - 1;
+
+			Eigen::Matrix4d diffMatrix = data[startIndex].DetectorTransformation * deviceTransformation.inverse();
+			Eigen::Quaterniond quaternino(diffMatrix.topLeftCorner<3, 3>());
+			Eigen::Vector3d angle = diffMatrix.eulerAngles(0, 1, 2);
+			
+
+			std::vector<ListModeData>::const_iterator first = data.begin() + startIndex;
+			std::vector<ListModeData>::const_iterator last = data.begin() + endIndex + 1;
+			std::vector<ListModeData> newVec(first, last);
+
+			RadiationImage radImg = RadiationImage(newVec);
+
+
+
+			startIndex = i;
+		}
+	}
+	
+
+
+	return GetCvToPointers(radImg, &ptrImg);
+}
+
 
 bool HUREL::Compton::RtabmapCppWrapper::GetIsSlamPipeOn()
 {

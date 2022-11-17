@@ -99,6 +99,9 @@ namespace HUREL {
 			/// <returns>Coded Compton Hybrid</returns>
 			std::tuple<sBitMapUnmanged, sBitMapUnmanged, sBitMapUnmanged>  GetRadiation2dImage(int timeInMiliSeconds, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov, int imgSize, double minValuePortion);
 
+			sBitMapUnmanged GetTransPoseRadiationImage(int timeInMiliSeconds, double minValuePortion, double resolution);
+
+
 			static LahgiCppWrapper& instance();
 		};
 

@@ -219,6 +219,12 @@ Tuple<sBitmapWrapper^, sBitmapWrapper^, sBitmapWrapper^>^ HUREL::Compton::LahgiW
 	return gcnew Tuple<sBitmapWrapper^, sBitmapWrapper^, sBitmapWrapper^>(gcnew sBitmapWrapper(std::get<0>(data)), gcnew sBitmapWrapper(std::get<1>(data)), gcnew sBitmapWrapper(std::get<2>(data)));
 }
 
+sBitmapWrapper^ HUREL::Compton::LahgiWrapper::GetTransPoseRadiationImage(int timeInMiliSeconds, double minValuePortion, double resolution)
+{
+	return gcnew sBitmapWrapper(LahgiCppWrapper::instance().GetTransPoseRadiationImage(timeInMiliSeconds, minValuePortion, resolution));
+}
+
+
 void HUREL::Compton::LahgiWrapper::GetRealTimeReconImage(double time, eReconType reconType, int% width, int% height, int% stride, IntPtr% data)
 {
 	//cv::Mat color = cv::Mat();

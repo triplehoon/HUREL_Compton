@@ -102,17 +102,19 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 						      0, 0, 1, T265_TO_LAHGI_OFFSET_Y,
 						      1, 0, 0, T265_TO_LAHGI_OFFSET_Z,
 							  0, 0, 0, 1;
+
+	t265toLACCPosTranslate << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
+		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
+		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
+		0, 0, 0, 1;
+	t265toLACCPosTransformInv = t265toLACCPosTransform.inverse();
 	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Logger loaded in cpp!", eLoggerType::INFO);
 
-	
-
 	ListModeDataListeningThread = std::async([this] 
-		{ 
-			this->ListModeDataListening(); 
-		});
+	{ 
+		this->ListModeDataListening(); 
+	});
 
-
-	//this->LoadListedListModeData("20220706_DigitalLabScan_100uCi_-1,0,2.4_cpplmdata.csv");
 }
 
 void HUREL::Compton::LahgiControl::ListModeDataListening()
@@ -123,12 +125,7 @@ void HUREL::Compton::LahgiControl::ListModeDataListening()
 	tempVector.reserve(bufferSize);
 
 
-	Eigen::Matrix4d t265toLACCPosTranslate;
-	t265toLACCPosTranslate << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
-		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
-		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
-		0, 0, 0, 1;
-	Eigen::Matrix4d t265toLACCPosTransformInv = t265toLACCPosTransform.inverse();
+
 	while (mIsListModeDataListeningThreadStart)
 	{
 		std::array<unsigned short, 144> out;
@@ -549,10 +546,8 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationVerification
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimationVerification(scatterShorts[scatterInteractModuleNum]);
 						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
 
-						if (IsOnActiveArea(scatterPoint[0], scatterPoint[1], *mScatterModules[scatterInteractModuleNum]))
-						{
 							mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
-						}
+						
 					}
 
 				}
@@ -1283,77 +1278,6 @@ void HUREL::Compton::LahgiControl::ResetEnergySpectrum(int fpgaChannelNumber)
 	return;
 }
 
-static std::future<void> t1;
-
-void HUREL::Compton::LahgiControl::StartListModeGenPipe(double miliSec)
-{
-	if (mIsListModeGenOn == true)
-	{
-		StopListModeGenPipe();
-	}
-	printf("ListMode Gen Pipe starts\n");
-	mListModeImgInterval = miliSec;
-	mIsListModeGenOn = true;
-	mListModeImage.clear();
-	auto func = std::bind(&LahgiControl::ListModeGenPipe, this);
-	t1 = std::async(std::launch::async, func);
-}
-
-void HUREL::Compton::LahgiControl::StopListModeGenPipe()
-{
-	if (mIsListModeGenOn == false)
-	{
-		return;
-	}
-	mIsListModeGenOn = false;
-	t1.get();
-
-	printf("ListMode Gen Pipe is end\n");
-}
-
-void HUREL::Compton::LahgiControl::ResetListModeImage()
-{
-	mListModeImage.clear();
-}
-
-void HUREL::Compton::LahgiControl::ListModeGenPipe()
-{
-	size_t startIdx = 0;
-	while (mIsListModeGenOn)
-	{
-		Sleep(mListModeImgInterval);
-		vector<ListModeData> tmp = GetListedListModeData();
-		if (tmp.size() < startIdx || tmp.size() == 0)
-		{
-
-			startIdx = 0;
-			continue;
-		}
-		
-		long long timeInMiliStart = tmp[startIdx].InteractionTimeInMili.count();
-
-		for (size_t i = startIdx; i < tmp.size() - 1; ++i)
-		{
-			long long timeInMiliEnd = tmp[i + 1].InteractionTimeInMili.count();
-
-			if (timeInMiliEnd - timeInMiliStart > mListModeImgInterval)
-			{
-				vector<ListModeData>::const_iterator first = tmp.begin() + startIdx;
-				vector<ListModeData>::const_iterator last = tmp.begin() + i + 2;
-				vector<ListModeData> effectiveData(first, last);
-				RadiationImage effectiveImg(effectiveData);
-
-				mListModeImageMutex.lock();
-				mListModeImage.push_back(effectiveImg);
-				mListModeImageMutex.unlock();
-				startIdx = i;
-				timeInMiliStart = tmp[startIdx].InteractionTimeInMili.count();
-			}
-		}
-	}
-	
-}
-
 ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudComptonUntransformed(open3d::geometry::PointCloud& outPC, double seconds)
 {
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
@@ -1443,7 +1367,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudCoded(ope
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	mListModeImageMutex.lock();
 
-	std::vector<RadiationImage> tempLMData = mListModeImage;
+	std::vector<RadiationImage> tempLMData;
 	mListModeImageMutex.unlock();
 
 	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
@@ -1477,11 +1401,9 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudCompton(o
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	mListModeImageMutex.lock();
 
-	std::vector<RadiationImage> tempLMData = mListModeImage;
+	std::vector<RadiationImage> tempLMData;
 	mListModeImageMutex.unlock();
 
-	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
-	//std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
 	int reconStartIndex = 0;
 	for (int i = 0; i < tempLMData.size(); ++i)
 	{
@@ -1508,114 +1430,11 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconOverlayPointCloudHybrid(op
 {
 	HUREL::Compton::ReconPointCloud reconPC = HUREL::Compton::ReconPointCloud(outPC);
 
-	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-	mListModeImageMutex.lock();
-
-	std::vector<RadiationImage> tempLMData = mListModeImage;
-	mListModeImageMutex.unlock();
-
-	//std::cout << "Start Recon (LM): " << tempLMData.size() << std::endl;
-	//std::cout << "Start Recon (PC): " << reconPC.points_.size() << std::endl;
-	int reconStartIndex = 0;
-	for (int i = 0; i < tempLMData.size(); ++i)
-	{
-
-		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(seconds))
-		{
-			reconStartIndex = i;
-			break;
-		}
-
-	}
-	RadiationImage radimg = RadiationImage(GetListedListModeData());
-	//RadiationImage::ShowCV_32SAsJet(radimg.mHybridImage, 800);
+	std::vector <ListModeData> lmData = GetListedListModeData();
+	RadiationImage radimg = RadiationImage(lmData);
 	reconPC.CalculateReconPointHybrid(radimg);
-	
-	//std::cout << "End GetReconOverlayPointCloudHybrid: " << tempLMData.size() << std::endl;
-
 
 	return reconPC;
-}
-
-cv::Mat HUREL::Compton::LahgiControl::GetListModeImageCoded(double time)
-{
-	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-	
-	mListModeImageMutex.lock();
-	std::vector<RadiationImage> tempLMData = mListModeImage;
-	mListModeImageMutex.unlock();
-
-	int reconStartIndex = 0;
-	for (int i = 0; i < tempLMData.size(); ++i)
-	{
-
-		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(time))
-		{
-			reconStartIndex = i;
-			break;
-		}
-
-	}
-	cv::Mat img = tempLMData[reconStartIndex].mCodedImage;
-	for (int i = reconStartIndex + 1; i < tempLMData.size(); ++i)
-	{
-		img + tempLMData[i].mCodedImage;
-	}
-	return img;
-}
-
-cv::Mat HUREL::Compton::LahgiControl::GetListModeImageCompton(double time)
-{
-	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-	
-	mListModeImageMutex.lock();
-	std::vector<RadiationImage> tempLMData = mListModeImage;
-	mListModeImageMutex.unlock();
-
-	int reconStartIndex = 0;
-	for (int i = 0; i < tempLMData.size(); ++i)
-	{
-
-		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(time))
-		{
-			reconStartIndex = i;
-			break;
-		}
-
-	}
-	cv::Mat img = tempLMData[reconStartIndex].mComptonImage;
-	for (int i = reconStartIndex + 1; i < tempLMData.size(); ++i)
-	{
-		img + tempLMData[i].mComptonImage;
-	}
-	return img;
-}
-
-cv::Mat HUREL::Compton::LahgiControl::GetListModeImageHybrid(double time)
-{
-	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-	
-	mListModeImageMutex.lock();
-	std::vector<RadiationImage> tempLMData = mListModeImage;
-	mListModeImageMutex.unlock();
-
-	int reconStartIndex = 0;
-	for (int i = 0; i < tempLMData.size(); ++i)
-	{
-
-		if (t.count() - tempLMData[i].mListedListModeData[0].InteractionTimeInMili.count() < static_cast<__int64>(time))
-		{
-			reconStartIndex = i;
-			break;
-		}
-
-	}
-	cv::Mat img = tempLMData[reconStartIndex].mHybridImage;
-	for (int i = reconStartIndex + 1; i < tempLMData.size(); ++i)
-	{
-		img + tempLMData[i].mHybridImage;
-	}
-	return img;
 }
 
 inline int findIndex(double value, double min, double pixelSize)
@@ -1681,19 +1500,4 @@ cv::Mat HUREL::Compton::LahgiControl::GetResponseImage(int imgSize, int pixelCou
 	
 
 	return HUREL::Compton::RadiationImage::GetCV_32SAsJet(responseImg, imgSize);
-}
-
-bool HUREL::Compton::LahgiControl::IsOnActiveArea(double x, double y, Module& module)
-{
-	double realPosX = x - module.mModuleOffsetX;
-	double realPosY = y - module.mModuleOffsetY;
-
-	if ((abs(realPosX) < ACTIVE_AREA_LENGTH / 2) && (abs(realPosY) < ACTIVE_AREA_LENGTH / 2))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
 }

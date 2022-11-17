@@ -92,7 +92,7 @@ namespace HUREL
 
 			cv::Mat GetCurrentVideoFrame();
 			cv::Mat GetCurrentDepthFrame();
-			cv::Mat GetCurrentPointsFrame();
+			cv::Mat GetCurrentPointsFrame(double res);
 
 			open3d::geometry::PointCloud GetRTPointCloud();
 			open3d::geometry::PointCloud GetRTPointCloudTransposed();
