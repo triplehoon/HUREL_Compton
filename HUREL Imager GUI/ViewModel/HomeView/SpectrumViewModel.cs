@@ -16,13 +16,13 @@ namespace HUREL_Imager_GUI.ViewModel
         public string Name { get; set; }
         public string Description { get; set; }
         public string Energy { get; set; }
-        public string Dose { get; set; }
+       // public string Dose { get; set; }
         public IsotopeInfo(string name, string description, string energy, string dose)
         {
             Name = name;
             Description = description;
             Energy = energy;
-            Dose = dose;
+            //Dose = dose;
         }
     }
     public enum eSpectrumCases
@@ -48,6 +48,8 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
         Mutex StatusUpdateMutex = new Mutex();
+        static int IsotopeInfosCount = 0;
+
         public void StatusUpdate(object? obj, EventArgs eventArgs)
         {
             if (!StatusUpdateMutex.WaitOne(0))
@@ -59,7 +61,7 @@ namespace HUREL_Imager_GUI.ViewModel
             switch (_spectrumCases)
             {
                 case eSpectrumCases.Scatter:
-                    spectrum = LahgiApi.GetScatterSumSpectrum();
+                    spectrum = LahgiApi.GetScatterSumSpectrumByTime(10);
                     break;
                 case eSpectrumCases.Absorber:
                     spectrum = LahgiApi.GetAbsorberSumSpectrum();
@@ -74,6 +76,14 @@ namespace HUREL_Imager_GUI.ViewModel
             if (spectrum != null)
             {
                 EnergySpectrum = new ObservableCollection<HistoEnergy>(spectrum.HistoEnergies);
+                int maxCount = 0;
+                for (int i = 0; i < spectrum.HistoEnergies.Count; i++)
+                {
+                    if (spectrum.HistoEnergies[i].Count > maxCount)
+                    {
+                        maxCount = spectrum.HistoEnergies[i].Count;
+                    }
+                }
                 if (eventArgs is LahgiApiEnvetArgs)
                 {
                     LahgiApiEnvetArgs lahgiApiEnvetArgs = (LahgiApiEnvetArgs)eventArgs;
@@ -115,7 +125,8 @@ namespace HUREL_Imager_GUI.ViewModel
                             MinSnrLine = new ObservableCollection<GraphData>();
                             PeakLine = new ObservableCollection<GraphData>();
                         }
-
+                        PeakLine = new ObservableCollection<GraphData>();
+                        bool isBa133Found = false;
                         foreach (Isotope iso in DetectedIso)
                         {
                             string energy = "";
@@ -125,9 +136,68 @@ namespace HUREL_Imager_GUI.ViewModel
                                 energy += " ";
                             }
 
+                            if (iso.IsotopeElement == IsotopeElement.Ba133)
+                            {
+                                var tempEchk = new List<AddListModeDataEchk>();
+                                //tempEchk.Add(new AddListModeDataEchk(30, 90));
+                                //tempEchk.Add(new AddListModeDataEchk(60, 100));
+                                //tempEchk.Add(new AddListModeDataEchk(330, 370));
+                                //tempEchk.Add(new AddListModeDataEchk(450, 570));
+                                //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
+                                //tempEchk.Add(new AddListModeDataEchk(60, 100));
+
+                                tempEchk.Add(new AddListModeDataEchk(330, 370));
+                                //tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
+                                //tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
+                                LahgiApi.Echks = tempEchk;
+                                isBa133Found = true;
+                            }
+
+
                             isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy, ""));
+                            foreach (double e in iso.PeakEnergy)
+                            {
+                                GraphData peakData = new GraphData(e, maxCount*1.5);
+                                PeakLine.Add(peakData);
+                            }
+
                         }
-                        IsotopeInfos = isotopeInfos;
+                    
+                            IsotopeInfosCount = isotopeInfos.Count; 
+                            IsotopeInfos = isotopeInfos;
+
+                        
+                        SpectrumEnergyNasa copySpect = new SpectrumEnergyNasa (spectrum);
+                        if (isBa133Found)
+                        {
+                            for (int i =0; i < copySpect.HistoEnergies.Count; i++)
+                            {
+                                if ((copySpect.HistoEnergies[i].Energy < 400 && copySpect.HistoEnergies[i].Energy > 300))
+                                {
+
+                                }
+                                else
+                                {
+                                    copySpect.HistoEnergies[i].Count = 0;
+                                }
+                            }
+                            ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>(copySpect.HistoEnergies);
+                        }
+                        else
+                        {
+                            for (int i = 0; i < copySpect.HistoEnergies.Count; i++)
+                            {
+                                if ((copySpect.HistoEnergies[i].Energy < 720 && copySpect.HistoEnergies[i].Energy > 600))
+                                {
+
+                                }
+                                else
+                                {
+                                    copySpect.HistoEnergies[i].Count = 0;
+                                }
+                            }
+                            ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>(copySpect.HistoEnergies);
+                        }
 
                     }
 
@@ -149,6 +219,18 @@ namespace HUREL_Imager_GUI.ViewModel
                 OnPropertyChanged(nameof(EnergySpectrum));
             }
         }
+
+        private ObservableCollection<HistoEnergy> _imagingEnergySpetrum = new ObservableCollection<HistoEnergy>();
+
+        public ObservableCollection<HistoEnergy> ImagingEnergySpectrum
+        {
+            get { return _imagingEnergySpetrum; }
+            set
+            {
+                _imagingEnergySpetrum = value;
+                OnPropertyChanged(nameof(ImagingEnergySpectrum));
+            }
+        }
         public ObservableCollection<IsotopeInfo> _isotopeInfos = new ObservableCollection<IsotopeInfo>();
         public ObservableCollection<IsotopeInfo> IsotopeInfos
         {
@@ -158,8 +240,23 @@ namespace HUREL_Imager_GUI.ViewModel
             }
             set
             {
-                _isotopeInfos = value;
-                OnPropertyChanged(nameof(IsotopeInfos));
+                if (_isotopeInfos.Count != value.Count)
+                {
+                    _isotopeInfos = value;
+                    OnPropertyChanged(nameof(IsotopeInfos));
+                }
+                else
+                {
+                    for (int i = 0; i < IsotopeInfos.Count; i++)
+                    {
+                        if (value[i].Name != IsotopeInfos[i].Name)
+                        {
+                            _isotopeInfos = value;
+                            OnPropertyChanged(nameof(IsotopeInfos));
+                        }
+                    }
+                }
+               
             }
         }
         private ObservableCollection<GraphData> _minSnrLine = new ObservableCollection<GraphData>();

@@ -336,7 +336,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 
 		if (lm.Type == eInterationType::COMPTON)
 		{
-			if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 200)
+			if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 400)
 			{
 				continue;
 			}
@@ -348,7 +348,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 			double comptonScatterAngle = nan("");
 			double sigmacomptonScatteringAngle = nan("");
 			Eigen::Vector3d sToAVector;
-			double imagePlaneZ = s2M;
+			double imagePlaneZ = s2M + 0.07;
 
 			for (int i = 0; i < pixelCount; ++i)
 			{
@@ -375,7 +375,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 	double maxValue;
 	//cv::minMaxLoc(reconImg, nullptr, &maxValue);
 	//Mat idxImg(pixelCount, pixelCount, CV_32S, Scalar(maxValue * 0.01));
-	mCodedImage = reconImg;
+	//mCodedImage = reconImg;
 	//cv::max(reconImg, idxImg, mCodedImage);
 
 	
@@ -408,11 +408,38 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData> data, d
 	}
 
 	mDetectorResponseImage = responseImg;
-	mCodedImage = mCodedImage(Range(minHeightPixleCount, maxHeightPixleCount), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
-	
-	mComptonImage = comptonImg(Range(minHeightPixleCount, maxHeightPixleCount), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
-	mHybridImage = mCodedImage.mul(mComptonImage);
+	cv::Mat nonFiltered = reconImg;
+	cv::Mat Filtered;
 
+	nonFiltered.convertTo(nonFiltered, CV_32F);
+	cv::GaussianBlur(nonFiltered, Filtered, Size(7, 7), 1.5);
+	Filtered.convertTo(Filtered, CV_32S);
+	reconImg = Filtered;
+
+	mCodedImage = reconImg(Range(minHeightPixleCount, maxHeightPixleCount), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
+	
+
+	nonFiltered.convertTo(nonFiltered, CV_32F);
+	cv::GaussianBlur(nonFiltered, Filtered, Size(7, 7), 1.5);
+	Filtered.convertTo(Filtered, CV_32S);
+	reconImg = Filtered;
+
+	nonFiltered = comptonImg;
+	Filtered;
+
+	nonFiltered.convertTo(nonFiltered, CV_32F);
+	cv::GaussianBlur(nonFiltered, Filtered, Size(7, 7), 1.5);
+	Filtered.convertTo(Filtered, CV_32S);
+	comptonImg = Filtered;
+
+	mComptonImage = comptonImg(Range(minHeightPixleCount, maxHeightPixleCount), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
+	nonFiltered = mCodedImage.mul(mComptonImage);
+	Filtered;
+	nonFiltered.convertTo(nonFiltered, CV_32F);
+	cv::GaussianBlur(nonFiltered, Filtered, Size(7, 7), 1.5);
+	Filtered.convertTo(Filtered, CV_32S);
+
+	mHybridImage = Filtered;
 	
 
 	if (data.size() == 0)

@@ -45,8 +45,15 @@
             <syncfusion:SfChart.SecondaryAxis>
                 <syncfusion:LogarithmicAxis Minimum="1" Header="Counts [#]"/>
             </syncfusion:SfChart.SecondaryAxis>
-          
-            <syncfusion:FastColumnBitmapSeries Interior="Black"
+            <syncfusion:FastColumnBitmapSeries Interior="Red"
+                                                                     ListenPropertyChange="True"
+                                                                     Label="Imaging Area"
+                                                                     ItemsSource="{Binding ImagingEnergySpectrum}" 
+                                                                     XBindingPath="Energy" 
+                                                                     YBindingPath="Count"
+                                                                     syncfusion:ChartSeriesBase.Spacing="0" Margin="0,12,0,-12" />
+
+            <syncfusion:FastLineBitmapSeries Interior="Black"
                                                                      ListenPropertyChange="True"
                                                                      Label="Energy"
                                                                      ItemsSource="{Binding EnergySpectrum}" 
@@ -206,7 +213,7 @@
                     <syncfusion:GridTextColumn MappingName="Name" ColumnSizer="Star" />
                     <syncfusion:GridTextColumn MappingName="Description" ColumnSizer="Star"/>
                     <syncfusion:GridTextColumn MappingName="Energy" ColumnSizer="Star"/>
-                    <syncfusion:GridTextColumn MappingName="Dose" ColumnSizer="Star"/>
+                    <!--<syncfusion:GridTextColumn MappingName="Dose" ColumnSizer="Star"/>-->
                 </syncfusion:SfDataGrid.Columns>
             </syncfusion:SfDataGrid>
             

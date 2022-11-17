@@ -244,9 +244,10 @@ namespace HUREL.Compton.RadioisotopeAnalysis
             }
             return true;
         }
+
     }
 
-    public class SpectrumEnergyNasa : SpectrumEnergy
+    public class SpectrumEnergyNasa : SpectrumEnergy 
     {
         private static List<double> GCoeff = new List<double>();
         private static List<double> KermaCoeff = new List<double>();
@@ -356,7 +357,7 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                     double countRateSigam = HistoEnergies[i].Count / time / time;
                     variance += H10Coeff[i] * H10Coeff[i] * countRateSigam* countRateSigam;
                 }
-                return (10.5 * 2.7 * exp, 10.5 * 2.7 *Math.Sqrt(variance));
+                return (10.5 *2 * 2.7 * exp / 5, 10.5 * 2.7 *Math.Sqrt(variance) / 5);
             }
             else
             {

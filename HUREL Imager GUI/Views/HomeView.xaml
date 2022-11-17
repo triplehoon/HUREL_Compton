@@ -31,17 +31,17 @@
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1.2*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="0.02*"/>
                     </Grid.ColumnDefinitions>
 
                     <components:ReconstructImageView Grid.Column="0" Margin="0,0,0,5"  DataContext="{Binding ReconstructionImageViewModel}"  Visibility="{Binding ElementName=ViewSetting, Path=IsChecked, Converter={StaticResource ConvBoolToVisibilityReverse}}"/>
                     <components:ThreeDimensionalView  Grid.Column="0" Margin="0,0,0,5"  DataContext="{Binding ThreeDimensionalViewModel}" Visibility="{Binding ElementName=ViewSetting, Path=IsChecked, Converter={StaticResource ConvBoolToVisibility}}"/>
 
-                    <Image Grid.Column="1" Stretch="Uniform" Margin="10">
+                    <!--<Image Grid.Column="1" Stretch="Uniform" Margin="10">
                         <Image.Source>
                             <BitmapImage UriSource="/Resource/occupation grid.png" />
                         </Image.Source>
-                    </Image>
+                    </Image>-->
 
                 </Grid>
             </Grid>
