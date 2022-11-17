@@ -458,6 +458,52 @@ namespace HUREL.Compton
 
             return (imgCoded, imgCompton, imgHybrid);
         }
+        public static Mutex GetTransPoseRadiationImageMutex = new Mutex();
+
+
+        public static BitmapImage? GetTransPoseRadiationImage(int timeInMiliSecond, double minValuePortion, double resolution = 10)
+        {
+            BitmapImage? img= null;
+            
+            if (!GetTransPoseRadiationImageMutex.WaitOne())
+            {
+                return img;
+            }
+            var outData = lahgiWrapper.GetTransPoseRadiationImage(timeInMiliSecond, minValuePortion, resolution);
+            //tempBitmap.Save("E:\\OneDrive - 한양대학교\\01.Hurel\\01.현재작업\\20201203 Comtpon GUI\\Compton GUI Main\\HUREL Compton\\RealsensWrapperTest\\bin\\Debug\\net5.0-windows\\test.png");
+            // Bitmap 담을 메모리스트림 
+            IntPtr data = outData.ptr;
+
+            if (data == IntPtr.Zero || outData.width == 1)
+            {
+                GetRadation2dImageMutex.ReleaseMutex();
+                return img;
+            }
+
+            int width = outData.width;
+            int height = outData.height;
+            int stride = outData.stride;
+            Bitmap tempBitmap = new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format32bppArgb, data);
+
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                //tempBitmap.Save("test.png");
+                img = new BitmapImage();
+                img.BeginInit();
+                ms.Seek(0, SeekOrigin.Begin);
+                img.StreamSource = ms;
+                img.CacheOption = BitmapCacheOption.OnLoad;
+                img.EndInit();
+                img.Freeze();
+            }
+
+            GetTransPoseRadiationImageMutex.ReleaseMutex();
+
+
+            return img;
+        }
         public static BitmapImage? GetRgbImage()
         {
 

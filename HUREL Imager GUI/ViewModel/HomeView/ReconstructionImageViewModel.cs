@@ -41,8 +41,8 @@ namespace HUREL_Imager_GUI.ViewModel
                     BitmapImage? tmpHybrid;
                     
                     //848 480 90 60    51 90  48 85
-                    (tmpCode, tmpCompton, tmpHybrid) = LahgiApi.GetRadation2dImage(timeInMiliSeconds, s2M, det_W, resImprov, m2D, 60, 90, imgSize, minValuePortion);
-
+                    //(tmpCode, tmpCompton, tmpHybrid) = LahgiApi.GetRadation2dImage(timeInMiliSeconds, s2M, det_W, resImprov, m2D, 60, 90, imgSize, minValuePortion);
+                    tmpCode = LahgiApi.GetTransPoseRadiationImage(timeInMiliSeconds, minValuePortion, 10);
                     if (tmpCode == null || tmpCompton == null || tmpHybrid == null)
                     {
                         StatusUpdateMutex.ReleaseMutex();

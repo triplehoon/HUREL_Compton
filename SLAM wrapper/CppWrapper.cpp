@@ -293,9 +293,10 @@ sBitMapUnmanged HUREL::Compton::LahgiCppWrapper::GetTransPoseRadiationImage(int 
 		}
 	}
 	
+	cv::Mat jetImage = RadiationImage::GetCV_32SAsJet(radImgReturn, minValuePortion);
 
 
-	return GetCvToPointers(radImgReturn, &ptrImg);
+	return GetCvToPointers(jetImage, &ptrImg);
 }
 
 
