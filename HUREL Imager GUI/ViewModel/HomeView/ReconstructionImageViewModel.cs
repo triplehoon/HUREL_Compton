@@ -120,7 +120,7 @@ namespace HUREL_Imager_GUI.ViewModel
             }
         }
 
-        private double det_W = 0.33;
+        private double det_W = 0.312;
         public double Det_W
         {
             get { return det_W; }

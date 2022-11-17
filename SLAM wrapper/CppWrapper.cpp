@@ -247,12 +247,14 @@ sBitMapUnmanged HUREL::Compton::LahgiCppWrapper::GetTransPoseRadiationImage(int 
 										   * LahgiControl::instance().t265toLACCPosTransformInv * LahgiControl::instance().t265toLACCPosTranslate;
 
 	cv::Mat p3 = RtabmapSlamControl::instance().GetCurrentPointsFrame(resolution);
+	cv::Mat xyz[3];
+	cv::split(p3, xyz);
 	std::vector<ListModeData> data = LahgiControl::instance().GetListedListModeData(timeInMiliSeconds);
-	cv::Mat radImg = cv::Mat::zeros(p3.rows, p3.cols, CV_32S);
+	cv::Mat radImgReturn = cv::Mat::zeros(p3.rows, p3.cols, CV_32S);
 	
 	if (data.size() == 0)
 	{
-		return GetCvToPointers(radImg, &ptrImg);
+		return GetCvToPointers(radImgReturn, &ptrImg);
 	}
 
 	long long startTime = data[0].InteractionTimeInMili.count();
@@ -275,16 +277,26 @@ sBitMapUnmanged HUREL::Compton::LahgiCppWrapper::GetTransPoseRadiationImage(int 
 			std::vector<ListModeData> newVec(first, last);
 
 			RadiationImage radImg = RadiationImage(newVec);
+			cv::Mat tempRadImg = cv::Mat::zeros(p3.rows, p3.cols, CV_32S);
 
+			for (int iPix = 0; iPix < radImgReturn.rows; ++iPix)
+			{
+				for (int jPix = 0; jPix < radImgReturn.cols; ++jPix)
+				{
+					Eigen::Vector3d point(xyz[0].at<float>(iPix, jPix), xyz[1].at<float>(iPix, jPix), xyz[2].at<float>(iPix, jPix));
 
+					tempRadImg.at<int>(iPix, jPix) = radImg.OverlayValue(point, eRadiationImagingMode::COMPTON);
+				}
+			}
 
+			radImgReturn += tempRadImg;
 			startIndex = i;
 		}
 	}
 	
 
 
-	return GetCvToPointers(radImg, &ptrImg);
+	return GetCvToPointers(radImgReturn, &ptrImg);
 }
 
 

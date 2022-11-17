@@ -3,7 +3,7 @@
 using namespace Eigen;
 
 // Makting Detector Response Image
-constexpr double Det_W = 0.300;
+constexpr double Det_W = 0.312;
 constexpr double Mask_W = 0.370;
 constexpr double Mpix = 37;
 constexpr double S2M = 1;
