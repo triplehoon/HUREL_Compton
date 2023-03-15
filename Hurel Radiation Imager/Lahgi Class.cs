@@ -247,17 +247,17 @@ namespace HUREL.Compton
         public static bool InitiateLaghi()
         {
             StatusMsg = "Initiating LAHGI";
-            //var tempEchk = new List<AddListModeDataEchk>();
+            var tempEchk = new List<AddListModeDataEchk>();
             ////tempEchk.Add(new AddListModeDataEchk(30, 90));
             ////tempEchk.Add(new AddListModeDataEchk(60, 100));
             ////tempEchk.Add(new AddListModeDataEchk(330, 370));
             ////tempEchk.Add(new AddListModeDataEchk(450, 570));
             ////tempEchk.Add(new AddListModeDataEchk(1200, 1350));
             
-            ////tempEchk.Add(new AddListModeDataEchk(600, 720));
+            tempEchk.Add(new AddListModeDataEchk(600, 720));
             //tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
             //tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
-            //Echks = tempEchk;
+            Echks = tempEchk;
             if (lahgiWrapper.Initiate(eModuleManagedType.QUAD))
             {
                 StatusMsg = "Successfully initiate Lahgi Software";

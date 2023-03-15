@@ -94,6 +94,7 @@ namespace HUREL {
 			RadiationImage(std::vector<ListModeData>& data);			
 			RadiationImage(std::vector<ListModeData>& data, double s2M, double det_W, double resImprov, double m2D, double hFov, double wFov);
 			double OverlayValue(Eigen::Vector3d point, eRadiationImagingMode mode);
+			double OverlayValue(Eigen::Vector4d point, eRadiationImagingMode mode);
 
 			static void OverlayRadimgToP3(cv::Mat& p3, const cv::Mat& radImg);
 		};

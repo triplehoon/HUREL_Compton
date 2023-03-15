@@ -250,11 +250,13 @@ sBitMapUnmanged HUREL::Compton::LahgiCppWrapper::GetTransPoseRadiationImage(int 
 	cv::Mat xyz[3];
 	cv::split(p3, xyz);
 	std::vector<ListModeData> data = LahgiControl::instance().GetListedListModeData(timeInMiliSeconds);
-	cv::Mat radImgReturn = cv::Mat::zeros(p3.rows, p3.cols, CV_32S);
+	cv::Mat radImgReturn = cv::Mat::ones(p3.rows, p3.cols, CV_32S);
 	
 	if (data.size() == 0)
 	{
-		return GetCvToPointers(radImgReturn, &ptrImg);
+		cv::Mat returenJet;
+
+		return GetCvToPointers(returenJet, &ptrImg);
 	}
 
 	long long startTime = data[0].InteractionTimeInMili.count();
@@ -266,7 +268,12 @@ sBitMapUnmanged HUREL::Compton::LahgiCppWrapper::GetTransPoseRadiationImage(int 
 		if (startTime != data[i].InteractionTimeInMili.count())
 		{
 			endIndex = i - 1;
-
+			startTime = data[i].InteractionTimeInMili.count();
+			if (endIndex - startIndex < 3000)
+			{
+				continue;
+			}
+			
 			Eigen::Matrix4d diffMatrix = data[startIndex].DetectorTransformation * deviceTransformation.inverse();
 			Eigen::Quaterniond quaternino(diffMatrix.topLeftCorner<3, 3>());
 			
@@ -282,8 +289,8 @@ sBitMapUnmanged HUREL::Compton::LahgiCppWrapper::GetTransPoseRadiationImage(int 
 			{
 				for (int jPix = 0; jPix < radImgReturn.cols; ++jPix)
 				{
-					Eigen::Vector3d point(xyz[0].at<float>(iPix, jPix), xyz[1].at<float>(iPix, jPix), xyz[2].at<float>(iPix, jPix));
-
+					Eigen::Vector4d point(xyz[0].at<float>(iPix, jPix), xyz[1].at<float>(iPix, jPix), xyz[2].at<float>(iPix, jPix), 1);
+					point = deviceTransformation*point;
 					tempRadImg.at<int>(iPix, jPix) = radImg.OverlayValue(point, eRadiationImagingMode::COMPTON);
 				}
 			}
@@ -292,8 +299,8 @@ sBitMapUnmanged HUREL::Compton::LahgiCppWrapper::GetTransPoseRadiationImage(int 
 			startIndex = i;
 		}
 	}
-	
-	cv::Mat jetImage = RadiationImage::GetCV_32SAsJet(radImgReturn, minValuePortion);
+	//RadiationImage::ShowCV_32SAsJet(radImgReturn, 600);
+	cv::Mat jetImage = RadiationImage::GetCV_32SAsJet(radImgReturn, 500, minValuePortion);
 
 
 	return GetCvToPointers(jetImage, &ptrImg);
