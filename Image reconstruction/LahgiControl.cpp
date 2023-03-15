@@ -210,7 +210,7 @@ bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		{
 			return false;
 		}
-		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], 0 + offsetZ);
+		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], -0.08 + offsetZ);
 		if (!mAbsorberModules[i]->IsModuleSet())
 		{
 			return false;
