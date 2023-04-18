@@ -192,7 +192,7 @@ void HUREL::Compton::LahgiWrapper::ContinueReconPointFor1m1m1m(List<array<double
 	}
 
 	mReconPointsCount = lmData.size();
-
+	Console::WriteLine(mReconPointsCount + " lmData Size \n");
 	vectors->Capacity = count;
 	
 	maxValue = mReconPointCloud->maxReoconValue;

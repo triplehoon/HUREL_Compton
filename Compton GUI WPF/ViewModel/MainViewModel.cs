@@ -25,7 +25,7 @@ using HUREL.Compton.LACC;
 using HUREL.Compton.RadioisotopeAnalysis;
 using MathNet.Numerics;
 using MathNet.Numerics.Statistics;
-
+using Python.Runtime;
 
 namespace Compton_GUI_WPF.ViewModel
 {
@@ -62,7 +62,6 @@ namespace Compton_GUI_WPF.ViewModel
 
             InitiateLACCAsync().SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
             TestFunction("").SafeFireAndForget(onException: ex => Debug.WriteLine(ex));
-            IsotopeInfos.Add(new IsotopeInfo("Co-60", "test", "est"));
         }
 
 
@@ -268,8 +267,25 @@ namespace Compton_GUI_WPF.ViewModel
 
                 isotopeInfos.Add(new IsotopeInfo(iso.IsotopeName, iso.IsotopeDescription, energy));
             }
-            IsotopeInfos = isotopeInfos;
+            foreach (var newIso in isotopeInfos)
+            {
+                bool isSameFound = false;
+                foreach (var oldIso in IsotopeInfos)
+                {
+                    if (newIso.Name == oldIso.Name)
+                    {
+                        isSameFound = true;
+                        continue;
+                    }
+                }
+                if (!isSameFound)
+                {
+                    IsotopeInfos.Add(newIso);
+                }
+            }
+            OnPropertyChanged(nameof(IsotopeInfos));
             sw.Stop();
+            Trace.WriteLine("Draw spectrum done");
         }
 
         

@@ -398,30 +398,34 @@
                                               OnContent="On"
                                               OnCommand="{Binding StartCommunicationAsyncCommand}"
                                               OffCommand="{Binding StopCommunicationCommand}"
-                                              IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
-                                              IsOn="{Binding IsSerialOpen}"
+                                              IsEnabled="True"
+                                              IsOn="True"
                                               />
+                            <!--IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"-->
+                            <!--IsOn="{Binding IsSerialOpen}"-->
                             <TextBlock Text="FPGA Power" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <mah:ToggleSwitch Grid.Column="3" Grid.Row="0" 
                                               OffContent="Off"
                                               OnContent="On"
                                               OnCommand="{Binding StartFpgaCommand}"
                                               OffCommand="{Binding StopFpgaCommand}"
-                                              IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
-                                              IsOn="{Binding IsFPGAOn}"
+                                              IsEnabled="True"
+                                             IsOn="True"
                                              />
+                            <!--IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"-->
+                            <!--IsOn="{Binding IsFPGAOn}"-->
                             <TextBlock Text="High Voltage" Grid.Column="4" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <mah:ToggleSwitch Grid.Column="5" Grid.Row="0" 
                                               OffContent="{Binding HvModuleVoltage}"
-                                              OnContent="{Binding HvModuleVoltage}"
+                                              OnContent="900 V"
                                               OnCommand="{Binding StartHvModuleCommand}"
                                               OffCommand="{Binding StopHvModuleCommand}"
                                               IsEnabled="{Binding Path=IsCommunicating, Converter={StaticResource ConvInverseBoolean}}"
-                                              IsOn="{Binding IsHvModuleOn}"/>
+                                              IsOn="True"/>
                             <TextBlock Text="Battery" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <StackPanel Orientation="Horizontal"  Grid.Column="3" Grid.Row="1">
-                                <mah:MetroProgressBar Width="60" Value="{Binding BatteryVoltageDiv100}" BorderBrush="Gray" BorderThickness="1" Foreground="Green" Margin="0,7,0,7"/>
-                                <TextBlock Margin="5,0,0,0" Text="{Binding BatteryVoltage}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <mah:MetroProgressBar Width="60" Value="70" BorderBrush="Gray" BorderThickness="1" Foreground="Green" Margin="0,7,0,7"/>
+                                <TextBlock Margin="5,0,0,0" Text="12 V" HorizontalAlignment="Left" VerticalAlignment="Center"/>
 
 
 

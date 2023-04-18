@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace HUREL.Compton.RadioisotopeAnalysis
 {
@@ -250,6 +251,8 @@ namespace HUREL.Compton.RadioisotopeAnalysis
 
 
         }
+        private static Mutex PyMutex = new Mutex();
+
         public List<double> FindPeaks(float ref_x, float ref_fwhm, float fwhm_at_0, float min_snr)
         {
 
@@ -263,13 +266,21 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 ernergyBin.Add(HistoEnergies[i].Energy + BinSize / 2);
                 energyBinCount.Add(HistoEnergies[i].Count);
             }
-            PythonEngine.Initialize();
-            //var m_threadState = PythonEngine.BeginAllowThreads(); ;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            PyMutex.WaitOne();
+            if (!PythonEngine.IsInitialized)
+            {
+                PythonEngine.Initialize();
+                PythonEngine.BeginAllowThreads();
+            }
+
+            IntPtr gs = PythonEngine.AcquireLock();
 
             using (Py.GIL())
             {
-                dynamic np = Py.Import("numpy");
-                dynamic nasagamma = Py.Import("nasagamma");
+                dynamic np = PythonEngine.ImportModule("numpy");
+                dynamic nasagamma = PythonEngine.ImportModule("nasagamma");
                 dynamic sp = nasagamma.spectrum;
                 dynamic ps = nasagamma.peaksearch;
 
@@ -285,17 +296,24 @@ namespace HUREL.Compton.RadioisotopeAnalysis
                 dynamic search = ps.PeakSearch(spect, ref_x, ref_fwhm, fwhm_at_0, min_snr);
                 dynamic peakIdx = search.peaks_idx;
 
+                dynamic snr = search.snr;
+
                 for (int i = 0; i < (int)np.size(peakIdx); ++i)
                 {
-                    if (peakIdx[i] + 2 < (int)np.size(erg))
+                    if (peakIdx[i] < (int)np.size(erg))
                     {
-                        PeakE.Add((double)erg[peakIdx[i] + 2]);
+                        PeakE.Add((double)erg[peakIdx[i]]);
                     }
 
                 }
             }
-            //PythonEngine.EndAllowThreads(m_threadState);
-            // PythonEngine.Shutdown();
+            PythonEngine.ReleaseLock(gs);
+
+            PyMutex.ReleaseMutex();
+            sw.Stop();
+            //LogManager.GetLogger("Energy Spectrum").Info($"Elapsed: {sw.ElapsedMilliseconds} [ms]");
+
+
 
 
             return PeakE;

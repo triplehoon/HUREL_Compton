@@ -113,15 +113,16 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\Program Files %28x86%29\Open3D_MD\include;C:\Program Files (x86)\Open3D_MD\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Image reconstruction;$(SolutionDir)\Realsense Control Library</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv\build\include;C:\open3d-devel-windows-amd64-0.15.1\include;C:\open3d-devel-windows-amd64-0.15.1\include\open3d\3rdparty;C:\Program Files (x86)\Intel RealSense SDK 2.0\include;$(SolutionDir)\Image reconstruction;$(SolutionDir)\Realsense Control Library</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>Default</LanguageStandard>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Open3D_MD\lib;C:\Program Files %28x86%29\Intel RealSense SDK 2.0\lib\x64;$(SolutionDir)\Image reconstruction;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>realsense2.lib;Open3D.lib;Open3D_3rdparty_assimp_assimp-vc142-mt.lib;Open3D_3rdparty_assimp_IrrXML.lib;Open3D_3rdparty_filament_backend.lib;Open3D_3rdparty_filament_bluegl.lib;Open3D_3rdparty_filament_bluevk.lib;Open3D_3rdparty_filament_filabridge.lib;Open3D_3rdparty_filament_filaflat.lib;Open3D_3rdparty_filament_filamat_lite.lib;Open3D_3rdparty_filament_filament.lib;Open3D_3rdparty_filament_filameshio.lib;Open3D_3rdparty_filament_geometry.lib;Open3D_3rdparty_filament_ibl.lib;Open3D_3rdparty_filament_image.lib;Open3D_3rdparty_filament_meshoptimizer.lib;Open3D_3rdparty_filament_smol-v.lib;Open3D_3rdparty_filament_utils.lib;Open3D_3rdparty_glew.lib;Open3D_3rdparty_glfw3.lib;Open3D_3rdparty_imgui.lib;Open3D_3rdparty_jpeg.lib;Open3D_3rdparty_jsoncpp.lib;Open3D_3rdparty_libpng.lib;Open3D_3rdparty_lzf.lib;Open3D_3rdparty_mkl_mkl_core.lib;Open3D_3rdparty_mkl_mkl_intel_ilp64.lib;Open3D_3rdparty_mkl_mkl_sequential.lib;Open3D_3rdparty_mkl_mkl_tbb_thread.lib;Open3D_3rdparty_mkl_tbb_static.lib;Open3D_3rdparty_qhullcpp.lib;Open3D_3rdparty_qhull_r.lib;Open3D_3rdparty_rply.lib;Open3D_3rdparty_tbb_tbbmalloc_static.lib;Open3D_3rdparty_tbb_tbb_static.lib;Open3D_3rdparty_tinyfiledialogs.lib;Open3D_3rdparty_zlib.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\open3d-devel-windows-amd64-0.15.1\lib;C:\Program Files %28x86%29\Intel RealSense SDK 2.0\lib\x64;$(SolutionDir)\Image reconstruction;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>realsense2.lib;Open3D.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/force:multiple %(AdditionalOptions) /ignore:4099 /ignore:4248 /ignore:4088 /ignore:4006</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -130,6 +130,7 @@ namespace Compton_GUI_WPF.ViewModel
                     bool isFPGAStart = await Task.Run(() => FPGAControl.Start_usb(out status)).ConfigureAwait(false);
                     if (isFPGAStart) 
                     {
+                        IsotopeInfos.Clear();
                         LahgiWrapper_Static.ResetListmodeData();
                         for (uint i = 0; i < 16; ++i)
                         {
@@ -212,17 +213,18 @@ namespace Compton_GUI_WPF.ViewModel
         private bool IsAddingListModeData;
         private void AddListModeData()
         {
-            List<double[]> UnmanagedEcks = new List<double[]>();
-            foreach(var eck in Echks)
-            {
-                double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
-                UnmanagedEcks.Add(eckUnmanaged);
-            }
+            
 
             //LACC_Control_Static.ResetLMData();
             while (IsAddingListModeData)
             {
                 ushort[] item;
+                List<double[]> UnmanagedEcks = new List<double[]>();
+                foreach (var eck in Echks)
+                {
+                    double[] eckUnmanaged = new double[] { eck.MinE, eck.MaxE };
+                    UnmanagedEcks.Add(eckUnmanaged);
+                }
                 while (FPGAControl.ShortArrayQueue.TryTake(out item))
                 {
                     LahgiWrapper_Static.AddListModeDataWraper(item, UnmanagedEcks);
