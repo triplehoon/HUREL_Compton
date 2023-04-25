@@ -244,9 +244,9 @@ cv::Mat ConvertDepthTo3DPoint(cv::Mat& depthI, float fx, float fy, float cx, flo
 	//ShowCV_32FAsJet(y_over_z, 600);
 	cv::Mat before = 1 + x_over_z.mul(x_over_z) + y_over_z.mul(y_over_z);
 	cv::sqrt(before, sqrtVlaue);
-	chans[2] = depth.mul(1 / sqrtVlaue) / 1000;
-	chans[1] = x_over_z .mul(depth) / 1000;
-	chans[0] = y_over_z.mul(depth) / 1000;
+	chans[2] = depth.mul(1 / sqrtVlaue);
+	chans[1] = x_over_z .mul(depth);
+	chans[0] = y_over_z.mul(depth);
 
 	cv::merge(chans, 3, points);
 
@@ -390,7 +390,7 @@ cv::Mat HUREL::Compton::RtabmapSlamControl::GetCurrentPointsFrame(double res)
 
 			if (dImg.cols > 0)
 			{
-				img = ConvertDepthTo3DPoint(dImgSmall, fxValue, fyValue, cxValue, cyValue);
+				img = ConvertDepthTo3DPoint(dImg, fxValue, fyValue, cxValue, cyValue);
 			}
 		}
 	}
@@ -635,13 +635,13 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointClo
 	std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	std::string fileName = std::to_string(timeInMili.count());
 	open3d::geometry::PointCloud returnPC = *tmpOpen3dPc.VoxelDownSample(0.05);
-	/*open3d::io::WritePointCloudOption option;
+	open3d::io::WritePointCloudOption option;
 	open3d::io::WritePointCloudToPLY(fileName + ".ply", returnPC, option);
 
 
 	cv::imwrite(fileName + "_depth.png", RtabmapSlamControl::instance().GetCurrentDepthFrame());
 	cv::imwrite(fileName + "_rgb.png", RtabmapSlamControl::instance().GetCurrentVideoFrame());
-*/
+
 
 
 	return returnPC;
