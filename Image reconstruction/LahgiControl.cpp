@@ -204,7 +204,7 @@ bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		double gain[10];
 		
 		
-		double offsetZ = -(0.245);
+		double offsetZ = -(0.260);
 		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i] , -0.055);		
 		if (!mScatterModules[i]->IsModuleSet())
 		{

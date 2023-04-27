@@ -163,81 +163,79 @@ namespace HUREL_Imager_GUI.ViewModel
 
                         
                         SpectrumEnergyNasa copySpect = new SpectrumEnergyNasa (spectrum);
-                        //if (isBa133Found)
-                        //{
-                        //    for (int i =0; i < copySpect.HistoEnergies.Count; i++)
-                        //    {
-                        //        if ((copySpect.HistoEnergies[i].Energy < 400 && copySpect.HistoEnergies[i].Energy > 300))
-                        //        {
+                        /*
+                        if (isBa133Found)
+                        {
+                            for (int i =0; i < copySpect.HistoEnergies.Count; i++)
+                            {
+                                if ((copySpect.HistoEnergies[i].Energy < 400 && copySpect.HistoEnergies[i].Energy > 300))
+                                {
 
-                        //        }
-                        //        else
-                        //        {
-                        //            copySpect.HistoEnergies[i].Count = 0;
-                        //        }
-                        //    }
-                        //    ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>(copySpect.HistoEnergies);
-
-
-                        //    //var tempEchk = new List<AddListModeDataEchk>();
-                        //    ////tempEchk.Add(new AddListModeDataEchk(30, 90));
-                        //    ////tempEchk.Add(new AddListModeDataEchk(60, 100));
-                        //    ////tempEchk.Add(new AddListModeDataEchk(330, 370));
-                        //    ////tempEchk.Add(new AddListModeDataEchk(450, 570));
-                        //    ////tempEchk.Add(new AddListModeDataEchk(1200, 1350));
-                        //    ////tempEchk.Add(new AddListModeDataEchk(60, 100));
-
-                        //    //tempEchk.Add(new AddListModeDataEchk(330, 370));
-                        //    ////tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
-                        //    ////tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
-                        //    //LahgiApi.Echks = tempEchk;
-                        //}
-                        //else
-                        //{
-                        //    if (isCo60Found)
-                        //    {
-
-                        //        for (int i = 0; i < copySpect.HistoEnergies.Count; i++)
-                        //        {
+                                }
+                                else
+                                {
+                                    copySpect.HistoEnergies[i].Count = 0;
+                                }
+                            }
+                            ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>(copySpect.HistoEnergies);
 
 
-                        //            if ((copySpect.HistoEnergies[i].Energy < 1173 + 70 && copySpect.HistoEnergies[i].Energy > 1173 - 70) || (copySpect.HistoEnergies[i].Energy < 1333 + 50 && copySpect.HistoEnergies[i].Energy > 1333 - 50))
-                        //            {
+                            var tempEchk = new List<AddListModeDataEchk>();
+                            //tempEchk.Add(new AddListModeDataEchk(30, 90));
+                            //tempEchk.Add(new AddListModeDataEchk(60, 100));
+                            //tempEchk.Add(new AddListModeDataEchk(330, 370));
+                            //tempEchk.Add(new AddListModeDataEchk(450, 570));
+                            //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
+                            //tempEchk.Add(new AddListModeDataEchk(60, 100));
 
-                        //            }
-                        //            else
-                        //            {
-                        //                copySpect.HistoEnergies[i].Count = 0;
-                        //            }
-                        //        }
-                        //        ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>(copySpect.HistoEnergies);
+                            tempEchk.Add(new AddListModeDataEchk(330, 370));
+                            //tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
+                            //tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
+                            LahgiApi.Echks = tempEchk;
+                        }
+                        else
+                        {
+                            if (isCo60Found)
+                            {
 
-
-
-                        //        var tempEchk = new List<AddListModeDataEchk>();
-                        //        //tempEchk.Add(new AddListModeDataEchk(30, 90));
-                        //        //tempEchk.Add(new AddListModeDataEchk(60, 100));
-                        //        //tempEchk.Add(new AddListModeDataEchk(330, 370));
-                        //        //tempEchk.Add(new AddListModeDataEchk(450, 570));
-                        //        //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
-                        //        //tempEchk.Add(new AddListModeDataEchk(60, 100));
-
-                        //        //tempEchk.Add(new AddListModeDataEchk(330, 370));
-                        //        tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
-                        //        tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
-                        //        LahgiApi.Echks = tempEchk;
-                        //    }
-                        //    else
-                        //    {
-                        //        ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>();
-
-                        //        var tempEchk = new List<AddListModeDataEchk>();
-                        //        LahgiApi.Echks = tempEchk;
-                        //    }
+                                for (int i = 0; i < copySpect.HistoEnergies.Count; i++)
+                                {
 
 
-                        //}
+                                    if ((copySpect.HistoEnergies[i].Energy < 1173 + 70 && copySpect.HistoEnergies[i].Energy > 1173 - 70) || (copySpect.HistoEnergies[i].Energy < 1333 + 50 && copySpect.HistoEnergies[i].Energy > 1333 - 50))
+                                    {
 
+                                    }
+                                    else
+                                    {
+                                        copySpect.HistoEnergies[i].Count = 0;
+                                    }
+                                }
+                                ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>(copySpect.HistoEnergies);
+
+
+
+                                var tempEchk = new List<AddListModeDataEchk>();
+                                //tempEchk.Add(new AddListModeDataEchk(30, 90));
+                                //tempEchk.Add(new AddListModeDataEchk(60, 100));
+                                //tempEchk.Add(new AddListModeDataEchk(330, 370));
+                                //tempEchk.Add(new AddListModeDataEchk(450, 570));
+                                //tempEchk.Add(new AddListModeDataEchk(1200, 1350));
+                                //tempEchk.Add(new AddListModeDataEchk(60, 100));
+
+                                //tempEchk.Add(new AddListModeDataEchk(330, 370));
+                                tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
+                                tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
+                                LahgiApi.Echks = tempEchk;
+                            }
+                            else
+                            {
+                                ImagingEnergySpectrum = new ObservableCollection<HistoEnergy>();
+                            }
+
+
+                        }
+                        */
                     }
 
 

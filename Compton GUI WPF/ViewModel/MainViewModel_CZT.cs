@@ -190,7 +190,7 @@ namespace Compton_GUI_WPF.ViewModel
                 OnPropertyChanged(nameof(CZTMessage));
             }
         }
-
+        
         static void ProcessImgData(SRE3021ImageData imgData)
         {
             List<int> interactionX = new List<int>();
@@ -233,6 +233,7 @@ namespace Compton_GUI_WPF.ViewModel
 
             DataCountStatic++;
         }
+
         static int DataCountStatic = 0;
 
         const double p1 = 0.2987;

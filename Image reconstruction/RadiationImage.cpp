@@ -12,7 +12,7 @@ constexpr double SP = S2M - M2D;// Source to Mask distance(mm)
 constexpr double M = 1 + M2D / S2M; // projection ratio((a + b) / a)
 constexpr double Dproj = Det_W / (Mask_W / Mpix * M); // projection mask to Detector pixel Length(mm)
 constexpr double ReconPlaneWidth = S2M / M2D * Det_W;
-constexpr double ResImprov = 10;
+constexpr double ResImprov = 5;
 int PixelCount = static_cast<int>(round(Dproj * ResImprov));
 
 inline int findIndex(double value, double min, double pixelSize)
@@ -203,10 +203,20 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data)
 	int codedImageCount = 0;
 	int comptonImageCount = 0;
 
+	#pragma omp parallel for
 	for (int i = 0; i < data.size(); ++i)
 	{
 
 		ListModeData& lm = data[i];
+		//if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 600 || lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy > 720)
+		//{
+		//	continue;
+		//}
+		/*if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 1000 || lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy > 1500)
+		{
+			continue;
+		}*/
+
 		if (lm.Type == eInterationType::CODED)
 		{
 			//continue;
@@ -222,6 +232,9 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data)
 			}
 		}
 
+
+		
+		
 		if (lm.Type == eInterationType::COMPTON)
 		{	
 			if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 200)
@@ -241,8 +254,6 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data)
 					imgPoint[1] = imagePlaneY;
 					imgPoint[2] = imagePlaneZ;
 					comptonImgPtr[PixelCount * (PixelCount - j - 1) + PixelCount - i - 1] += ReconPointCloud::SimpleComptonBackprojectionUntransformed(lm, imgPoint);
-				
-				
 				}
 			}
 
@@ -454,7 +465,11 @@ double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadi
 	Eigen::Vector3d detectorNormalVector(0, 0, 1);
 	Eigen::Vector4d point4d(point.x(), point.y(), point.z(), 1);
 	Eigen::Vector4d transformedPoint = ((mDetectorTransformation).inverse()* point4d);
-
+	if (transformedPoint.z() <= imagePlaneZ || transformedPoint.z() >= 5)
+	{
+		//std::cout << transformedPoint << std::endl;
+		return 0;
+	}
 	double xPoseOnImgPlane = transformedPoint.x() * imagePlaneZ / transformedPoint.z();
 	double yPoseOnImgPlane = transformedPoint.y() * imagePlaneZ / transformedPoint.z();
 
@@ -494,55 +509,6 @@ double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadi
 
 
 	
-}
-
-
-double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector4d point, eRadiationImagingMode mode)
-{
-
-	constexpr double imagePlaneZ = S2M + M2D + 0.011;
-	Eigen::Vector3d detectorNormalVector(0, 0, 1);
-	Eigen::Vector4d transformedPoint = ((mDetectorTransformation).inverse() * point);
-
-	double xPoseOnImgPlane = transformedPoint.x() * imagePlaneZ / transformedPoint.z();
-	double yPoseOnImgPlane = transformedPoint.y() * imagePlaneZ / transformedPoint.z();
-
-
-	int iY = findIndex(xPoseOnImgPlane, -ReconPlaneWidth / 2, ReconPlaneWidth / PixelCount);
-	int iX = findIndex(yPoseOnImgPlane, -ReconPlaneWidth / 2, ReconPlaneWidth / PixelCount);
-	int tempiY = iY;
-	iY = iX;
-	iX = tempiY;
-
-	if (iX >= 0 && iY >= 0 && iX < PixelCount && iY < PixelCount)
-	{
-		__int32 value = 0;
-		switch (mode)
-		{
-		case HUREL::Compton::eRadiationImagingMode::CODED:
-			value = static_cast<__int32*>(static_cast<void*>(mCodedImage.ptr()))[PixelCount * (PixelCount - iY) + PixelCount - iX];
-			break;
-		case HUREL::Compton::eRadiationImagingMode::COMPTON:
-			value = static_cast<__int32*>(static_cast<void*>(mComptonImage.ptr()))[PixelCount * (PixelCount - iY) + PixelCount - iX];
-		case HUREL::Compton::eRadiationImagingMode::HYBRID:
-			value = static_cast<__int32*>(static_cast<void*>(mHybridImage.ptr()))[PixelCount * (PixelCount - iY) + PixelCount - iX];
-			break;
-		default:
-			assert(false);
-			return 0.0;
-			break;
-		}
-		return static_cast<double>(value);
-	}
-	else
-	{
-		return 0.0;
-	}
-
-
-
-
-
 }
 
 void HUREL::Compton::RadiationImage::OverlayRadimgToP3(cv::Mat& p3, const cv::Mat& radImg)
