@@ -77,7 +77,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate()
 			}
 		}
 		//cfgD455.enable_device("935322071433");	
-
+		
 		*outMessage = "RtabmapSlamControl: d455 connencted with usb " + usbInfo + " \n";
 
 	}
@@ -116,7 +116,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate()
 		mCamera->setDepthResolution(848, 480);
 
 		const rtabmap::Transform test(0.000f, 0.13f, 0.0f, 0.0f, 0.0f, 0.0f);
-		mCamera->setDualMode(true, test);
+		//mCamera->setDualMode(false, test); // t265 같이 사용하는 모드. t265 없을시 false.
 
 		//mCamera->setOdomProvided(true, false, true);
 		//mCamera->setImagesRectified(true);
@@ -124,6 +124,7 @@ bool HUREL::Compton::RtabmapSlamControl::Initiate()
 	catch(int exp)
 	{
 		*outMessage += "RtabmapSlamControl: CameraRealSense2 error " + exp ;
+
 	}
 	if (!mCamera->init(".", ""))
 	{
@@ -202,6 +203,22 @@ void HUREL::Compton::RtabmapSlamControl::StopVideoStream()
 static std::mutex videoStreamMutex;
 static std::mutex pcMutex;
 
+void HUREL::Compton::RtabmapSlamControl::IntrinsicParamters()
+{
+	rs2::pipeline pipeline;
+	rs2::config config;
+	config.enable_stream(RS2_STREAM_DEPTH);
+
+	rs2::pipeline_profile pipeline_profile = pipeline.start(config);
+	rs2::depth_sensor depth_sensor = pipeline_profile.get_device().first<rs2::depth_sensor>();
+	rs2_intrinsics intrinsics = depth_sensor.get_stream_profiles()[0].as<rs2::video_stream_profile>().get_intrinsics();
+
+	std::cout << "Width: " << intrinsics.width << std::endl;
+	std::cout << "Height: " << intrinsics.height << std::endl;
+	std::cout << "FX: " << intrinsics.fx << std::endl;
+	std::cout << "FY: " << intrinsics.fy << std::endl;
+	
+}
 
 cv::Mat ConvertDepthTo3DPoint(cv::Mat& depthI, float fx, float fy, float cx, float cy)
 {
@@ -235,7 +252,7 @@ cv::Mat ConvertDepthTo3DPoint(cv::Mat& depthI, float fx, float fy, float cx, flo
 			vMat.col(v).setTo(v);
 		}
 	}
-	
+
 
 	cv::Mat x_over_z = (cx - uMat) /fx;
 	cv::Mat y_over_z = (cy - vMat) / fy;
@@ -275,10 +292,10 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			
 			auto img = data.imageRaw();
 			auto imgDepth = data.depthOrRightRaw();
-			float fxValue = static_cast<float>(data.stereoCameraModels()[0].left().fx());
-			float fyValue = static_cast<float>(data.stereoCameraModels()[0].left().fy());
-			float cxValue = static_cast<float>(data.stereoCameraModels()[0].left().cx());
-			float cyValue = static_cast<float>(data.stereoCameraModels()[0].left().cy());
+			//float fxValue = static_cast<float>(data.stereoCameraModels()[0].left().fx());
+			//float fyValue = static_cast<float>(data.stereoCameraModels()[0].left().fy());
+			//float cxValue = static_cast<float>(data.stereoCameraModels()[0].left().cx());
+			//float cyValue = static_cast<float>(data.stereoCameraModels()[0].left().cy());
 			
 			videoStreamMutex.lock();
 			if (img.cols > 0)
@@ -288,7 +305,7 @@ void HUREL::Compton::RtabmapSlamControl::VideoStream()
 			if (imgDepth.cols > 0)
 			{
 				mCurrentDepthFrame = imgDepth;
-				cv::Mat point3 = ConvertDepthTo3DPoint(imgDepth, fxValue, fyValue, cxValue, cyValue);
+				//cv::Mat point3 = ConvertDepthTo3DPoint(imgDepth, fxValue, fyValue, cxValue, cyValue);
 			}
 			if (mOdo != nullptr && &mOdo->getPose() != nullptr && mIsSlamPipeOn == true )
 			{
@@ -553,6 +570,7 @@ void HUREL::Compton::RtabmapSlamControl::SlamPipe()
 		optimizedPoses = tmpOptimizedPoses;
 		std::vector < Eigen::Matrix4d> tempPoses;
 		tempPoses.reserve(optimizedPoses.size());
+		
 		//https://cpp.hotexamples.com/examples/-/Rtabmap/-/cpp-rtabmap-class-examples.html
 		for (std::map<int, rtabmap::Transform>::iterator iter = optimizedPoses.begin(); iter != optimizedPoses.end(); ++iter)
 		{
@@ -632,16 +650,18 @@ open3d::geometry::PointCloud HUREL::Compton::RtabmapSlamControl::GetSlamPointClo
 		tmpOpen3dPc.points_.push_back(inputpoint);
 	}
 
+	open3d::geometry::PointCloud returnPC = *tmpOpen3dPc.VoxelDownSample(0.05);
+
 	std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	std::string fileName = std::to_string(timeInMili.count());
-	open3d::geometry::PointCloud returnPC = *tmpOpen3dPc.VoxelDownSample(0.05);
 	open3d::io::WritePointCloudOption option;
-	open3d::io::WritePointCloudToPLY(fileName + ".ply", returnPC, option);
+	//open3d::io::WritePointCloudToPLY(fileName + ".ply", returnPC, option);
 
 
-	cv::imwrite(fileName + "_depth.png", RtabmapSlamControl::instance().GetCurrentDepthFrame());
-	cv::imwrite(fileName + "_rgb.png", RtabmapSlamControl::instance().GetCurrentVideoFrame());
-
+	timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	fileName = std::to_string(timeInMili.count());
+	//cv::imwrite(fileName + "_depth.png", RtabmapSlamControl::instance().GetCurrentDepthFrame());
+	//cv::imwrite(fileName + "_rgb.png", RtabmapSlamControl::instance().GetCurrentVideoFrame());
 
 
 	return returnPC;

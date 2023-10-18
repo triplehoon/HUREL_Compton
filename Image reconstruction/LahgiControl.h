@@ -24,19 +24,20 @@
 #define ACTIVE_AREA_LENGTH 0.
 
 namespace HUREL {
-	namespace Compton {	
+	namespace Compton {
 		class RadiationImage;
 		class ReconPointCloud;
 
-		struct sEnergyCheck
+		//230911 sbkwon : ListModeData.h 로 위치 이동
+		/*struct sEnergyCheck
 		{
 			double minE;
 			double maxE;
-		};
-		
+		};*/
+
 		class LahgiControl
 		{
-		private:		
+		private:
 
 			Module** mScatterModules;  //./Module information/MONOScatter1/Gain.csv, LUT.csv ...
 			Module** mAbsorberModules;	//./Module information/QUADScatter1/Gain.csv, LUT.csv ...
@@ -44,13 +45,13 @@ namespace HUREL {
 			tbb::concurrent_vector <ListModeData> mListedListModeData;
 			tbb::concurrent_vector <EnergyTimeData> mListedEnergyTimeData;
 
-			
+
 			LahgiControl();
-			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds& timeInMili);
+			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds& timeInMili, sEnergyCheck echk);//230911 sbkwon : Energy check 추가 - 다중 핵종 분류
 			inline static ListModeData MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation);
 			//CodeMaks Setting
 			double mMaskThickness = 0.006;
-		
+
 			tbb::concurrent_queue<std::array<unsigned short, 144>> mShortByteDatas;
 			std::future<void> ListModeDataListeningThread;
 			std::mutex eChksMutex;
@@ -64,15 +65,15 @@ namespace HUREL {
 
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-			static LahgiControl& instance();
+				static LahgiControl& instance();
 
 			void SetEchk(std::vector<sEnergyCheck> eChksInput);
 
 			bool SetType(eMouduleType type);
-			
+
 			~LahgiControl();
-			void AddListModeData(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation);
-			void AddListModeDataEigen(const unsigned short (byteData)[144], Eigen::Matrix4d deviceTransformation);
+			void AddListModeData(const unsigned short(byteData)[144], Eigen::Matrix4d deviceTransformation);
+			void AddListModeDataEigen(const unsigned short(byteData)[144], Eigen::Matrix4d deviceTransformation);
 			void AddListModeDataWithTransformation(const unsigned short byteData[144]);
 			void AddListModeDataWithTransformationVerification(const unsigned short byteData[]);
 			void AddListModeDataWithTransformationLoop(std::array<unsigned short, 144> byteData, std::chrono::milliseconds& timeInMili, Eigen::Matrix4d& deviceTransformation);
@@ -82,21 +83,23 @@ namespace HUREL {
 			const std::vector<ListModeData> GetListedListModeData() const;
 			std::vector<ListModeData> GetListedListModeData();
 			const std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds) const;
-		    std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds);
-			
+			std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds);
+			std::vector<ListModeData> GetListedListModeData(sEnergyCheck echk);//230911 sbkwon : Energy Check 적용
+			std::vector<ListModeData> GetListedListModeData(long long timeInMililseconds, sEnergyCheck echk);	//230911 sbkwon : Energy Check 적용
+
 			std::vector<EnergyTimeData> GetListedEnergyTimeData();
 			const std::vector<EnergyTimeData> GetListedEnergyTimeData(long long timeInMililseconds) const;
 			std::vector<EnergyTimeData> GetListedEnergyTimeData(long long timeInMililseconds);
 
 
-						
+
 			size_t GetListedListModeDataSize();
 
 			void ResetListedListModeData();
-			void SaveListedListModeData(std::string filePath);			
+			void SaveListedListModeData(std::string filePath);
 			bool LoadListedListModeData(std::string filePath);
 
-			EnergySpectrum& GetEnergySpectrum(int fpgaChannelNumber);	
+			EnergySpectrum& GetEnergySpectrum(int fpgaChannelNumber);
 			EnergySpectrum GetSumEnergySpectrum();
 			EnergySpectrum GetAbsorberSumEnergySpectrum();
 			EnergySpectrum GetScatterSumEnergySpectrum();
@@ -118,6 +121,7 @@ namespace HUREL {
 			Eigen::Matrix4d t265toLACCPosTransform;
 			Eigen::Matrix4d t265toLACCPosTransformInv;
 			Eigen::Matrix4d t265toLACCPosTranslate;
+			Eigen::Matrix4d t265toLACCPosTransCalc;	//231012 sbkwon : 다음식 사전 연산(현재 위치 보정용), t265toLACCPosTransform * t265toLACCPosTransformInv * t265toLACCPosTranslate;
 		};
 	}
 }

@@ -18,6 +18,8 @@ namespace HUREL_Imager_GUI
     /// </summary>
     public partial class App : Application        
     {
+        internal static MainWindowViewModel? MainVM { get; private set; }   //230921 sbkwon : global variable
+
         private static readonly ILog logger = LogManager.GetLogger(typeof(App));
         public App()
         {
@@ -34,6 +36,7 @@ namespace HUREL_Imager_GUI
           
             MainWindow = new MainWindow();
             MainWindow.DataContext = new MainWindowViewModel();
+            MainVM = MainWindow.DataContext as MainWindowViewModel;//230921 sbkwon : global variable
             MainWindow.Show();
             LahgiApi.InitiateLaghi();
             LahgiApi.InititateRtabmap();

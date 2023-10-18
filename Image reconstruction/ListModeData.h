@@ -15,7 +15,7 @@ namespace HUREL {
 		{
 			NONE,
 			COMPTON,
-			CODED			
+			CODED
 		};
 
 		/// <summary>
@@ -25,14 +25,26 @@ namespace HUREL {
 		{
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			Eigen::Vector4d RelativeInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""), 1);
-			Eigen::Vector4d TransformedInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""),1);
-			double InteractionEnergy = 0;  
+			Eigen::Vector4d TransformedInteractionPoint = Eigen::Vector4d(nan(""), nan(""), nan(""), 1);
+			double InteractionEnergy = 0;
+		};
+
+		//230911 sbkwon : 위치 이동
+		struct sEnergyCheck
+		{
+			double minE;
+			double maxE;
+
+			bool operator==(const sEnergyCheck& other) const	//230911 sbkwon : 비교 추가, 다중 핵종 분석 시 사용
+			{
+				return (minE == other.minE && maxE == other.maxE);
+			}
 		};
 
 		class ListModeData
 		{
 		private:
-			
+
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 			eInterationType Type = eInterationType::NONE;
@@ -41,6 +53,8 @@ namespace HUREL {
 			//time_t InteractionTime = 0;
 			std::chrono::milliseconds InteractionTimeInMili = std::chrono::milliseconds(0);
 			Eigen::Matrix4d DetectorTransformation = Eigen::Matrix4d::Zero();
+
+			sEnergyCheck EnergyCheck;	//230911 sbkwpn : Energy check 추가 - 다중 핵종 분류
 
 			std::string WriteListModeData();
 			bool ReadListModeData(std::string data);
@@ -54,7 +68,7 @@ namespace HUREL {
 
 		class PlaneReconsturctImage
 		{
-		private: 
+		private:
 			std::vector<HUREL::Compton::ListModeData> mListedListModeData;
 			cv::Mat mComptonImage;
 			cv::Mat mCodedImage;
@@ -64,7 +78,7 @@ namespace HUREL {
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 		public:
-			
+
 			double Distance;
 
 

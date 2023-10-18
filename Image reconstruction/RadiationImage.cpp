@@ -146,21 +146,21 @@ cv::Mat HUREL::Compton::RadiationImage::GetCV_32SAsJet(cv::Mat img, int size, do
 	}
 	cv::Mat normImg(img.rows, img.cols, CV_8UC1, cv::Scalar(0));
 	double minValue;
-	double maxValue;	
+	double maxValue;
 	cv::minMaxIdx(img, nullptr, &maxValue);
 	minValue = maxValue * minValuePortion;
 	for (int i = 0; i < img.rows; i++)
 	{
 		for (int j = 0; j < img.cols; j++)
-		{			
-			if (img.at<int>(i, j) < maxValue* minValuePortion )
+		{
+			if (img.at<int>(i, j) < maxValue * minValuePortion)
 			{
 				normImg.at<uchar>(i, j) = 0;
 			}
 			else
 			{
 				normImg.at<uchar>(i, j) = static_cast<uchar>((static_cast<double>(img.at<int>(i, j)) - minValue) / (maxValue - minValue) * 255);
-			}			
+			}
 		}
 	}
 	cv::Mat colorImg;
@@ -203,7 +203,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data)
 	int codedImageCount = 0;
 	int comptonImageCount = 0;
 
-	#pragma omp parallel for
+#pragma omp parallel for
 	for (int i = 0; i < data.size(); ++i)
 	{
 
@@ -233,10 +233,10 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data)
 		}
 
 
-		
-		
+
+
 		if (lm.Type == eInterationType::COMPTON)
-		{	
+		{
 			if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 200)
 			{
 				continue;
@@ -263,14 +263,15 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data)
 	Mat scaleG;
 	cv::resize(CodedMaskMat(), scaleG, Size(37 * ResImprov, 37 * ResImprov), 0, 0, INTER_NEAREST_EXACT);
 	Mat reconImg;
-	cv::filter2D(responseImg, reconImg, CV_32S, scaleG);
+	//cv::filter2D(responseImg, reconImg, CV_32S, scaleG);	//231017 sbkwon : 기존
+	cv::filter2D(responseImg, reconImg, CV_32S, scaleG, Point(-1, -1), 0.0, BORDER_CONSTANT);//231017 sbkwon : 수정
 
 	double maxValue;
 	cv::minMaxLoc(reconImg, nullptr, &maxValue);
 	Mat idxImg(PixelCount, PixelCount, CV_32S, Scalar(1));
 
 	cv::max(reconImg, idxImg, mCodedImage);
-	
+
 	//mCodedImage = reconImg;
 
 	mDetectorResponseImage = responseImg;
@@ -309,6 +310,10 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data, 
 	int codedImageCount = 0;
 	int comptonImageCount = 0;
 
+	//231013 sbkwon : 중복 연산 제거
+	double det_w_div2 = -det_W / 2;
+	double pixelSize = det_W / pixelCount;
+
 #pragma omp parallel for
 	for (int i = 0; i < data.size(); ++i)
 	{
@@ -318,18 +323,15 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data, 
 			double& interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
 			double& interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
 
-			int iX = findIndex(interactionPoseX, -det_W / 2, det_W / pixelCount);
-			int iY = findIndex(interactionPoseY, -det_W / 2, det_W / pixelCount);
+			int iX = findIndex(interactionPoseX, det_w_div2, pixelSize);	//231013 sbkwon : 중복 연산 제거, 기존 : int iX = findIndex(interactionPoseX, -det_W / 2, det_W / pixelCount);
+			int iY = findIndex(interactionPoseY, det_w_div2, pixelSize);	//231013 sbkwon : 중복 연산 제거, 기존 : int iY = findIndex(interactionPoseY, -det_W / 2, det_W / pixelCount);
 			if (iX >= 0 && iY >= 0 && iX < pixelCount && iY < pixelCount)
 			{
 				++responseImgPtr[pixelCount * iY + iX];
 				++codedImageCount;
 			}
 		}
-
-
-
-		if (lm.Type == eInterationType::COMPTON)
+		else if (lm.Type == eInterationType::COMPTON)	//230907 sbkwon
 		{
 			if (lm.Scatter.InteractionEnergy + lm.Absorber.InteractionEnergy < 400)
 			{
@@ -345,17 +347,24 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data, 
 			Eigen::Vector3d sToAVector;
 			double imagePlaneZ = s2M + 0.07;
 
+			//231013 sbkwon : 중복 연산 제거
+			double reconPlaneWidth_dev_pixelCount = reconPlaneWidth / pixelCount;
+			double reconPlaneWidth_dev_2 = reconPlaneWidth / 2;
+			int nPixelIndex = pixelCount - 1;
+
 			for (int i = 0; i < pixelCount; ++i)
 			{
+				double imagePlaneX = reconPlaneWidth_dev_pixelCount * i + reconPlaneWidth_dev_pixelCount * 0.5 - reconPlaneWidth_dev_2;	//231013 sbkwon : 중복 연산 제거, 기존 : double imagePlaneX = reconPlaneWidth / pixelCount * i + reconPlaneWidth / pixelCount * 0.5 - reconPlaneWidth / 2;
+
 				for (int j = 0; j < pixelCount; ++j)
 				{
-					double imagePlaneX = reconPlaneWidth / pixelCount * i + reconPlaneWidth / pixelCount * 0.5 - reconPlaneWidth / 2;
-					double imagePlaneY = reconPlaneWidth / pixelCount * j + reconPlaneWidth / pixelCount * 0.5 - reconPlaneWidth / 2;
+					double imagePlaneY = reconPlaneWidth_dev_pixelCount * j + reconPlaneWidth_dev_pixelCount * 0.5 - reconPlaneWidth_dev_2;	//231013 sbkwon : 중복 연산 제거, 기존 : double imagePlaneY = reconPlaneWidth / pixelCount * j + reconPlaneWidth / pixelCount * 0.5 - reconPlaneWidth / 2;
+
 					Eigen::Vector3d imgPoint;
 					imgPoint[0] = imagePlaneX;
 					imgPoint[1] = imagePlaneY;
 					imgPoint[2] = imagePlaneZ;
-					comptonImgPtr[pixelCount * (pixelCount - j - 1) + pixelCount - i - 1] += ReconPointCloud::SimpleComptonBackprojectionUntransformed(lm, imgPoint, &comptonScatterAngle, &sigmacomptonScatteringAngle, &sToAVector);
+					comptonImgPtr[pixelCount * (nPixelIndex - j) + nPixelIndex - i] += ReconPointCloud::SimpleComptonBackprojectionUntransformed(lm, imgPoint, &comptonScatterAngle, &sigmacomptonScatteringAngle, &sToAVector);	//231013 sbkwon : 중복 연산 제거,
 				}
 			}
 		}
@@ -364,7 +373,8 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data, 
 	Mat scaleG;
 	cv::resize(CodedMaskMat(), scaleG, Size(37 * resImprov, 37 * resImprov), 0, 0, INTER_NEAREST_EXACT);
 	Mat reconImg;
-	cv::filter2D(responseImg, reconImg, CV_32S, scaleG);
+	//cv::filter2D(responseImg, reconImg, CV_32S, scaleG);//231017 sbkwon : 기존
+	cv::filter2D(responseImg, reconImg, CV_32S, scaleG, Point(-1, -1), 0.0, BORDER_CONSTANT);//231017 sbkwon : 수정
 
 	//reconImg = -reconImg;
 	double maxValue;
@@ -412,7 +422,7 @@ HUREL::Compton::RadiationImage::RadiationImage(std::vector<ListModeData>& data, 
 	reconImg = Filtered;
 
 	mCodedImage = reconImg(Range(minHeightPixleCount, maxHeightPixleCount), Range((pixelCount - widthPixelCount) / 2, (pixelCount + widthPixelCount) / 2));
-	
+
 
 	nonFiltered.convertTo(nonFiltered, CV_32F);
 	cv::GaussianBlur(nonFiltered, Filtered, Size(7, 7), 1.5);
@@ -464,7 +474,7 @@ double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadi
 	constexpr double imagePlaneZ = S2M + M2D + 0.011;
 	Eigen::Vector3d detectorNormalVector(0, 0, 1);
 	Eigen::Vector4d point4d(point.x(), point.y(), point.z(), 1);
-	Eigen::Vector4d transformedPoint = ((mDetectorTransformation).inverse()* point4d);
+	Eigen::Vector4d transformedPoint = ((mDetectorTransformation).inverse() * point4d);
 	if (transformedPoint.z() <= imagePlaneZ || transformedPoint.z() >= 5)
 	{
 		//std::cout << transformedPoint << std::endl;
@@ -504,11 +514,11 @@ double HUREL::Compton::RadiationImage::OverlayValue(Eigen::Vector3d point, eRadi
 	{
 		return 0.0;
 	}
-	
 
 
 
-	
+
+
 }
 
 void HUREL::Compton::RadiationImage::OverlayRadimgToP3(cv::Mat& p3, const cv::Mat& radImg)

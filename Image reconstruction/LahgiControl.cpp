@@ -13,7 +13,8 @@ using namespace HUREL;
 using namespace Compton;
 
 
-ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds& timeInMili)
+//230911 sbkwon : Energy check 추가 - 다중 핵종 분류
+ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationType& iType, Eigen::Vector4d& scatterPoint, Eigen::Vector4d& absorberPoint, double& scatterEnergy, double& absorberEnergy, Eigen::Matrix4d& transformation, std::chrono::milliseconds& timeInMili, sEnergyCheck echk)
 {
 	InteractionData scatter;
 	InteractionData absorber;
@@ -32,10 +33,10 @@ ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationTyp
 	}
 	if (iType == eInterationType::COMPTON)
 	{
-		
+
 		absorber.RelativeInteractionPoint = absorberPoint;
 		absorber.TransformedInteractionPoint = transformation * absorberPoint;
-	}	
+	}
 
 
 
@@ -44,7 +45,8 @@ ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationTyp
 	listmodeData.Absorber = absorber;
 	listmodeData.DetectorTransformation = transformation;
 	listmodeData.InteractionTimeInMili = timeInMili;
-	
+	listmodeData.EnergyCheck = echk;	//230911 sbkwon : Energy check 추가 - 다중 핵종 분류
+
 	return listmodeData;
 }
 
@@ -70,7 +72,7 @@ ListModeData HUREL::Compton::LahgiControl::MakeListModeData(const eInterationTyp
 
 		absorber.RelativeInteractionPoint = absorberPoint;
 		absorber.TransformedInteractionPoint = transformation * absorberPoint;
-	}	
+	}
 
 
 
@@ -88,32 +90,36 @@ HUREL::Compton::LahgiControl::LahgiControl() :
 	mAbsorberModules(NULL),
 	mScatterModules(NULL),
 	mModuleType(HUREL::Compton::eMouduleType::MONO)
-{	
+{
 	Eigen::Matrix4d test;
 	test = Matrix4d::Ones();
-	Eigen::Vector3d test2 = Eigen::Vector3d(1,1,1);
-	
+	Eigen::Vector3d test2 = Eigen::Vector3d(1, 1, 1);
+
 	Eigen::Vector4d test3;
 	test3 = Eigen::Vector4d(1, 2, 3, 4);
 	test3.normalize();
 
-	
+
 	t265toLACCPosTransform << 0, 1, 0, T265_TO_LAHGI_OFFSET_X,
-						      0, 0, 1, T265_TO_LAHGI_OFFSET_Y,
-						      1, 0, 0, T265_TO_LAHGI_OFFSET_Z,
-							  0, 0, 0, 1;
+		0, 0, 1, T265_TO_LAHGI_OFFSET_Y,
+		1, 0, 0, T265_TO_LAHGI_OFFSET_Z,
+		0, 0, 0, 1;
 
 	t265toLACCPosTranslate << 1, 0, 0, T265_TO_LAHGI_OFFSET_X,
 		0, 1, 0, T265_TO_LAHGI_OFFSET_Y,
 		0, 0, 1, T265_TO_LAHGI_OFFSET_Z,
 		0, 0, 0, 1;
+
 	t265toLACCPosTransformInv = t265toLACCPosTransform.inverse();
+
+	t265toLACCPosTransCalc = t265toLACCPosTransform * t265toLACCPosTransformInv * t265toLACCPosTranslate;	//231012 sbkwon : 사전 연산
+
 	HUREL::Logger::Instance().InvokeLog("C++HUREL::Compton::LahgiControl", "Logger loaded in cpp!", eLoggerType::INFO);
 
-	ListModeDataListeningThread = std::async([this] 
-	{ 
-		this->ListModeDataListening(); 
-	});
+	ListModeDataListeningThread = std::async([this]
+		{
+			this->ListModeDataListening();
+		});
 
 }
 
@@ -140,11 +146,12 @@ void HUREL::Compton::LahgiControl::ListModeDataListening()
 		mListModeDataMutex.lock();
 		mResetEnergySpectrumMutex.lock();
 		eChksMutex.lock();
-		
-		std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-		Eigen::Matrix4d deviceTransformation = t265toLACCPosTransform * RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransformInv * t265toLACCPosTranslate;
 
-		#pragma omp parallel for
+		std::chrono::milliseconds timeInMili = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+		//Eigen::Matrix4d deviceTransformation = t265toLACCPosTransform * RtabmapSlamControl::instance().GetOdomentry() * t265toLACCPosTransformInv * t265toLACCPosTranslate;	//231023 sbkwon 기존
+		Eigen::Matrix4d deviceTransformation = t265toLACCPosTransCalc * RtabmapSlamControl::instance().GetOdomentry();	//231023 sbkwon 수정
+
+#pragma omp parallel for
 		for (int i = 0; i < tempVector.size(); ++i)
 		{
 			AddListModeDataWithTransformationLoop(tempVector[i], timeInMili, deviceTransformation);
@@ -179,7 +186,7 @@ bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 	HUREL::Logger::Instance().InvokeLog("C++::HUREL::Compton::LahgiControl", "Set type", eLoggerType::INFO);
 	mListModeDataMutex.lock();
 
-	mListedListModeData.reserve(50000);	
+	mListedListModeData.reserve(50000);
 	mListModeDataMutex.unlock();
 	mModuleType = type;
 	switch (type)
@@ -188,35 +195,36 @@ bool HUREL::Compton::LahgiControl::SetType(eMouduleType type)
 		assert(false);
 		break;
 	case HUREL::Compton::eMouduleType::QUAD:
-	{	
-		mScatterModules = new Module * [4];
-	mAbsorberModules = new Module * [4];
-	double offset = 0.083;
-	// 3 0
-	// 2 1
-	//
-	double xOffset[4]{ -offset, -offset, +offset, +offset };
-	double yOffset[4]{ +offset, -offset, -offset, +offset };
-	string scatterSerial = "50777";
-	string absorberSerial = "50784";
-	for (int i = 0; i < 4; ++i)
 	{
-		double gain[10];
-		
-		
-		double offsetZ = -(0.260);
-		mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i] , -0.055);		
-		if (!mScatterModules[i]->IsModuleSet())
+		mScatterModules = new Module * [4];
+		mAbsorberModules = new Module * [4];
+		double offset = 0.083;
+		// 3 0
+		// 2 1
+		//
+		double xOffset[4]{ -offset, -offset, +offset, +offset };
+		double yOffset[4]{ +offset, -offset, -offset, +offset };
+		string scatterSerial = "50776";
+		string absorberSerial = "50785";
+
+		for (int i = 0; i < 4; ++i)
 		{
-			return false;
+			double gain[10];
+
+
+			double offsetZ = -(0.260);
+			mScatterModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", scatterSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], -0.055);
+			if (!mScatterModules[i]->IsModuleSet())
+			{
+				return false;
+			}
+			mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], -0.055 + offsetZ);
+			if (!mAbsorberModules[i]->IsModuleSet())
+			{
+				return false;
+			}
 		}
-		mAbsorberModules[i] = new Module(eMouduleType::QUAD, "config\\QUAD", absorberSerial + string("_Scint") + to_string(i), xOffset[i], yOffset[i], -0.055 + offsetZ);
-		if (!mAbsorberModules[i]->IsModuleSet())
-		{
-			return false;
-		}
-	}
-	break;
+		break;
 	}
 	case HUREL::Compton::eMouduleType::QUAD_DUAL:
 	{
@@ -334,7 +342,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 
 		double scattersEnergy[4];
 		double absorbersEnergy[4];
-		
+
 		int scatterInteractionCount = 0;
 		int absorberInteractionCount = 0;
 		int scatterInteractModuleNum[4];
@@ -359,7 +367,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 
 				mListedEnergyTimeData.push_back(eTime);
 				absorberInteractModuleNum[absorberInteractionCount++] = i;
-				
+
 			}
 		}
 
@@ -372,7 +380,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 			{
 				double aEnergy = absorbersEnergy[absorberInteractModuleNum[0]];
 
-	
+
 				//Compton
 				for (int i = 0; i < eChk.size(); ++i)
 				{
@@ -385,7 +393,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum[0]]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum[0]]);
 						Eigen::Vector4d absorberPoint = mAbsorberModules[absorberInteractModuleNum[0]]->FastMLPosEstimation(absorberShorts[absorberInteractModuleNum[0]]);
 
-						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
+						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili, eChk[i]));//230911 sbkwon : Energy check 추가
 					}
 				}
 
@@ -393,7 +401,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 			}
 			else if (absorberInteractionCount == 0)
 			{
-				
+
 				//Coded Apature
 				for (int i = 0; i < eChk.size(); ++i)
 				{
@@ -403,7 +411,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum[0]]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum[0]]);
 						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
 						aEnergy = nan("");
-						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
+						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili, eChk[i]));//230911 sbkwon : Energy check 추가
 					}
 
 				}
@@ -425,12 +433,12 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationLoop(std::ar
 						eInterationType type = eInterationType::CODED;
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum[interDet]]->FastMLPosEstimation(scatterShorts[scatterInteractModuleNum[interDet]]);
 						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
-						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili));
+						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation, timeInMili, eChk[i]));//230911 sbkwon : Energy check 추가
 					}
 
 				}
 			}
-			
+
 		}
 
 
@@ -467,7 +475,7 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationVerification
 		0, 0, 1, T265_TO_LAHGI_OFFSET_Y,
 		1, 0, 0, T265_TO_LAHGI_OFFSET_Z,
 		0, 0, 0, 1;
-	Eigen::Matrix4d deviceTransformation = t265toLACCPosTransform *  RtabmapSlamControl::instance().GetOdomentry() ;
+	Eigen::Matrix4d deviceTransformation = t265toLACCPosTransform * RtabmapSlamControl::instance().GetOdomentry();
 
 	switch (mModuleType)
 	{
@@ -546,8 +554,8 @@ void HUREL::Compton::LahgiControl::AddListModeDataWithTransformationVerification
 						Eigen::Vector4d scatterPoint = mScatterModules[scatterInteractModuleNum]->FastMLPosEstimationVerification(scatterShorts[scatterInteractModuleNum]);
 						Eigen::Vector4d absorberPoint = Eigen::Vector4d(0, 0, 0, 1);
 
-							mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
-						
+						mListedListModeData.push_back(MakeListModeData(type, scatterPoint, absorberPoint, sEnergy, aEnergy, deviceTransformation));
+
 					}
 
 				}
@@ -592,7 +600,7 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 		{
 			for (int j = 0; j < 9; ++j)
 			{
-				scatterShorts[i-4][j] = byteData[i * 9 + j];
+				scatterShorts[i - 4][j] = byteData[i * 9 + j];
 			}
 		}
 
@@ -699,7 +707,7 @@ void HUREL::Compton::LahgiControl::AddListModeData(const unsigned short(byteData
 }
 void HUREL::Compton::LahgiControl::AddListModeDataEigen(const unsigned short(byteData)[144], Eigen::Matrix4d deviceTransformation)
 {
-	
+
 }
 
 HUREL::Compton::eMouduleType HUREL::Compton::LahgiControl::GetDetectorType()
@@ -723,7 +731,7 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 	return lmData;
 }
 
-size_t  HUREL::Compton::LahgiControl::GetListedListModeDataSize() 
+size_t  HUREL::Compton::LahgiControl::GetListedListModeDataSize()
 {
 	return mListedListModeData.size();
 }
@@ -752,7 +760,7 @@ const std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeD
 	}
 
 	int reconStartIndex = 0;
-	
+
 	lmData.reserve(size - getIndexStart);
 	for (int i = getIndexStart; i < size; ++i)
 	{
@@ -817,6 +825,66 @@ std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(lo
 	return lmData;
 }
 
+//230911 sbkwon
+std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(sEnergyCheck echk)
+{
+	mResetListModeDataMutex.lock();
+
+	size_t size = mListedListModeData.size();
+	std::vector<ListModeData> lmData;
+	lmData.reserve(size);
+	for (int i = 0; i < size; ++i)
+	{
+		ListModeData& d = mListedListModeData[i];
+		if (d.EnergyCheck == echk)
+		{
+			lmData.push_back(d);
+		}
+	}
+	mResetListModeDataMutex.unlock();
+
+	return lmData;
+}
+
+//230911 sbkwon
+std::vector<ListModeData> HUREL::Compton::LahgiControl::GetListedListModeData(long long timeInMililseconds, sEnergyCheck echk)
+{
+	if (timeInMililseconds <= 0)
+	{
+		return GetListedListModeData(echk);
+	}
+
+	mResetListModeDataMutex.lock();
+
+	size_t size = mListedListModeData.size();
+	std::vector<ListModeData> lmData;
+	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	size_t getIndexStart = 0;
+	long long currentTime = t.count();
+
+	for (int i = size - 1; i > 0; --i)
+	{
+		long long interactionTime = mListedListModeData[i].InteractionTimeInMili.count();
+		if (currentTime - interactionTime > timeInMililseconds)
+		{
+			getIndexStart = i;
+			break;
+		}
+	}
+
+	lmData.reserve(size - getIndexStart);
+	for (int i = getIndexStart; i < size; ++i)
+	{
+		ListModeData& d = mListedListModeData[i];
+		if (d.EnergyCheck == echk)
+		{
+			lmData.push_back(d);
+		}
+	}
+	mResetListModeDataMutex.unlock();
+
+	return lmData;
+}
 
 std::vector<EnergyTimeData> HUREL::Compton::LahgiControl::GetListedEnergyTimeData(long long timeInMiliSecond)
 {
@@ -914,7 +982,7 @@ void HUREL::Compton::LahgiControl::SaveListedListModeData(std::string fileName)
 {
 	std::ofstream saveFile;
 	saveFile.open(fileName + "_LmData.csv");
-	if (!saveFile.is_open()) 
+	if (!saveFile.is_open())
 	{
 		std::cout << "File is not opened" << endl;
 		saveFile.close();
@@ -972,13 +1040,13 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 		return false;
 	}
 	mListedListModeData.clear();
-	
+
 	for (int i = 0; i < 4; ++i)
 	{
 		mScatterModules[i]->GetEnergySpectrum().Reset();
 		mAbsorberModules[i]->GetEnergySpectrum().Reset();
 	}
-		
+
 	string buffer;
 	char line[2048];
 	while (loadFile.good())
@@ -989,7 +1057,7 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 		{
 			mListedListModeData.push_back(temp);
 
-			
+
 		}
 	}
 
@@ -998,7 +1066,7 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 	{
 		std::string tempFileName = fileName;
 		replace(tempFileName, "_LmData", "_EnergyList_Channel_" + std::to_string(i));
-		
+
 	}
 
 
@@ -1014,7 +1082,7 @@ bool HUREL::Compton::LahgiControl::LoadListedListModeData(std::string fileName)
 }
 
 EnergySpectrum& HUREL::Compton::LahgiControl::GetEnergySpectrum(int fpgaChannelNumber)
-{	
+{
 	switch (mModuleType)
 	{
 	case eMouduleType::MONO:
@@ -1062,7 +1130,7 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetSumEnergySpectrum()
 	{
 	case eMouduleType::MONO:
 
-		spect =	mScatterModules[0]->GetEnergySpectrum() + mAbsorberModules[0]->GetEnergySpectrum();
+		spect = mScatterModules[0]->GetEnergySpectrum() + mAbsorberModules[0]->GetEnergySpectrum();
 		break;
 
 	case eMouduleType::QUAD:
@@ -1097,14 +1165,14 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetAbsorberSumEnergySpectrum()
 	case eMouduleType::QUAD:
 		for (int i = 0; i < 4; ++i)
 		{
-			
+
 			spect = spect + mAbsorberModules[i]->GetEnergySpectrum();
 		}
 		break;
 	case eMouduleType::QUAD_DUAL:
 		for (int i = 0; i < 8; ++i)
 		{
-			
+
 			spect = spect + mAbsorberModules[i]->GetEnergySpectrum();
 		}
 		break;
@@ -1128,14 +1196,14 @@ EnergySpectrum HUREL::Compton::LahgiControl::GetScatterSumEnergySpectrum()
 		for (int i = 0; i < 4; ++i)
 		{
 			spect = spect + mScatterModules[i]->GetEnergySpectrum();
-			
+
 		}
 		break;
 	case eMouduleType::QUAD_DUAL:
 		for (int i = 0; i < 8; ++i)
 		{
 			spect = spect + mScatterModules[i]->GetEnergySpectrum();
-			
+
 		}
 		break;
 	default:
@@ -1238,7 +1306,7 @@ void HUREL::Compton::LahgiControl::ResetEnergySpectrum()
 }
 
 void HUREL::Compton::LahgiControl::ResetEnergySpectrum(int fpgaChannelNumber)
-{	
+{
 	switch (mModuleType)
 	{
 	case eMouduleType::MONO:
@@ -1346,7 +1414,7 @@ ReconPointCloud HUREL::Compton::LahgiControl::GetReconRealtimePointCloudCompton(
 		{
 			reconLm.push_back(lm);
 		}
-		
+
 	}
 
 #pragma omp parallel for
@@ -1451,7 +1519,7 @@ cv::Mat HUREL::Compton::LahgiControl::GetResponseImage(int imgSize, int pixelCou
 	std::chrono::milliseconds t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
 	std::vector<ListModeData> tempLMData = GetListedListModeData(timeInSeconds * 1000);
-	
+
 	constexpr double Det_W = 0.400;
 	Mat responseImg(pixelCount, pixelCount, CV_32S, Scalar(0));
 	__int32* responseImgPtr = static_cast<__int32*>(static_cast<void*>(responseImg.data));
@@ -1462,7 +1530,7 @@ cv::Mat HUREL::Compton::LahgiControl::GetResponseImage(int imgSize, int pixelCou
 		double interactionPoseX = -999999;
 		double interactionPoseY = -999999;
 
-		switch (lm.Type)	
+		switch (lm.Type)
 		{
 		case eInterationType::COMPTON:
 			if (isScatter)
@@ -1470,7 +1538,7 @@ cv::Mat HUREL::Compton::LahgiControl::GetResponseImage(int imgSize, int pixelCou
 				interactionPoseX = lm.Scatter.RelativeInteractionPoint[0];
 				interactionPoseY = lm.Scatter.RelativeInteractionPoint[1];
 			}
-			else 
+			else
 			{
 				interactionPoseX = lm.Absorber.RelativeInteractionPoint[0];
 				interactionPoseY = lm.Absorber.RelativeInteractionPoint[1];
@@ -1497,7 +1565,7 @@ cv::Mat HUREL::Compton::LahgiControl::GetResponseImage(int imgSize, int pixelCou
 			++responseImgPtr[pixelCount * iY + iX];
 		}
 	}
-	
+
 
 	return HUREL::Compton::RadiationImage::GetCV_32SAsJet(responseImg, imgSize);
 }

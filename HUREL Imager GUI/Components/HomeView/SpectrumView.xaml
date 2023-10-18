@@ -3,11 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:HUREL_Imager_GUI.Components"
              xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+             xmlns:vmdl="clr-namespace:HUREL_Imager_GUI.ViewModel"
              xmlns:converter="clr-namespace:HUREL_Imager_GUI.Converters"
+             xmlns:mybehavior="clr-namespace:HUREL_Imager_BEHAVIOR"
              mc:Ignorable="d" 
              d:Background="White"
+             d:DataContext="{d:DesignInstance Type=vmdl:SpectrumViewModel, IsDesignTimeCreatable=False}"
              d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.Resources>
         <converter:EspectModeConverter x:Key="ConvEspectMode"/>
@@ -16,7 +20,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="*"/>
-            
+
         </Grid.ColumnDefinitions>
         <syncfusion:SfChart Grid.Column="0" Margin="5" 
                             Header="Spectrum" 
@@ -34,9 +38,12 @@
             <syncfusion:SfChart.Behaviors>
                 <syncfusion:ChartCrossHairBehavior VerticalLineStyle="{StaticResource lineStyle}" HorizontalAxisLabelAlignment="Near" />
             </syncfusion:SfChart.Behaviors>
+            <i:Interaction.Behaviors>
+                <mybehavior:MouseBehavior PreviewMouseDown="{Binding PreviewMouseDownCommand}"/>
+            </i:Interaction.Behaviors>
             <syncfusion:SfChart.Legend>
                 <syncfusion:ChartLegend ToggleSeriesVisibility="True" DockPosition="Bottom">
-                    
+
                 </syncfusion:ChartLegend>
             </syncfusion:SfChart.Legend>
             <syncfusion:SfChart.PrimaryAxis>
@@ -82,8 +89,9 @@
                                                                      XBindingPath="X" 
                                                                      YBindingPath="Y"
 
-                                                                     syncfusion:ChartSeriesBase.Spacing="0.5" Margin="0,12,0,-12" />
-          
+                                                                     syncfusion:ChartSeriesBase.Spacing="1" Margin="0,12,0,-12" />
+            <!--231013 sbkwon line width 문제 기존 : 0.5-->
+
         </syncfusion:SfChart>
         <ToggleButton  x:Name="SetupButton" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right" 
                               Margin="5"
@@ -166,7 +174,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Margin="5,5,5,5" Grid.Column="0">
                         <CheckBox Content="Show Peak Analysis" IsChecked="{Binding IsSpectrumAnalysisShow}"/>
-                        
+
                         <RadioButton Content="Scatter" GroupName="Spectrum" IsChecked="True" Margin="0,10,0,0"
                                      />
                         <RadioButton Content="Absorber" GroupName="Spectrum"
@@ -184,7 +192,7 @@
                                                ZeroColor="Black"
                                                />
                         </StackPanel>
-                        
+
                     </StackPanel>
                     <StackPanel Margin="5,5,5,5" Grid.Column="1">
                         <TextBlock Text="Peak Setting" FontSize="13" FontWeight="Bold"/>
@@ -206,7 +214,7 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
-               
+
             </d:Border>
             <syncfusion:SfDataGrid Grid.Row="1" Margin="10" ItemsSource="{Binding IsotopeInfos}">
                 <syncfusion:SfDataGrid.Columns>
@@ -216,8 +224,8 @@
                     <!--<syncfusion:GridTextColumn MappingName="Dose" ColumnSizer="Star"/>-->
                 </syncfusion:SfDataGrid.Columns>
             </syncfusion:SfDataGrid>
-            
+
         </Grid>
-       
+
     </Grid>
 </UserControl>

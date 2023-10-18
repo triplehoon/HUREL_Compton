@@ -44,13 +44,16 @@ namespace HUREL_Imager_GUI.Command
                     case ViewType.HOME_VIEW:
                         _navigator.CurrentViewModel = homeViewModel;
                         //OnPropertyChanged(nameof(_navigator.CurrentViewModel));
+                        homeViewModel.DoseRateViewModel.DoseLogScale = 1.2;
                         break;
                     case ViewType.SETTING_VIEW:
                         _navigator.CurrentViewModel = settingViewModel;
                         //OnPropertyChanged(nameof(_navigator.CurrentViewModel));
+                        homeViewModel.DoseRateViewModel.DoseLogScale = 4.2;
                         break;
                     case ViewType.CALIBRATION_VIEW:
                         _navigator.CurrentViewModel = calibrationViewModel;
+                        homeViewModel.DoseRateViewModel.DoseLogScale = 3.5;
                         break;
                 }
             }

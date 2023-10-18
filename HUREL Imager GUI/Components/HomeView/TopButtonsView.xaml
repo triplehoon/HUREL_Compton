@@ -364,8 +364,8 @@
             <TextBlock FontSize="{StaticResource FontSize-Normal}" Foreground="White" Margin="2"  FontWeight="Bold"> Save Folder Name</TextBlock>
             <TextBox Grid.Row="1" FontSize="{StaticResource FontSize-Normal}" Margin="2" SelectedText="Enter name" Text="{Binding FileName}"></TextBox>
             <TextBlock Grid.Row="2" Text="Time Setup" FontSize="{StaticResource FontSize-Normal}"  Foreground="White" FontWeight="Bold" Margin="2"/>
-            <CheckBox x:Name="CheckBoxIsInfinite" Grid.Row="2" HorizontalAlignment="Right" Content="Is Infinite" FontSize="{StaticResource FontSize-Normal}" Margin="0,2,0,2" Foreground="White" VerticalAlignment="Center" IsChecked="True"/>
-            <syncfusion:UpDown Grid.Row="3" FontSize="{StaticResource FontSize-Normal}" FontWeight="Bold" Margin="2" ZeroColor="Black" MinValue="0" IsEnabled="{Binding ElementName=CheckBoxIsInfinite, Path=IsChecked, Converter={StaticResource BooleanToReverseConverter}}"/>
+            <CheckBox x:Name="CheckBoxIsInfinite" Grid.Row="2" HorizontalAlignment="Right" Content="Is Infinite" FontSize="{StaticResource FontSize-Normal}" Margin="0,2,0,2" Foreground="White" VerticalAlignment="Center" IsChecked="{Binding IsInfinite}"/>  <!--231017 sbkwon Binding-->
+            <syncfusion:UpDown Grid.Row="3" FontSize="{StaticResource FontSize-Normal}" FontWeight="Bold" Margin="2" ZeroColor="Black" MinValue="0" Value="{Binding MeasurementTime}" IsEnabled="{Binding ElementName=CheckBoxIsInfinite, Path=IsChecked, Converter={StaticResource BooleanToReverseConverter}}"/>  <!--231017 sbkwon Binding-->
         </Grid>
 
 
@@ -419,7 +419,7 @@
                 </Border>            
             </Popup>
         </syncfusion:ButtonAdv>-->
-        
+
         <syncfusion:ButtonAdv  Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" IsMultiLine="True" SizeMode="Large"
                                Command="{Binding LoadDataCommand}">
             <syncfusion:ButtonAdv.Style>
@@ -429,7 +429,7 @@
                 </Style>
             </syncfusion:ButtonAdv.Style>
         </syncfusion:ButtonAdv>
-        
+
         <Line Height="70" Width="2.5" Fill="White" Stroke="White" StrokeThickness="10" X1="0" X2="0" Y1="00" Y2="90" Margin="10,0,10,0"/>
         <!--<syncfusion:ButtonAdv  Template="{DynamicResource ButtonAdvTemplateTopButtons}" d:IsEnabled="{Binding ElementName=IsAbled, Path=IsChecked}" FontStyle="Normal" IsMultiLine="True" SizeMode="Large">
             <syncfusion:ButtonAdv.Style>
@@ -549,5 +549,5 @@
 
 
     </StackPanel>
-    
+
 </UserControl>

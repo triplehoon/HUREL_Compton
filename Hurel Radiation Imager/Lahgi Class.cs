@@ -8,7 +8,6 @@ using HUREL.Compton.RadioisotopeAnalysis;
 using log4net;
 using Newtonsoft.Json.Linq;
 
-
 namespace HUREL.Compton
 {
     public record AddListModeDataEchk(double MinE, double MaxE);
@@ -28,13 +27,13 @@ namespace HUREL.Compton
         Success,
         Unknown
     }
-    public class LahgiApiEnvetArgs:EventArgs
+    public class LahgiApiEnvetArgs : EventArgs
     {
         public eLahgiApiEnvetArgsState State { get; private set; }
         public LahgiApiEnvetArgs(eLahgiApiEnvetArgsState state)
         {
             State = state;
-        }  
+        }
     }
     public static class LahgiApi
     {
@@ -49,7 +48,7 @@ namespace HUREL.Compton
 
         public static void StatusUpdateInvoke(object? obj, eLahgiApiEnvetArgsState state)
         {
-            Task.Run(()=> { StatusUpdate?.Invoke(obj, new LahgiApiEnvetArgs(state)); });
+            Task.Run(() => { StatusUpdate?.Invoke(obj, new LahgiApiEnvetArgs(state)); });
 
         }
 
@@ -104,6 +103,7 @@ namespace HUREL.Compton
                 return IsLahgiInitiate && IsRtabmapInitiate;
             }
         }
+
 
         /// <summary>
         /// Start Stop Counting, Get Spectrum, Get 3D image, Get 2D image, 
@@ -219,7 +219,7 @@ namespace HUREL.Compton
                 ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
 
                 LahgiApi.StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Spectrum);
-               }
+            }
         }
         private static float min_snr = Convert.ToSingle(ConfigurationManager.AppSettings.Get(nameof(min_snr)));
         public static float Min_snr
@@ -252,9 +252,9 @@ namespace HUREL.Compton
             ////tempEchk.Add(new AddListModeDataEchk(60, 100));
             ////tempEchk.Add(new AddListModeDataEchk(330, 370));
             ////tempEchk.Add(new AddListModeDataEchk(450, 570));
-            ////tempEchk.Add(new AddListModeDataEchk(1200, 1350));
-            
-            tempEchk.Add(new AddListModeDataEchk(550, 690));
+            // tempEchk.Add(new AddListModeDataEchk(600, 720));
+            //tempEchk.Add(new AddListModeDataEchk(1594, 1984));
+            tempEchk.Add(new AddListModeDataEchk(0, 3000));
             //tempEchk.Add(new AddListModeDataEchk(1173 - 70, 1173 + 70));
             //tempEchk.Add(new AddListModeDataEchk(1333 - 50, 1333 + 50));
             Echks = tempEchk;
@@ -279,7 +279,7 @@ namespace HUREL.Compton
                     eEcalStates.Clear();
                     for (int i = 0; i < 8; i++)
                     {
-                        eEcalStates.Add((eEcalState)Enum.Parse(typeof(eEcalState), appSetting[nameof(eEcalStates) + i.ToString()].Value) );
+                        eEcalStates.Add((eEcalState)Enum.Parse(typeof(eEcalState), appSetting[nameof(eEcalStates) + i.ToString()].Value));
                     }
                 }
 
@@ -405,7 +405,7 @@ namespace HUREL.Compton
             int stride = outData.Item1.stride;
             Bitmap tempBitmap = new Bitmap(width, height, stride, System.Drawing.Imaging.PixelFormat.Format32bppArgb, dataCoded);
 
-           
+
             using (MemoryStream ms = new MemoryStream())
             {
                 tempBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
@@ -463,8 +463,8 @@ namespace HUREL.Compton
 
         public static BitmapImage? GetTransPoseRadiationImage(int timeInMiliSecond, double minValuePortion, double resolution = 10)
         {
-            BitmapImage? img= null;
-            
+            BitmapImage? img = null;
+
             if (!GetTransPoseRadiationImageMutex.WaitOne())
             {
                 return img;
@@ -545,7 +545,7 @@ namespace HUREL.Compton
                 img.Freeze();
                 //img = bitMapimg;
             }
-            
+
 
             //tempBitmap.Dispose();
 
@@ -601,8 +601,17 @@ namespace HUREL.Compton
             set { StatusUpdateInvoke(null, eLahgiApiEnvetArgsState.Status); isSessionStarting = value; }
         }
 
+        //231016 sbkwon : 경과 시간
+        private static uint _elapsedTime = 0;
+        public static uint ElapsedTime
+        {
+            get => _elapsedTime;
+            set => _elapsedTime = value;
+        }
+
         public static async Task StartSessionAsync(string fileName, CancellationTokenSource tokenSource)
         {
+            SessionStopwatch.Reset();//231017 sbkwon : time 초기화
             IsSessionStarting = true;
             if (!IsInitiate)
             {
@@ -648,14 +657,16 @@ namespace HUREL.Compton
                         IsSessionStarting = true;
                         StatusMsg = "Saving CSV and ply file";
 
-                        string saveFileName = Path.GetDirectoryName(fpga.FileMainPath) + "\\" + fileName;
+                        string saveFileName = Path.GetDirectoryName(fpga.FileMainPath) + "\\" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + fileName;   //230912 sbkwon : 시간, 날짜 정보 추가
                         rtabmapWrapper.SavePlyFile(saveFileName + "_SlamData.ply");
 
                         lahgiWrapper.SaveListModeData(saveFileName);
                         StatusMsg = "Done saving CSV and ply file";
 
+                        SaveSumSpectrum(saveFileName + "_Spectrum.csv");    //230911 sbkwon : 스펙트럼 데이터 저장 (X, Y)                       
+
                         await Task.Run(() => StopSlam());
-               
+
 
                         IsSessionStarting = false;
                         IsSessionStart = false;
@@ -712,20 +723,20 @@ namespace HUREL.Compton
             }
         }
         private static void AddListModeData(CancellationTokenSource tokenSource)
-        {          
+        {
             lahgiWrapper.ResetListmodeData();
-            for (uint i = 0; i < 16; ++i)
-            {
-                lahgiWrapper.ResetSpectrum(i);
-            }
+            //for (uint i = 0; i < 16; ++i)   //230907 sbkwon : 윗줄 lahgiWrapper.ResetListmodeData(); 내부에서 ResetSpectrum 호출함
+            //{
+            //    lahgiWrapper.ResetSpectrum(i);
+            //}
 
             while (true)
             {
                 ushort[] item;
                 while (fpga.ShortArrayQueue.TryTake(out item!))
                 {
-                    lahgiWrapper.AddListModeDataWraper(item);
-                   
+                    lahgiWrapper.AddListModeDataWraper(item);//fpga에서 원시 데이터 획득 : 144ea, listup
+
                     if (tokenSource.IsCancellationRequested)
                     {
                         break;
@@ -797,7 +808,7 @@ namespace HUREL.Compton
             {
 
             }
-            
+
             sw.Stop();
             Thread.Sleep(0);
 
@@ -811,6 +822,7 @@ namespace HUREL.Compton
             rtabmapWrapper.StartSLAM();
             timerBoolSlamPoints = true;
             StatusMsg = "Slam Started";
+
         }
         public static void StopSlam()
         {
@@ -987,7 +999,7 @@ namespace HUREL.Compton
         public static void CheckEcalState(double min1461E = 1300, double max1461E = 1500)
         {
             StatusMsg = "Ecal Start";
-            for (int i =0; i < 8; ++i)
+            for (int i = 0; i < 8; ++i)
             {
                 if (eEcalStates[i] == eEcalState.Success)
                 {
@@ -1001,7 +1013,7 @@ namespace HUREL.Compton
                     break;
                 }
             }
-            for (int i =0; i <4; ++i)
+            for (int i = 0; i < 4; ++i)
             {
                 //Scatter
 
@@ -1009,7 +1021,7 @@ namespace HUREL.Compton
 
                 var peaks = GetSpectrumEnergy(i + 4).FindPeaks(ref_x, ref_fwhm, ref_at_0, min_snr);
                 bool isEcalSuccessFlag = false;
-                foreach(var e in peaks)
+                foreach (var e in peaks)
                 {
                     if (Ecal609keV)
                     {
@@ -1022,13 +1034,13 @@ namespace HUREL.Compton
                             double ecalA = 0;
                             double ecalB = 0;
                             double ecalC = 0;
-                            lahgiWrapper.GetEcal(Convert.ToUInt32(i + 4), ref ecalA, ref ecalB, ref ecalC) ;
+                            lahgiWrapper.GetEcal(Convert.ToUInt32(i + 4), ref ecalA, ref ecalB, ref ecalC);
                             //Only linearity affect
                             ecalA *= 1461 * 1461 / e / e;
                             ecalB *= 1461 / e;
-                            
+
                             lahgiWrapper.SetEcal(Convert.ToUInt32(i + 4), ecalA, ecalB, ecalC);
-                            
+
                             eEcalStates[i] = eEcalState.Success;
                             isEcalSuccessFlag = true;
                         }
@@ -1038,7 +1050,7 @@ namespace HUREL.Compton
                     {
                         eEcalStates[i] = eEcalState.Fail;
                     }
-                }               
+                }
             }
             for (int i = 0; i < 4; ++i)
             {
@@ -1077,7 +1089,7 @@ namespace HUREL.Compton
                         eEcalStates[i + 4] = eEcalState.Fail;
                     }
                 }
-               
+
             }
             StatusMsg = "Ecal Done";
 
@@ -1085,7 +1097,7 @@ namespace HUREL.Compton
 
             var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             var appSetting = configFile.AppSettings.Settings;
-            
+
             for (int i = 0; i < 8; i++)
             {
                 appSetting[nameof(eEcalStates) + i.ToString()].Value = eEcalState.Unknown.ToString();
@@ -1129,13 +1141,34 @@ namespace HUREL.Compton
             {
                 log.Info("Loading fail");
                 return false;
-            }            
+            }
         }
 
         public static void GetLoadedPointCloud(ref List<double[]> poseVect, ref List<double[]> colorVect)
         {
-            rtabmapWrapper.GetLoadedPointCloud(ref poseVect, ref colorVect);            
+            rtabmapWrapper.GetLoadedPointCloud(ref poseVect, ref colorVect);
+        }
+
+        //230911 sbkwon : spectrum 데이터(X, Y) 저장
+        public static void SaveSumSpectrum(string filepath)
+        {
+            if (!IsLahgiInitiate)
+            {
+                return;
+            }
+            List<double[]> eCount = new List<double[]>();
+            lahgiWrapper.GetSumSpectrum(ref eCount);
+
+            using (StreamWriter file = new StreamWriter(filepath))
+            {
+                file.WriteLine("Energy,Count");
+
+                for (int i = 0; i < eCount.Count; i++)
+                {
+                    file.WriteLine($"{eCount[i][0]},{eCount[i][1]}");
+                }
+            }
         }
     }
 }
-    
+

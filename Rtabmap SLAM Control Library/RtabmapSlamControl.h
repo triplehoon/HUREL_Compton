@@ -105,6 +105,8 @@ namespace HUREL
 
 			void ResetSlam();
 
+			void IntrinsicParamters();
+
 			open3d::geometry::PointCloud GetSlamPointCloud();
 
 			std::vector<double> getMatrix3DOneLineFromPoseData();

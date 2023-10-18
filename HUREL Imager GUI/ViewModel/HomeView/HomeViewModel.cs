@@ -115,7 +115,54 @@ namespace HUREL_Imager_GUI.ViewModel
             TestValue = "Hello World";
             logger.Info("HomeViewModel Loaded");
 
+            DoseRateViewModel.AlarmUpdate += AlarmUpdate;   //230920 sbkwon : DoseRate Alarm Event
+
             LahgiApi.StatusUpdate += StatusUpdate;
+        }
+
+        //230920 sbkwon : DoseRate Alarm Event
+        private void AlarmUpdate(object? sender, EventArgs e)
+        {
+            //if (App.MainVM is not null)
+            //    App.MainVM.AlramVisibility = 
+
+            if (e is AlarmEventArgs)
+            {
+                AlarmEventArgs alarmEventArgs = (AlarmEventArgs)e;
+
+                AlarmDisplay(alarmEventArgs.AlarmStatus);
+                DoseRateViewModel.Alarm(alarmEventArgs.AlarmStatus);
+            }
+        }
+
+        private void AlarmDisplay(enAlarm alarm)
+        {
+            if (App.MainVM is not null)
+            {
+                App.MainVM.AlramVisibility = System.Windows.Visibility.Collapsed;
+
+                if (alarm == enAlarm.enAlarm3)
+                {
+                    App.MainVM.AlramColor = System.Windows.Media.Brushes.Yellow;
+                    App.MainVM.AlramCycleTime = 1000;
+                    App.MainVM.AlramVisibility = System.Windows.Visibility.Visible;
+                    App.MainVM.AlarmContent = "Alarm 3";
+                }
+                if (alarm == enAlarm.enAlarm4)
+                {
+                    App.MainVM.AlramColor = System.Windows.Media.Brushes.Orange;
+                    App.MainVM.AlramCycleTime = 800;
+                    App.MainVM.AlramVisibility = System.Windows.Visibility.Visible;
+                    App.MainVM.AlarmContent = "Alarm 4";
+                }
+                if (alarm == enAlarm.enAlarm5)
+                {
+                    App.MainVM.AlramColor = System.Windows.Media.Brushes.Red;
+                    App.MainVM.AlramCycleTime = 500;
+                    App.MainVM.AlramVisibility = System.Windows.Visibility.Visible;
+                    App.MainVM.AlarmContent = "Alarm 5";
+                }
+            }
         }
 
         private string statusMsg = "test";
